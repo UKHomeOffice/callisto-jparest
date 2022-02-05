@@ -1,8 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -335,9 +333,8 @@ public class ResourceApiController<T, U> {
         Class<?> related_id_type = entityUtils.getRelatedIdType(relation);
 
         for (Object object : related_id) {
-            // TODO: Fix typo
-            Serializable identitfier = getIdentifier(object, related_id_type);
-            Object f = this.entityUtils.getEntityReference(relation, identitfier);
+            Serializable identifier = getIdentifier(object, related_id_type);
+            Object f = this.entityUtils.getEntityReference(relation, identifier);
             if (!relatedEntities.contains(f)) {
                 relatedEntities.add(f);
             }
@@ -358,6 +355,7 @@ public class ResourceApiController<T, U> {
         return this.entityUtils.getRelatedResources();
     }
 
+    // TODO: This should be in a utility class or something
     private static Predicate convertToPredicate(Criteria criteria, CriteriaBuilder builder, Root<?> root) {
         Path<Object> field = root.get(criteria.getFieldName());
         Class<?> clazz = field.getJavaType();
@@ -384,7 +382,9 @@ public class ResourceApiController<T, U> {
             case Between:
                 String[] values = criteria.getValue().split(",");
                 Path<Comparable<Object>> comparableField = root.get(criteria.getFieldName());
-                return builder.between(comparableField, (Comparable<Object>)convert(values[0], clazz), (Comparable<Object>)convert(values[1], clazz));
+                @SuppressWarnings("unchecked")
+                Predicate result = builder.between(comparableField, (Comparable<Object>)convert(values[0], clazz), (Comparable<Object>)convert(values[1], clazz));
+                return result;
             default:
                 break;
 

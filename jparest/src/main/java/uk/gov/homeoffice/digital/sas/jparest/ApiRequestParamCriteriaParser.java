@@ -2,12 +2,11 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.persistence.criteria.Predicate;
+import org.springframework.web.method.annotation.RequestParamMapMethodArgumentResolver;
 
 /**
  * Argument resolver used for parameters annotated with {@link ApiRequestParam}
