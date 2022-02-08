@@ -2,9 +2,12 @@ package uk.gov.homeoffice.digital.sas.jparest;
 
 import java.util.logging.Logger;
 
+import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+
+import uk.gov.homeoffice.digital.sas.jparest.swagger.ResourceOpenApiCustomiser;
 
 @Configuration
 public class Config {
@@ -24,5 +27,11 @@ public class Config {
         LOGGER.info(("auto configure handler mapping"));
 		return new HandlerMappingConfigurer();
 	}
+	
+	@Bean
+	public OpenApiCustomiser resourceOpenApiCustomiser() {
+		return new ResourceOpenApiCustomiser();
+	}
+
 	
 }
