@@ -1,9 +1,11 @@
-package uk.gov.homeoffice.digital.sas.jparest;
+package uk.gov.homeoffice.digital.sas.jparest.web;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import uk.gov.homeoffice.digital.sas.jparest.criteria.Criteria;
 
 /**
  * Class representing the arguments used by the {@link ResourceApiController}

@@ -20,6 +20,10 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo.BuilderConfiguration;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
+import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
+import uk.gov.homeoffice.digital.sas.jparest.web.ApiRequestParams;
+
 /**
  * Discovers JPA entities annotated with {@link Resource}
  * and registers a {@link ResourceApiController} for them.

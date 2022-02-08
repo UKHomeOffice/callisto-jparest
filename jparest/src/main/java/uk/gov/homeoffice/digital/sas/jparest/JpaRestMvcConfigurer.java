@@ -15,6 +15,9 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import uk.gov.homeoffice.digital.sas.jparest.annotation.ApiRequestParamArgumentResolver;
+
 public class JpaRestMvcConfigurer implements WebMvcConfigurer {
     
     private final static Logger LOGGER = Logger.getLogger(JpaRestMvcConfigurer.class.getName());

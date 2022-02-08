@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest;
+package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -38,6 +38,10 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import uk.gov.homeoffice.digital.sas.jparest.*;
+import uk.gov.homeoffice.digital.sas.jparest.criteria.Criteria;
+import uk.gov.homeoffice.digital.sas.jparest.web.*;
 
 // TODO: Added include for related materials and also add metadata to response e.g. next link
 /**

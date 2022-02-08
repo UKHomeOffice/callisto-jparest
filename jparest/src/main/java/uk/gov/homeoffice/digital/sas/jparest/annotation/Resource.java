@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest;
+package uk.gov.homeoffice.digital.sas.jparest.annotation;
 
 import java.lang.annotation.Target;
 import java.lang.annotation.Retention;

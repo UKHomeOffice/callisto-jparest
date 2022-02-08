@@ -7,7 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import uk.gov.homeoffice.digital.sas.jparest.Resource;
+import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

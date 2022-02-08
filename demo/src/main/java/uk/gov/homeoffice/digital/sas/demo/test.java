@@ -2,6 +2,7 @@ package uk.gov.homeoffice.digital.sas.demo;
 
 import javax.annotation.PostConstruct;
 
+import org.springdoc.core.GroupedOpenApi;
 import org.springdoc.core.SpringDocUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +15,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import uk.gov.homeoffice.digital.sas.jparest.ResourceApiController;
+import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 
 @Configuration
 public class test {
@@ -24,12 +25,6 @@ public class test {
         // GroupedOpenApi.builder().group("concerts").pathsToMatch("/resources/concerts/**").build();
         SpringDocUtils.getConfig().addRestControllers(ResourceApiController.class);
     }
-    // @Bean
-    // public GroupedOpenApi storeOpenApi() {
-    //    String paths[] = {"/resources/concerts/**"};
-    //    return GroupedOpenApi.builder().group("stores").pathsToMatch(paths)
-    //          .build();
-    // }
 
     @Bean
     public OpenAPI customOpenAPI(@Value("1.0.0.0") String appVersion) {
@@ -50,4 +45,5 @@ public class test {
         						.url("http://springdoc.org")))
                     .path("/resources/stephen", pi);
     }
+
 }

@@ -1,7 +1,8 @@
-package uk.gov.homeoffice.digital.sas.jparest;
+package uk.gov.homeoffice.digital.sas.jparest.annotation;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.springframework.core.MethodParameter;
@@ -11,6 +12,10 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.annotation.RequestParamMapMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import uk.gov.homeoffice.digital.sas.jparest.web.ApiRequestParamCriteriaParser;
+import uk.gov.homeoffice.digital.sas.jparest.web.ApiRequestParams;
+import uk.gov.homeoffice.digital.sas.jparest.criteria.Criteria;
 
 /**
  * Argument resolver used for parameters annotated with {@link ApiRequestParam}
@@ -38,8 +43,7 @@ public class ApiRequestParamArgumentResolver extends RequestParamMapMethodArgume
         Object resolvedArgument = super.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
         if (resolvedArgument instanceof  Map<?,?>){
             @SuppressWarnings("unchecked")
-            Map<String, String> superResult = (Map<String,String>)super.resolveArgument(parameter, mavContainer, webRequest,
-            binderFactory);
+            Map<String, String> superResult = (Map<String,String>)resolvedArgument;
 
             // Create a result and assign the page and pagesize and sort if present
             setProperty(new Consumer<Integer>(){ public void accept(Integer i) { qp.setPage(i); }}, superResult, "page");
@@ -53,6 +57,7 @@ public class ApiRequestParamArgumentResolver extends RequestParamMapMethodArgume
             superResult.remove("pageSize");
             superResult.remove("sort");
 
+            Set<Criteria> criteria = qp.getCriteria();
             // Check for filter criteria
             Iterator<Map.Entry<String,String>> requestParams = superResult.entrySet().iterator();
             while (requestParams.hasNext()) {
@@ -60,13 +65,13 @@ public class ApiRequestParamArgumentResolver extends RequestParamMapMethodArgume
                 String value = rp.getValue();
                 if (ApiRequestParamCriteriaParser.isCriteria(value))
                 {
-                    qp.criteria.add(ApiRequestParamCriteriaParser.parse(rp.getKey(),value));
+                    criteria.add(ApiRequestParamCriteriaParser.parse(rp.getKey(),value));
                     requestParams.remove();
                 }
             }
 
             // place the remaining key pairs into filters
-            qp.requestParams.putAll(superResult);
+            qp.getRequestParams().putAll(superResult);
         }
         return qp;
     }

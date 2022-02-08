@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest;
+package uk.gov.homeoffice.digital.sas.jparest.criteria;
 
 // Enum to control the allowed functions in the querystring criteria
 public enum CriteriaFunction {

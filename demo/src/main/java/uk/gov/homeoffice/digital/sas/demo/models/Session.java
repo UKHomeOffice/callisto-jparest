@@ -7,7 +7,7 @@ import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import uk.gov.homeoffice.digital.sas.jparest.Resource;
+import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 
 @Resource
 @Entity(name = "sessions")

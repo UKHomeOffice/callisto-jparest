@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import uk.gov.homeoffice.digital.sas.jparest.Resource;
+import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

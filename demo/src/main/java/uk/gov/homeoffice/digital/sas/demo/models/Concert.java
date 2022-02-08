@@ -10,7 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 
-import uk.gov.homeoffice.digital.sas.jparest.Resource;
+import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

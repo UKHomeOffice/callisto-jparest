@@ -29,7 +29,7 @@ import lombok.Getter;
  * i.e. it excludes {@link ManyToMany} with the 
  * mappedBy property set.
  */
-class EntityUtils<T> {
+public class EntityUtils<T> {
 
     private final static Logger LOGGER = Logger.getLogger(EntityUtils.class.getName());
 
@@ -49,7 +49,7 @@ class EntityUtils<T> {
      * @param entityType The JPA entity class
      * @param entityManager The {@link EntityManager}
      */
-    EntityUtils(Class<T> entityType, EntityManager entityManager){
+    public EntityUtils(Class<T> entityType, EntityManager entityManager){
         
         Set<String> relatedResources = new HashSet<String>();
 
@@ -101,7 +101,7 @@ class EntityUtils<T> {
      * with ManyToMany
      * @return Collection of entities expressed by the ManyToMany attribute
      */
-    Collection<?> getRelatedEntities(Object entity, String relation ) {
+    public Collection<?> getRelatedEntities(Object entity, String relation ) {
         RelatedEntity relatedEntity = this.relations.get(relation);
         Collection<?> result = null;
         try {
@@ -143,7 +143,7 @@ class EntityUtils<T> {
      * @return An instance of the entityType represented by the utility class
      * with its identifier set to the given value
      */
-    Object getEntityReference(Serializable identifier) {
+    public Object getEntityReference(Serializable identifier) {
         return getEntityReference(this.entityType, this.idField, identifier);
     }
 
@@ -151,7 +151,7 @@ class EntityUtils<T> {
      * Creates an reference entity for the entityType exposed by the specified 
      * relation.
      */
-    Object getEntityReference(String relation, Serializable identifier) {
+    public Object getEntityReference(String relation, Serializable identifier) {
         RelatedEntity relatedEntity = this.relations.get(relation);
         return getEntityReference(relatedEntity.entityType, relatedEntity.idField, identifier);
     }
@@ -159,14 +159,14 @@ class EntityUtils<T> {
     /**
      * Provides the type of the Id field for the entity accessed by the specified relation
      */
-    Class<?> getRelatedIdType(String relation) {
+    public Class<?> getRelatedIdType(String relation) {
         return this.relations.get(relation).idFieldType;
     }
 
     /**
      * Provides the Id field for the entity accessed by the specified relation
      */
-    Field getRelatedIdField(String relation) {
+    public Field getRelatedIdField(String relation) {
         return this.relations.get(relation).idField;
     }
 

@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest;
+package uk.gov.homeoffice.digital.sas.jparest.criteria;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

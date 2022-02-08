@@ -1,5 +1,5 @@
 
-package uk.gov.homeoffice.digital.sas.jparest;
+package uk.gov.homeoffice.digital.sas.jparest.web;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +7,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.web.method.annotation.RequestParamMapMethodArgumentResolver;
+
+import uk.gov.homeoffice.digital.sas.jparest.criteria.*;
 
 /**
  * Argument resolver used for parameters annotated with {@link ApiRequestParam}
@@ -26,7 +28,7 @@ public class ApiRequestParamCriteriaParser {
 
     }
         
-    static boolean isCriteria(String requestParamValue) {
+    public static boolean isCriteria(String requestParamValue) {
         for (Map.Entry<Pattern, CriteriaFunction> entry : criteria.entrySet()) {
             if (entry.getKey().matcher(requestParamValue).matches()){
                 return true;
@@ -35,7 +37,7 @@ public class ApiRequestParamCriteriaParser {
         return false;
     }
 
-    static Criteria parse(String fieldName, String requestParamValue){
+    public static Criteria parse(String fieldName, String requestParamValue){
 
         for (Map.Entry<Pattern, CriteriaFunction> entry : criteria.entrySet()) {
             Matcher matcher = entry.getKey().matcher(requestParamValue);
