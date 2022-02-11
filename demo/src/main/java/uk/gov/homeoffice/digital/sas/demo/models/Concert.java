@@ -12,6 +12,8 @@ import javax.persistence.ManyToMany;
 
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;
@@ -34,6 +36,7 @@ public class Concert extends BaseEntity {
             name = "concert_artists",
             joinColumns = @JoinColumn(name = "concert_id"),
             inverseJoinColumns = @JoinColumn(name = "artist_id"))
+    @JsonIgnore
     private Set<Artist> artists;
 
 }

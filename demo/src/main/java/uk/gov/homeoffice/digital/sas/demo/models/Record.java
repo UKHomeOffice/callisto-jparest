@@ -9,6 +9,8 @@ import javax.persistence.ManyToOne;
 
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;
@@ -29,5 +31,6 @@ public class Record extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name="artist_id", nullable=false, insertable=false, updatable=false)
+    @JsonIgnore
     private Artist artist;
 }

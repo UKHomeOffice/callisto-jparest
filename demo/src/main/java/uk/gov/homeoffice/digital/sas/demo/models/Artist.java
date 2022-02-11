@@ -13,6 +13,8 @@ import javax.persistence.OneToOne;
 
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;
@@ -33,13 +35,15 @@ public class Artist extends BaseEntity {
 
     @OneToOne(optional=false)
     @JoinColumn(name="profile_id", unique=true, nullable=false, insertable=false, updatable=false)
-//    @JsonIgnore
+    @JsonIgnore
     private Profile profile;
 
     @OneToMany(mappedBy="artist")
+    @JsonIgnore
     private Set<Record> records;
 
     @ManyToMany(mappedBy = "artists")
+    @JsonIgnore
     private Set<Concert> concerts; 
 
 }
