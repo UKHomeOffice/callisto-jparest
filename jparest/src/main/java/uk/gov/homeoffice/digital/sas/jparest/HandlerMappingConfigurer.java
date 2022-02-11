@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -48,6 +49,9 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping  {
     @Autowired
     ApplicationContext context;
 
+    @Autowired
+    private ResourceEndpoint resourceEndpoint;
+
     @PostConstruct
     public void registerUserController() throws NoSuchMethodException, SecurityException, ClassNotFoundException {
         
@@ -56,6 +60,8 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping  {
         builderOptions.setPathMatcher(requestMappingHandlerMapping.getPathMatcher());
         builderOptions.setPatternParser(requestMappingHandlerMapping.getPatternParser());
 
+        List<Class<?>> resourceTypes = resourceEndpoint.getResourceTypes();
+        
         // TODO: Make the path configurable
         String apiRootPath = "/resources";
         
@@ -76,6 +82,9 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping  {
                 String path = apiRootPath + "/" + resourcePath;
                 LOGGER.fine("root path for resource: " + path);
                 
+                // Added to endpoint resource types for documentation customiser
+                resourceTypes.add(resource);
+                
                 // Create a controller for the resource
                 LOGGER.fine("Creating controller");
                 
@@ -83,19 +92,19 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping  {
                 // Map the CRUD operations to the controllers methods
 
                 LOGGER.fine("Registering common paths");
-                register(controller, "list", new Class<?>[] {ApiRequestParams.class}, path, null, RequestMethod.GET);
-                register(controller, "get", new Class<?>[] {Object.class}, path + "/{id}", null, RequestMethod.GET);
-                register(controller, "create", new Class<?>[] {String.class}, path, null, RequestMethod.POST);
-                register(controller, "delete", new Class<?>[] {Object.class}, path + "/{id}", null, RequestMethod.DELETE);
-                register(controller, "update", new Class<?>[] {Object.class, String.class}, path + "/{id}", null, RequestMethod.PUT);
+                register(resource, controller, "list", new Class<?>[] {ApiRequestParams.class}, path, null, RequestMethod.GET);
+                register(resource, controller, "get", new Class<?>[] {Object.class}, path + "/{id}", null, RequestMethod.GET);
+                register(resource, controller, "create", new Class<?>[] {String.class}, path, null, RequestMethod.POST);
+                register(resource, controller, "delete", new Class<?>[] {Object.class}, path + "/{id}", null, RequestMethod.DELETE);
+                register(resource, controller, "update", new Class<?>[] {Object.class, String.class}, path + "/{id}", null, RequestMethod.PUT);
 
                 LOGGER.fine("Registering related paths");
                 for (Object element : controller.GetRelatedResources()) {
                     String relation = (String)element;
                     LOGGER.fine("Registering related path: " + relation);
-                    register(controller, "getRelated", new Class<?>[] {Object.class, String.class, ApiRequestParams.class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}" , null, RequestMethod.GET);
-                    register(controller, "deleteRelated", new Class<?>[] {Object.class, String.class, Object[].class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}/{related_id}" , null, RequestMethod.DELETE);
-                    register(controller, "addRelated", new Class<?>[] {Object.class, String.class, Object[].class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}/{related_id}" , null, RequestMethod.PUT);
+                    register(resource, controller, "getRelated", new Class<?>[] {Object.class, String.class, ApiRequestParams.class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}" , null, RequestMethod.GET);
+                    register(resource, controller, "deleteRelated", new Class<?>[] {Object.class, String.class, Object[].class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}/{related_id}" , null, RequestMethod.DELETE);
+                    register(resource, controller, "addRelated", new Class<?>[] {Object.class, String.class, Object[].class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}/{related_id}" , null, RequestMethod.PUT);
                 }
                 LOGGER.fine("All paths registered");
             }
@@ -115,7 +124,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping  {
      * @param requestMethod The request method to map
      * @throws NoSuchMethodException
      */
-    private void register(Object controller, String methodName, Class<?>[] methodArgs, String path, RequestCondition<?> condition, RequestMethod requestMethod) throws NoSuchMethodException {
+    private void register(Class<?> resource, Object controller, String methodName, Class<?>[] methodArgs, String path, RequestCondition<?> condition, RequestMethod requestMethod) throws NoSuchMethodException {
         Method method = ResourceApiController.class.getDeclaredMethod(methodName, methodArgs);
 
         LOGGER.finest("Building RequestMappingInfo");
@@ -129,6 +138,8 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping  {
 
         RequestMappingInfo requestMappingInfo = builder.build();
         
+        resourceEndpoint.getEndpoints().put(path, resource);
+
         LOGGER.finest("Registering mapping");
         requestMappingHandlerMapping.registerMapping(requestMappingInfo, controller, method) ;
         LOGGER.finest("Mapping registered");
