@@ -6,8 +6,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-// import java.util.logging.Logger;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
@@ -39,9 +37,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import uk.gov.homeoffice.digital.sas.jparest.*;
+import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.criteria.Criteria;
-import uk.gov.homeoffice.digital.sas.jparest.web.*;
+import uk.gov.homeoffice.digital.sas.jparest.web.ApiRequestParams;
+import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
 // TODO: Added include for related materials and also add metadata to response e.g. next link
 /**
@@ -65,9 +64,11 @@ public class ResourceApiController<T, U> {
         WebDataBinder binder = new WebDataBinder(null);
 
         // DateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd");
-        // binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));// CustomDateEditor is a custom date editor
+        // binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat,
+        // true));// CustomDateEditor is a custom date editor
         StdDateFormat dateFormat2 = new StdDateFormat();
-        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat2, true));// CustomDateEditor is a custom date editor
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat2, true));// CustomDateEditor is a custom
+                                                                                         // date editor
 
         return binder;
     }
@@ -87,12 +88,13 @@ public class ResourceApiController<T, U> {
         return (Serializable) binder.convertIfNecessary(identifier, fieldType);
     }
 
+    @SuppressWarnings("unchecked")
     public ResourceApiController(Class<T> entityType, EntityManager entityManager,
-            PlatformTransactionManager transactionManager) {
+            PlatformTransactionManager transactionManager, EntityUtils<?> entityUtils) {
         this.entityManager = entityManager;
         this.transactionManager = transactionManager;
         this.repository = new SimpleJpaRepository<T, Serializable>(entityType, entityManager);
-        this.entityUtils = new EntityUtils<T>(entityType, entityManager);
+        this.entityUtils = (EntityUtils<T>) entityUtils;
     }
 
     public ApiResponse<T> list(ApiRequestParams params) {
@@ -355,10 +357,6 @@ public class ResourceApiController<T, U> {
         return new ResponseEntity<String>(null, null, HttpStatus.OK);
     }
 
-    public Set<String> GetRelatedResources() {
-        return this.entityUtils.getRelatedResources();
-    }
-
     // TODO: This should be in a utility class or something
     private static Predicate convertToPredicate(Criteria criteria, CriteriaBuilder builder, Root<?> root) {
         Path<Object> field = root.get(criteria.getFieldName());
@@ -380,14 +378,15 @@ public class ResourceApiController<T, U> {
             case Lt:
                 return builder.lt(field.as(Number.class), (Number) convert(criteria.getValue(), clazz));
             case In:
-                return field.in((Object[])criteria.getValue().split(","));
+                return field.in((Object[]) criteria.getValue().split(","));
             case NotIn:
-                return builder.not(field.in((Object[])criteria.getValue().split(",")));
+                return builder.not(field.in((Object[]) criteria.getValue().split(",")));
             case Between:
                 String[] values = criteria.getValue().split(",");
                 Path<Comparable<Object>> comparableField = root.get(criteria.getFieldName());
                 @SuppressWarnings("unchecked")
-                Predicate result = builder.between(comparableField, (Comparable<Object>)convert(values[0], clazz), (Comparable<Object>)convert(values[1], clazz));
+                Predicate result = builder.between(comparableField, (Comparable<Object>) convert(values[0], clazz),
+                        (Comparable<Object>) convert(values[1], clazz));
                 return result;
             default:
                 break;

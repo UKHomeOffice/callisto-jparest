@@ -87,8 +87,8 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping  {
                 
                 // Create a controller for the resource
                 LOGGER.fine("Creating controller");
-                
-                ResourceApiController<?,?> controller = new ResourceApiController<>(resource, entityManager, transactionManager);
+                EntityUtils<?> entityUtils = new EntityUtils<>(resource, entityManager);
+                ResourceApiController<?,?> controller = new ResourceApiController<>(resource, entityManager, transactionManager, entityUtils);
                 // Map the CRUD operations to the controllers methods
 
                 LOGGER.fine("Registering common paths");
@@ -98,14 +98,21 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping  {
                 register(resource, controller, "delete", new Class<?>[] {Object.class}, path + "/{id}", null, RequestMethod.DELETE);
                 register(resource, controller, "update", new Class<?>[] {Object.class, String.class}, path + "/{id}", null, RequestMethod.PUT);
 
+                resourceEndpoint.Add(resource, path, entityUtils.getIdFieldType());
+
                 LOGGER.fine("Registering related paths");
-                for (Object element : controller.GetRelatedResources()) {
-                    String relation = (String)element;
+                for (String relation : entityUtils.getRelatedResources()) {
+                    
+                    Class<?> relatedType = entityUtils.getRelatedType(relation);
+                    Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
+                    resourceEndpoint.AddRelated(resource, relatedType, path + "/{id}/" + relation, relatedIdType);
+
                     LOGGER.fine("Registering related path: " + relation);
                     register(resource, controller, "getRelated", new Class<?>[] {Object.class, String.class, ApiRequestParams.class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}" , null, RequestMethod.GET);
                     register(resource, controller, "deleteRelated", new Class<?>[] {Object.class, String.class, Object[].class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}/{related_id}" , null, RequestMethod.DELETE);
                     register(resource, controller, "addRelated", new Class<?>[] {Object.class, String.class, Object[].class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}/{related_id}" , null, RequestMethod.PUT);
                 }
+
                 LOGGER.fine("All paths registered");
             }
 
@@ -138,8 +145,6 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping  {
 
         RequestMappingInfo requestMappingInfo = builder.build();
         
-        resourceEndpoint.getEndpoints().put(path, resource);
-
         LOGGER.finest("Registering mapping");
         requestMappingHandlerMapping.registerMapping(requestMappingInfo, controller, method) ;
         LOGGER.finest("Mapping registered");

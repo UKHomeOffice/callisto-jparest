@@ -157,6 +157,13 @@ public class EntityUtils<T> {
     }
 
     /**
+     * Provides the type of the entity accessed by the specified relation
+     */
+    public Class<?> getRelatedType(String relation) {
+        return this.relations.get(relation).entityType;
+    }
+
+    /**
      * Provides the type of the Id field for the entity accessed by the specified relation
      */
     public Class<?> getRelatedIdType(String relation) {

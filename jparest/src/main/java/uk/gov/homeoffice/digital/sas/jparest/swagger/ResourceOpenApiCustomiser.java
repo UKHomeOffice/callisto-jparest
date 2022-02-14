@@ -1,7 +1,5 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springdoc.core.SpringDocAnnotationsUtils;
@@ -16,9 +14,14 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
-import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
 /**
  * Extends the OpenApi model to include the endpoints added by the resource
@@ -32,13 +35,33 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     @Autowired
     private ResourceEndpoint endpoint;
 
+    private static ApiResponse emptyResponse = emptyResponse();
+
     /**
      * Customises the generated openApi for the endpoints exposed by the
      * ResourceApiController
      */
     public void customise(OpenAPI openApi) {
-
         Components components = openApi.getComponents();
+
+        // Ensure the ApiResponse schema is registered
+        // along with the metadata schema
+        Schema<?> apiResponseSchema = components.getSchemas().get("ApiResponse");
+        if (apiResponseSchema == null) {
+            apiResponseSchema = ModelConverters.getInstance()
+                    .read(new AnnotatedType(uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class)
+                            .resolveAsRef(false))
+                    .get("ApiResponse");
+            components.addSchemas("ApiResponse", apiResponseSchema);
+
+            Schema<?> metadataSchema = ModelConverters.getInstance()
+                    .read(new AnnotatedType(uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class)
+                            .resolveAsRef(false))
+                    .get("Metadata");
+
+            components.addSchemas("Metadata", metadataSchema);
+
+        }
 
         // Get the schema for the response object and then extend the items
         // property to be one of the entities exposed by the controller
@@ -47,66 +70,201 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
             composedSchema.addOneOfItem(
                     SpringDocAnnotationsUtils.extractSchema(components, resource, null, null));
         }
-        ArraySchema arraySchema = (ArraySchema) components.getSchemas().get("ApiResponseObject").getProperties()
+        ArraySchema arraySchema = (ArraySchema) apiResponseSchema.getProperties()
                 .get("items");
         arraySchema.setItems(composedSchema);
 
-        // Iterate the paths and for any that map to the ResourceApiController
-        // improve the schema to include the resource type
-        // in the response object and the request body
-        Map<String, Class<?>> endpoints = endpoint.getEndpoints();
-        for (Entry<String, PathItem> o : openApi.getPaths().entrySet()) {
-            String key = o.getKey();
-            PathItem pathItem = o.getValue();
+        // Iterate the ResourceEndpoint descriptors to
+        // generate documentation for all of the registered endpoints
+        for (Entry<Class<?>, ResourceEndpoint.RootDescriptor> element : endpoint.getDescriptors().entrySet()) {
+            Class<?> clazz = element.getKey();
+            ResourceEndpoint.RootDescriptor rootDescriptor = element.getValue();
 
-            // Check if the path is from the ResourceApiController
-            // and if so group the paths under the resource
-            if (endpoints.containsKey(key)) {
+            // Group all of the resource endpoints together
+            String tag = clazz.getSimpleName();
 
-                // Get a strongly typed schema for the response
-                Class<?> resource = endpoints.get(key);
-                Schema<?> responseSchema = getTypedApiResponseSchema(resource);
+            // Create documentation for the entity
+            PathItem resourceRootPath = createRootPath(tag, clazz);
+            openApi.path(rootDescriptor.getPath(), resourceRootPath);
+            PathItem resourceItemPath = createItemPath(tag, clazz, rootDescriptor.getIdFieldType());
+            openApi.path(rootDescriptor.getPath() + "/{id}", resourceItemPath);
 
-                // For get set the tag and update the response schema
-                Operation operation = pathItem.getGet();
-                if (operation != null) {
-                    operation.setTags(Arrays.asList(resource.getSimpleName()));
-                    operation.getResponses().get("200").getContent().get("*/*").setSchema(responseSchema);
-                }
+            // Create documentation for relations in the entity
+            for (Entry<Class<?>, ResourceEndpoint.Descriptor> relatedElement : rootDescriptor.getRelations()
+                    .entrySet()) {
 
-                // For post set the tag and update the request body and response schema
-                operation = pathItem.getPost();
-                if (operation != null) {
-                    operation.setTags(Arrays.asList(resource.getSimpleName()));
-                    Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(components, resource, null,
-                            null);
-                    operation.getRequestBody().getContent().get("application/json").setSchema(schema);
-                    operation.getResponses().get("200").getContent().get("*/*").setSchema(responseSchema);
-                }
+                Class<?> relatedClazz = relatedElement.getKey();
+                ResourceEndpoint.Descriptor relatedDescriptor = relatedElement.getValue();
 
-                // For delete set the tag
-                operation = pathItem.getDelete();
-                if (operation != null) {
-                    operation.setTags(Arrays.asList(resource.getSimpleName()));
-                }
+                PathItem relatedRootPath = createRelatedRootPath(tag, relatedClazz, rootDescriptor.getIdFieldType());
+                openApi.path(relatedDescriptor.getPath(), relatedRootPath);
+                PathItem relatedItemPath = createRelatedItemPath(tag, relatedClazz, rootDescriptor.getIdFieldType(),
+                        relatedDescriptor.getIdFieldType());
+                openApi.path(relatedDescriptor.getPath() + "/{related_id}", relatedItemPath);
 
-                // For put set the tag and update the request body and response schema
-                operation = pathItem.getPut();
-                if (operation != null) {
-                    operation.setTags(Arrays.asList(resource.getSimpleName()));
-                    Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(components, resource, null,
-                            null);
-                    operation.getRequestBody().getContent().get("application/json").setSchema(schema);
-                    operation.getResponses().get("200").getContent().get("*/*").setSchema(responseSchema);
-                }
             }
         }
-
     }
 
     /**
-     * Returns a schema for the ApiResponse class with the items
-     * property containing a schema for the given class
+     * Creates documentation for the endpoints of the resource
+     * covers get many and post
+     * 
+     * @param tag   The tag to group the endpoints together. Expected to be the
+     *              simplename of the resource
+     * @param clazz The class representing the resource exposed by the endpoint
+     * @return PathItem documenting the GET many and POST endpoints
+     */
+    private PathItem createRootPath(String tag, Class<?> clazz) {
+
+        PathItem pi = new PathItem();
+
+        ApiResponse response = getResourceResponse(clazz);
+        ApiResponses responses = new ApiResponses().addApiResponse("200", response);
+
+        Operation get = new Operation();
+        get.setResponses(responses);
+        get.addTagsItem(tag);
+        pi.get(get);
+
+        Operation post = new Operation();
+        post.setResponses(responses);
+        post.addTagsItem(tag);
+        pi.post(post);
+
+        return pi;
+    }
+
+    /**
+     * Creates documentation for the endpoints of the resource
+     * covers get and put (update) individual resource
+     * 
+     * @param tag     The tag to group the endpoints together. Expected to be the
+     *                simplename of the resource
+     * @param clazz   The class representing the resource exposed by the endpoint
+     * @param idClazz The type of the identifier for the specified resource
+     * @return PathItem documenting the GET one and PUT endpoints
+     */
+    private PathItem createItemPath(String tag, Class<?> clazz, Class<?> idClazz) {
+
+        PathItem pi = new PathItem();
+
+        ApiResponse response = getResourceResponse(clazz);
+        ApiResponses responses = new ApiResponses().addApiResponse("200", response);
+        Operation get = new Operation();
+        get.setResponses(responses);
+        get.addTagsItem(tag);
+        pi.get(get);
+
+        Parameter idParameter = getParameter(idClazz, "path", "id");
+        get.addParametersItem(idParameter);
+        Operation put = new Operation();
+        put.setResponses(responses);
+        put.addTagsItem(tag);
+        pi.put(put);
+        Operation delete = new Operation();
+
+        ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", emptyResponse);
+        delete.addParametersItem(idParameter);
+        delete.setResponses(deleteResponses);
+        delete.addTagsItem(tag);
+        pi.delete(delete);
+
+        return pi;
+    }
+
+    /**
+     * Creates documentation for the endpoints of the resource
+     * covers get related resources for an individual resource
+     * 
+     * @param tag     The tag to group the endpoints together. Expected to be the
+     *                simplename of the parent resource
+     * @param clazz   The class representing the related resource exposed by the
+     *                endpoint
+     * @param idClazz The type of the identifier for the parent resource
+     * @return PathItem documenting the GET many related items endpoint
+     */
+    private PathItem createRelatedRootPath(String tag, Class<?> clazz, Class<?> idClazz) {
+
+        PathItem pi = new PathItem();
+        ApiResponse response = getResourceResponse(clazz);
+        ApiResponses responses = new ApiResponses().addApiResponse("200", response);
+        Parameter idParameter = getParameter(idClazz, "path", "id");
+
+        Operation get = new Operation();
+        get.addParametersItem(idParameter);
+        get.setResponses(responses);
+        get.addTagsItem(tag);
+        pi.get(get);
+        return pi;
+    }
+
+    /**
+     * Creates documentation for the endpoints of the resource
+     * covers delete and put related resources for an individual resource
+     * 
+     * @param tag            The tag to group the endpoints together. Expected to be
+     *                       the simplename of the parent resource
+     * @param clazz          The class representing the related resource exposed by
+     *                       the endpoint
+     * @param idClazz        The type of the identifier for the parent resource
+     * @param relatedIdClazz The type of the identifier for the related resource
+     * @return PathItem documenting the DELETE/PUT many related items
+     */
+    private PathItem createRelatedItemPath(String tag, Class<?> relatedClazz, Class<?> idClazz,
+            Class<?> relatedIdClazz) {
+
+        PathItem pi = new PathItem();
+
+        ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", emptyResponse);
+
+        Parameter idParameter = getParameter(idClazz, "path", "id");
+        Parameter relatedIdParameter = getArrayParameter(relatedIdClazz, "path", "related_id");
+        Operation delete = new Operation();
+        delete.addParametersItem(idParameter);
+        delete.addParametersItem(relatedIdParameter);
+        delete.setResponses(defaultResponses);
+        delete.addTagsItem(tag);
+        pi.delete(delete);
+
+        Operation put = new Operation();
+        put.addParametersItem(idParameter);
+        put.addParametersItem(relatedIdParameter);
+        put.setResponses(defaultResponses);
+        put.addTagsItem(tag);
+        pi.put(put);
+
+        return pi;
+    }
+
+    /**
+     * The {@link uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse ApiResponse}
+     * can return any type of resource in its items
+     * property. This method returns a swagger ApiResponse that
+     * contains a schema for the
+     * {@link uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse ApiResponse}
+     * with its items set to the specified class
+     * 
+     * @param clazz The type of items to describe in the schema
+     * @return
+     */
+    private ApiResponse getResourceResponse(Class<?> clazz) {
+        ApiResponse response = new ApiResponse();
+
+        Content c = new Content();
+        MediaType mt = new MediaType();
+        Schema<?> responseSchema = getTypedApiResponseSchema(clazz);
+        mt.schema(responseSchema);
+        c.addMediaType("*/*", mt);
+        response.content(c);
+
+        return response;
+    }
+
+    /**
+     * Returns a schema for the
+     * {@link uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse ApiResponse}
+     * class with the items property containing a schema for the given class
      * 
      * @param clazz The type to generate a schema for
      * @return Schema for the ApiResponse
@@ -115,7 +273,9 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
         // Generate a schema for the ApiResponse
         Schema<?> schema = ModelConverters.getInstance()
-                .read(new AnnotatedType(ApiResponse.class).resolveAsRef(false)).get("ApiResponse");
+                .read(new AnnotatedType(uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class)
+                        .resolveAsRef(false))
+                .get("ApiResponse");
 
         // Get the schema for the given class
         Components newComponents = new Components();
@@ -126,6 +286,66 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         arraySchema.setItems(clazzSchema);
 
         return schema;
+
+    }
+
+    /**
+     * Generates a parameter for the specified class 
+     * with the given name
+     * @param clazz The parameter type
+     * @param setIn Where the parameter is set
+     * @param name The name of the parameter
+     * @return A Parameter with a schema for the given class
+     */
+    private Parameter getParameter(Class<?> clazz, String setIn, String name) {
+        Parameter parameter = new Parameter();
+
+        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
+
+        parameter.schema(schema);
+        parameter.setIn(setIn);
+        parameter.required(true);
+        parameter.name(name);
+
+        return parameter;
+    }
+
+    /**
+     * Generates a parameter for an array of the specified class 
+     * with the given name
+     * @param clazz The parameter type
+     * @param setIn Where the parameter is set
+     * @param name The name of the parameter
+     * @return A Parameter with an array schema for items of the given class
+     */
+    private Parameter getArrayParameter(Class<?> clazz, String setIn, String name) {
+        Parameter parameter = new Parameter();
+        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
+        ArraySchema as = new ArraySchema();
+        as.setItems(schema);
+
+        parameter.schema(as);
+        parameter.setIn(setIn);
+        parameter.required(true);
+        parameter.name(name);
+
+        return parameter;
+    }
+
+    /**
+     * Generates an empty/unspecified response.
+     * This will be replaced as the ResourceApiController
+     * is refined to define all expected response
+     * @return An empty ApiResponse
+     */
+    private static ApiResponse emptyResponse() {
+        ApiResponse deleteResponse = new io.swagger.v3.oas.models.responses.ApiResponse();
+        Content deleteContent = new Content();
+        MediaType deleteMediaType = new MediaType();
+        deleteMediaType.schema(new StringSchema());
+        deleteContent.addMediaType("*/*", deleteMediaType);
+        deleteResponse.content(deleteContent);
+        return deleteResponse;
 
     }
 }
