@@ -11,6 +11,8 @@ import javax.persistence.metamodel.EntityType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.Pageable;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -23,7 +25,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
-import uk.gov.homeoffice.digital.sas.jparest.web.ApiRequestParams;
 
 /**
  * Discovers JPA entities annotated with {@link Resource}
@@ -92,7 +93,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping  {
                 // Map the CRUD operations to the controllers methods
 
                 LOGGER.fine("Registering common paths");
-                register(resource, controller, "list", new Class<?>[] {ApiRequestParams.class}, path, null, RequestMethod.GET);
+                register(resource, controller, "list", new Class<?>[] {SpelExpression.class, Pageable.class}, path, null, RequestMethod.GET);
                 register(resource, controller, "get", new Class<?>[] {Object.class}, path + "/{id}", null, RequestMethod.GET);
                 register(resource, controller, "create", new Class<?>[] {String.class}, path, null, RequestMethod.POST);
                 register(resource, controller, "delete", new Class<?>[] {Object.class}, path + "/{id}", null, RequestMethod.DELETE);
@@ -108,7 +109,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping  {
                     resourceEndpoint.AddRelated(resource, relatedType, path + "/{id}/" + relation, relatedIdType);
 
                     LOGGER.fine("Registering related path: " + relation);
-                    register(resource, controller, "getRelated", new Class<?>[] {Object.class, String.class, ApiRequestParams.class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}" , null, RequestMethod.GET);
+                    register(resource, controller, "getRelated", new Class<?>[] {Object.class, String.class, SpelExpression.class, Pageable.class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}" , null, RequestMethod.GET);
                     register(resource, controller, "deleteRelated", new Class<?>[] {Object.class, String.class, Object[].class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}/{related_id}" , null, RequestMethod.DELETE);
                     register(resource, controller, "addRelated", new Class<?>[] {Object.class, String.class, Object[].class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}/{related_id}" , null, RequestMethod.PUT);
                 }

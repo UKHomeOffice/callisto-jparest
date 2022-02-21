@@ -28,6 +28,7 @@ public class Profile extends BaseEntity {
     private String bio;
     private String phone_number;
     private Date dob;
+    private Date first_release;
 
 
 }

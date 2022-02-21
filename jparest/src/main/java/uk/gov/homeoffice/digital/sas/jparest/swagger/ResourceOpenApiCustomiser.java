@@ -3,8 +3,10 @@ package uk.gov.homeoffice.digital.sas.jparest.swagger;
 import java.util.Map.Entry;
 
 import org.springdoc.core.SpringDocAnnotationsUtils;
+import org.springdoc.core.converters.models.Pageable;
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.spel.standard.SpelExpression;
 
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
@@ -36,6 +38,8 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     private ResourceEndpoint endpoint;
 
     private static ApiResponse emptyResponse = emptyResponse();
+    private static Parameter pageableParameter = pageableParameter();
+    private static Parameter filterParameter = filterParameter();
 
     /**
      * Customises the generated openApi for the endpoints exposed by the
@@ -46,22 +50,9 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
         // Ensure the ApiResponse schema is registered
         // along with the metadata schema
-        Schema<?> apiResponseSchema = components.getSchemas().get("ApiResponse");
-        if (apiResponseSchema == null) {
-            apiResponseSchema = ModelConverters.getInstance()
-                    .read(new AnnotatedType(uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class)
-                            .resolveAsRef(false))
-                    .get("ApiResponse");
-            components.addSchemas("ApiResponse", apiResponseSchema);
-
-            Schema<?> metadataSchema = ModelConverters.getInstance()
-                    .read(new AnnotatedType(uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class)
-                            .resolveAsRef(false))
-                    .get("Metadata");
-
-            components.addSchemas("Metadata", metadataSchema);
-
-        }
+        Schema<?> apiResponseSchema =  ensureSchema(components, "ApiResponse", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
+        ensureSchema(components, "Metadata", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
+        ensureSchema(components, "Pageable", Pageable.class);
 
         // Get the schema for the response object and then extend the items
         // property to be one of the entities exposed by the controller
@@ -122,7 +113,10 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         ApiResponse response = getResourceResponse(clazz);
         ApiResponses responses = new ApiResponses().addApiResponse("200", response);
 
+        
         Operation get = new Operation();
+        get.addParametersItem(pageableParameter);
+        get.addParametersItem(filterParameter);
         get.setResponses(responses);
         get.addTagsItem(tag);
         pi.get(get);
@@ -193,6 +187,8 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
         Operation get = new Operation();
         get.addParametersItem(idParameter);
+        get.addParametersItem(pageableParameter);
+        get.addParametersItem(filterParameter);
         get.setResponses(responses);
         get.addTagsItem(tag);
         pi.get(get);
@@ -348,4 +344,61 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         return deleteResponse;
 
     }
+
+    /**
+     * 
+     * @return Parameter representing pageable class
+     */
+    private static Parameter pageableParameter() {
+        Parameter parameter = new Parameter();
+        Components newComponents = new Components();
+
+        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(newComponents, Pageable.class, null, null);
+
+        parameter.schema(schema);
+        parameter.required(true);
+        parameter.setIn("query");
+        parameter.name("pageable");
+
+        return parameter;
+
+    }
+
+    /**
+     * 
+     * @return Parameter representing SpelExpression
+     */
+    private static Parameter filterParameter() {
+        Parameter parameter = new Parameter();
+        Components newComponents = new Components();
+
+        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(newComponents, SpelExpression.class, null, null);
+
+        parameter.schema(schema);
+        parameter.required(false);
+        parameter.setIn("query");
+        parameter.name("filter");
+
+        return parameter;
+
+    }
+
+    /**
+     * Util function to get or create schema
+     */
+    private static Schema<?> ensureSchema(Components components, String schemaName,
+            Class<?> clazz) {
+
+        Schema<?> schema = components.getSchemas().get(schemaName);
+        if (schema == null) {
+            schema = ModelConverters.getInstance()
+                    .read(new AnnotatedType(clazz)
+                            .resolveAsRef(false))
+                    .get(schemaName);
+            components.addSchemas(schemaName, schema);
+        }
+        return schema;        
+    }
+
+
 }

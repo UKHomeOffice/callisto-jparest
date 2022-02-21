@@ -332,13 +332,13 @@ VALUES (1,40),
        (2,4),
        (3,5);
 
-INSERT INTO profiles (profile_id, preferences, bio, phone_number, dob)
-VALUES  (1, 'My preferences for 1', 'My Bio for 1', '07879 899101', '1979-01-01'),
-        (2, 'My preferences for 2', 'My Bio for 2', '07879 899102', '1973-06-12'),
-        (3, 'My preferences for 3', 'My Bio for 3', '07879 899103', '1976-11-21'),
-        (4, 'My preferences for 4', 'My Bio for 4', '07879 899104', '1979-04-12'),
-        (5, 'My preferences for 5', 'My Bio for 5', '07879 899105', '1972-06-19'),
-        (6, 'My preferences for 6', 'My Bio for 6', '07879 899106', '1974-01-01');
+INSERT INTO profiles (profile_id, preferences, bio, phone_number, dob, first_release)
+VALUES  (1, 'My preferences for 1', 'My Bio for 1', '07879 899101', '1979-01-01', '1979-01-01'),
+        (2, 'My preferences for 2', 'My Bio for 2', '07879 899102', '1973-06-12', '1979-01-01'),
+        (3, 'My preferences for 3', 'My Bio for 3', '07879 899103', '1976-11-21', '1979-01-01'),
+        (4, 'My preferences for 4', 'My Bio for 4', '07879 899104', '1979-04-12', '1976-01-01'),
+        (5, 'My preferences for 5', 'My Bio for 5', '07879 899105', '1972-06-19', '1979-01-01'),
+        (6, 'My preferences for 6', 'My Bio for 6', '07879 899106', '1974-01-01', '1972-01-01');
 
 INSERT INTO artists (artist_id, profile_id, performance_name)
 VALUES  (1, 1, 'Beautiful South'),

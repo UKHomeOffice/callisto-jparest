@@ -16,7 +16,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import uk.gov.homeoffice.digital.sas.jparest.annotation.ApiRequestParamArgumentResolver;
+import uk.gov.homeoffice.digital.sas.jparest.web.SpelExpressionArgumentResolver;
 
 public class JpaRestMvcConfigurer implements WebMvcConfigurer {
     
@@ -29,7 +29,7 @@ public class JpaRestMvcConfigurer implements WebMvcConfigurer {
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         LOGGER.info("addArgumentResolvers");
 
-       argumentResolvers.add(new ApiRequestParamArgumentResolver());
+       argumentResolvers.add(new SpelExpressionArgumentResolver());
     }
 
     /**
