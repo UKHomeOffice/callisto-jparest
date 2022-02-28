@@ -25,7 +25,7 @@ $ mvnw package -pl demo -am
 ## Building from Source
 
 JPA Rest can be easily built with the maven wrapper.
-You also need JDK 1.7.
+You also need JDK 17.
 
 ```bash
  $ ./mvnw clean install
