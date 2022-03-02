@@ -1,10 +1,9 @@
 package uk.gov.homeoffice.digital.sas.jparest.models;
 
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.logging.Logger;
-
-import javax.persistence.Id;
 
 /**
  * Provides an implementation of equals and hashCode that
@@ -17,7 +16,6 @@ public abstract class BaseEntity {
     private Field idField = getIdField();
 
     /**
-     * 
      * @return {@link Field} annotated with {@link Id}
      */
     private Field getIdField() {

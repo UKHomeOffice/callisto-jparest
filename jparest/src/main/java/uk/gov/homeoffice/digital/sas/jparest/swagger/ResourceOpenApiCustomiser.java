@@ -1,29 +1,23 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
-import java.util.Map.Entry;
-
-import org.springdoc.core.SpringDocAnnotationsUtils;
-import org.springdoc.core.converters.models.Pageable;
-import org.springdoc.core.customizers.OpenApiCustomiser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.spel.standard.SpelExpression;
-
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import org.springdoc.core.SpringDocAnnotationsUtils;
+import org.springdoc.core.converters.models.Pageable;
+import org.springdoc.core.customizers.OpenApiCustomiser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.spel.standard.SpelExpression;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
+
+import java.util.Map.Entry;
 
 /**
  * Extends the OpenApi model to include the endpoints added by the resource
@@ -50,7 +44,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
         // Ensure the ApiResponse schema is registered
         // along with the metadata schema
-        Schema<?> apiResponseSchema =  ensureSchema(components, "ApiResponse", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
+        Schema<?> apiResponseSchema = ensureSchema(components, "ApiResponse", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
         ensureSchema(components, "Metadata", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
         ensureSchema(components, "Pageable", Pageable.class);
 
@@ -100,7 +94,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     /**
      * Creates documentation for the endpoints of the resource
      * covers get many and post
-     * 
+     *
      * @param tag   The tag to group the endpoints together. Expected to be the
      *              simplename of the resource
      * @param clazz The class representing the resource exposed by the endpoint
@@ -113,7 +107,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         ApiResponse response = getResourceResponse(clazz);
         ApiResponses responses = new ApiResponses().addApiResponse("200", response);
 
-        
+
         Operation get = new Operation();
         get.addParametersItem(pageableParameter);
         get.addParametersItem(filterParameter);
@@ -132,7 +126,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     /**
      * Creates documentation for the endpoints of the resource
      * covers get and put (update) individual resource
-     * 
+     *
      * @param tag     The tag to group the endpoints together. Expected to be the
      *                simplename of the resource
      * @param clazz   The class representing the resource exposed by the endpoint
@@ -170,7 +164,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     /**
      * Creates documentation for the endpoints of the resource
      * covers get related resources for an individual resource
-     * 
+     *
      * @param tag     The tag to group the endpoints together. Expected to be the
      *                simplename of the parent resource
      * @param clazz   The class representing the related resource exposed by the
@@ -198,7 +192,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     /**
      * Creates documentation for the endpoints of the resource
      * covers delete and put related resources for an individual resource
-     * 
+     *
      * @param tag            The tag to group the endpoints together. Expected to be
      *                       the simplename of the parent resource
      * @param clazz          The class representing the related resource exposed by
@@ -208,7 +202,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * @return PathItem documenting the DELETE/PUT many related items
      */
     private PathItem createRelatedItemPath(String tag, Class<?> relatedClazz, Class<?> idClazz,
-            Class<?> relatedIdClazz) {
+                                           Class<?> relatedIdClazz) {
 
         PathItem pi = new PathItem();
 
@@ -240,7 +234,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * contains a schema for the
      * {@link uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse ApiResponse}
      * with its items set to the specified class
-     * 
+     *
      * @param clazz The type of items to describe in the schema
      * @return
      */
@@ -261,7 +255,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * Returns a schema for the
      * {@link uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse ApiResponse}
      * class with the items property containing a schema for the given class
-     * 
+     *
      * @param clazz The type to generate a schema for
      * @return Schema for the ApiResponse
      */
@@ -286,11 +280,12 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     }
 
     /**
-     * Generates a parameter for the specified class 
+     * Generates a parameter for the specified class
      * with the given name
+     *
      * @param clazz The parameter type
      * @param setIn Where the parameter is set
-     * @param name The name of the parameter
+     * @param name  The name of the parameter
      * @return A Parameter with a schema for the given class
      */
     private Parameter getParameter(Class<?> clazz, String setIn, String name) {
@@ -307,11 +302,12 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     }
 
     /**
-     * Generates a parameter for an array of the specified class 
+     * Generates a parameter for an array of the specified class
      * with the given name
+     *
      * @param clazz The parameter type
      * @param setIn Where the parameter is set
-     * @param name The name of the parameter
+     * @param name  The name of the parameter
      * @return A Parameter with an array schema for items of the given class
      */
     private Parameter getArrayParameter(Class<?> clazz, String setIn, String name) {
@@ -332,6 +328,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * Generates an empty/unspecified response.
      * This will be replaced as the ResourceApiController
      * is refined to define all expected response
+     *
      * @return An empty ApiResponse
      */
     private static ApiResponse emptyResponse() {
@@ -346,7 +343,6 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     }
 
     /**
-     * 
      * @return Parameter representing pageable class
      */
     private static Parameter pageableParameter() {
@@ -365,7 +361,6 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     }
 
     /**
-     * 
      * @return Parameter representing SpelExpression
      */
     private static Parameter filterParameter() {
@@ -387,7 +382,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * Util function to get or create schema
      */
     private static Schema<?> ensureSchema(Components components, String schemaName,
-            Class<?> clazz) {
+                                          Class<?> clazz) {
 
         Schema<?> schema = components.getSchemas().get(schemaName);
         if (schema == null) {
@@ -397,7 +392,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
                     .get(schemaName);
             components.addSchemas(schemaName, schema);
         }
-        return schema;        
+        return schema;
     }
 
 
