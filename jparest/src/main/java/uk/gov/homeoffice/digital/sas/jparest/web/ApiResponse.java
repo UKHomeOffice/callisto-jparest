@@ -14,7 +14,7 @@ public class ApiResponse<T> {
         public URL getNext() {
             return this.next;
         }
-    
+
         public void setNext(URL next) {
             this.next = next;
         }
@@ -23,7 +23,7 @@ public class ApiResponse<T> {
 
     private Metadata meta = new Metadata();
     private List<T> items;
-    
+
     public ApiResponse(List<T> items) {
         this.items = items;
     }

@@ -17,7 +17,7 @@ public class InvalidFilterException extends RuntimeException {
      * Constructs an {@code InvalidFilterException} with the
      * specified detail message.
      *
-     * @param   s   the detail message.
+     * @param s the detail message.
      */
     public InvalidFilterException(String s) {
         super(s);
