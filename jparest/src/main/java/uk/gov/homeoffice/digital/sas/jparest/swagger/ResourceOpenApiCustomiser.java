@@ -1,11 +1,16 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
+
+
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
+import io.swagger.v3.core.util.AnnotationsUtils;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -14,10 +19,11 @@ import org.springdoc.core.SpringDocAnnotationsUtils;
 import org.springdoc.core.converters.models.Pageable;
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.spel.standard.SpelExpression;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
+import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 
 import java.util.Map.Entry;
+import java.util.Optional;
 
 /**
  * Extends the OpenApi model to include the endpoints added by the resource
@@ -33,7 +39,6 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
     private static ApiResponse emptyResponse = emptyResponse();
     private static Parameter pageableParameter = pageableParameter();
-    private static Parameter filterParameter = filterParameter();
 
     /**
      * Customises the generated openApi for the endpoints exposed by the
@@ -46,7 +51,9 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         // along with the metadata schema
         Schema<?> apiResponseSchema = ensureSchema(components, "ApiResponse", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
         ensureSchema(components, "Metadata", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
-        ensureSchema(components, "Pageable", Pageable.class);
+        Schema<?> pageableSchema = ensureSchema(components, "Pageable", Pageable.class);
+        Pageable value = new Pageable(0,10, null);
+        pageableSchema.setExample(value);
 
         // Get the schema for the response object and then extend the items
         // property to be one of the entities exposed by the controller
@@ -110,7 +117,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
         Operation get = new Operation();
         get.addParametersItem(pageableParameter);
-        get.addParametersItem(filterParameter);
+        get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
         get.addTagsItem(tag);
         pi.get(get);
@@ -182,7 +189,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         Operation get = new Operation();
         get.addParametersItem(idParameter);
         get.addParametersItem(pageableParameter);
-        get.addParametersItem(filterParameter);
+        get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
         get.addTagsItem(tag);
         pi.get(get);
@@ -355,7 +362,6 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         parameter.required(true);
         parameter.setIn("query");
         parameter.name("pageable");
-
         return parameter;
 
     }
@@ -363,16 +369,23 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     /**
      * @return Parameter representing SpelExpression
      */
-    private static Parameter filterParameter() {
+    private static Parameter getFilterParameter(Class<?> clazz) {
         Parameter parameter = new Parameter();
         Components newComponents = new Components();
 
-        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(newComponents, SpelExpression.class, null, null);
-
+        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(newComponents, String.class, null, null);
+        
         parameter.schema(schema);
         parameter.required(false);
         parameter.setIn("query");
         parameter.name("filter");
+
+        Resource annotation = clazz.getAnnotation(Resource.class);
+        for(ExampleObject example : annotation.filterExamples()) {
+            
+            Optional<Example> exampleValue = AnnotationsUtils.getExample(example);
+            parameter.addExample(example.name(), exampleValue.get());
+        }
 
         return parameter;
 
