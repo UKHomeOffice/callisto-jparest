@@ -1,5 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.it;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import uk.gov.homeoffice.digital.sas.demo.EntitiesApplication;
 import javax.servlet.ServletContext;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes=EntitiesApplication.class)
@@ -52,4 +55,92 @@ class SessionControllerIntegrationTest {
                 .andExpect(content().json(jsonContent))
                 .andReturn();
     }
+
+    @Test
+    public void giveSessionsExists_WhenGetOperationForSessionsCalled_thenVerifyResponse() throws Exception {
+        String jsonContent = "{\"session_id\":1,\"session_name\":\"Keynote - The Golden Age of Software\",\"session_description\":\"\",\"session_length\":45}";
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/sessions"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+        String result = mvcResult.getResponse().getContentAsString();
+        System.out.println(result);
+        /*final JSONObject jsonObject = new JSONObject(result);
+        JSONArray array = (JSONArray) jsonObject.getJSONArray("");
+        final int n = array.length();
+        System.out.println(n);*/
+    }
+
+
+    @Test
+    public void giveArtistIdExists_WhenGetOperationForArtistIdCalled_thenVerifyResponse() throws Exception {
+        String jsonContent = "{\n" +
+                "    \"meta\": {\n" +
+                "        \"next\": null\n" +
+                "    },\n" +
+                "    \"items\": [\n" +
+                "        {\n" +
+                "            \"artist_id\": 1,\n" +
+                "            \"profile_id\": 1,\n" +
+                "            \"performance_name\": \"Beautiful South\"\n" +
+                "        }\n" +
+                "    ]\n" +
+                "}";
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/resources/artists/1"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(content().json(jsonContent))
+                .andReturn();
+    }
+
+    @Test
+    public void givenArtistsExists_WhenGetOperationForArtistCalled_thenVerifyResponse() throws Exception {
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/resources/artists"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+        String result = mvcResult.getResponse().getContentAsString();
+        final JSONObject jsonObject = new JSONObject(result);
+        JSONArray array = (JSONArray) jsonObject.getJSONArray("items");
+        final int count = array.length();
+        Assertions.assertEquals(count,6);
+    }
+
+    @Test
+    public void givenArtistsExists_WhenGetOperationWithFilterIdGreaterthan3_thenVerifyResponse() throws Exception {
+        String uri = "/resources/artists?filter=artist_id>3";
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get(uri))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+        String result = mvcResult.getResponse().getContentAsString();
+        final JSONObject jsonObject = new JSONObject(result);
+        JSONArray array = (JSONArray) jsonObject.getJSONArray("items");
+        final int count = array.length();
+        Assertions.assertEquals(count,3);
+    }
+
+    @Test
+    public void givenArtistsExists_WhenGetOperationWithFilterIdLessthan5_thenVerifyResponse() throws Exception {
+        String uri = "/resources/artists?filter=artist_id<5";
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get(uri))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+        String result = mvcResult.getResponse().getContentAsString();
+        final JSONObject jsonObject = new JSONObject(result);
+        JSONArray array = (JSONArray) jsonObject.getJSONArray("items");
+        final int count = array.length();
+        Assertions.assertEquals(count,4);
+    }
+
+    @Test
+    public void givenArtistsExists_WhenGetOperationWithFilterIdEqualTo5_thenVerifyResponse() throws Exception {
+        String uri = "/resources/artists?filter=artist_id==5";
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get(uri))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+        String result = mvcResult.getResponse().getContentAsString();
+        final JSONObject jsonObject = new JSONObject(result);
+        JSONArray array = (JSONArray) jsonObject.getJSONArray("items");
+        final int count = array.length();
+        Assertions.assertEquals(count,1);
+    }
+
+
 }
