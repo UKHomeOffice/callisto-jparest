@@ -21,20 +21,20 @@ public class SpelExpressionArgumentResolver implements HandlerMethodArgumentReso
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-            NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
         String parameterName = parameter.getParameterName();
         String paramValue = webRequest.getParameter(parameterName);
 
         if (paramValue != null) {
             try {
-                SpelExpression result = (SpelExpression)expressionParser.parseExpression(paramValue);
+                SpelExpression result = (SpelExpression) expressionParser.parseExpression(paramValue);
                 return result;
             } catch (ParseException ex) {
-                throw new MethodArgumentTypeMismatchException(paramValue, parameter.getParameterType(), parameterName,parameter, ex.getCause());
+                throw new MethodArgumentTypeMismatchException(paramValue, parameter.getParameterType(), parameterName, parameter, ex.getCause());
             }
         }
         return null;
     }
-    
+
 }

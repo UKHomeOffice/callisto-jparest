@@ -1,32 +1,26 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
+import lombok.Getter;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.metamodel.EntityType;
-
-import org.springframework.util.StringUtils;
-
-import lombok.Getter;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Provides utility functions for JPA entities.
  * It provides the entity's id field and entity
- * information for any {@link ManyToMany} mapping 
+ * information for any {@link ManyToMany} mapping
  * declared in the entity
- * i.e. it excludes {@link ManyToMany} with the 
+ * i.e. it excludes {@link ManyToMany} with the
  * mappedBy property set.
  */
 public class EntityUtils<T> {
@@ -46,11 +40,12 @@ public class EntityUtils<T> {
 
     /**
      * Creates a utility class for the specified entityType
-     * @param entityType The JPA entity class
+     *
+     * @param entityType    The JPA entity class
      * @param entityManager The {@link EntityManager}
      */
-    public EntityUtils(Class<T> entityType, EntityManager entityManager){
-        
+    public EntityUtils(Class<T> entityType, EntityManager entityManager) {
+
         Set<String> relatedResources = new HashSet<String>();
 
         // Iterate the declared fields to find the field annotated with Id
@@ -64,25 +59,25 @@ public class EntityUtils<T> {
                 idFieldName = field.getName();
                 idFieldType = field.getType();
             }
-            
+
             // Only record relationships that aren't mapped by another class
             if (field.isAnnotationPresent(ManyToMany.class)) {
                 ManyToMany m2m = field.getAnnotation(ManyToMany.class);
                 if (!StringUtils.hasText(m2m.mappedBy())) {
                     Type relatedEntityType = field.getGenericType();
                     if (relatedEntityType instanceof ParameterizedType) {
-                        relatedEntityType = ((ParameterizedType)relatedEntityType).getActualTypeArguments()[0];
+                        relatedEntityType = ((ParameterizedType) relatedEntityType).getActualTypeArguments()[0];
                     }
 
-                    EntityType<?> ret = entityManager.getMetamodel().entity((Class<?>)relatedEntityType);
+                    EntityType<?> ret = entityManager.getMetamodel().entity((Class<?>) relatedEntityType);
                     Class<?> related_id_type = ret.getIdType().getJavaType();
-                    Field related_id_field = (Field)ret.getDeclaredId((Class<?>)related_id_type).getJavaMember();
+                    Field related_id_field = (Field) ret.getDeclaredId((Class<?>) related_id_type).getJavaMember();
                     field.setAccessible(true);
-                    relations.putIfAbsent(field.getName(), new RelatedEntity(field, (Class<?>)relatedEntityType, related_id_type, related_id_field));
+                    relations.putIfAbsent(field.getName(), new RelatedEntity(field, (Class<?>) relatedEntityType, related_id_type, related_id_field));
                     relatedResources.add(field.getName());
                 }
             }
-            
+
         }
 
         this.entityType = entityType;
@@ -93,41 +88,42 @@ public class EntityUtils<T> {
     }
 
     /**
-     * Returns the collection of entities decribed by the given 
+     * Returns the collection of entities decribed by the given
      * relation.
-     * 
-     * @param entity The entity to retrieve related entities from
-     * @param relation The name of the property that is annotated 
-     * with ManyToMany
+     *
+     * @param entity   The entity to retrieve related entities from
+     * @param relation The name of the property that is annotated
+     *                 with ManyToMany
      * @return Collection of entities expressed by the ManyToMany attribute
      */
-    public Collection<?> getRelatedEntities(Object entity, String relation ) {
+    public Collection<?> getRelatedEntities(Object entity, String relation) {
         RelatedEntity relatedEntity = this.relations.get(relation);
         Collection<?> result = null;
         try {
-            result = (Collection<?>)relatedEntity.declaredField.get(entity);
+            result = (Collection<?>) relatedEntity.declaredField.get(entity);
         } catch (IllegalArgumentException | IllegalAccessException e) {
             LOGGER.severe("Unable to access " + relation + " of entity type " + entity.getClass().getName());
         }
         return result;
     }
-    
+
     /**
      * Creates an instance of an entity with it's {@link Id} attributed field
      * set to the given identifier.
-     * 
+     * <p>
      * This is used as an optimisation to the {@link EntityManager.getReference}
      * as it doesn't require a call to the database as it'a only intended to facilitate
      * adding and removing related entities in a ManyToMany relationship.
+     *
      * @param entityType The type of entity to create a reference of
-     * @param idField The field of the entity type that is attributed with {@link Id}
+     * @param idField    The field of the entity type that is attributed with {@link Id}
      * @param identifier The value of the Id.
      * @return An instance of entityType with the idField set to the identifier
      */
     private Object getEntityReference(Class<?> entityType, Field idField, Serializable identifier) {
         Object reference = null;
         try {
-            reference = entityType.getConstructor(new Class<?>[] {}).newInstance(new Object[] {});
+            reference = entityType.getConstructor(new Class<?>[]{}).newInstance(new Object[]{});
             idField.set(reference, identifier);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
@@ -139,6 +135,7 @@ public class EntityUtils<T> {
 
     /**
      * Creates a reference for the entity type this utility class is for
+     *
      * @param identifier The value to set the Id to
      * @return An instance of the entityType represented by the utility class
      * with its identifier set to the given value
@@ -148,7 +145,7 @@ public class EntityUtils<T> {
     }
 
     /**
-     * Creates an reference entity for the entityType exposed by the specified 
+     * Creates an reference entity for the entityType exposed by the specified
      * relation.
      */
     public Object getEntityReference(String relation, Serializable identifier) {
@@ -178,12 +175,13 @@ public class EntityUtils<T> {
     }
 
     class RelatedEntity {
-        RelatedEntity( Field declaredField, Class<?> entityType, Class<?> idFieldType, Field idField) {
+        RelatedEntity(Field declaredField, Class<?> entityType, Class<?> idFieldType, Field idField) {
             this.declaredField = declaredField;
             this.entityType = entityType;
             this.idFieldType = idFieldType;
-            this.idField = idField;            
+            this.idField = idField;
         }
+
         Field declaredField;
         Class<?> entityType;
         Class<?> idFieldType;

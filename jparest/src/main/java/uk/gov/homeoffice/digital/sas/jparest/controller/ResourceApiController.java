@@ -1,29 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest.controller;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -45,18 +24,25 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.InvalidFilterException;
 import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
+import java.io.Serializable;
+import java.util.*;
+
 // TODO: Added include for related materials and also add metadata to response e.g. next link
+
 /**
  * Spring MVC controller that exposes JPA entities
  * and has common functionality for paging, sorting
  * and filtering resources.
- * 
+ * <p>
  * Resources for ManyToMany relationships can also be queried.
  */
 @ResponseBody
@@ -89,7 +75,7 @@ public class ResourceApiController<T, U> {
         return (Serializable) binder.convertIfNecessary(identifier, fieldType);
     }
 
-    @ExceptionHandler({ InvalidFilterException.class })
+    @ExceptionHandler({InvalidFilterException.class})
     public ResponseEntity<String> handleException(Exception ex) {
         String message = null;
         if (InvalidFilterException.class.isInstance(ex)) {
@@ -101,7 +87,7 @@ public class ResourceApiController<T, U> {
 
     @SuppressWarnings("unchecked")
     public ResourceApiController(Class<T> entityType, EntityManager entityManager,
-            PlatformTransactionManager transactionManager, EntityUtils<?> entityUtils) {
+                                 PlatformTransactionManager transactionManager, EntityUtils<?> entityUtils) {
         this.entityManager = entityManager;
         this.transactionManager = transactionManager;
         this.repository = new SimpleJpaRepository<T, Serializable>(entityType, entityManager);
@@ -242,9 +228,9 @@ public class ResourceApiController<T, U> {
         ApiResponse<T> results = new ApiResponse<T>(Arrays.asList((T) orig));
         return new ResponseEntity<ApiResponse<T>>(results, null, HttpStatus.OK);
     }
-    
+
     public ApiResponse<?> getRelated(@PathVariable U id, @PathVariable String relation,
-            SpelExpression filter, Pageable pageable) {
+                                     SpelExpression filter, Pageable pageable) {
         Serializable identifier = getIdentifier(id);
 
         CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
@@ -275,7 +261,7 @@ public class ResourceApiController<T, U> {
     }
 
     public ResponseEntity<String> deleteRelated(@PathVariable U id, @PathVariable String relation,
-            @PathVariable Object[] related_id)
+                                                @PathVariable Object[] related_id)
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
 
         TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
@@ -311,9 +297,9 @@ public class ResourceApiController<T, U> {
         return new ResponseEntity<String>(null, null, HttpStatus.OK);
     }
 
-    @SuppressWarnings(value = { "rawtypes", "unchecked" }) //
+    @SuppressWarnings(value = {"rawtypes", "unchecked"}) //
     public ResponseEntity<String> addRelated(@PathVariable U id, @PathVariable String relation,
-            @PathVariable Object[] related_id)
+                                             @PathVariable Object[] related_id)
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
 
         TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
