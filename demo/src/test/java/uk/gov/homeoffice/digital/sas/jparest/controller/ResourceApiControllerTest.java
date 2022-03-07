@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest.it;
+package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
