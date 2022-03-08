@@ -1,0 +1,22 @@
+---
+kind: pipeline
+type: kubernetes
+name: jparest
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: test
+  image: maven:3.8-openjdk-17
+  environment:
+    SONAR_HOST:
+      from_secret: sonar_host
+    SONAR_TOKEN:
+      from_secret: sonar_token
+  commands:
+  - mvn clean install
+  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN}
+
+
