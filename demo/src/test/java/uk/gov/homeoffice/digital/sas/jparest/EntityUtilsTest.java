@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.web.WebAppConfiguration;
 import uk.gov.homeoffice.digital.sas.demo.EntitiesApplication;
 import uk.gov.homeoffice.digital.sas.demo.models.Artist;
 import uk.gov.homeoffice.digital.sas.demo.models.Concert;
@@ -21,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes= EntitiesApplication.class)
+@WebAppConfiguration
 public class EntityUtilsTest {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(EntityUtilsTest.class);
