@@ -34,22 +34,28 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
     private BuilderConfiguration builderOptions;
 
-    public HandlerMappingConfigurer() {
-    }
 
     private final static Logger LOGGER = Logger.getLogger(HandlerMappingConfigurer.class.getName());
 
-    @Autowired
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
-    @Autowired
-    private PlatformTransactionManager transactionManager;
+    private final PlatformTransactionManager transactionManager;
 
-    @Autowired
     ApplicationContext context;
 
+    private final ResourceEndpoint resourceEndpoint;
+
+
     @Autowired
-    private ResourceEndpoint resourceEndpoint;
+    public HandlerMappingConfigurer(EntityManager entityManager,
+                                    PlatformTransactionManager transactionManager,
+                                    ApplicationContext context,
+                                    ResourceEndpoint resourceEndpoint) {
+        this.entityManager = entityManager;
+        this.transactionManager = transactionManager;
+        this.context = context;
+        this.resourceEndpoint = resourceEndpoint;
+    }
 
     @PostConstruct
     public void registerUserController() throws NoSuchMethodException, SecurityException, ClassNotFoundException {
