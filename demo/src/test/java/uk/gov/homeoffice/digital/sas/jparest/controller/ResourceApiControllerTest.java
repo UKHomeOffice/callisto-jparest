@@ -6,15 +6,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.SpelCompilerMode;
+import org.springframework.expression.spel.SpelParserConfiguration;
+import org.springframework.expression.spel.ast.SpelNodeImpl;
+import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.demo.EntitiesApplication;
-import uk.gov.homeoffice.digital.sas.demo.models.*;
 import uk.gov.homeoffice.digital.sas.demo.models.Record;
+import uk.gov.homeoffice.digital.sas.demo.models.*;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
-import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
 import javax.persistence.EntityManager;
@@ -120,9 +127,7 @@ public class ResourceApiControllerTest {
     @Test
     @Transactional
     void shouldDeleteData() {
-        Class<Concert> resource = Concert.class;
-        EntityUtils<Concert> entityUtils = new EntityUtils<Concert>(resource, entityManager);
-        ResourceApiController<Concert,Integer> controller = new ResourceApiController<Concert, Integer>(resource, entityManager, transactionManager, entityUtils);
+        ResourceApiController<Concert, Integer> controller = getResourceApiController();
         controller.delete(1);
 
         ApiResponse response = controller.list(null, Pageable.ofSize(20));
@@ -134,5 +139,44 @@ public class ResourceApiControllerTest {
         concerts.stream().forEach( concert -> {
             assertThat(concert.getConcert_id()).isNotEqualTo(1);
         });
+    }
+
+    @Test
+    void shouldGetRelatedEntities(){
+        ResourceApiController<Concert, Integer> controller = getResourceApiController();
+
+        SpelExpressionParser expressionParser = new SpelExpressionParser();
+        SpelExpression expression = expressionParser.parseRaw("artist_id==1");
+
+        ApiResponse apiResponse = controller.getRelated(1, "artists", expression, Pageable.ofSize(100));
+        Artist artist = (Artist) apiResponse.getItems().get(0);
+        assertThat(apiResponse.getItems().size()).isEqualTo(1);
+        assertThat(artist.getArtist_id()).isEqualTo(1);
+        assertThat(artist.getProfile_id()).isEqualTo(1);
+        assertThat(artist.getPerformance_name()).isEqualTo("Beautiful South");
+    }
+
+    @Test
+    void shouldAddRelatedEntities() throws NoSuchFieldException, IllegalAccessException {
+        ResourceApiController<Concert, Integer> controller = getResourceApiController();
+
+        ResponseEntity response = controller.addRelated(1, "artists", new Object[]{3});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void shouldDeleteRelatedEntities() throws NoSuchFieldException, IllegalAccessException {
+        ResourceApiController<Concert, Integer> controller = getResourceApiController();
+
+        ResponseEntity response = controller.deleteRelated(2, "artists", new Object[]{6});
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    private ResourceApiController<Concert, Integer> getResourceApiController() {
+        Class<Concert> resource = Concert.class;
+        EntityUtils<Concert> entityUtils = new EntityUtils<Concert>(resource, entityManager);
+        return new ResourceApiController<Concert, Integer>(resource, entityManager, transactionManager, entityUtils);
     }
 }
