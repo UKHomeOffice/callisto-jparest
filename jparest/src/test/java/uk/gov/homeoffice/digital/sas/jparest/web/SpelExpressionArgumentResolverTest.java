@@ -42,7 +42,7 @@ public class SpelExpressionArgumentResolverTest {
     public static final String PARAMETER_VALUE_2 = "Hi There!!";
 
     @Test
-    void shouldResolveArgument() throws Exception {
+    void shouldResolveArgument() throws MethodArgumentTypeMismatchException {
 
         given(methodParameter.getParameterName()).willReturn(PARAMETER_NAME);
         given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn(PARAMETER_VALUE);
@@ -56,7 +56,7 @@ public class SpelExpressionArgumentResolverTest {
     }
 
     @Test
-    void shouldThrowParseException() throws Exception {
+    void shouldThrowParseException() throws MethodArgumentTypeMismatchException {
         given(methodParameter.getParameterName()).willReturn(PARAMETER_NAME);
         given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn(PARAMETER_VALUE_2);
 

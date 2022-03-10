@@ -21,7 +21,7 @@ public class SpelExpressionArgumentResolver implements HandlerMethodArgumentReso
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws MethodArgumentTypeMismatchException {
 
         String parameterName = parameter.getParameterName();
         String paramValue = webRequest.getParameter(parameterName);
