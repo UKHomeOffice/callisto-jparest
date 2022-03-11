@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import java.util.Set;
 
-@Resource
+@Resource(path = "dummyEntityBs")
 @Entity(name = "dummyEntityB")
 public class DummyEntityB {
 

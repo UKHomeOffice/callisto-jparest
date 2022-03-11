@@ -4,39 +4,39 @@ package uk.gov.homeoffice.digital.sas.jparest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;
 import org.springframework.expression.spel.standard.SpelExpression;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import uk.gov.homeoffice.digital.sas.demo.EntitiesApplication;
-import uk.gov.homeoffice.digital.sas.demo.models.Record;
-import uk.gov.homeoffice.digital.sas.demo.models.*;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.testutils.HandlerMappingConfigurerTestUtil;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(classes= EntitiesApplication.class)
-@WebAppConfiguration
-@AutoConfigureTestDatabase
+@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@Transactional
+@ContextConfiguration(locations = "/test-context.xml")
 public class HandlerMappingConfigurerTest {
 
 
-    @Autowired
+    @PersistenceContext
     private EntityManager entityManager;
 
     @MockBean
@@ -51,35 +51,29 @@ public class HandlerMappingConfigurerTest {
     @MockBean
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
-    private static boolean CONTEXT_LOADED = false;
+    private HandlerMappingConfigurer handlerMappingConfigurer;
 
     private static final Map<Class<?>, String> RESOURCE_TO_PATH_NAME_MAP = Map.of(
-            Artist.class, Artist.class.getAnnotation(Resource.class).path(),
-            Concert.class, Concert.class.getAnnotation(Resource.class).path(),
-            Profile.class, Profile.class.getAnnotation(Resource.class).path(),
-            Record.class, Record.class.getAnnotation(Resource.class).path()
+            DummyEntityA.class, DummyEntityA.class.getAnnotation(Resource.class).path(),
+            DummyEntityB.class, DummyEntityB.class.getAnnotation(Resource.class).path(),
+            DummyEntityC.class, DummyEntityC.class.getAnnotation(Resource.class).path()
     );
 
 
     @BeforeEach
-    public void setup() throws NoSuchMethodException, ClassNotFoundException {
+    public void setup() {
         when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
-
-        //We don't want to directly call the method under test for the first test method that is ran
-        // as the method under test will be ran automatically once the app context is started, otherwise subsequent tests will fail
-        if (!CONTEXT_LOADED) CONTEXT_LOADED = true;
-        else {
-            var handlerMappingConfigurer = new HandlerMappingConfigurer(entityManager, transactionManager, context, resourceEndpoint);
-            handlerMappingConfigurer.registerUserController();
-        }
+        handlerMappingConfigurer = new HandlerMappingConfigurer(entityManager, transactionManager, context, resourceEndpoint);
     }
 
 
 
     //Resources Path Registry Tests
     @Test
-    public void registerUserController_listPathsAreRegisteredForResources() throws SecurityException {
+    public void registerUserController_listPathsAreRegisteredForResources()
+            throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
+        handlerMappingConfigurer.registerUserController();
         assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourceClass, resourcePathName) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePath(resourcePathName);
@@ -95,8 +89,10 @@ public class HandlerMappingConfigurerTest {
 
 
     @Test
-    public void registerUserController_getPathsAreRegisteredForResources() throws SecurityException {
+    public void registerUserController_getPathsAreRegisteredForResources()
+            throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
+        handlerMappingConfigurer.registerUserController();
         assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourceClass, resourcePathName) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName);
@@ -112,8 +108,10 @@ public class HandlerMappingConfigurerTest {
 
 
     @Test
-    public void registerUserController_createPathsAreRegisteredForResources() throws SecurityException {
+    public void registerUserController_createPathsAreRegisteredForResources()
+            throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
+        handlerMappingConfigurer.registerUserController();
         assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourceClass, resourcePathName) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePath(resourcePathName);
@@ -128,8 +126,10 @@ public class HandlerMappingConfigurerTest {
     }
 
     @Test
-    public void registerUserController_deletePathsAreRegisteredForResources() throws SecurityException {
+    public void registerUserController_deletePathsAreRegisteredForResources()
+            throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
+        handlerMappingConfigurer.registerUserController();
         assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourceClass, resourcePathName) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName);
@@ -144,8 +144,10 @@ public class HandlerMappingConfigurerTest {
     }
 
     @Test
-    public void registerUserController_updatePathsAreRegisteredForResources() throws SecurityException {
+    public void registerUserController_updatePathsAreRegisteredForResources()
+            throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
+        handlerMappingConfigurer.registerUserController();
         assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourceClass, resourcePathName) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName);
@@ -161,8 +163,10 @@ public class HandlerMappingConfigurerTest {
 
 
     @Test
-    public void registerUserController_resourcesAreAddedToResourceEndpoint() throws SecurityException {
+    public void registerUserController_resourcesAreAddedToResourceEndpoint()
+            throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
+        handlerMappingConfigurer.registerUserController();
         assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourceClass, resourcePathName) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePath(resourcePathName);
@@ -175,8 +179,10 @@ public class HandlerMappingConfigurerTest {
 
     //Related Resources Path Registry Tests
     @Test
-    public void registerUserController_getPathsAreRegisteredForRelatedResources() throws SecurityException {
+    public void registerUserController_getPathsAreRegisteredForRelatedResources()
+            throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
+        handlerMappingConfigurer.registerUserController();
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourceClass, resourcePathName) -> {
 
             var entityUtils = new EntityUtils<>(resourceClass, entityManager);
@@ -197,8 +203,10 @@ public class HandlerMappingConfigurerTest {
     }
 
     @Test
-    public void registerUserController_deletePathsAreRegisteredForRelatedResources() throws SecurityException {
+    public void registerUserController_deletePathsAreRegisteredForRelatedResources()
+            throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
+        handlerMappingConfigurer.registerUserController();
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourceClass, resourcePathName) -> {
 
             var entityUtils = new EntityUtils<>(resourceClass, entityManager);
@@ -219,8 +227,10 @@ public class HandlerMappingConfigurerTest {
     }
 
     @Test
-    public void registerUserController_updatePathsAreRegisteredForRelatedResources() throws SecurityException {
+    public void registerUserController_updatePathsAreRegisteredForRelatedResources()
+            throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
+        handlerMappingConfigurer.registerUserController();
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourceClass, resourcePathName) -> {
 
             var entityUtils = new EntityUtils<>(resourceClass, entityManager);
@@ -242,8 +252,10 @@ public class HandlerMappingConfigurerTest {
 
 
     @Test
-    public void registerUserController_relatedResourcesAreAddedToResourceEndpoint() throws SecurityException {
+    public void registerUserController_relatedResourcesAreAddedToResourceEndpoint()
+            throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
+        handlerMappingConfigurer.registerUserController();
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourceClass, resourcePathName) -> {
 
             var entityUtils = new EntityUtils<>(resourceClass, entityManager);

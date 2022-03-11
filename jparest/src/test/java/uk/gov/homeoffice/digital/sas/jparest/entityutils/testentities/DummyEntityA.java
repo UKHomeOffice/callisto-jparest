@@ -12,7 +12,7 @@ import javax.persistence.JoinColumn;
 
 import java.util.Set;
 
-@Resource
+@Resource(path = "dummyEntityAs")
 @Entity(name = "dummyEntityA")
 public class DummyEntityA {
 
