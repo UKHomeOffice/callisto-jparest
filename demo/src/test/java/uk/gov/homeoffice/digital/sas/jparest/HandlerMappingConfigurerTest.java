@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import uk.gov.homeoffice.digital.sas.demo.EntitiesApplication;
 import uk.gov.homeoffice.digital.sas.demo.models.Record;
 import uk.gov.homeoffice.digital.sas.demo.models.*;
+import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.testutils.HandlerMappingConfigurerTestUtil;
 
@@ -53,11 +54,10 @@ public class HandlerMappingConfigurerTest {
     private static boolean CONTEXT_LOADED = false;
 
     private static final Map<Class<?>, String> RESOURCE_TO_PATH_NAME_MAP = Map.of(
-            Artist.class, "artists",
-            Concert.class, "concerts",
-            Profile.class, "profiles",
-            Record.class, "records",
-            Session.class, "sessions"
+            Artist.class, Artist.class.getAnnotation(Resource.class).path(),
+            Concert.class, Concert.class.getAnnotation(Resource.class).path(),
+            Profile.class, Profile.class.getAnnotation(Resource.class).path(),
+            Record.class, Record.class.getAnnotation(Resource.class).path()
     );
 
 
@@ -66,7 +66,7 @@ public class HandlerMappingConfigurerTest {
         when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
 
         //We don't want to directly call the method under test for the first test method that is ran
-        // as the method under test will be ran automatically once the app context is started
+        // as the method under test will be ran automatically once the app context is started, otherwise subsequent tests will fail
         if (!CONTEXT_LOADED) CONTEXT_LOADED = true;
         else {
             var handlerMappingConfigurer = new HandlerMappingConfigurer(entityManager, transactionManager, context, resourceEndpoint);
