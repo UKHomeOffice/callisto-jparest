@@ -1,17 +1,14 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.*;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ResourceEndpointTest {
 
-
-    private ResourceEndpoint resourceEndpoint;
 
     private final static Class<?> RESOURCE = DummyEntityA.class;
     private final static Class<?> RELATED_RESOURCE = DummyEntityB.class;
@@ -20,16 +17,11 @@ public class ResourceEndpointTest {
     private final static String RELATED_RESOURCE_PATH = "dummyEntityBSet";
 
 
-    @BeforeEach
-    public void setUp() {
-        this.resourceEndpoint = new ResourceEndpoint();
-    }
-
-
 
     @Test
     public void add_descriptorsAlreadyContainsResourceToBeAdded_errorThrown() {
 
+        var resourceEndpoint = new ResourceEndpoint();
         resourceEndpoint.Add(RESOURCE, PATH, ID_FIELD_TYPE);
 
         assertThrows(
@@ -40,6 +32,7 @@ public class ResourceEndpointTest {
     @Test
     public void add_descriptorsDoesNotContainResourceToBeAdded_resourceAdded() {
 
+        var resourceEndpoint = new ResourceEndpoint();
         assertDoesNotThrow(
                 () -> resourceEndpoint.Add(RESOURCE, PATH, ID_FIELD_TYPE));
 
@@ -55,6 +48,7 @@ public class ResourceEndpointTest {
     @Test
     public void addRelated_descriptorsDoesNotContainResource_errorThrown() {
 
+        var resourceEndpoint = new ResourceEndpoint();
         var thrown = assertThrows(
                 IllegalArgumentException.class,
                 () -> resourceEndpoint.AddRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, ID_FIELD_TYPE));
@@ -63,8 +57,9 @@ public class ResourceEndpointTest {
     }
 
     @Test
-    public void addRelated_descriptorRelationsAlreadyContainsRelatedResource_errorThrow() throws NoSuchFieldException{
+    public void addRelated_descriptorRelationsAlreadyContainsRelatedResource_errorThrow() {
 
+        var resourceEndpoint = new ResourceEndpoint();
         resourceEndpoint.Add(RESOURCE, PATH, ID_FIELD_TYPE);
         resourceEndpoint.AddRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, String.class);
 
@@ -79,6 +74,7 @@ public class ResourceEndpointTest {
     @Test
     public void addRelated_descriptorRelationsDoesNotContainRelatedResourceToBeAdded_relatedResourceAdded() {
 
+        var resourceEndpoint = new ResourceEndpoint();
         resourceEndpoint.Add(RESOURCE, PATH, ID_FIELD_TYPE);
 
         assertDoesNotThrow(
