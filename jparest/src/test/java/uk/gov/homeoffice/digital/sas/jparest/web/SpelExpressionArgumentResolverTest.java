@@ -2,6 +2,8 @@ package uk.gov.homeoffice.digital.sas.jparest.web;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,6 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class SpelExpressionArgumentResolverTest {
@@ -37,40 +41,54 @@ public class SpelExpressionArgumentResolverTest {
 
     public static final String PARAMETER_NAME = "ParamName";
 
-    public static final String PARAMETER_VALUE = "Hi";
 
-    public static final String PARAMETER_VALUE_2 = "Hi There!!";
-
-    @Test
-    void shouldResolveArgument() throws MethodArgumentTypeMismatchException {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "1 != 2",
+        "index == 1",
+        "name == \"Ricardo\"",
+        "1 != 2 && 2 != 3 || 3 != 4"
+    })
+    void shouldResolveArgument(String parameterValue){
 
         given(methodParameter.getParameterName()).willReturn(PARAMETER_NAME);
-        given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn(PARAMETER_VALUE);
+        given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn(parameterValue);
 
-        SpelExpression expression = (SpelExpression) expressionArgumentResolver.resolveArgument(methodParameter, modelAndViewContainer, nativeWebRequest, webDataBinderFactory);
+        SpelExpression expression = (SpelExpression) assertDoesNotThrow(() -> expressionArgumentResolver
+                .resolveArgument(methodParameter, modelAndViewContainer, nativeWebRequest, webDataBinderFactory));
+
         String value = expression.getExpressionString();
+        assertThat(value).isEqualTo(parameterValue);
 
-        assertThat(value).isEqualTo(PARAMETER_VALUE);
-        assertDoesNotThrow(() ->
-                expressionArgumentResolver.resolveArgument(methodParameter, modelAndViewContainer, nativeWebRequest, webDataBinderFactory));
+                        
+        verifyNoInteractions(modelAndViewContainer);
+        verifyNoInteractions(webDataBinderFactory);
+        verify(methodParameter).getParameterName();
+        verify(nativeWebRequest).getParameter(PARAMETER_NAME);
+
     }
 
-    @Test
-    void shouldThrowParseException() throws MethodArgumentTypeMismatchException {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "1 !== 2",
+        "index == 1)",
+        "name == \"Ric\"ardo\"",
+        "1 != 2 &(&) 2 != 3 || 3 != 4"
+    })
+    void shouldThrowParseException(String parameterValue) {
         given(methodParameter.getParameterName()).willReturn(PARAMETER_NAME);
-        given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn(PARAMETER_VALUE_2);
+        given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn(parameterValue);
 
         assertThatExceptionOfType(MethodArgumentTypeMismatchException.class)
-                .isThrownBy( () -> expressionArgumentResolver.resolveArgument(methodParameter, modelAndViewContainer, nativeWebRequest, webDataBinderFactory));
+                .isThrownBy(() -> expressionArgumentResolver.resolveArgument(methodParameter, modelAndViewContainer,
+                        nativeWebRequest, webDataBinderFactory));
+
+        verifyNoInteractions(modelAndViewContainer);
+        verifyNoInteractions(webDataBinderFactory);
+        verify(methodParameter).getParameterName();
+        verify(nativeWebRequest).getParameter(PARAMETER_NAME);
+
     }
 
-    @Test
-    void shouldNotThrowParseException(){
-        given(methodParameter.getParameterName()).willReturn(PARAMETER_NAME);
-        given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn(PARAMETER_VALUE);
-
-        assertDoesNotThrow(() ->
-                expressionArgumentResolver.resolveArgument(methodParameter, modelAndViewContainer, nativeWebRequest, webDataBinderFactory));
-    }
 
 }
