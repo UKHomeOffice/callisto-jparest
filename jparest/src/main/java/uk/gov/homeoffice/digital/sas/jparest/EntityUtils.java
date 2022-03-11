@@ -56,6 +56,7 @@ public class EntityUtils<T> {
         for (Field field : entityType.getDeclaredFields()) {
             if (field.isAnnotationPresent(Id.class)) {
                 idField = field;
+                idField.setAccessible(true);
                 idFieldName = field.getName();
                 idFieldType = field.getType();
             }
@@ -120,12 +121,12 @@ public class EntityUtils<T> {
      * @param identifier The value of the Id.
      * @return An instance of entityType with the idField set to the identifier
      */
-    private Object getEntityReference(Class<?> entityType, Field idField, Serializable identifier) {
+    private Object getEntityReference(Class<?> entityType, Field idField, Serializable identifier) throws IllegalArgumentException {
         Object reference = null;
         try {
             reference = entityType.getConstructor(new Class<?>[]{}).newInstance(new Object[]{});
             idField.set(reference, identifier);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             LOGGER.severe("Unable to create reference for entity " + entityType.getName());
         }
