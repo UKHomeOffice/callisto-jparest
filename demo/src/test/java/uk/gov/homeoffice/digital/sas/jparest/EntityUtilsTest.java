@@ -75,7 +75,7 @@ public class EntityUtilsTest {
     public void getEntityReference_relatedEntityExist_relatedEntityReferenceReturned() {
 
         var entityUtils = new EntityUtils<>(Concert.class, entityManager);
-        var actualReference = entityUtils.getEntityReference("artists", "id");
+        var actualReference = entityUtils.getEntityReference("artists", (long)1);
         assertThat(actualReference).isInstanceOf(Artist.class);
     }
 
@@ -83,7 +83,7 @@ public class EntityUtilsTest {
     public void getEntityReference_entityReferenceReturned() {
 
         var entityUtils = new EntityUtils<>(Profile.class, entityManager);
-        var actualReference = entityUtils.getEntityReference("id");
+        var actualReference = entityUtils.getEntityReference((long)1);
         assertThat(actualReference).isInstanceOf(Profile.class);
     }
 
