@@ -17,7 +17,7 @@
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="org.h2.Driver" />
-        <property name="url" value="jdbc:h2:mem:testdb" />
+        <property name="url" value="jdbc:h2:mem:testdb;INIT=RUNSCRIPT FROM 'classpath:schema-h2.sql'\;RUNSCRIPT FROM 'classpath:data-h2.sql';" />
         <property name="username" value="sa" />
         <property name="password" value="" />
     </bean>
