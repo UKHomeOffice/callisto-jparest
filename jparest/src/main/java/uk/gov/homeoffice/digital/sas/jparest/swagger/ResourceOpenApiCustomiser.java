@@ -31,9 +31,6 @@ import java.util.Optional;
  */
 public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
-    // private final static Logger LOGGER =
-    // Logger.getLogger(ResourceOpenApiCustomiser.class.getName());
-
     @Autowired
     private ResourceEndpoint endpoint;
 
@@ -90,7 +87,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
                 PathItem relatedRootPath = createRelatedRootPath(tag, relatedClazz, rootDescriptor.getIdFieldType());
                 openApi.path(relatedDescriptor.getPath(), relatedRootPath);
-                PathItem relatedItemPath = createRelatedItemPath(tag, relatedClazz, rootDescriptor.getIdFieldType(),
+                PathItem relatedItemPath = createRelatedItemPath(tag, rootDescriptor.getIdFieldType(),
                         relatedDescriptor.getIdFieldType());
                 openApi.path(relatedDescriptor.getPath() + "/{related_id}", relatedItemPath);
 
@@ -202,13 +199,11 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      *
      * @param tag            The tag to group the endpoints together. Expected to be
      *                       the simplename of the parent resource
-     * @param clazz          The class representing the related resource exposed by
-     *                       the endpoint
      * @param idClazz        The type of the identifier for the parent resource
      * @param relatedIdClazz The type of the identifier for the related resource
      * @return PathItem documenting the DELETE/PUT many related items
      */
-    private PathItem createRelatedItemPath(String tag, Class<?> relatedClazz, Class<?> idClazz,
+    private PathItem createRelatedItemPath(String tag, Class<?> idClazz,
                                            Class<?> relatedIdClazz) {
 
         PathItem pi = new PathItem();
