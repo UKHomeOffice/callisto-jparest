@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -64,15 +65,16 @@ public class ResourceApiController<T, U> {
         return binder;
     }
 
-    private Serializable getIdentifier(Object identifier) {
+    private @NonNull Serializable getIdentifier(Object identifier) {
         return getIdentifier(identifier, this.entityUtils.getIdFieldType());
     }
 
-    private static Serializable getIdentifier(Object identifier, Class<?> fieldType) {
-        if (identifier == null) {
+    private static @NonNull Serializable getIdentifier(Object identifier, Class<?> fieldType) {
+        Serializable result = (Serializable) binder.convertIfNecessary(identifier, fieldType);
+        if (result == null) {
             throw new IllegalArgumentException("identifier must not be null");
         }
-        return (Serializable) binder.convertIfNecessary(identifier, fieldType);
+        return result;
     }
 
     @ExceptionHandler({InvalidFilterException.class})
