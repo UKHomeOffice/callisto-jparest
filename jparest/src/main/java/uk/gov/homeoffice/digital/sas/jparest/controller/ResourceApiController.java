@@ -63,22 +63,22 @@ public class ResourceApiController<T, U> {
 
         return binder;
     }
-    // private final static Logger LOGGER =
-    // Logger.getLogger(ResourceApiController.class.getName());
 
     private Serializable getIdentifier(Object identifier) {
         return getIdentifier(identifier, this.entityUtils.getIdFieldType());
     }
 
     private static Serializable getIdentifier(Object identifier, Class<?> fieldType) {
-
+        if (identifier == null) {
+            throw new IllegalArgumentException("identifier must not be null");
+        }
         return (Serializable) binder.convertIfNecessary(identifier, fieldType);
     }
 
     @ExceptionHandler({InvalidFilterException.class})
     public ResponseEntity<String> handleException(Exception ex) {
         String message = null;
-        if (InvalidFilterException.class.isInstance(ex)) {
+        if (ex instanceof InvalidFilterException) {
             message = ex.getMessage();
         }
         // TODO: Structure this into a nice json response
