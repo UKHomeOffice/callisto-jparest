@@ -45,7 +45,7 @@ public abstract class BaseEntity {
             return null;
         }
         try {
-            return (Serializable) this.idField.get(this);
+            return (Serializable) this.idField.get(instance);
         } catch (IllegalArgumentException | IllegalAccessException e) {
             // This shouldn't happen as we set it to accessible
             LOGGER.severe("Error accessing field " + this.idField.getName());
