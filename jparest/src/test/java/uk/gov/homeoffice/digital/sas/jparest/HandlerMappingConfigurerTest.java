@@ -21,6 +21,7 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.testutils.HandlerMappingConfigurerTestUtil;
 
+import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
@@ -56,7 +57,7 @@ public class HandlerMappingConfigurerTest {
     private static final Map<Class<?>, String> RESOURCE_TO_PATH_NAME_MAP = Map.of(
             DummyEntityA.class, DummyEntityA.class.getAnnotation(Resource.class).path(),
             DummyEntityB.class, DummyEntityB.class.getAnnotation(Resource.class).path(),
-            DummyEntityC.class, DummyEntityC.class.getAnnotation(Resource.class).path()
+            DummyEntityC.class, DummyEntityC.class.getAnnotation(Entity.class).name().toLowerCase()
     );
 
 
