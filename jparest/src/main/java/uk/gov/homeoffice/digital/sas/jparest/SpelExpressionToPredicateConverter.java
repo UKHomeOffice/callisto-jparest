@@ -21,6 +21,10 @@ import java.util.logging.Logger;
  */
 public class SpelExpressionToPredicateConverter {
 
+    private SpelExpressionToPredicateConverter(){
+        throw new IllegalStateException("Utility class");
+    }
+
     private final static Logger LOGGER = Logger.getLogger(SpelExpressionToPredicateConverter.class.getName());
 
     private static WebDataBinder binder = initBinder();
