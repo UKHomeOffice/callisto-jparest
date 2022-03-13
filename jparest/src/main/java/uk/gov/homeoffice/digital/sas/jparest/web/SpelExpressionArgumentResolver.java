@@ -10,6 +10,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import lombok.NonNull;
+
 public class SpelExpressionArgumentResolver implements HandlerMethodArgumentResolver {
 
     SpelExpressionParser expressionParser = new SpelExpressionParser();
@@ -23,6 +25,7 @@ public class SpelExpressionArgumentResolver implements HandlerMethodArgumentReso
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws MethodArgumentTypeMismatchException {
 
+        @NonNull
         String parameterName = parameter.getParameterName();
         String paramValue = webRequest.getParameter(parameterName);
 
