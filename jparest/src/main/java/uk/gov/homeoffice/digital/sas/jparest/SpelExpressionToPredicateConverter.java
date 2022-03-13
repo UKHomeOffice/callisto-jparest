@@ -65,18 +65,18 @@ public class SpelExpressionToPredicateConverter {
         Predicate predicate = null;
 
         // Handle logical operators
-        if (OpOr.class.isInstance(node)) {
+        if (node instanceof OpOr) {
             Predicate x = getPredicate(node.getChild(0), builder, root);
             Predicate y = getPredicate(node.getChild(1), builder, root);
             predicate = builder.or(x, y);
-        } else if (OpAnd.class.isInstance(node)) {
+        } else if (node instanceof OpAnd) {
             Predicate x = getPredicate(node.getChild(0), builder, root);
             Predicate y = getPredicate(node.getChild(1), builder, root);
             predicate = builder.and(x, y);
-        } else if (OperatorNot.class.isInstance(node)) {
+        } else if (node instanceof OperatorNot) {
             Predicate x = getPredicate(node.getChild(0), builder, root);
             predicate = builder.not(x);
-        } else if (MethodReference.class.isInstance(node)) {
+        } else if (node instanceof MethodReference) {
             // delegate method reference to getMethodPredicate 
             predicate = getMethodPredicate((MethodReference) node, builder, root);
         } else {
@@ -99,17 +99,17 @@ public class SpelExpressionToPredicateConverter {
                 // Get the right side
                 SpelNode rightNode = node.getChild(1);
                 // handle field comparison
-                if (PropertyOrFieldReference.class.isInstance(rightNode)) {
+                if (rightNode instanceof PropertyOrFieldReference) {
                     Path<Comparable<Object>> rightField = root.get(((PropertyOrFieldReference) rightNode).getName());
-                    if (OpEQ.class.isInstance(node)) {
+                    if (node instanceof OpEQ) {
                         predicate = builder.equal(field, rightField);
-                    } else if (OpGE.class.isInstance(node)) {
+                    } else if (node instanceof OpGE) {
                         predicate = builder.greaterThanOrEqualTo(field, rightField);
-                    } else if (OpGT.class.isInstance(node)) {
+                    } else if (node instanceof OpGT) {
                         predicate = builder.greaterThan(field, rightField);
-                    } else if (OpLE.class.isInstance(node)) {
+                    } else if (node instanceof OpLE) {
                         predicate = builder.lessThanOrEqualTo(field, rightField);
-                    } else if (OpLT.class.isInstance(node)) {
+                    } else if (node instanceof OpLT) {
                         predicate = builder.lessThan(field, rightField);
                     } else {
                         // TODO: Probably should support not equal here
@@ -122,17 +122,17 @@ public class SpelExpressionToPredicateConverter {
                     @SuppressWarnings("unchecked")
                     Comparable<Object> comparableValue = (Comparable<Object>) rightValue;
 
-                    if (OpEQ.class.isInstance(node)) {
+                    if (node instanceof OpEQ) {
                         predicate = builder.equal(field, comparableValue);
-                    } else if (OpGE.class.isInstance(node)) {
+                    } else if (node instanceof OpGE) {
                         predicate = builder.greaterThanOrEqualTo(field, comparableValue);
-                    } else if (OpGT.class.isInstance(node)) {
+                    } else if (node instanceof OpGT) {
                         predicate = builder.greaterThan(field, comparableValue);
-                    } else if (OpLE.class.isInstance(node)) {
+                    } else if (node instanceof OpLE) {
                         predicate = builder.lessThanOrEqualTo(field, comparableValue);
-                    } else if (OpLT.class.isInstance(node)) {
+                    } else if (node instanceof OpLT) {
                         predicate = builder.lessThan(field, comparableValue);
-                    } else if (OperatorMatches.class.isInstance(node)) {
+                    } else if (node instanceof OperatorMatches) {
                         // TODO: Check if clazz is a string
                         predicate = builder.like(field.as(String.class), (String) rightValue);
                     } else {
@@ -168,18 +168,15 @@ public class SpelExpressionToPredicateConverter {
         Class<?> clazz = field.getJavaType();
 
         Predicate predicate;
-        Path<Comparable<Object>> comparableField;
         Comparable<Object>[] args;
 
         // Create the appropriate predicate
         switch (methodReference.getName()) {
             case "Between":
-                comparableField = root.get(fieldReference.getName());
                 args = getLiteralValues(node, 1, clazz);
-                predicate = builder.between(comparableField, args[0], args[1]);
+                predicate = builder.between(root.get(fieldReference.getName()), args[0], args[1]);
                 break;
             case "In":
-                comparableField = root.get(fieldReference.getName());
                 args = getLiteralValues(node, 1, clazz);
                 predicate = field.in((Object[]) args);
                 break;

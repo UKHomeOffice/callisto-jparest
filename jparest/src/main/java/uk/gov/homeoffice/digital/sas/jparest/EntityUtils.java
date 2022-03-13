@@ -46,19 +46,19 @@ public class EntityUtils<T> {
      */
     public EntityUtils(Class<T> entityType, EntityManager entityManager) {
 
-        Set<String> relatedResources = new HashSet<String>();
+        Set<String> tmpRelatedResources = new HashSet<String>();
 
         // Iterate the declared fields to find the field annotated with Id
         // and to find the fields markerd ManyToMany
-        String idFieldName = null;
-        Class<?> idFieldType = null;
-        Field idField = null;
+        String tmpIdFieldName = null;
+        Class<?> tmpIdFieldType = null;
+        Field tmpIdField = null;
         for (Field field : entityType.getDeclaredFields()) {
             if (field.isAnnotationPresent(Id.class)) {
-                idField = field;
-                idField.setAccessible(true);
-                idFieldName = field.getName();
-                idFieldType = field.getType();
+                tmpIdField = field;
+                tmpIdField.setAccessible(true);
+                tmpIdFieldName = field.getName();
+                tmpIdFieldType = field.getType();
             }
 
             // Only record relationships that aren't mapped by another class
@@ -75,17 +75,17 @@ public class EntityUtils<T> {
                     Field related_id_field = (Field) ret.getDeclaredId((Class<?>) related_id_type).getJavaMember();
                     field.setAccessible(true);
                     relations.putIfAbsent(field.getName(), new RelatedEntity(field, (Class<?>) relatedEntityType, related_id_type, related_id_field));
-                    relatedResources.add(field.getName());
+                    tmpRelatedResources.add(field.getName());
                 }
             }
 
         }
 
         this.entityType = entityType;
-        this.relatedResources = relatedResources;
-        this.idField = idField;
-        this.idFieldType = idFieldType;
-        this.idFieldName = idFieldName;
+        this.relatedResources = tmpRelatedResources;
+        this.idField = tmpIdField;
+        this.idFieldType = tmpIdFieldType;
+        this.idFieldName = tmpIdFieldName;
     }
 
     /**
