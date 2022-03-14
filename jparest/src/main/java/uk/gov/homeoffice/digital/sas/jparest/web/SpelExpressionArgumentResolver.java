@@ -1,5 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.web;
 
+import java.util.Objects;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpression;
@@ -9,8 +11,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-
-import lombok.NonNull;
 
 public class SpelExpressionArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -25,8 +25,7 @@ public class SpelExpressionArgumentResolver implements HandlerMethodArgumentReso
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws MethodArgumentTypeMismatchException {
 
-        @NonNull
-        String parameterName = parameter.getParameterName();
+        String parameterName = Objects.requireNonNull(parameter.getParameterName());
         String paramValue = webRequest.getParameter(parameterName);
 
         if (paramValue != null) {
