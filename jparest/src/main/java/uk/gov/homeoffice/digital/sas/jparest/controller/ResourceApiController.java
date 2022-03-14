@@ -55,6 +55,7 @@ public class ResourceApiController<T, U> {
     private EntityUtils<T> entityUtils;
 
     private static WebDataBinder binder = initBinder();
+    private static final String QUERY_HINT = "javax.persistence.fetchgraph";
 
     private static WebDataBinder initBinder() {
         WebDataBinder binder = new WebDataBinder(null);
@@ -115,7 +116,7 @@ public class ResourceApiController<T, U> {
         TypedQuery<T> typedQuery = this.entityManager.createQuery(select);
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
-        typedQuery.setHint("javax.persistence.fetchgraph", entityGraph);
+        typedQuery.setHint(QUERY_HINT, entityGraph);
         List<T> result = typedQuery.getResultList();
         return new ApiResponse<>(result);
     }
@@ -137,7 +138,7 @@ public class ResourceApiController<T, U> {
 
         CriteriaQuery<T> select = query.select(root);
         TypedQuery<T> typedQuery = this.entityManager.createQuery(select);
-        typedQuery.setHint("javax.persistence.fetchgraph", entityGraph);
+        typedQuery.setHint(QUERY_HINT, entityGraph);
         List<T> result2 = typedQuery.getResultList();
         if (result2.isEmpty()) {
             return null;
@@ -256,7 +257,7 @@ public class ResourceApiController<T, U> {
         TypedQuery<?> typedQuery = this.entityManager.createQuery(select);
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
-        typedQuery.setHint("javax.persistence.fetchgraph", entityGraph);
+        typedQuery.setHint(QUERY_HINT, entityGraph);
 
         List<?> result = typedQuery.getResultList();
         return new ApiResponse<>(result);
