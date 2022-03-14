@@ -46,6 +46,9 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
     private final ResourceEndpoint resourceEndpoint;
 
+    private static final String URL_ID_PATH_PARAM =  "/{id}";
+    private static final String URL_RELATED_ID_PATH_PARAM =  "/{related_id}";
+
 
     @Autowired
     public HandlerMappingConfigurer(EntityManager entityManager,
@@ -99,10 +102,10 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
                 LOGGER.fine("Registering common paths");
                 register(controller, "list", new Class<?>[]{SpelExpression.class, Pageable.class}, path, null, RequestMethod.GET);
-                register(controller, "get", new Class<?>[]{Object.class}, path + "/{id}", null, RequestMethod.GET);
+                register(controller, "get", new Class<?>[]{Object.class}, path + URL_ID_PATH_PARAM, null, RequestMethod.GET);
                 register(controller, "create", new Class<?>[]{String.class}, path, null, RequestMethod.POST);
-                register(controller, "delete", new Class<?>[]{Object.class}, path + "/{id}", null, RequestMethod.DELETE);
-                register(controller, "update", new Class<?>[]{Object.class, String.class}, path + "/{id}", null, RequestMethod.PUT);
+                register(controller, "delete", new Class<?>[]{Object.class}, path + URL_ID_PATH_PARAM, null, RequestMethod.DELETE);
+                register(controller, "update", new Class<?>[]{Object.class, String.class}, path + URL_ID_PATH_PARAM, null, RequestMethod.PUT);
 
                 resourceEndpoint.Add(resource, path, entityUtils.getIdFieldType());
 
@@ -111,13 +114,13 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
                     Class<?> relatedType = entityUtils.getRelatedType(relation);
                     Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
-                    resourceEndpoint.AddRelated(resource, relatedType, path + "/{id}/" + relation, relatedIdType);
+                    resourceEndpoint.AddRelated(resource, relatedType, path + URL_ID_PATH_PARAM + "/" + relation, relatedIdType);
 
                     LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
 
-                    register(controller, "getRelated", new Class<?>[]{Object.class, String.class, SpelExpression.class, Pageable.class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}", null, RequestMethod.GET);
-                    register(controller, "deleteRelated", new Class<?>[]{Object.class, String.class, Object[].class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}/{related_id}", null, RequestMethod.DELETE);
-                    register(controller, "addRelated", new Class<?>[]{Object.class, String.class, Object[].class}, path + "/{id}/{relation:" + Pattern.quote(relation) + "}/{related_id}", null, RequestMethod.PUT);
+                    register(controller, "getRelated", new Class<?>[]{Object.class, String.class, SpelExpression.class, Pageable.class}, path + createIdAndRelationParams(relation), null, RequestMethod.GET);
+                    register(controller, "deleteRelated", new Class<?>[]{Object.class, String.class, Object[].class}, path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM, null, RequestMethod.DELETE);
+                    register(controller, "addRelated", new Class<?>[]{Object.class, String.class, Object[].class}, path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM, null, RequestMethod.PUT);
                 }
 
                 LOGGER.fine("All paths registered");
@@ -126,6 +129,10 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
         }
 
 
+    }
+
+    private String createIdAndRelationParams(String relation) {
+        return URL_ID_PATH_PARAM + "/{relation:" + Pattern.quote(relation) + "}";
     }
 
     /**
