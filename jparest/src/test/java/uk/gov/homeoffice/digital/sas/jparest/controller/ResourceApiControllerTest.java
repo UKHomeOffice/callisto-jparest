@@ -1,18 +1,12 @@
 package uk.gov.homeoffice.digital.sas.jparest.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.text.SimpleDateFormat;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
-
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.InvalidFilterException;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
@@ -31,9 +24,17 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
-// @ExtendWith(SpringExtension.class)
-// @SpringBootTest(classes= EntitiesApplication.class)
-// @WebAppConfiguration
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import javax.transaction.Transactional;
+import java.text.SimpleDateFormat;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -52,7 +53,7 @@ public class ResourceApiControllerTest {
     @Test
     void shouldReturnAllEntitiesList() {
 
-        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
         ApiResponse<DummyEntityA> response = controller.list(null, Pageable.ofSize(100));
 
         assertThat(response).isNotNull();
@@ -83,7 +84,7 @@ public class ResourceApiControllerTest {
 
     @Test
     void shouldReturnEntityById() {
-        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
         ResponseEntity<ApiResponse<DummyEntityA>> response = (ResponseEntity<ApiResponse<DummyEntityA>>) controller
                 .get(2);
         ApiResponse<DummyEntityA> apiResponse = response.getBody();
@@ -99,7 +100,7 @@ public class ResourceApiControllerTest {
                 "            \"id\": 7\n" +
                 "        }";
 
-        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
         ResponseEntity<ApiResponse<DummyEntityA>> response = (ResponseEntity<ApiResponse<DummyEntityA>>) assertDoesNotThrow(
                 () -> controller.create(payload));
         ApiResponse<DummyEntityA> apiResponse = response.getBody();
@@ -123,7 +124,7 @@ public class ResourceApiControllerTest {
                 "            \"description\": \"Updated Dummy Entity C 100\"" +
                 "        }";
 
-        ResourceApiController<DummyEntityC, Integer> controller = getResourceApiController(DummyEntityC.class);
+        ResourceApiController<DummyEntityC, Integer> controller = getResourceApiController(DummyEntityC.class, Integer.class);
 
         assertDoesNotThrow(() -> controller.create(payload));
 
@@ -154,7 +155,7 @@ public class ResourceApiControllerTest {
                 "            \"description\": \"Dummy Entity C 100\"" +
                 "        }";
 
-        ResourceApiController<DummyEntityC, Integer> controller = getResourceApiController(DummyEntityC.class);
+        ResourceApiController<DummyEntityC, Integer> controller = getResourceApiController(DummyEntityC.class, Integer.class);
         assertDoesNotThrow(() -> controller.create(payload));
         ResponseEntity<ApiResponse<DummyEntityC>> response = (ResponseEntity<ApiResponse<DummyEntityC>>) controller
                 .get(100);
@@ -168,7 +169,7 @@ public class ResourceApiControllerTest {
 
     @Test
     void shouldGetRelatedEntities() {
-        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
         SpelExpressionParser expressionParser = new SpelExpressionParser();
         SpelExpression expression = expressionParser.parseRaw("id==2");
@@ -181,7 +182,7 @@ public class ResourceApiControllerTest {
 
     @Test
     void shouldAddRelatedEntities() {
-        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
         ResponseEntity<?> response = assertDoesNotThrow(
                 () -> controller.addRelated(2, "dummyEntityBSet", new Object[] { 1 }));
@@ -191,7 +192,7 @@ public class ResourceApiControllerTest {
 
     @Test
     void shouldDeleteRelatedEntities() {
-        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
         ResponseEntity<?> response = assertDoesNotThrow(
                 () -> controller.deleteRelated(2, "dummyEntityBSet", new Object[] { 2 }));
@@ -205,7 +206,7 @@ public class ResourceApiControllerTest {
             "3,1"
     })
     void deleteRelatedEntities_whenEntityNotFound_throws(int entityId, int relatedEntityId) {
-        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
         ResponseEntity<?> response = assertDoesNotThrow(
                 () -> controller.deleteRelated(entityId, "dummyEntityBSet", new Object[] { relatedEntityId }));
@@ -224,11 +225,47 @@ public class ResourceApiControllerTest {
         assertThat(thrown.getMessage()).isEqualTo("identifier must not be null");
     }
 
-    private <T> ResourceApiController<T, Integer> getResourceApiController(Class<T> clazz) {
-        EntityUtils<T> entityUtils = new EntityUtils<T>(clazz, entityManager);
-        return new ResourceApiController<T, Integer>(clazz, entityManager, transactionManager, entityUtils);
+    @ParameterizedTest
+    @MethodSource("invalidIDSource")
+    void shouldThrowIllegalArgumentExceptionForInvalidId(Class<?> clazz, Object id) {
+        ResourceApiController controller = getResourceApiController(DummyEntityA.class, clazz);
+        assertThatThrownBy( () ->
+                controller.get(id)).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("identifier must not be null");
     }
 
+    @ParameterizedTest
+    @MethodSource("exceptionSource")
+    void shouldReturnBadRequest(Exception exception){
+        ResourceApiController controller = getResourceApiController(DummyEntityA.class, String.class);
+        ResponseEntity<String> response = controller.handleException(exception);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getStatusCode().getReasonPhrase()).isEqualTo(HttpStatus.BAD_REQUEST.getReasonPhrase());
+
+        if(exception instanceof InvalidFilterException){
+            assertThat(response.getBody()).isEqualTo("Invalid Filter Exception");
+        } else {
+            assertThat(response.getBody()).isNull();
+        }
+    }
+
+    @SneakyThrows
+    @Test
+    void shouldReturnBadRequestForInvalidPayload_SaveData() {
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        ResponseEntity response = controller.create("");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNull();
+    }
+
+    @SneakyThrows
+    @Test
+    void shouldThrowPersistenceExceptionForEmptyPayload_SaveData(){
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        assertThatThrownBy( () -> controller.create("{}")).isInstanceOf(PersistenceException.class);
+    }
 
     @Test
     void handleException_exceptionIsInvalidFilterException_messageContainedInResponse() {
@@ -248,4 +285,29 @@ public class ResourceApiControllerTest {
         assertThat(actualResponse.getBody()).isNull();
         assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
+
+    private static Stream exceptionSource(){
+        return Stream.of(
+                Arguments.of(new IndexOutOfBoundsException()),
+                Arguments.of(new InvalidFilterException("Invalid Filter Exception"))
+        );
+    }
+
+    private static Stream invalidIDSource(){
+        return Stream.of(
+                Arguments.of(String.class, ""),
+                Arguments.of(Integer.class, null)
+        );
+    }
+
+    private <T, U> ResourceApiController<T, U> getResourceApiController(Class<T> clazz, Class<U> clazzU) {
+        EntityUtils<T> entityUtils = new EntityUtils<T>(clazz, entityManager);
+        return new ResourceApiController<T, U>(clazz, entityManager, transactionManager, entityUtils);
+    }
+
+    private <T> ResourceApiController<T, Integer> getResourceApiController(Class<T> clazz) {
+        EntityUtils<T> entityUtils = new EntityUtils<T>(clazz, entityManager);
+        return new ResourceApiController<T, Integer>(clazz, entityManager, transactionManager, entityUtils);
+    }
+
 }
