@@ -376,10 +376,11 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         parameter.name("filter");
 
         Resource annotation = clazz.getAnnotation(Resource.class);
-        for(ExampleObject example : annotation.filterExamples()) {
-            
-            Optional<Example> exampleValue = AnnotationsUtils.getExample(example);
-            parameter.addExample(example.name(), exampleValue.get());
+        for(ExampleObject exampleObj : annotation.filterExamples()) {
+            var example = AnnotationsUtils.getExample(exampleObj).orElseThrow(() ->
+                    new IllegalArgumentException(String.format(
+                            "Example could not be found in ExampleObject with name: '%s' and ref: '%s'", exampleObj.name(), exampleObj.ref())));
+            parameter.addExample(exampleObj.name(), example);
         }
 
         return parameter;
