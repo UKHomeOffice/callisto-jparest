@@ -1,7 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.text.SimpleDateFormat;
 
@@ -25,6 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
+import uk.gov.homeoffice.digital.sas.jparest.InvalidFilterException;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
@@ -56,6 +57,28 @@ public class ResourceApiControllerTest {
 
         assertThat(response).isNotNull();
         assertThat(response.getItems().size()).isEqualTo(2);
+    }
+
+    @Test
+    void list_filterProvided_filteredEntitiesReturned() {
+
+        var filteredEntity1 = new DummyEntityA();
+        filteredEntity1.setId(998L);
+        entityManager.persist(filteredEntity1);
+        var filteredEntity2 = new DummyEntityA();
+        filteredEntity2.setId(999L);
+        entityManager.persist(filteredEntity2);
+
+        SpelExpressionParser expressionParser = new SpelExpressionParser();
+        SpelExpression expression = expressionParser.parseRaw(String.format("id>=%s", filteredEntity1.getId()));
+
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        ApiResponse<DummyEntityA> response = controller.list(expression, Pageable.ofSize(100));
+
+        assertThat(response).isNotNull();
+        assertThat(response.getItems().size()).isEqualTo(2);
+        assertThat(response.getItems().get(0).getId()).isEqualTo(filteredEntity1.getId());
+        assertThat(response.getItems().get(1).getId()).isEqualTo(filteredEntity2.getId());
     }
 
     @Test
@@ -190,8 +213,39 @@ public class ResourceApiControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
+    @Test
+    void getIdentifier_identifierIsNull_exceptionThrown() {
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+
+        var thrown = assertThrows(
+                IllegalArgumentException.class,
+                () -> controller.get(null));
+
+        assertThat(thrown.getMessage()).isEqualTo("identifier must not be null");
+    }
+
     private <T> ResourceApiController<T, Integer> getResourceApiController(Class<T> clazz) {
         EntityUtils<T> entityUtils = new EntityUtils<T>(clazz, entityManager);
         return new ResourceApiController<T, Integer>(clazz, entityManager, transactionManager, entityUtils);
+    }
+
+
+    @Test
+    void handleException_exceptionIsInvalidFilterException_messageContainedInResponse() {
+
+        var exception = new InvalidFilterException("my message");
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        var actualResponse = controller.handleException(exception);
+        assertThat(actualResponse.getBody()).isEqualTo(exception.getMessage());
+        assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void handleException_exceptionIsNotInvalidFilterException_responseBodyIsNull() {
+
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        var actualResponse = controller.handleException(new Exception());
+        assertThat(actualResponse.getBody()).isNull();
+        assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 }
