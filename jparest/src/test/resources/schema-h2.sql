@@ -14,6 +14,12 @@ CREATE TABLE dummyEntityC
     description  varchar(800) NULL
 );
 
+CREATE TABLE dummyEntityD
+(
+    id           SERIAL PRIMARY KEY,
+    description  varchar(800) NULL
+);
+
 CREATE TABLE dummyEntityA_dummyEntityB
 (
     dummyEntityA  integer NOT NULL REFERENCES dummyEntityA (id),

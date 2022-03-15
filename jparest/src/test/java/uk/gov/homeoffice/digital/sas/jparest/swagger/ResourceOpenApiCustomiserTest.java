@@ -12,6 +12,7 @@ import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.ApiResponseTestUtil;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.HttpOperationTestUtil;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.OpenApiTestUtil;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 
@@ -182,6 +184,26 @@ public class ResourceOpenApiCustomiserTest {
         HttpOperationTestUtil.addIdParameterToOperation(expectedPutOperation, rootDescriptor.getIdFieldType());
         HttpOperationTestUtil.addArrayRelatedIdParameterToOperation(expectedPutOperation, relatedDescriptor.getIdFieldType());
         assertThat(actualPutOperation).isEqualTo(expectedPutOperation);
+    }
+
+
+
+    @Test
+    public void customise_resourceHasBlankFilterExampleObject_errorThrown() {
+
+        when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
+
+        var resourceClass = DummyEntityD.class;
+        var rootDescriptor = resourceEndpoint.new RootDescriptor(Long.class, ROOT_PATH);
+        when(resourceEndpoint.getDescriptors()).thenReturn(Map.of(
+                resourceClass, rootDescriptor));
+
+        var openApi = OpenApiTestUtil.createDefaultOpenAPI();
+
+        var actualException = assertThrows(
+                IllegalArgumentException.class,
+                () -> resourceOpenApiCustomiser.customise(openApi));
+        assertThat(actualException.getMessage()).contains("Example could not be found");
     }
 
 
