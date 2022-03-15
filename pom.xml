@@ -15,6 +15,11 @@
         <java.version>17</java.version>
         <!-- JaCoCo Properties -->
         <jacoco.version>0.8.7</jacoco.version>
+        <sonar.language>java</sonar.language>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.exclusions>
+            **/*Config.*,**/*Exception.*,**/*Application.*,**/*Constant.*,**/*Enum.*,**/models/**,**/*ApiResponse.*
+        </sonar.exclusions>
     </properties>
 
     <dependencies>
