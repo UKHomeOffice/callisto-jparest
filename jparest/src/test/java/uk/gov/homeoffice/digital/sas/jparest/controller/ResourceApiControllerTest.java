@@ -75,7 +75,7 @@ public class ResourceApiControllerTest {
         SpelExpressionParser expressionParser = new SpelExpressionParser();
         SpelExpression expression = expressionParser.parseRaw(String.format("id>=%s", filteredEntity1.getId()));
 
-        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
         ApiResponse<DummyEntityA> response = controller.list(expression, Pageable.ofSize(100));
 
         assertThat(response).isNotNull();
@@ -237,7 +237,7 @@ public class ResourceApiControllerTest {
 
     @Test
     void getIdentifier_identifierIsNull_exceptionThrown() {
-        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
         var thrown = assertThrows(
                 IllegalArgumentException.class,
@@ -292,7 +292,7 @@ public class ResourceApiControllerTest {
     void handleException_exceptionIsInvalidFilterException_messageContainedInResponse() {
 
         var exception = new InvalidFilterException("my message");
-        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
         var actualResponse = controller.handleException(exception);
         assertThat(actualResponse.getBody()).isEqualTo(exception.getMessage());
         assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -301,7 +301,7 @@ public class ResourceApiControllerTest {
     @Test
     void handleException_exceptionIsNotInvalidFilterException_responseBodyIsNull() {
 
-        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class);
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
         var actualResponse = controller.handleException(new Exception());
         assertThat(actualResponse.getBody()).isNull();
         assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -405,11 +405,6 @@ public class ResourceApiControllerTest {
     private <T, U> ResourceApiController<T, U> getResourceApiController(Class<T> clazz, Class<U> clazzU) {
         EntityUtils<T> entityUtils = new EntityUtils<T>(clazz, entityManager);
         return new ResourceApiController<T, U>(clazz, entityManager, transactionManager, entityUtils);
-    }
-
-    private <T> ResourceApiController<T, Integer> getResourceApiController(Class<T> clazz) {
-        EntityUtils<T> entityUtils = new EntityUtils<T>(clazz, entityManager);
-        return new ResourceApiController<T, Integer>(clazz, entityManager, transactionManager, entityUtils);
     }
 
 }
