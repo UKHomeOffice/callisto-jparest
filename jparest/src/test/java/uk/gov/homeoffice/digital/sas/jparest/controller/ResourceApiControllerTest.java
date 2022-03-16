@@ -10,7 +10,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.http.HttpStatus;
@@ -168,11 +170,17 @@ public class ResourceApiControllerTest {
     }
 
     @Test
-    void shouldGetRelatedEntities() {
+    void shouldAddRelatedEntities() {
         ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
-        SpelExpressionParser expressionParser = new SpelExpressionParser();
-        SpelExpression expression = expressionParser.parseRaw("id==2");
+        ResponseEntity<?> response = assertDoesNotThrow(
+                () -> controller.addRelated(2, "dummyEntityBSet", new Object[] { 1 }));
+    }
+
+    @ParameterizedTest
+    @MethodSource("filterSource")
+    void shouldGetRelatedEntities_With_And_Without_Filters(SpelExpression expression) {
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
         ApiResponse<?> apiResponse = controller.getRelated(2, "dummyEntityBSet", expression, Pageable.ofSize(100));
         DummyEntityB dummyB = (DummyEntityB) apiResponse.getItems().get(0);
@@ -180,14 +188,27 @@ public class ResourceApiControllerTest {
         assertThat(dummyB.getId()).isEqualTo(2);
     }
 
-    @Test
-    void shouldAddRelatedEntities() {
+    private static Stream filterSource(){
+        return Stream.of(
+                new SpelExpressionParser().parseRaw("id==2"),
+                new SpelExpressionParser().parseRaw("id>0"),
+                null
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource({"1","2","3"})
+    void shouldReturnEntityNotFound_AddRelated(int id) {
         ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
         ResponseEntity<?> response = assertDoesNotThrow(
-                () -> controller.addRelated(2, "dummyEntityBSet", new Object[] { 1 }));
+                () -> controller.addRelated(id, "dummyEntityBSet", new Object[] { id }));
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        if(id == 3){
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        } else {
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        }
     }
 
     @Test
@@ -284,6 +305,87 @@ public class ResourceApiControllerTest {
         var actualResponse = controller.handleException(new Exception());
         assertThat(actualResponse.getBody()).isNull();
         assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @ParameterizedTest
+    @MethodSource("sortSource")
+    void shouldReturnAllEntitiesListByDescOrder(Sort sort) {
+
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        Pageable pageable = PageRequest.ofSize(100).withSort(sort);
+        ApiResponse<DummyEntityA> response = controller.list(null, pageable);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getItems().size()).isEqualTo(2);
+
+        if(sort.getOrderFor("id").isDescending()){
+            assertThat(response.getItems().get(0).getId()).isEqualTo(2);
+            assertThat(response.getItems().get(1).getId()).isEqualTo(1);
+        } else {
+            assertThat(response.getItems().get(1).getId()).isEqualTo(2);
+            assertThat(response.getItems().get(0).getId()).isEqualTo(1);
+        }
+    }
+
+    @Test
+    void shouldReturnEntityNotFound() {
+        ResourceApiController<DummyEntityC, String> controller = getResourceApiController(DummyEntityC.class, String.class);
+        ResponseEntity<String> response = controller.delete("10");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @SneakyThrows
+    @Test
+    void shouldReturnBadRequestForInvalidPayload_UpdateData() {
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        ResponseEntity response = controller.update(1, "");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNull();
+    }
+
+    @SneakyThrows
+    @Test
+    void shouldReturnNotFound_UpdateData(){
+        ResourceApiController<DummyEntityA, String> controller = getResourceApiController(DummyEntityA.class, String.class);
+        ResponseEntity response = controller.update("10", "{}");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"1","3","4","5"})
+    void shouldReturnNotFoundForInvalidIdElseOK_AddRelated(int id) {
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
+
+        ResponseEntity<?> response = assertDoesNotThrow(
+                () -> controller.addRelated(id, "dummyEntityBSet", new Object[] { id }));
+
+        if(id == 1){
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        } else {
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Test
+    void shouldReturnFilteredEntitiesList() {
+        SpelExpressionParser expressionParser = new SpelExpressionParser();
+        SpelExpression expression = expressionParser.parseRaw("id==2");
+
+        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        ApiResponse<DummyEntityA> response = controller.list(expression, Pageable.ofSize(100));
+
+        assertThat(response).isNotNull();
+        assertThat(response.getItems().size()).isEqualTo(1);
+    }
+
+    private static Stream sortSource(){
+        return Stream.of(
+                Arguments.of(Sort.by("id").descending()),
+                Arguments.of(Sort.by("id").ascending())
+        );
     }
 
     private static Stream exceptionSource(){
