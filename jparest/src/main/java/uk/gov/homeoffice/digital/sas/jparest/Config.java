@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 @Configuration
 public class Config {
 
-    private final static Logger LOGGER = Logger.getLogger(Config.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Config.class.getName());
 
     @Bean
     @Lazy(false)

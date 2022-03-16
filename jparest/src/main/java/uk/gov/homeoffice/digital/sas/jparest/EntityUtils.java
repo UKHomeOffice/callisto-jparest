@@ -25,18 +25,18 @@ import java.util.logging.Logger;
  */
 public class EntityUtils<T> {
 
-    private final static Logger LOGGER = Logger.getLogger(EntityUtils.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(EntityUtils.class.getName());
 
     @Getter
     private Class<T> entityType;
     @Getter
-    private Set<String> relatedResources = new HashSet<String>();
+    private Set<String> relatedResources = new HashSet<>();
     private Field idField;
     @Getter
     private Class<?> idFieldType;
     @Getter
     private String idFieldName;
-    private Map<String, RelatedEntity> relations = new HashMap<String, RelatedEntity>();
+    private Map<String, RelatedEntity> relations = new HashMap<>();
 
     /**
      * Creates a utility class for the specified entityType
@@ -46,7 +46,7 @@ public class EntityUtils<T> {
      */
     public EntityUtils(Class<T> entityType, EntityManager entityManager) {
 
-        Set<String> tmpRelatedResources = new HashSet<String>();
+        Set<String> tmpRelatedResources = new HashSet<>();
 
         // Iterate the declared fields to find the field annotated with Id
         // and to find the fields markerd ManyToMany
@@ -56,7 +56,7 @@ public class EntityUtils<T> {
         for (Field field : entityType.getDeclaredFields()) {
             if (field.isAnnotationPresent(Id.class)) {
                 tmpIdField = field;
-                tmpIdField.setAccessible(true);
+                tmpIdField.setAccessible(true); //NOSONAR
                 tmpIdFieldName = field.getName();
                 tmpIdFieldType = field.getType();
             }
@@ -65,16 +65,16 @@ public class EntityUtils<T> {
             if (field.isAnnotationPresent(ManyToMany.class)) {
                 ManyToMany m2m = field.getAnnotation(ManyToMany.class);
                 if (!StringUtils.hasText(m2m.mappedBy())) {
-                    Type relatedEntityType = field.getGenericType();
+                    var relatedEntityType = field.getGenericType();
                     if (relatedEntityType instanceof ParameterizedType) {
                         relatedEntityType = ((ParameterizedType) relatedEntityType).getActualTypeArguments()[0];
                     }
 
                     EntityType<?> ret = entityManager.getMetamodel().entity((Class<?>) relatedEntityType);
-                    Class<?> related_id_type = ret.getIdType().getJavaType();
-                    Field related_id_field = (Field) ret.getDeclaredId((Class<?>) related_id_type).getJavaMember();
-                    field.setAccessible(true);
-                    relations.putIfAbsent(field.getName(), new RelatedEntity(field, (Class<?>) relatedEntityType, related_id_type, related_id_field));
+                    Class<?> relatedIdType = ret.getIdType().getJavaType();
+                    var related_id_field = (Field) ret.getDeclaredId((Class<?>) relatedIdType).getJavaMember();
+                    field.setAccessible(true); //NOSONAR
+                    relations.putIfAbsent(field.getName(), new RelatedEntity(field, (Class<?>) relatedEntityType, relatedIdType, related_id_field));
                     tmpRelatedResources.add(field.getName());
                 }
             }
@@ -97,11 +97,11 @@ public class EntityUtils<T> {
      *                 with ManyToMany
      * @return Collection of entities expressed by the ManyToMany attribute
      */
-    public Collection<?> getRelatedEntities(Object entity, String relation) {
-        RelatedEntity relatedEntity = this.relations.get(relation);
-        Collection<?> result = null;
+    public Collection<Object> getRelatedEntities(Object entity, String relation) {
+        var relatedEntity = this.relations.get(relation);
+        Collection<Object> result = null;
         try {
-            result = (Collection<?>) relatedEntity.declaredField.get(entity);
+            result = (Collection<Object>) relatedEntity.declaredField.get(entity);
         } catch (IllegalArgumentException | IllegalAccessException e) {
             LOGGER.severe("Unable to access " + relation + " of entity type " + entity.getClass().getName());
         }
@@ -124,8 +124,8 @@ public class EntityUtils<T> {
     private Object getEntityReference(Class<?> entityType, Field idField, Serializable identifier) throws IllegalArgumentException {
         Object reference = null;
         try {
-            reference = entityType.getConstructor(new Class<?>[]{}).newInstance(new Object[]{});
-            idField.set(reference, identifier);
+            reference = entityType.getConstructor(new Class<?>[]{}).newInstance();
+            idField.set(reference, identifier); //NOSONAR
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             LOGGER.severe("Unable to create reference for entity " + entityType.getName());
@@ -150,7 +150,7 @@ public class EntityUtils<T> {
      * relation.
      */
     public Object getEntityReference(String relation, Serializable identifier) {
-        RelatedEntity relatedEntity = this.relations.get(relation);
+        var relatedEntity = this.relations.get(relation);
         return getEntityReference(relatedEntity.entityType, relatedEntity.idField, identifier);
     }
 
