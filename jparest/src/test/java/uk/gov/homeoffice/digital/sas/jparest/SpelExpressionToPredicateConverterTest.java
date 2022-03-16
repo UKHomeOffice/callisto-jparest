@@ -10,6 +10,12 @@ import org.springframework.expression.spel.standard.SpelExpression;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 class SpelExpressionToPredicateConverterTest {
 
@@ -33,5 +39,18 @@ class SpelExpressionToPredicateConverterTest {
         );
         Assertions.assertNull(result);
     }
+
+    @Test
+    public void spelExpressionToPredicateConverter_constructorIsPrivate_exceptionThrownWhenAccessed() {
+
+       var constructor = assertDoesNotThrow(() ->
+               SpelExpressionToPredicateConverter.class.getDeclaredConstructor());
+        assertTrue(Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+
+        var actualException = assertThrows(InvocationTargetException.class, constructor::newInstance);
+        assertThat(actualException.getTargetException()).isInstanceOf(IllegalStateException.class);
+    }
+
 
 }
