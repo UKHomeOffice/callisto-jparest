@@ -54,10 +54,10 @@ public class HandlerMappingConfigurerTest {
 
     private HandlerMappingConfigurer handlerMappingConfigurer;
 
-    private static final Map<Class<?>, String> RESOURCE_TO_PATH_NAME_MAP = Map.of(
-            DummyEntityA.class, DummyEntityA.class.getAnnotation(Resource.class).path(),
-            DummyEntityB.class, DummyEntityB.class.getAnnotation(Resource.class).path(),
-            DummyEntityC.class, DummyEntityC.class.getAnnotation(Entity.class).name().toLowerCase()
+    private static final Map<String, Class<?>> RESOURCE_TO_PATH_NAME_MAP = Map.of(
+            DummyEntityA.class.getAnnotation(Resource.class).path(), DummyEntityA.class,
+            DummyEntityB.class.getAnnotation(Resource.class).path(), DummyEntityB.class,
+            DummyEntityC.class.getAnnotation(Entity.class).name().toLowerCase(), DummyEntityC.class
     );
 
 
@@ -75,7 +75,7 @@ public class HandlerMappingConfigurerTest {
             throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
         handlerMappingConfigurer.registerUserController();
-        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourceClass, resourcePathName) -> {
+        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourcePathName, resourceClass) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePath(resourcePathName);
             var expectedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
@@ -94,7 +94,7 @@ public class HandlerMappingConfigurerTest {
             throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
         handlerMappingConfigurer.registerUserController();
-        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourceClass, resourcePathName) -> {
+        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourcePathName, resourceClass) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName);
             var expectedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
@@ -113,7 +113,7 @@ public class HandlerMappingConfigurerTest {
             throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
         handlerMappingConfigurer.registerUserController();
-        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourceClass, resourcePathName) -> {
+        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourcePathName, resourceClass) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePath(resourcePathName);
             var expectedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
@@ -131,7 +131,7 @@ public class HandlerMappingConfigurerTest {
             throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
         handlerMappingConfigurer.registerUserController();
-        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourceClass, resourcePathName) -> {
+        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourcePathName, resourceClass) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName);
             var expectedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
@@ -149,7 +149,7 @@ public class HandlerMappingConfigurerTest {
             throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
         handlerMappingConfigurer.registerUserController();
-        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourceClass, resourcePathName) -> {
+        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourcePathName, resourceClass) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName);
             var expectedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
@@ -168,7 +168,7 @@ public class HandlerMappingConfigurerTest {
             throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
         handlerMappingConfigurer.registerUserController();
-        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourceClass, resourcePathName) -> {
+        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourcePathName, resourceClass) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePath(resourcePathName);
             var entityUtils = new EntityUtils<>(resourceClass, entityManager);
@@ -184,7 +184,7 @@ public class HandlerMappingConfigurerTest {
             throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
         handlerMappingConfigurer.registerUserController();
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourceClass, resourcePathName) -> {
+        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
 
             var entityUtils = new EntityUtils<>(resourceClass, entityManager);
             var relatedResources = entityUtils.getRelatedResources();
@@ -208,7 +208,7 @@ public class HandlerMappingConfigurerTest {
             throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
         handlerMappingConfigurer.registerUserController();
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourceClass, resourcePathName) -> {
+        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
 
             var entityUtils = new EntityUtils<>(resourceClass, entityManager);
             var relatedResources = entityUtils.getRelatedResources();
@@ -232,7 +232,7 @@ public class HandlerMappingConfigurerTest {
             throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
         handlerMappingConfigurer.registerUserController();
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourceClass, resourcePathName) -> {
+        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
 
             var entityUtils = new EntityUtils<>(resourceClass, entityManager);
             var relatedResources = entityUtils.getRelatedResources();
@@ -257,7 +257,7 @@ public class HandlerMappingConfigurerTest {
             throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 
         handlerMappingConfigurer.registerUserController();
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourceClass, resourcePathName) -> {
+        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
 
             var entityUtils = new EntityUtils<>(resourceClass, entityManager);
             var relatedResources = entityUtils.getRelatedResources();
@@ -270,10 +270,5 @@ public class HandlerMappingConfigurerTest {
             });
         });
     }
-
-
-
-
-
 
 }

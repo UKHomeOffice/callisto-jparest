@@ -264,7 +264,7 @@ public class ResourceApiController<T, U> {
     }
 
     public ResponseEntity<String> deleteRelated(@PathVariable U id, @PathVariable String relation,
-                                                @PathVariable Object[] related_id)
+                                                @PathVariable Object[] relatedId)
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
 
         TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
@@ -278,10 +278,10 @@ public class ResourceApiController<T, U> {
         }
 
         Collection<?> relatedEntities = entityUtils.getRelatedEntities(orig, relation);
-        Class<?> related_id_type = entityUtils.getRelatedIdType(relation);
+        Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
 
-        for (Object object : related_id) {
-            Serializable identitfier = getIdentifier(object, related_id_type);
+        for (Object object : relatedId) {
+            Serializable identitfier = getIdentifier(object, relatedIdType);
             // TODO: Check for null here also on the add related
             Object f = this.entityUtils.getEntityReference(relation, identitfier);
             if (!relatedEntities.remove(f)) {
@@ -302,7 +302,7 @@ public class ResourceApiController<T, U> {
 
     @SuppressWarnings(value = {"rawtypes", "unchecked"}) //
     public ResponseEntity<String> addRelated(@PathVariable U id, @PathVariable String relation,
-                                             @PathVariable Object[] related_id)
+                                             @PathVariable Object[] relatedId)
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
 
         TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
@@ -315,11 +315,11 @@ public class ResourceApiController<T, U> {
             return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
         }
 
-        Collection relatedEntities = entityUtils.getRelatedEntities(orig, relation);
-        Class<?> related_id_type = entityUtils.getRelatedIdType(relation);
+        Collection<Object> relatedEntities = entityUtils.getRelatedEntities(orig, relation);
+        Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
 
-        for (Object object : related_id) {
-            Serializable identifier = getIdentifier(object, related_id_type);
+        for (Object object : relatedId) {
+            Serializable identifier = getIdentifier(object, relatedIdType);
             Object f = this.entityUtils.getEntityReference(relation, identifier);
             if (!relatedEntities.contains(f)) {
                 relatedEntities.add(f);

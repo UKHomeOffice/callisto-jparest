@@ -22,7 +22,7 @@ public abstract class BaseEntity {
         for (Field field : this.getClass().getDeclaredFields()) {
             if (field.isAnnotationPresent(Id.class)) {
                 idField = field;
-                idField.setAccessible(true);
+                idField.setAccessible(true); //NOSONAR
             }
         }
         // TODO: Should throw an error as this class should not be extended 
