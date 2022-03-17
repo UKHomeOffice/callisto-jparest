@@ -11,7 +11,8 @@ CREATE TABLE dummyEntityB
 CREATE TABLE dummyEntityC
 (
     id           SERIAL PRIMARY KEY,
-    description  varchar(800) NULL
+    description  varchar(800) NULL,
+    index        integer NOT NULL
 );
 
 CREATE TABLE dummyEntityD

@@ -118,12 +118,14 @@ class ResourceApiControllerTest {
 
         String payload = "{" +
                 "            \"id\": 100," +
-                "            \"description\": \"Dummy Entity C 100\"" +
+                "            \"description\": \"Dummy Entity C 100\"," +
+                "            \"index\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
                 "            \"id\": 100," +
-                "            \"description\": \"Updated Dummy Entity C 100\"" +
+                "            \"description\": \"Updated Dummy Entity C 100\"," +
+                "            \"index\": 2" +
                 "        }";
 
         ResourceApiController<DummyEntityC, Integer> controller = getResourceApiController(DummyEntityC.class, Integer.class);
@@ -138,6 +140,7 @@ class ResourceApiControllerTest {
         assertThat(apiResponse.getItems().size()).isEqualTo(1);
         assertThat(dummy).isNotNull();
         assertThat(dummy.getId()).isEqualTo(100);
+        assertThat(dummy.getIndex()).isEqualTo(2);
         assertThat(dummy.getDescription()).isEqualTo("Updated Dummy Entity C 100");
 
         response = (ResponseEntity<ApiResponse<DummyEntityC>>) controller.get(100);
@@ -145,6 +148,7 @@ class ResourceApiControllerTest {
         dummy = apiResponse.getItems().get(0);
         assertThat(dummy).isNotNull();
         assertThat(dummy.getId()).isEqualTo(100);
+        assertThat(dummy.getIndex()).isEqualTo(2);
         assertThat(dummy.getDescription()).isEqualTo("Updated Dummy Entity C 100");
 
     }
@@ -154,7 +158,8 @@ class ResourceApiControllerTest {
     void shouldDeleteData() {
         String payload = "{" +
                 "            \"id\": 100," +
-                "            \"description\": \"Dummy Entity C 100\"" +
+                "            \"description\": \"Dummy Entity C 100\"," +
+                "            \"index\": 1" +
                 "        }";
 
         ResourceApiController<DummyEntityC, Integer> controller = getResourceApiController(DummyEntityC.class, Integer.class);
