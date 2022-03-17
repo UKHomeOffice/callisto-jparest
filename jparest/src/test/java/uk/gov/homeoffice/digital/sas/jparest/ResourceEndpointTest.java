@@ -7,7 +7,8 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceE
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class ResourceEndpointTest {
@@ -41,12 +42,12 @@ public class ResourceEndpointTest {
         assertDoesNotThrow(
                 () -> resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE));
 
-        assertTrue(resourceEndpoint.getDescriptors().containsKey(RESOURCE));
+        assertThat(resourceEndpoint.getDescriptors().containsKey(RESOURCE)).isTrue();
 
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE);
         var expectedDescriptor = resourceEndpoint.new RootDescriptor(ID_FIELD_TYPE, PATH);
-        assertEquals(expectedDescriptor.getPath(), actualDescriptor.getPath());
-        assertEquals(expectedDescriptor.getIdFieldType(), actualDescriptor.getIdFieldType());
+        assertThat(actualDescriptor.getPath()).isEqualTo(expectedDescriptor.getPath());
+        assertThat(actualDescriptor.getIdFieldType()).isEqualTo(expectedDescriptor.getIdFieldType());
     }
 
 
@@ -86,8 +87,8 @@ public class ResourceEndpointTest {
                 () -> resourceEndpoint.addRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, ID_FIELD_TYPE));
 
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE).getRelations().get(RELATED_RESOURCE);
-        assertEquals(RELATED_RESOURCE_PATH, actualDescriptor.getPath());
-        assertEquals(ID_FIELD_TYPE, actualDescriptor.getIdFieldType());
+        assertThat(actualDescriptor.getPath()).isEqualTo(RELATED_RESOURCE_PATH);
+        assertThat(actualDescriptor.getIdFieldType()).isEqualTo(ID_FIELD_TYPE);
     }
 
 
