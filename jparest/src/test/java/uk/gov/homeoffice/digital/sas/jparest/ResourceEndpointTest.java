@@ -3,7 +3,10 @@ package uk.gov.homeoffice.digital.sas.jparest;
 import org.junit.jupiter.api.Test;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceErrorCode;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -24,9 +27,11 @@ public class ResourceEndpointTest {
         var resourceEndpoint = new ResourceEndpoint();
         resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE);
 
-        assertThrows(
-                IllegalArgumentException.class,
+        var thrown = assertThrows(
+                AddResourceException.class,
                 () -> resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE));
+
+        assertThat(thrown.getErrorCode()).isEqualTo(AddResourceErrorCode.RESOURCE_ALREADY_EXISTS.getCode());
     }
 
     @Test
@@ -50,24 +55,24 @@ public class ResourceEndpointTest {
 
         var resourceEndpoint = new ResourceEndpoint();
         var thrown = assertThrows(
-                IllegalArgumentException.class,
+                AddResourceException.class,
                 () -> resourceEndpoint.addRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, ID_FIELD_TYPE));
 
-        assertEquals(thrown.getMessage(), "You can only call AddRelated on resources already passed to the Add method");
+        assertThat(thrown.getErrorCode()).isEqualTo(AddResourceErrorCode.RESOURCE_DOES_NOT_EXIST.getCode());
     }
 
     @Test
-    public void addRelated_descriptorRelationsAlreadyContainsRelatedResource_errorThrow() {
+    public void addRelated_descriptorRelationsAlreadyContainsRelatedResource_errorThrown() {
 
         var resourceEndpoint = new ResourceEndpoint();
         resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE);
         resourceEndpoint.addRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, String.class);
 
         var thrown = assertThrows(
-                IllegalArgumentException.class,
+                AddResourceException.class,
                 () -> resourceEndpoint.addRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, ID_FIELD_TYPE));
 
-        assertEquals(thrown.getMessage(), "Related resource as already been added");
+        assertThat(thrown.getErrorCode()).isEqualTo(AddResourceErrorCode.RELATED_RESOURCE_ALREADY_EXISTS.getCode());
 
     }
 

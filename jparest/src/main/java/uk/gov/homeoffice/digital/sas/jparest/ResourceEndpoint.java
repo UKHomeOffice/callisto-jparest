@@ -1,6 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
 import lombok.Getter;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceErrorCode;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +21,7 @@ public class ResourceEndpoint {
     public void add(Class<?> clazz, String path, Class<?> idFieldType) {
 
         if (descriptors.containsKey(clazz)) {
-            throw new IllegalArgumentException("Resource as already been added");
+            throw new AddResourceException("Resource has already been added", AddResourceErrorCode.RESOURCE_ALREADY_EXISTS);
         }
 
         var rootDescriptor = new RootDescriptor(idFieldType, path);
@@ -30,13 +32,16 @@ public class ResourceEndpoint {
     public void addRelated(Class<?> clazz, Class<?> relatedClazz, String path, Class<?> idFieldType) {
 
         if (!descriptors.containsKey(clazz)) {
-            throw new IllegalArgumentException("You can only call AddRelated on resources already passed to the Add method");
+            throw new AddResourceException(
+                    "You can only call AddRelated on resources already passed to the Add method",
+                    AddResourceErrorCode.RESOURCE_DOES_NOT_EXIST);
         }
 
         var rootDescriptor = descriptors.get(clazz);
 
         if (rootDescriptor.getRelations().containsKey(relatedClazz)) {
-            throw new IllegalArgumentException("Related resource as already been added");
+            throw new AddResourceException(
+                    "Related resource has already been added", AddResourceErrorCode.RELATED_RESOURCE_ALREADY_EXISTS);
         }
 
         var descriptor = new Descriptor(idFieldType, path);

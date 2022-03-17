@@ -7,6 +7,7 @@ import org.springframework.expression.spel.ast.*;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.WebDataBinder;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
