@@ -39,7 +39,7 @@ class ResourceEndpointTest {
         assertDoesNotThrow(
                 () -> resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE));
 
-        assertThat(resourceEndpoint.getDescriptors().containsKey(RESOURCE));
+        assertThat(resourceEndpoint.getDescriptors()).containsKey(RESOURCE);
 
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE);
         var expectedDescriptor = resourceEndpoint.new RootDescriptor(ID_FIELD_TYPE, PATH);
