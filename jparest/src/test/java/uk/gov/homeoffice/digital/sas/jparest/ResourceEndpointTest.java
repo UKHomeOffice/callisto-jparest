@@ -11,8 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
-public class ResourceEndpointTest {
-
+class ResourceEndpointTest {
 
     private final static Class<?> RESOURCE = DummyEntityA.class;
     private final static Class<?> RELATED_RESOURCE = DummyEntityB.class;
@@ -20,10 +19,8 @@ public class ResourceEndpointTest {
     private final static String PATH = "DummyEntityA";
     private final static String RELATED_RESOURCE_PATH = "dummyEntityBSet";
 
-
-
     @Test
-    public void add_descriptorsAlreadyContainsResourceToBeAdded_errorThrown() {
+    void add_descriptorsAlreadyContainsResourceToBeAdded_errorThrown() {
 
         var resourceEndpoint = new ResourceEndpoint();
         resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE);
@@ -36,13 +33,13 @@ public class ResourceEndpointTest {
     }
 
     @Test
-    public void add_descriptorsDoesNotContainResourceToBeAdded_resourceAdded() {
+    void add_descriptorsDoesNotContainResourceToBeAdded_resourceAdded() {
 
         var resourceEndpoint = new ResourceEndpoint();
         assertDoesNotThrow(
                 () -> resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE));
 
-        assertThat(resourceEndpoint.getDescriptors().containsKey(RESOURCE)).isTrue();
+        assertThat(resourceEndpoint.getDescriptors().containsKey(RESOURCE));
 
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE);
         var expectedDescriptor = resourceEndpoint.new RootDescriptor(ID_FIELD_TYPE, PATH);
@@ -52,7 +49,7 @@ public class ResourceEndpointTest {
 
 
     @Test
-    public void addRelated_descriptorsDoesNotContainResource_errorThrown() {
+    void addRelated_descriptorsDoesNotContainResource_errorThrown() {
 
         var resourceEndpoint = new ResourceEndpoint();
         var thrown = assertThrows(
@@ -63,7 +60,7 @@ public class ResourceEndpointTest {
     }
 
     @Test
-    public void addRelated_descriptorRelationsAlreadyContainsRelatedResource_errorThrown() {
+    void addRelated_descriptorRelationsAlreadyContainsRelatedResource_errorThrown() {
 
         var resourceEndpoint = new ResourceEndpoint();
         resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE);
@@ -78,7 +75,7 @@ public class ResourceEndpointTest {
     }
 
     @Test
-    public void addRelated_descriptorRelationsDoesNotContainRelatedResourceToBeAdded_relatedResourceAdded() {
+    void addRelated_descriptorRelationsDoesNotContainRelatedResourceToBeAdded_relatedResourceAdded() {
 
         var resourceEndpoint = new ResourceEndpoint();
         resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE);
@@ -90,10 +87,5 @@ public class ResourceEndpointTest {
         assertThat(actualDescriptor.getPath()).isEqualTo(RELATED_RESOURCE_PATH);
         assertThat(actualDescriptor.getIdFieldType()).isEqualTo(ID_FIELD_TYPE);
     }
-
-
-
-
-
 
 }
