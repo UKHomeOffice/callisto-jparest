@@ -167,7 +167,7 @@ public class HandlerMappingConfigurerTest {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePath(resourcePathName);
             var entityUtils = new EntityUtils<>(resourceClass, entityManager);
-            verify(resourceEndpoint).Add(resourceClass, path, entityUtils.getIdFieldType());
+            verify(resourceEndpoint).add(resourceClass, path, entityUtils.getIdFieldType());
         });
     }
 
@@ -256,7 +256,7 @@ public class HandlerMappingConfigurerTest {
             assertThat(relatedResources).allSatisfy(relatedResource -> {
 
                 var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName) + "/" + relatedResource;
-                verify(resourceEndpoint).AddRelated(
+                verify(resourceEndpoint).addRelated(
                         resourceClass, entityUtils.getRelatedType(relatedResource), path, entityUtils.getRelatedIdType(relatedResource));
             });
         });

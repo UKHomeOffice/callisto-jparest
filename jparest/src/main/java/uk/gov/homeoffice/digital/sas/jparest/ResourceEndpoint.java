@@ -11,35 +11,35 @@ import java.util.Map;
 public class ResourceEndpoint {
 
     @Getter
-    private List<Class<?>> resourceTypes = new ArrayList<Class<?>>();
+    private List<Class<?>> resourceTypes = new ArrayList<>();
 
     @Getter
-    private Map<Class<?>, RootDescriptor> descriptors = new HashMap<Class<?>, RootDescriptor>();
+    private Map<Class<?>, RootDescriptor> descriptors = new HashMap<>();
 
-    public void Add(Class<?> clazz, String path, Class<?> idFieldType) {
+    public void add(Class<?> clazz, String path, Class<?> idFieldType) {
 
         if (descriptors.containsKey(clazz)) {
             throw new IllegalArgumentException("Resource as already been added");
         }
 
-        RootDescriptor rootDescriptor = new RootDescriptor(idFieldType, path);
+        var rootDescriptor = new RootDescriptor(idFieldType, path);
         descriptors.put(clazz, rootDescriptor);
 
     }
 
-    public void AddRelated(Class<?> clazz, Class<?> relatedClazz, String path, Class<?> idFieldType) {
+    public void addRelated(Class<?> clazz, Class<?> relatedClazz, String path, Class<?> idFieldType) {
 
         if (!descriptors.containsKey(clazz)) {
             throw new IllegalArgumentException("You can only call AddRelated on resources already passed to the Add method");
         }
 
-        RootDescriptor rootDescriptor = descriptors.get(clazz);
+        var rootDescriptor = descriptors.get(clazz);
 
         if (rootDescriptor.getRelations().containsKey(relatedClazz)) {
             throw new IllegalArgumentException("Related resource as already been added");
         }
 
-        Descriptor descriptor = new Descriptor(idFieldType, path);
+        var descriptor = new Descriptor(idFieldType, path);
         rootDescriptor.getRelations().put(relatedClazz, descriptor);
     }
 
@@ -65,6 +65,6 @@ public class ResourceEndpoint {
         }
 
         @Getter
-        private Map<Class<?>, Descriptor> relations = new HashMap<Class<?>, Descriptor>();
+        private Map<Class<?>, Descriptor> relations = new HashMap<>();
     }
 }

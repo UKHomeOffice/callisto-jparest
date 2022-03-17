@@ -101,14 +101,14 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
                 register(controller, "delete", new Class<?>[]{Object.class}, path + URL_ID_PATH_PARAM, null, RequestMethod.DELETE);
                 register(controller, "update", new Class<?>[]{Object.class, String.class}, path + URL_ID_PATH_PARAM, null, RequestMethod.PUT);
 
-                resourceEndpoint.Add(resource, path, entityUtils.getIdFieldType());
+                resourceEndpoint.add(resource, path, entityUtils.getIdFieldType());
 
                 LOGGER.fine("Registering related paths");
                 for (String relation : entityUtils.getRelatedResources()) {
 
                     Class<?> relatedType = entityUtils.getRelatedType(relation);
                     Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
-                    resourceEndpoint.AddRelated(resource, relatedType, path + URL_ID_PATH_PARAM + "/" + relation, relatedIdType);
+                    resourceEndpoint.addRelated(resource, relatedType, path + URL_ID_PATH_PARAM + "/" + relation, relatedIdType);
 
                     LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
 

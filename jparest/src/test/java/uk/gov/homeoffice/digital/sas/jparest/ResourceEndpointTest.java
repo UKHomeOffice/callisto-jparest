@@ -22,11 +22,11 @@ public class ResourceEndpointTest {
     public void add_descriptorsAlreadyContainsResourceToBeAdded_errorThrown() {
 
         var resourceEndpoint = new ResourceEndpoint();
-        resourceEndpoint.Add(RESOURCE, PATH, ID_FIELD_TYPE);
+        resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE);
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> resourceEndpoint.Add(RESOURCE, PATH, ID_FIELD_TYPE));
+                () -> resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE));
     }
 
     @Test
@@ -34,7 +34,7 @@ public class ResourceEndpointTest {
 
         var resourceEndpoint = new ResourceEndpoint();
         assertDoesNotThrow(
-                () -> resourceEndpoint.Add(RESOURCE, PATH, ID_FIELD_TYPE));
+                () -> resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE));
 
         assertTrue(resourceEndpoint.getDescriptors().containsKey(RESOURCE));
 
@@ -51,7 +51,7 @@ public class ResourceEndpointTest {
         var resourceEndpoint = new ResourceEndpoint();
         var thrown = assertThrows(
                 IllegalArgumentException.class,
-                () -> resourceEndpoint.AddRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, ID_FIELD_TYPE));
+                () -> resourceEndpoint.addRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, ID_FIELD_TYPE));
 
         assertEquals(thrown.getMessage(), "You can only call AddRelated on resources already passed to the Add method");
     }
@@ -60,12 +60,12 @@ public class ResourceEndpointTest {
     public void addRelated_descriptorRelationsAlreadyContainsRelatedResource_errorThrow() {
 
         var resourceEndpoint = new ResourceEndpoint();
-        resourceEndpoint.Add(RESOURCE, PATH, ID_FIELD_TYPE);
-        resourceEndpoint.AddRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, String.class);
+        resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE);
+        resourceEndpoint.addRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, String.class);
 
         var thrown = assertThrows(
                 IllegalArgumentException.class,
-                () -> resourceEndpoint.AddRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, ID_FIELD_TYPE));
+                () -> resourceEndpoint.addRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, ID_FIELD_TYPE));
 
         assertEquals(thrown.getMessage(), "Related resource as already been added");
 
@@ -75,10 +75,10 @@ public class ResourceEndpointTest {
     public void addRelated_descriptorRelationsDoesNotContainRelatedResourceToBeAdded_relatedResourceAdded() {
 
         var resourceEndpoint = new ResourceEndpoint();
-        resourceEndpoint.Add(RESOURCE, PATH, ID_FIELD_TYPE);
+        resourceEndpoint.add(RESOURCE, PATH, ID_FIELD_TYPE);
 
         assertDoesNotThrow(
-                () -> resourceEndpoint.AddRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, ID_FIELD_TYPE));
+                () -> resourceEndpoint.addRelated(RESOURCE, RELATED_RESOURCE, RELATED_RESOURCE_PATH, ID_FIELD_TYPE));
 
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE).getRelations().get(RELATED_RESOURCE);
         assertEquals(RELATED_RESOURCE_PATH, actualDescriptor.getPath());
