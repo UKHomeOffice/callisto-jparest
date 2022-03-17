@@ -2,20 +2,19 @@ package uk.gov.homeoffice.digital.sas.jparest;
 
 import org.hibernate.query.criteria.internal.predicate.ComparisonPredicate;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
