@@ -75,7 +75,7 @@ class HandlerMappingConfigurerTest {
     void registerUserController_listPathsAreRegisteredForResources() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourcePathName, resourceClass) -> {
+        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePath(resourcePathName);
             var expectedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
@@ -178,22 +178,23 @@ class HandlerMappingConfigurerTest {
     void registerUserController_getPathsAreRegisteredForRelatedResources() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
+        var resourceClass = DummyEntityA.class;
+        var resourcePathName = DummyEntityA.class.getAnnotation(Resource.class).path();
 
-            var entityUtils = new EntityUtils<>(resourceClass, entityManager);
-            var relatedResources = entityUtils.getRelatedResources();
+        var entityUtils = new EntityUtils<>(resourceClass, entityManager);
+        var relatedResources = entityUtils.getRelatedResources();
 
-            assertThat(relatedResources).allSatisfy(relatedResource -> {
+        assertThat(relatedResources).isNotEmpty();
+        assertThat(relatedResources).allSatisfy(relatedResource -> {
 
-                var relatedPath = HandlerMappingConfigurerTestUtil.createApiRelatedResourcePath(resourcePathName, relatedResource);
-                var expectedRelatedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
-                        requestMappingHandlerMapping, relatedPath, RequestMethod.GET);
+            var relatedPath = HandlerMappingConfigurerTestUtil.createApiRelatedResourcePath(resourcePathName, relatedResource);
+            var expectedRelatedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
+                    requestMappingHandlerMapping, relatedPath, RequestMethod.GET);
 
-                var expectedRelatedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
-                        "getRelated", ResourceApiController.class, Object.class, String.class, SpelExpression.class, Pageable.class);
+            var expectedRelatedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
+                    "getRelated", ResourceApiController.class, Object.class, String.class, SpelExpression.class, Pageable.class);
 
-                verify(requestMappingHandlerMapping).registerMapping(eq(expectedRelatedRequestMappingInfo), any(), eq(expectedRelatedMethod));
-            });
+            verify(requestMappingHandlerMapping).registerMapping(eq(expectedRelatedRequestMappingInfo), any(), eq(expectedRelatedMethod));
         });
     }
 
@@ -201,22 +202,23 @@ class HandlerMappingConfigurerTest {
     void registerUserController_deletePathsAreRegisteredForRelatedResources() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
+        var resourceClass = DummyEntityA.class;
+        var resourcePathName = DummyEntityA.class.getAnnotation(Resource.class).path();
 
-            var entityUtils = new EntityUtils<>(resourceClass, entityManager);
-            var relatedResources = entityUtils.getRelatedResources();
+        var entityUtils = new EntityUtils<>(resourceClass, entityManager);
+        var relatedResources = entityUtils.getRelatedResources();
 
-            assertThat(relatedResources).allSatisfy(relatedResource -> {
+        assertThat(relatedResources).isNotEmpty();
+        assertThat(relatedResources).allSatisfy(relatedResource -> {
 
-                var relatedPath = HandlerMappingConfigurerTestUtil.createApiRelatedResourcePathWithRelatedId(resourcePathName, relatedResource);
-                var expectedRelatedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
-                        requestMappingHandlerMapping, relatedPath, RequestMethod.DELETE);
+            var relatedPath = HandlerMappingConfigurerTestUtil.createApiRelatedResourcePathWithRelatedId(resourcePathName, relatedResource);
+            var expectedRelatedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
+                    requestMappingHandlerMapping, relatedPath, RequestMethod.DELETE);
 
-                var expectedRelatedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
-                        "deleteRelated", ResourceApiController.class, Object.class, String.class, Object[].class);
+            var expectedRelatedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
+                    "deleteRelated", ResourceApiController.class, Object.class, String.class, Object[].class);
 
-                verify(requestMappingHandlerMapping).registerMapping(eq(expectedRelatedRequestMappingInfo), any(), eq(expectedRelatedMethod));
-            });
+            verify(requestMappingHandlerMapping).registerMapping(eq(expectedRelatedRequestMappingInfo), any(), eq(expectedRelatedMethod));
         });
     }
 
@@ -224,23 +226,25 @@ class HandlerMappingConfigurerTest {
     void registerUserController_updatePathsAreRegisteredForRelatedResources() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
+        var resourceClass = DummyEntityA.class;
+        var resourcePathName = DummyEntityA.class.getAnnotation(Resource.class).path();
 
-            var entityUtils = new EntityUtils<>(resourceClass, entityManager);
-            var relatedResources = entityUtils.getRelatedResources();
+        var entityUtils = new EntityUtils<>(resourceClass, entityManager);
+        var relatedResources = entityUtils.getRelatedResources();
 
-            assertThat(relatedResources).allSatisfy(relatedResource -> {
+        assertThat(relatedResources).isNotEmpty();
+        assertThat(relatedResources).allSatisfy(relatedResource -> {
 
-                var relatedPath = HandlerMappingConfigurerTestUtil.createApiRelatedResourcePathWithRelatedId(resourcePathName, relatedResource);
-                var expectedRelatedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
-                        requestMappingHandlerMapping, relatedPath, RequestMethod.PUT);
+            var relatedPath = HandlerMappingConfigurerTestUtil.createApiRelatedResourcePathWithRelatedId(resourcePathName, relatedResource);
+            var expectedRelatedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
+                    requestMappingHandlerMapping, relatedPath, RequestMethod.PUT);
 
-                var expectedRelatedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
-                        "addRelated", ResourceApiController.class, Object.class, String.class, Object[].class);
+            var expectedRelatedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
+                    "addRelated", ResourceApiController.class, Object.class, String.class, Object[].class);
 
-                verify(requestMappingHandlerMapping).registerMapping(eq(expectedRelatedRequestMappingInfo), any(), eq(expectedRelatedMethod));
-            });
+            verify(requestMappingHandlerMapping).registerMapping(eq(expectedRelatedRequestMappingInfo), any(), eq(expectedRelatedMethod));
         });
+
     }
 
 
@@ -248,17 +252,18 @@ class HandlerMappingConfigurerTest {
     void registerUserController_relatedResourcesAreAddedToResourceEndpoint() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
+        var resourceClass = DummyEntityA.class;
+        var resourcePathName = DummyEntityA.class.getAnnotation(Resource.class).path();
 
-            var entityUtils = new EntityUtils<>(resourceClass, entityManager);
-            var relatedResources = entityUtils.getRelatedResources();
+        var entityUtils = new EntityUtils<>(resourceClass, entityManager);
+        var relatedResources = entityUtils.getRelatedResources();
 
-            assertThat(relatedResources).allSatisfy(relatedResource -> {
+        assertThat(relatedResources).isNotEmpty();
+        assertThat(relatedResources).allSatisfy(relatedResource -> {
 
-                var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName) + "/" + relatedResource;
-                verify(resourceEndpoint).addRelated(
-                        resourceClass, entityUtils.getRelatedType(relatedResource), path, entityUtils.getRelatedIdType(relatedResource));
-            });
+            var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName) + "/" + relatedResource;
+            verify(resourceEndpoint).addRelated(
+                    resourceClass, entityUtils.getRelatedType(relatedResource), path, entityUtils.getRelatedIdType(relatedResource));
         });
     }
 
