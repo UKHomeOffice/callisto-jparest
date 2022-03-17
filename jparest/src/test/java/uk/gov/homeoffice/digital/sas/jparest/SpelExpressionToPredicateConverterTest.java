@@ -23,14 +23,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.PlatformTransactionManager;
 
-import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
@@ -41,9 +38,6 @@ class SpelExpressionToPredicateConverterTest {
 
     @PersistenceContext
     private EntityManager entityManager;
-
-    @Autowired
-    private PlatformTransactionManager transactionManager;
 
     SpelExpressionParser expressionParser = new SpelExpressionParser();
 
