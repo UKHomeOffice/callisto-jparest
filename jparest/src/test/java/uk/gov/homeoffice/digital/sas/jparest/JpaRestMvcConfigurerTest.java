@@ -8,14 +8,14 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class JpaRestMvcConfigurerTest {
@@ -40,6 +40,16 @@ public class JpaRestMvcConfigurerTest {
 
         jpaRestMvcConfigurer.extendMessageConverters(converters);
         verify(messageConverter, times(1)).registerObjectMappersForType(any(), any());
+    }
+
+
+    @Test
+    void extendMessageConverters_converterTypeNotApplicable_objectMappersNotRegistered() {
+        var messageConverter = Mockito.mock(MappingJackson2SmileHttpMessageConverter.class);
+        List<HttpMessageConverter<?>> converters = List.of(messageConverter);
+
+        jpaRestMvcConfigurer.extendMessageConverters(converters);
+        verifyNoInteractions(messageConverter);
     }
 
 }
