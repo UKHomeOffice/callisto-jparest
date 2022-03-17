@@ -158,7 +158,7 @@ public class SpelExpressionToPredicateConverter {
     }
 
     private enum Method {
-        in, between
+        IN, BETWEEN
     }
 
     /**
@@ -172,7 +172,7 @@ public class SpelExpressionToPredicateConverter {
         MethodReference methodReference = (MethodReference) node;
         Method method;
         try {
-            method = Method.valueOf(methodReference.getName().toLowerCase());
+            method = Method.valueOf(methodReference.getName().toUpperCase());
         } catch (IllegalArgumentException ex) {
             throw new InvalidFilterException("Unrecognised method " + methodReference.getName());
         }
@@ -192,11 +192,11 @@ public class SpelExpressionToPredicateConverter {
 
         // Create the appropriate predicate
         switch (method) {
-            case between:
+            case BETWEEN:
                 args = getLiteralValues(node, 1, clazz);
                 predicate = builder.between(root.get(fieldReference.getName()), args[0], args[1]);
                 break;
-            case in:
+            case IN:
                 args = getLiteralValues(node, 1, clazz);
                 predicate = field.in((Object[]) args);
                 break;
