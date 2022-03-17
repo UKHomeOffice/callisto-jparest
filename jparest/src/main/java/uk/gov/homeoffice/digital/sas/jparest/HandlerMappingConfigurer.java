@@ -82,7 +82,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
                 if (!StringUtils.hasText(resourcePath)) {
                     resourcePath = entityType.getName().toLowerCase();
                 }
-                String path = apiRootPath + PATH_DELIMITER + resourcePath;
+                String path = API_ROOT_PATH + PATH_DELIMITER + resourcePath;
                 LOGGER.log(Level.FINE, "root path for resource: {0}", path);
 
                 // Added to endpoint resource types for documentation customiser
