@@ -67,94 +67,123 @@ public class SpelExpressionToPredicateConverter {
      *  Allows methods where method is supported by {@link #getMethodPredicate(SpelNode, CriteriaBuilder, From<?, ?>)
      */
     private static Predicate getPredicate(SpelNode node, CriteriaBuilder builder, From<?, ?> root) {
-        Predicate predicate = null;
 
         // Handle logical operators
-        if (node instanceof OpOr) {
-            var x = getPredicate(node.getChild(0), builder, root);
-            var y = getPredicate(node.getChild(1), builder, root);
-            predicate = builder.or(x, y);
-        } else if (node instanceof OpAnd) {
-            var x = getPredicate(node.getChild(0), builder, root);
-            var y = getPredicate(node.getChild(1), builder, root);
-            predicate = builder.and(x, y);
-        } else if (node instanceof OperatorNot) {
-            var x = getPredicate(node.getChild(0), builder, root);
-            predicate = builder.not(x);
-        } else if (node instanceof MethodReference) {
-            // delegate method reference to getMethodPredicate 
-            predicate = getMethodPredicate((MethodReference) node, builder, root);
-        } else {
-            // At this point we are looking for "property {operator} property/literal"
-            // so we can only handle 2 children the left side and the right side
-            // of the expression
-            if (node.getChildCount() == 2) {
-
-                // Left side must be a field
-                SpelNode leftNode = node.getChild(0);
-                if (!PropertyOrFieldReference.class.isAssignableFrom(leftNode.getClass())) {
-                    LOGGER.severe("Left hand side was not assignable to PropertyOrFieldReference");
-                    throw new InvalidFilterException("Left hand side must be a field");
-                }
-                PropertyOrFieldReference fieldReference = (PropertyOrFieldReference) leftNode;
-                // TODO: Better error handling for left and right side to return bad request and report invalid field 
-                Path<Comparable<Object>> field = root.get(fieldReference.getName());
-                Class<?> clazz = field.getJavaType();
-
-                // Get the right side
-                SpelNode rightNode = node.getChild(1);
-                // handle field comparison
-                if (rightNode instanceof PropertyOrFieldReference) {
-                    Path<Comparable<Object>> rightField = root.get(((PropertyOrFieldReference) rightNode).getName());
-                    if (node instanceof OpEQ) {
-                        predicate = builder.equal(field, rightField);
-                    } else if (node instanceof OpNE) {
-                        predicate = builder.notEqual(field, rightField);
-                    } else if (node instanceof OpGE) {
-                        predicate = builder.greaterThanOrEqualTo(field, rightField);
-                    } else if (node instanceof OpGT) {
-                        predicate = builder.greaterThan(field, rightField);
-                    } else if (node instanceof OpLE) {
-                        predicate = builder.lessThanOrEqualTo(field, rightField);
-                    } else if (node instanceof OpLT) {
-                        predicate = builder.lessThan(field, rightField);
-                    } else {
-                        LOGGER.severe("Left hand side and right hand side where properties but the operator was not supported");
-                        throw new InvalidFilterException("Operator not valid. " + node.toStringAST());
-                    }
-                    // handle literal comparison
-                } else if (Literal.class.isAssignableFrom(rightNode.getClass())) {
-                    Object rightValue = convertTo(((Literal) rightNode).getLiteralValue().getValue(), clazz);
-                    @SuppressWarnings("unchecked")
-                    Comparable<Object> comparableValue = (Comparable<Object>) rightValue;
-
-                    if (node instanceof OpEQ) {
-                        predicate = builder.equal(field, comparableValue);
-                    } else if (node instanceof OpNE) {
-                        predicate = builder.notEqual(field, comparableValue);
-                    } else if (node instanceof OpGE) {
-                        predicate = builder.greaterThanOrEqualTo(field, comparableValue);
-                    } else if (node instanceof OpGT) {
-                        predicate = builder.greaterThan(field, comparableValue);
-                    } else if (node instanceof OpLE) {
-                        predicate = builder.lessThanOrEqualTo(field, comparableValue);
-                    } else if (node instanceof OpLT) {
-                        predicate = builder.lessThan(field, comparableValue);
-                    } else if (node instanceof OperatorMatches) {
-                        // TODO: Check if clazz is a string
-                        predicate = builder.like(field.as(String.class), (String) rightValue);
-                    } else {
-                        LOGGER.severe("Left hand side and right hand side where properties but the operator was not supported");
-                        throw new InvalidFilterException("Operator not valid. " + node.toStringAST());
-                    }
-                } else {
-                    throw new InvalidFilterException("Right hand side must be a literal or a field");
-                }
-            } else {
-                throw new InvalidFilterException("Unknown expression");
-            }
+        Predicate logicalPredicate = getLogicalPredicate(node, builder, root);
+        if (logicalPredicate != null) {
+            return logicalPredicate;
         }
-        return predicate;
+
+        // Handle method references 
+        if (node instanceof MethodReference) {
+            return getMethodPredicate((MethodReference) node, builder, root);
+        }
+
+        // At this point we are looking for "property {operator} property/literal"
+        // so we can only handle 2 children the left side and the right side
+        // of the expression. Throw if there are not only 2 children
+        if (node.getChildCount() != 2) {
+            throw new InvalidFilterException("Unknown expression");
+        }
+
+        // Left side must be a field
+        SpelNode leftNode = node.getChild(0);
+        if (!PropertyOrFieldReference.class.isAssignableFrom(leftNode.getClass())) {
+            LOGGER.severe("Left hand side was not assignable to PropertyOrFieldReference");
+            throw new InvalidFilterException("Left hand side must be a field");
+        }
+
+        PropertyOrFieldReference fieldReference = (PropertyOrFieldReference) leftNode;
+        Path<Comparable<Object>> field = root.get(fieldReference.getName());
+        Class<?> clazz = field.getJavaType();
+
+        // Get the right side
+        SpelNode rightNode = node.getChild(1);
+        // handle field comparison
+        if (rightNode instanceof PropertyOrFieldReference) {
+            Path<Comparable<Object>> rightField = root.get(((PropertyOrFieldReference) rightNode).getName());
+            Predicate predicate = getEqualityOrRelativeOperatorPredicate(node, builder, field, rightField);
+            if (predicate != null) {
+                return predicate;
+            } 
+            
+            LOGGER.severe("Left hand side and right hand side where properties but the operator was not supported");
+            throw new InvalidFilterException("Operator not valid. " + node.toStringAST());
+
+        }
+        
+        // handle literal comparison
+        if (Literal.class.isAssignableFrom(rightNode.getClass())) {
+            Object rightValue = convertTo(((Literal) rightNode).getLiteralValue().getValue(), clazz);
+            @SuppressWarnings("unchecked")
+            Comparable<Object> comparableValue = (Comparable<Object>) rightValue;
+            Predicate predicate = getEqualityOrRelativeOperatorPredicate(node, builder, field, comparableValue);
+            if (predicate != null) {
+                return predicate;
+            }
+            if (node instanceof OperatorMatches) {
+                // TODO: Check if clazz is a string
+                return builder.like(field.as(String.class), (String) rightValue);
+            }
+        
+            LOGGER.severe("Left hand side and right hand side where properties but the operator was not supported");
+            throw new InvalidFilterException("Operator not valid. " + node.toStringAST());
+        
+        }
+        throw new InvalidFilterException("Right hand side must be a literal or a field");
+
+    }
+
+    private static Predicate getLogicalPredicate(SpelNode node, CriteriaBuilder builder, From<?, ?> root) {
+        if (node instanceof OpOr) {
+            Predicate x = getPredicate(node.getChild(0), builder, root);
+            Predicate y = getPredicate(node.getChild(1), builder, root);
+            return builder.or(x, y);
+        } else if (node instanceof OpAnd) {
+            Predicate x = getPredicate(node.getChild(0), builder, root);
+            Predicate y = getPredicate(node.getChild(1), builder, root);
+            return builder.and(x, y);
+        } else if (node instanceof OperatorNot) {
+            Predicate x = getPredicate(node.getChild(0), builder, root);
+            return builder.not(x);
+        }
+        return null;
+    }
+
+    private static Predicate getEqualityOrRelativeOperatorPredicate(SpelNode node, CriteriaBuilder builder,
+            Path<Comparable<Object>> field, Comparable<Object> comparableValue) {
+        if (node instanceof OpEQ) {
+            return builder.equal(field, comparableValue);
+        } else if (node instanceof OpNE) {
+            return builder.notEqual(field, comparableValue);
+        } else if (node instanceof OpGE) {
+            return builder.greaterThanOrEqualTo(field, comparableValue);
+        } else if (node instanceof OpGT) {
+            return builder.greaterThan(field, comparableValue);
+        } else if (node instanceof OpLE) {
+            return builder.lessThanOrEqualTo(field, comparableValue);
+        } else if (node instanceof OpLT) {
+            return builder.lessThan(field, comparableValue);
+        }
+        return null;
+    }
+
+    private static Predicate getEqualityOrRelativeOperatorPredicate(SpelNode node, CriteriaBuilder builder,
+            Path<Comparable<Object>> field, Path<Comparable<Object>> comparableField) {
+        if (node instanceof OpEQ) {
+            return builder.equal(field, comparableField);
+        } else if (node instanceof OpNE) {
+            return builder.notEqual(field, comparableField);
+        } else if (node instanceof OpGE) {
+            return builder.greaterThanOrEqualTo(field, comparableField);
+        } else if (node instanceof OpGT) {
+            return builder.greaterThan(field, comparableField);
+        } else if (node instanceof OpLE) {
+            return builder.lessThanOrEqualTo(field, comparableField);
+        } else if (node instanceof OpLT) {
+            return builder.lessThan(field, comparableField);
+        }
+        return null;
     }
 
     private enum Method {
@@ -187,21 +216,18 @@ public class SpelExpressionToPredicateConverter {
         Path<Comparable<Object>> field = root.get(fieldReference.getName());
         Class<?> clazz = field.getJavaType();
 
-        Predicate predicate = null;
         Comparable<Object>[] args;
 
         // Create the appropriate predicate
         switch (method) {
             case BETWEEN:
                 args = getLiteralValues(node, 1, clazz);
-                predicate = builder.between(root.get(fieldReference.getName()), args[0], args[1]);
-                break;
+                return builder.between(root.get(fieldReference.getName()), args[0], args[1]);
+            default:
             case IN:
                 args = getLiteralValues(node, 1, clazz);
-                predicate = field.in((Object[]) args);
-                break;
+                return field.in((Object[]) args);
         }
-        return predicate;
     }
 
     /**
