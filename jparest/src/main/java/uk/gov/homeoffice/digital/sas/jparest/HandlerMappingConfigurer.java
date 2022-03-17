@@ -19,11 +19,12 @@ import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.EntityType;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.*;
 
 /**
  * Discovers JPA entities annotated with {@link Resource}
@@ -45,12 +46,6 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
     ApplicationContext context;
 
     private final ResourceEndpoint resourceEndpoint;
-
-    public static final String URL_ID_PATH_PARAM =  "/{id}";
-    public static final String URL_RELATED_ID_PATH_PARAM =  "/{related_id}";
-    public static final String apiRootPath = "/resources";
-    public static final String PATH_DELIMITER = "/";
-
 
     @Autowired
     public HandlerMappingConfigurer(EntityManager entityManager,
@@ -149,7 +144,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
         var method = ResourceApiController.class.getDeclaredMethod(methodName, methodArgs);
 
         LOGGER.finest("Building RequestMappingInfo");
-        RequestMappingInfo.Builder builder = RequestMappingInfo.paths(path).options(this.builderOptions)
+        var builder = RequestMappingInfo.paths(path).options(this.builderOptions)
                 .methods(requestMethod)
                 .produces(MediaType.APPLICATION_JSON_VALUE);
 
