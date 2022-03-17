@@ -10,7 +10,6 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -23,7 +22,6 @@ import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 
 import java.util.Map.Entry;
-import java.util.Optional;
 
 /**
  * Extends the OpenApi model to include the endpoints added by the resource
@@ -42,24 +40,24 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * ResourceApiController
      */
     public void customise(OpenAPI openApi) {
-        Components components = openApi.getComponents();
+        var components = openApi.getComponents();
 
         // Ensure the ApiResponse schema is registered
         // along with the metadata schema
         Schema<?> apiResponseSchema = ensureSchema(components, "ApiResponse", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
         ensureSchema(components, "Metadata", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
         Schema<?> pageableSchema = ensureSchema(components, "Pageable", Pageable.class);
-        Pageable value = new Pageable(0,10, null);
+        var value = new Pageable(0,10, null);
         pageableSchema.setExample(value);
 
         // Get the schema for the response object and then extend the items
         // property to be one of the entities exposed by the controller
-        ComposedSchema composedSchema = new ComposedSchema();
+        var composedSchema = new ComposedSchema();
         for (Class<?> resource : endpoint.getResourceTypes()) {
             composedSchema.addOneOfItem(
                     SpringDocAnnotationsUtils.extractSchema(components, resource, null, null));
         }
-        ArraySchema arraySchema = (ArraySchema) apiResponseSchema.getProperties()
+        var arraySchema = (ArraySchema) apiResponseSchema.getProperties()
                 .get("items");
         arraySchema.setItems(composedSchema);
 
@@ -67,7 +65,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         // generate documentation for all of the registered endpoints
         for (Entry<Class<?>, ResourceEndpoint.RootDescriptor> element : endpoint.getDescriptors().entrySet()) {
             Class<?> clazz = element.getKey();
-            ResourceEndpoint.RootDescriptor rootDescriptor = element.getValue();
+            var rootDescriptor = element.getValue();
 
             // Group all of the resource endpoints together
             String tag = clazz.getSimpleName();
@@ -83,7 +81,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
                     .entrySet()) {
 
                 Class<?> relatedClazz = relatedElement.getKey();
-                ResourceEndpoint.Descriptor relatedDescriptor = relatedElement.getValue();
+                var relatedDescriptor = relatedElement.getValue();
 
                 PathItem relatedRootPath = createRelatedRootPath(tag, relatedClazz, rootDescriptor.getIdFieldType());
                 openApi.path(relatedDescriptor.getPath(), relatedRootPath);
@@ -106,20 +104,20 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      */
     private PathItem createRootPath(String tag, Class<?> clazz) {
 
-        PathItem pi = new PathItem();
+        var pi = new PathItem();
 
         ApiResponse response = getResourceResponse(clazz);
         ApiResponses responses = new ApiResponses().addApiResponse("200", response);
 
 
-        Operation get = new Operation();
+        var get = new Operation();
         get.addParametersItem(pageableParameter);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
         get.addTagsItem(tag);
         pi.get(get);
 
-        Operation post = new Operation();
+        var post = new Operation();
         post.setResponses(responses);
         post.addTagsItem(tag);
         pi.post(post);
@@ -139,22 +137,22 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      */
     private PathItem createItemPath(String tag, Class<?> clazz, Class<?> idClazz) {
 
-        PathItem pi = new PathItem();
+        var pi = new PathItem();
 
         ApiResponse response = getResourceResponse(clazz);
         ApiResponses responses = new ApiResponses().addApiResponse("200", response);
-        Operation get = new Operation();
+        var get = new Operation();
         get.setResponses(responses);
         get.addTagsItem(tag);
         pi.get(get);
 
-        Parameter idParameter = getParameter(idClazz, "path", "id");
+        var idParameter = getParameter(idClazz, "path", "id");
         get.addParametersItem(idParameter);
-        Operation put = new Operation();
+        var put = new Operation();
         put.setResponses(responses);
         put.addTagsItem(tag);
         pi.put(put);
-        Operation delete = new Operation();
+        var delete = new Operation();
 
         ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", emptyResponse);
         delete.addParametersItem(idParameter);
@@ -178,12 +176,12 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      */
     private PathItem createRelatedRootPath(String tag, Class<?> clazz, Class<?> idClazz) {
 
-        PathItem pi = new PathItem();
+        var pi = new PathItem();
         ApiResponse response = getResourceResponse(clazz);
         ApiResponses responses = new ApiResponses().addApiResponse("200", response);
-        Parameter idParameter = getParameter(idClazz, "path", "id");
+        var idParameter = getParameter(idClazz, "path", "id");
 
-        Operation get = new Operation();
+        var get = new Operation();
         get.addParametersItem(idParameter);
         get.addParametersItem(pageableParameter);
         get.addParametersItem(getFilterParameter(clazz));
@@ -206,20 +204,20 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     private PathItem createRelatedItemPath(String tag, Class<?> idClazz,
                                            Class<?> relatedIdClazz) {
 
-        PathItem pi = new PathItem();
+        var pi = new PathItem();
 
         ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", emptyResponse);
 
-        Parameter idParameter = getParameter(idClazz, "path", "id");
-        Parameter relatedIdParameter = getArrayParameter(relatedIdClazz, "path", "related_id");
-        Operation delete = new Operation();
+        var idParameter = getParameter(idClazz, "path", "id");
+        var relatedIdParameter = getArrayParameter(relatedIdClazz, "path", "related_id");
+        var delete = new Operation();
         delete.addParametersItem(idParameter);
         delete.addParametersItem(relatedIdParameter);
         delete.setResponses(defaultResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
 
-        Operation put = new Operation();
+        var put = new Operation();
         put.addParametersItem(idParameter);
         put.addParametersItem(relatedIdParameter);
         put.setResponses(defaultResponses);
@@ -241,10 +239,10 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * @return
      */
     private ApiResponse getResourceResponse(Class<?> clazz) {
-        ApiResponse response = new ApiResponse();
+        var response = new ApiResponse();
 
-        Content c = new Content();
-        MediaType mt = new MediaType();
+        var c = new Content();
+        var mt = new MediaType();
         Schema<?> responseSchema = getTypedApiResponseSchema(clazz);
         mt.schema(responseSchema);
         c.addMediaType("*/*", mt);
@@ -270,11 +268,11 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
                 .get("ApiResponse");
 
         // Get the schema for the given class
-        Components newComponents = new Components();
+        var newComponents = new Components();
         Schema<?> clazzSchema = SpringDocAnnotationsUtils.extractSchema(newComponents, clazz, null, null);
 
         // Set the schema of the items property to the class schema
-        ArraySchema arraySchema = (ArraySchema) schema.getProperties().get("items");
+        var arraySchema = (ArraySchema) schema.getProperties().get("items");
         arraySchema.setItems(clazzSchema);
 
         return schema;
@@ -291,7 +289,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * @return A Parameter with a schema for the given class
      */
     private Parameter getParameter(Class<?> clazz, String setIn, String name) {
-        Parameter parameter = new Parameter();
+        var parameter = new Parameter();
 
         Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
 
@@ -313,9 +311,9 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * @return A Parameter with an array schema for items of the given class
      */
     private Parameter getArrayParameter(Class<?> clazz, String setIn, String name) {
-        Parameter parameter = new Parameter();
+        var parameter = new Parameter();
         Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
-        ArraySchema as = new ArraySchema();
+        var as = new ArraySchema();
         as.setItems(schema);
 
         parameter.schema(as);
@@ -334,9 +332,9 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * @return An empty ApiResponse
      */
     private static ApiResponse emptyResponse() {
-        ApiResponse deleteResponse = new io.swagger.v3.oas.models.responses.ApiResponse();
-        Content deleteContent = new Content();
-        MediaType deleteMediaType = new MediaType();
+        var deleteResponse = new io.swagger.v3.oas.models.responses.ApiResponse();
+        var deleteContent = new Content();
+        var deleteMediaType = new MediaType();
         deleteMediaType.schema(new StringSchema());
         deleteContent.addMediaType("*/*", deleteMediaType);
         deleteResponse.content(deleteContent);
@@ -348,8 +346,8 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * @return Parameter representing pageable class
      */
     private static Parameter pageableParameter() {
-        Parameter parameter = new Parameter();
-        Components newComponents = new Components();
+        var parameter = new Parameter();
+        var newComponents = new Components();
 
         Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(newComponents, Pageable.class, null, null);
 
@@ -365,8 +363,8 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * @return Parameter representing SpelExpression
      */
     private static Parameter getFilterParameter(Class<?> clazz) {
-        Parameter parameter = new Parameter();
-        Components newComponents = new Components();
+        var parameter = new Parameter();
+        var newComponents = new Components();
 
         Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(newComponents, String.class, null, null);
         
