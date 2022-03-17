@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @Transactional
 @ContextConfiguration(locations = "/test-context.xml")
-public class HandlerMappingConfigurerTest {
+class HandlerMappingConfigurerTest {
 
 
     @PersistenceContext
@@ -72,7 +72,7 @@ public class HandlerMappingConfigurerTest {
 
     //Resources Path Registry Tests
     @Test
-    public void registerUserController_listPathsAreRegisteredForResources() {
+    void registerUserController_listPathsAreRegisteredForResources() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
         assertThat(RESOURCE_TO_PATH_NAME_MAP).allSatisfy((resourcePathName, resourceClass) -> {
@@ -90,7 +90,7 @@ public class HandlerMappingConfigurerTest {
 
 
     @Test
-    public void registerUserController_getPathsAreRegisteredForResources() {
+    void registerUserController_getPathsAreRegisteredForResources() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
@@ -108,7 +108,7 @@ public class HandlerMappingConfigurerTest {
 
 
     @Test
-    public void registerUserController_createPathsAreRegisteredForResources() {
+    void registerUserController_createPathsAreRegisteredForResources() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
@@ -125,7 +125,7 @@ public class HandlerMappingConfigurerTest {
     }
 
     @Test
-    public void registerUserController_deletePathsAreRegisteredForResources() {
+    void registerUserController_deletePathsAreRegisteredForResources() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
@@ -142,7 +142,7 @@ public class HandlerMappingConfigurerTest {
     }
 
     @Test
-    public void registerUserController_updatePathsAreRegisteredForResources() {
+    void registerUserController_updatePathsAreRegisteredForResources() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
@@ -160,7 +160,7 @@ public class HandlerMappingConfigurerTest {
 
 
     @Test
-    public void registerUserController_resourcesAreAddedToResourceEndpoint() {
+    void registerUserController_resourcesAreAddedToResourceEndpoint() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
@@ -175,7 +175,7 @@ public class HandlerMappingConfigurerTest {
 
     //Related Resources Path Registry Tests
     @Test
-    public void registerUserController_getPathsAreRegisteredForRelatedResources() {
+    void registerUserController_getPathsAreRegisteredForRelatedResources() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
@@ -198,7 +198,7 @@ public class HandlerMappingConfigurerTest {
     }
 
     @Test
-    public void registerUserController_deletePathsAreRegisteredForRelatedResources() {
+    void registerUserController_deletePathsAreRegisteredForRelatedResources() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
@@ -221,7 +221,7 @@ public class HandlerMappingConfigurerTest {
     }
 
     @Test
-    public void registerUserController_updatePathsAreRegisteredForRelatedResources() {
+    void registerUserController_updatePathsAreRegisteredForRelatedResources() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
@@ -245,7 +245,7 @@ public class HandlerMappingConfigurerTest {
 
 
     @Test
-    public void registerUserController_relatedResourcesAreAddedToResourceEndpoint() {
+    void registerUserController_relatedResourcesAreAddedToResourceEndpoint() {
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
         RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
