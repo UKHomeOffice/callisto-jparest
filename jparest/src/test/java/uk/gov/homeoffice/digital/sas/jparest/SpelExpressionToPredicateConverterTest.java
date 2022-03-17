@@ -1,6 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
+import org.hibernate.query.criteria.internal.expression.LiteralExpression;
 import org.hibernate.query.criteria.internal.predicate.ComparisonPredicate;
+import org.hibernate.query.criteria.internal.predicate.CompoundPredicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -78,8 +80,8 @@ class SpelExpressionToPredicateConverterTest {
         assertThat(predicate).isNotNull();
         assertThat(predicate.getOperator().name()).isEqualTo("OR");
         assertThat(predicate.getExpressions().size()).isEqualTo(2);
-        assertThat(predicate.getExpressions().get(0).in(expression));
-        assertThat(predicate.getExpressions().get(1).in(expression));
+        assertThat(predicate.getExpressions().get(0).in(expression)).isNotNull();
+        assertThat(predicate.getExpressions().get(1).in(expression)).isNotNull();
     }
 
     @Test
@@ -93,8 +95,8 @@ class SpelExpressionToPredicateConverterTest {
         assertThat(predicate).isNotNull();
         assertThat(predicate.getOperator().name()).isEqualTo("AND");
         assertThat(predicate.getExpressions().size()).isEqualTo(2);
-        assertThat(predicate.getExpressions().get(0).in(expression));
-        assertThat(predicate.getExpressions().get(1).in(expression));
+        assertThat(predicate.getExpressions().get(0).in(expression)).isNotNull();
+        assertThat(predicate.getExpressions().get(1).in(expression)).isNotNull();
     }
 
     @Test
@@ -106,8 +108,8 @@ class SpelExpressionToPredicateConverterTest {
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate).isNotNull();
         assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.EQUAL);
-        assertThat(predicate.getRightHandOperand().isNotNull());
-        assertThat(predicate.getRightHandOperand().in(1L));
+        assertThat(predicate.getRightHandOperand()).isNotNull();
+        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
@@ -119,8 +121,8 @@ class SpelExpressionToPredicateConverterTest {
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate).isNotNull();
         assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.GREATER_THAN);
-        assertThat(predicate.getRightHandOperand().isNotNull());
-        assertThat(predicate.getRightHandOperand().in(1L));
+        assertThat(predicate.getRightHandOperand()).isNotNull();
+        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
@@ -132,8 +134,8 @@ class SpelExpressionToPredicateConverterTest {
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate).isNotNull();
         assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.GREATER_THAN_OR_EQUAL);
-        assertThat(predicate.getRightHandOperand().isNotNull());
-        assertThat(predicate.getRightHandOperand().in(1L));
+        assertThat(predicate.getRightHandOperand()).isNotNull();
+        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
@@ -145,8 +147,8 @@ class SpelExpressionToPredicateConverterTest {
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate).isNotNull();
         assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.LESS_THAN);
-        assertThat(predicate.getRightHandOperand().isNotNull());
-        assertThat(predicate.getRightHandOperand().in(1L));
+        assertThat(predicate.getRightHandOperand()).isNotNull();
+        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
@@ -158,8 +160,8 @@ class SpelExpressionToPredicateConverterTest {
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate).isNotNull();
         assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.LESS_THAN_OR_EQUAL);
-        assertThat(predicate.getRightHandOperand().isNotNull());
-        assertThat(predicate.getRightHandOperand().in(1L));
+        assertThat(predicate.getRightHandOperand()).isNotNull();
+        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
@@ -171,12 +173,62 @@ class SpelExpressionToPredicateConverterTest {
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate).isNotNull();
         assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.EQUAL);
-        assertThat(predicate.getRightHandOperand().isNotNull());
-        assertThat(predicate.getRightHandOperand().in(1L));
+        assertThat(predicate.getRightHandOperand()).isNotNull();
+    }
+
+    @Test
+    void test_convert_with_field_or_operation_in_filter() {
+        CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+        Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
+        SpelExpression expression = expressionParser.parseRaw(String.format("id == dummyEntityBSet or id ==2", 1L));
+
+        CompoundPredicate predicate = (CompoundPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
+        assertThat(predicate).isNotNull();
+        assertThat(predicate.getOperator().name()).isEqualTo("OR");
+    }
+
+    @Test
+    void test_convert_with_field_used_in_filter() {
+        CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+        Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
+
+        SpelExpression expression = parseExpression("id<=dummyEntityBSet");
+        ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
+        assertThat(predicate).isNotNull();
+        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.LESS_THAN_OR_EQUAL);
+
+        predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(parseExpression("id<dummyEntityBSet"), builder, root);
+        assertThat(predicate).isNotNull();
+        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.LESS_THAN);
+
+        predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(parseExpression("id==dummyEntityBSet"), builder, root);
+        assertThat(predicate).isNotNull();
+        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.EQUAL);
+
+        predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(parseExpression("id>=dummyEntityBSet"), builder, root);
+        assertThat(predicate).isNotNull();
+        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.GREATER_THAN_OR_EQUAL);
+
+        predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(parseExpression("id>dummyEntityBSet"), builder, root);
+        assertThat(predicate).isNotNull();
+        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.GREATER_THAN);
     }
 
     @Test
     void test_convert_throws_InvalidFilterException_with_describeError_in_filter() {
+        CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+        Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
+        SpelExpression expression = expressionParser.parseRaw(String.format("1==id", 1L));
+
+        InvalidFilterException exception = assertThrows(
+                InvalidFilterException.class,
+                () -> SpelExpressionToPredicateConverter.convert(expression, builder, root),
+                "Left hand side must be a field"
+        );
+    }
+
+    @Test
+    void test_convert_throws_InvalidFilterException_with_LeftHandSideMustBeAField() {
         CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
         Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
         SpelExpression expression = expressionParser.parseRaw(String.format("id!=1", 1L));
@@ -194,4 +246,7 @@ class SpelExpressionToPredicateConverterTest {
         return new ResourceApiController<T, U>(clazz, entityManager, transactionManager, entityUtils);
     }
 
+    private SpelExpression parseExpression(String expression) {
+        return expressionParser.parseRaw(String.format(expression, 1L));
+    }
 }
