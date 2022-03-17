@@ -20,4 +20,8 @@ public class DummyEntityC extends BaseEntity {
     @Setter
     private String description;
 
+    @Getter
+    @Setter
+    private Long index;
+
 }

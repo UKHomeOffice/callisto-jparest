@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @Transactional
 @ContextConfiguration(locations = "/test-context.xml")
-public class EntityUtilsTest {
+class EntityUtilsTest {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(EntityUtilsTest.class);
 

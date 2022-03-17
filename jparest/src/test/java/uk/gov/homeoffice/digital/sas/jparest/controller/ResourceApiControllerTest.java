@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @Transactional
 @ContextConfiguration(locations = "/test-context.xml")
-public class ResourceApiControllerTest {
+class ResourceApiControllerTest {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -92,7 +92,7 @@ public class ResourceApiControllerTest {
         ApiResponse<DummyEntityA> apiResponse = response.getBody();
         DummyEntityA dummy = apiResponse.getItems().get(0);
 
-        assertThat(apiResponse.getItems().size() == 1).isTrue();
+        assertThat(apiResponse.getItems().size()).isEqualTo(1);
         assertThat(dummy.getId()).isEqualTo(2);
     }
 
@@ -118,12 +118,14 @@ public class ResourceApiControllerTest {
 
         String payload = "{" +
                 "            \"id\": 100," +
-                "            \"description\": \"Dummy Entity C 100\"" +
+                "            \"description\": \"Dummy Entity C 100\"," +
+                "            \"index\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
                 "            \"id\": 100," +
-                "            \"description\": \"Updated Dummy Entity C 100\"" +
+                "            \"description\": \"Updated Dummy Entity C 100\"," +
+                "            \"index\": 2" +
                 "        }";
 
         ResourceApiController<DummyEntityC, Integer> controller = getResourceApiController(DummyEntityC.class, Integer.class);
@@ -138,6 +140,7 @@ public class ResourceApiControllerTest {
         assertThat(apiResponse.getItems().size()).isEqualTo(1);
         assertThat(dummy).isNotNull();
         assertThat(dummy.getId()).isEqualTo(100);
+        assertThat(dummy.getIndex()).isEqualTo(2);
         assertThat(dummy.getDescription()).isEqualTo("Updated Dummy Entity C 100");
 
         response = (ResponseEntity<ApiResponse<DummyEntityC>>) controller.get(100);
@@ -145,6 +148,7 @@ public class ResourceApiControllerTest {
         dummy = apiResponse.getItems().get(0);
         assertThat(dummy).isNotNull();
         assertThat(dummy.getId()).isEqualTo(100);
+        assertThat(dummy.getIndex()).isEqualTo(2);
         assertThat(dummy.getDescription()).isEqualTo("Updated Dummy Entity C 100");
 
     }
@@ -154,7 +158,8 @@ public class ResourceApiControllerTest {
     void shouldDeleteData() {
         String payload = "{" +
                 "            \"id\": 100," +
-                "            \"description\": \"Dummy Entity C 100\"" +
+                "            \"description\": \"Dummy Entity C 100\"," +
+                "            \"index\": 1" +
                 "        }";
 
         ResourceApiController<DummyEntityC, Integer> controller = getResourceApiController(DummyEntityC.class, Integer.class);

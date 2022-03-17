@@ -108,6 +108,8 @@ public class SpelExpressionToPredicateConverter {
                     Path<Comparable<Object>> rightField = root.get(((PropertyOrFieldReference) rightNode).getName());
                     if (node instanceof OpEQ) {
                         predicate = builder.equal(field, rightField);
+                    } else if (node instanceof OpNE) {
+                        predicate = builder.notEqual(field, rightField);
                     } else if (node instanceof OpGE) {
                         predicate = builder.greaterThanOrEqualTo(field, rightField);
                     } else if (node instanceof OpGT) {
@@ -117,9 +119,8 @@ public class SpelExpressionToPredicateConverter {
                     } else if (node instanceof OpLT) {
                         predicate = builder.lessThan(field, rightField);
                     } else {
-                        // TODO: Probably should support not equal here
                         LOGGER.severe("Left hand side and right hand side where properties but the operator was not supported");
-                        throw new InvalidFilterException("Operator not valid between two fields. " + node.toStringAST());
+                        throw new InvalidFilterException("Operator not valid. " + node.toStringAST());
                     }
                     // handle literal comparison
                 } else if (Literal.class.isAssignableFrom(rightNode.getClass())) {
@@ -129,6 +130,8 @@ public class SpelExpressionToPredicateConverter {
 
                     if (node instanceof OpEQ) {
                         predicate = builder.equal(field, comparableValue);
+                    } else if (node instanceof OpNE) {
+                        predicate = builder.notEqual(field, comparableValue);
                     } else if (node instanceof OpGE) {
                         predicate = builder.greaterThanOrEqualTo(field, comparableValue);
                     } else if (node instanceof OpGT) {
@@ -141,7 +144,8 @@ public class SpelExpressionToPredicateConverter {
                         // TODO: Check if clazz is a string
                         predicate = builder.like(field.as(String.class), (String) rightValue);
                     } else {
-                        throw new InvalidFilterException("TODO: Describe error");
+                        LOGGER.severe("Left hand side and right hand side where properties but the operator was not supported");
+                        throw new InvalidFilterException("Operator not valid. " + node.toStringAST());
                     }
                 } else {
                     throw new InvalidFilterException("Right hand side must be a literal or a field");
@@ -153,6 +157,10 @@ public class SpelExpressionToPredicateConverter {
         return predicate;
     }
 
+    private enum Method {
+        IN, BETWEEN
+    }
+
     /**
      * Converts Spel Method reference to predicate
      * Possible methods are
@@ -160,6 +168,14 @@ public class SpelExpressionToPredicateConverter {
      * <li>Between</ul>
      */
     private static Predicate getMethodPredicate(MethodReference node, CriteriaBuilder builder, From<?, ?> root) {
+
+        MethodReference methodReference = (MethodReference) node;
+        Method method;
+        try {
+            method = Method.valueOf(methodReference.getName().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new InvalidFilterException("Unrecognised method " + methodReference.getName());
+        }
 
         // To handle a method the first argument must be the field reference
         SpelNode firstArg = node.getChild(0);
@@ -171,22 +187,19 @@ public class SpelExpressionToPredicateConverter {
         Path<Comparable<Object>> field = root.get(fieldReference.getName());
         Class<?> clazz = field.getJavaType();
 
-        Predicate predicate;
+        Predicate predicate = null;
         Comparable<Object>[] args;
 
         // Create the appropriate predicate
-        switch (node.getName()) {
-            case "Between":
+        switch (method) {
+            case BETWEEN:
                 args = getLiteralValues(node, 1, clazz);
                 predicate = builder.between(root.get(fieldReference.getName()), args[0], args[1]);
                 break;
-            case "In":
+            case IN:
                 args = getLiteralValues(node, 1, clazz);
                 predicate = field.in((Object[]) args);
                 break;
-            default:
-                // Throw if the method is not handled
-                throw new InvalidFilterException("Unrecognised method " + node.getName());
         }
         return predicate;
     }
@@ -202,7 +215,7 @@ public class SpelExpressionToPredicateConverter {
             items.add(rightValue);
         }
         @SuppressWarnings("unchecked")
-        var result = new Comparable[node.getChildCount() - 1];
+        Comparable<Object>[] result = new Comparable[node.getChildCount() - 1];
         return items.toArray(result);
     }
 
