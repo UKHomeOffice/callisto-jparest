@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-public class ResourceOpenApiCustomiserTest {
+class ResourceOpenApiCustomiserTest {
 
 
     @Mock
@@ -40,13 +40,11 @@ public class ResourceOpenApiCustomiserTest {
     private static final String PATH_ID = "/{id}";
     private static final String PATH_RELATED_ID = "/{related_id}";
 
-
     @BeforeEach
     void setUp() {
         this.resourceOpenApiCustomiser = new ResourceOpenApiCustomiser();
         MockitoAnnotations.openMocks(this);
     }
-
 
     @Test
     void customise_resourceRootPathAddedToOpenApi() {
@@ -78,7 +76,6 @@ public class ResourceOpenApiCustomiserTest {
                 resourceClass, ApiResponseTestUtil.createDefaultApiResponse(resourceClass));
         assertThat(actualPostOperation).isEqualTo(expectedPostOperation);
     }
-
 
     @Test
     void customise_resourceItemPathAddedToOpenApi() {
@@ -116,8 +113,6 @@ public class ResourceOpenApiCustomiserTest {
         assertThat(actualDeleteOperation).isEqualTo(expectedDeleteOperation);
     }
 
-
-
     @Test
     void customise_relatedResourceRootPathAddedToOpenApi() {
 
@@ -147,8 +142,6 @@ public class ResourceOpenApiCustomiserTest {
         HttpOperationTestUtil.addFilterParameterToOperation(expectedGetOperation, resourceClass);
         assertThat(actualGetOperation).isEqualTo(expectedGetOperation);
     }
-
-
 
     @Test
     void customise_relatedResourceItemPathAddedToOpenApi() {
@@ -186,8 +179,6 @@ public class ResourceOpenApiCustomiserTest {
         assertThat(actualPutOperation).isEqualTo(expectedPutOperation);
     }
 
-
-
     @Test
     void customise_resourceHasBlankFilterExampleObject_errorThrown() {
 
@@ -205,6 +196,5 @@ public class ResourceOpenApiCustomiserTest {
                 () -> resourceOpenApiCustomiser.customise(openApi));
         assertThat(actualException.getMessage()).contains("Example could not be found");
     }
-
 
 }

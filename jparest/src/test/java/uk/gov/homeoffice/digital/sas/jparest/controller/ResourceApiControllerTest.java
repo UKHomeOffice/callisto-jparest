@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @Transactional
 @ContextConfiguration(locations = "/test-context.xml")
-public class ResourceApiControllerTest {
+class ResourceApiControllerTest {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -92,7 +92,7 @@ public class ResourceApiControllerTest {
         ApiResponse<DummyEntityA> apiResponse = response.getBody();
         DummyEntityA dummy = apiResponse.getItems().get(0);
 
-        assertThat(apiResponse.getItems().size() == 1).isTrue();
+        assertThat(apiResponse.getItems().size()).isEqualTo(1);
         assertThat(dummy.getId()).isEqualTo(2);
     }
 
