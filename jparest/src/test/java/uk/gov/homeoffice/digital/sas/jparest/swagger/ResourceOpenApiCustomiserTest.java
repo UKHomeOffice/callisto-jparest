@@ -42,14 +42,14 @@ public class ResourceOpenApiCustomiserTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         this.resourceOpenApiCustomiser = new ResourceOpenApiCustomiser();
         MockitoAnnotations.openMocks(this);
     }
 
 
     @Test
-    public void customise_resourceRootPathAddedToOpenApi() {
+    void customise_resourceRootPathAddedToOpenApi() {
 
         when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
 
@@ -81,7 +81,7 @@ public class ResourceOpenApiCustomiserTest {
 
 
     @Test
-    public void customise_resourceItemPathAddedToOpenApi() {
+    void customise_resourceItemPathAddedToOpenApi() {
 
         when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
 
@@ -119,7 +119,7 @@ public class ResourceOpenApiCustomiserTest {
 
 
     @Test
-    public void customise_relatedResourceRootPathAddedToOpenApi() {
+    void customise_relatedResourceRootPathAddedToOpenApi() {
 
         when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
 
@@ -151,7 +151,7 @@ public class ResourceOpenApiCustomiserTest {
 
 
     @Test
-    public void customise_relatedResourceItemPathAddedToOpenApi() {
+    void customise_relatedResourceItemPathAddedToOpenApi() {
 
         when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
 
@@ -189,7 +189,7 @@ public class ResourceOpenApiCustomiserTest {
 
 
     @Test
-    public void customise_resourceHasBlankFilterExampleObject_errorThrown() {
+    void customise_resourceHasBlankFilterExampleObject_errorThrown() {
 
         when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
 

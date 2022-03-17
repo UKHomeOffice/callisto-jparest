@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
-public class SpelExpressionArgumentResolverTest {
+class SpelExpressionArgumentResolverTest {
 
     @Spy
     private SpelExpressionArgumentResolver expressionArgumentResolver;

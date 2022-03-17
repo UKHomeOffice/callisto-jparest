@@ -41,7 +41,7 @@ public class EntityUtilsTest {
     private EntityManager entityManager;
 
     @Test
-    public void entityUtils_entityTypeHasIdField_idFieldInformationStored() {
+    void entityUtils_entityTypeHasIdField_idFieldInformationStored() {
 
         var idFieldName = "id";
         var resourceClass = DummyEntityC.class;
@@ -59,14 +59,14 @@ public class EntityUtilsTest {
 
 
     @Test
-    public void entityUtils_entityTypeHasRelations_relatedEntitiesStored() {
+    void entityUtils_entityTypeHasRelations_relatedEntitiesStored() {
 
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
         assertThat(entityUtils.getRelatedResources()).contains("dummyEntityBSet");
     }
 
     @Test
-    public void getRelatedEntities_relatedEntitiesExist_relatedEntitiesReturned() throws JsonMappingException, JsonProcessingException {
+    void getRelatedEntities_relatedEntitiesExist_relatedEntitiesReturned() throws JsonMappingException, JsonProcessingException {
         ObjectMapper om = new ObjectMapper();
         DummyEntityA a = om.readValue("{ \"id\": 1, \"dummyEntityBSet\": [{ \"id\": 2}]}", DummyEntityA.class);
         entityManager.persist(a);
@@ -79,7 +79,7 @@ public class EntityUtilsTest {
 
 
     @Test
-    public void getEntityReference_relatedEntityExist_relatedEntityReferenceReturned() {
+    void getEntityReference_relatedEntityExist_relatedEntityReferenceReturned() {
 
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
         long relatedEntityReference = 123;
@@ -93,7 +93,7 @@ public class EntityUtilsTest {
     
     @ParameterizedTest
     @MethodSource("invalidReferenceValues")
-    public void getEntityReference_relatedEntityExist_referenceTypeIsInvalid_throws_illegalArgumentException(Serializable reference) {
+    void getEntityReference_relatedEntityExist_referenceTypeIsInvalid_throws_illegalArgumentException(Serializable reference) {
 
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
 
@@ -103,7 +103,7 @@ public class EntityUtilsTest {
     }
 
     @Test
-    public void getEntityReference_entityReferenceReturned() {
+    void getEntityReference_entityReferenceReturned() {
         long expectedEntityId = 1;
         var entityUtils = new EntityUtils<DummyEntityC>(DummyEntityC.class, entityManager);
         var actualReference = entityUtils.getEntityReference(expectedEntityId);
@@ -115,7 +115,7 @@ public class EntityUtilsTest {
 
     @ParameterizedTest
     @MethodSource("invalidReferenceValues")
-    public void getEntityReference_when_referenceTypeIsInvalid_throws_illegalArgumentException(Serializable reference) {
+    void getEntityReference_when_referenceTypeIsInvalid_throws_illegalArgumentException(Serializable reference) {
         // int expectedEntityId = 1;
         var entityUtils = new EntityUtils<DummyEntityC>(DummyEntityC.class, entityManager);
         assertThrows(
