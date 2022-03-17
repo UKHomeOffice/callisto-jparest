@@ -26,15 +26,15 @@ public class SpelExpressionToPredicateConverter {
         throw new IllegalStateException("Utility class");
     }
 
-    private final static Logger LOGGER = Logger.getLogger(SpelExpressionToPredicateConverter.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SpelExpressionToPredicateConverter.class.getName());
 
     private static WebDataBinder binder = initBinder();
 
     // TODO: Maybe need to use DI to reuse a single instance
     private static WebDataBinder initBinder() {
-        WebDataBinder binder = new WebDataBinder(null);
+        var binder = new WebDataBinder(null);
 
-        StdDateFormat dateFormat2 = new StdDateFormat();
+        var dateFormat2 = new StdDateFormat();
         binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat2, true));
 
         return binder;
@@ -168,7 +168,6 @@ public class SpelExpressionToPredicateConverter {
         }
 
         PropertyOrFieldReference fieldReference = (PropertyOrFieldReference) firstArg;
-        MethodReference methodReference = (MethodReference) node;
         Path<Comparable<Object>> field = root.get(fieldReference.getName());
         Class<?> clazz = field.getJavaType();
 
@@ -176,7 +175,7 @@ public class SpelExpressionToPredicateConverter {
         Comparable<Object>[] args;
 
         // Create the appropriate predicate
-        switch (methodReference.getName()) {
+        switch (node.getName()) {
             case "Between":
                 args = getLiteralValues(node, 1, clazz);
                 predicate = builder.between(root.get(fieldReference.getName()), args[0], args[1]);
@@ -187,7 +186,7 @@ public class SpelExpressionToPredicateConverter {
                 break;
             default:
                 // Throw if the method is not handled
-                throw new InvalidFilterException("Unrecognised method " + methodReference.getName());
+                throw new InvalidFilterException("Unrecognised method " + node.getName());
         }
         return predicate;
     }
@@ -196,14 +195,14 @@ public class SpelExpressionToPredicateConverter {
      * Gets literal values from the spel expression as the given type
      */
     private static Comparable<Object>[] getLiteralValues(SpelNode node, int startPos, Class<?> clazz) {
-        ArrayList<Comparable<Object>> items = new ArrayList<Comparable<Object>>();
+        ArrayList<Comparable<Object>> items = new ArrayList<>();
         for (int i = startPos; i < node.getChildCount(); i++) {
             @SuppressWarnings("unchecked")
             Comparable<Object> rightValue = (Comparable<Object>) convertTo(((Literal) node.getChild(i)).getLiteralValue().getValue(), clazz);
-            items.add((Comparable<Object>) rightValue);
+            items.add(rightValue);
         }
         @SuppressWarnings("unchecked")
-        Comparable<Object>[] result = new Comparable[node.getChildCount() - 1];
+        var result = new Comparable[node.getChildCount() - 1];
         return items.toArray(result);
     }
 
