@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 public class JpaRestMvcConfigurer implements WebMvcConfigurer {
 
-    private final static Logger LOGGER = Logger.getLogger(JpaRestMvcConfigurer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(JpaRestMvcConfigurer.class.getName());
 
     /**
      * Registers the {@link com.example.misc.ApiRequestParamArgumentResolver}.
@@ -46,15 +46,15 @@ public class JpaRestMvcConfigurer implements WebMvcConfigurer {
         LOGGER.info("extendMessageConverters");
         for (HttpMessageConverter<?> converter : converters) {
             if (converter instanceof MappingJackson2HttpMessageConverter) {
-                Hibernate5Module hibernateModule = new Hibernate5Module();
+                var hibernateModule = new Hibernate5Module();
 
-                final ObjectMapper om = new ObjectMapper();
+                final var om = new ObjectMapper();
                 om.registerModule(hibernateModule);
                 om.registerModule(new JavaTimeModule());
 
-                ((MappingJackson2HttpMessageConverter) converter).registerObjectMappersForType(ApiResponse.class, map -> {
-                    map.put(MediaType.APPLICATION_JSON, om);
-                });
+                ((MappingJackson2HttpMessageConverter) converter).registerObjectMappersForType(ApiResponse.class, map ->
+                    map.put(MediaType.APPLICATION_JSON, om)
+                );
             }
         }
     }
