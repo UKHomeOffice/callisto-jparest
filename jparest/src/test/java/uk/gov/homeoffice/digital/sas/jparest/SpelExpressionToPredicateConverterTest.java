@@ -2,12 +2,14 @@ package uk.gov.homeoffice.digital.sas.jparest;
 
 import org.hibernate.query.criteria.internal.predicate.ComparisonPredicate;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
@@ -40,6 +42,8 @@ class SpelExpressionToPredicateConverterTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
+    SpelExpressionParser expressionParser = new SpelExpressionParser();
+
     @Test
     void convert_test_the_expression_parsing_with_null_from_data() {
         SpelExpression from = null;
@@ -69,7 +73,7 @@ class SpelExpressionToPredicateConverterTest {
     void test_convert_with_or_operation_in_filter() {
         CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
         Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
-        SpelExpression expression = new SpelExpressionParser().parseRaw(String.format("id==1L or id==2L", 1L));
+        SpelExpression expression = expressionParser.parseRaw(String.format("id==1L or id==2L", 1L));
 
         Predicate predicate = SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate).isNotNull();
@@ -83,7 +87,7 @@ class SpelExpressionToPredicateConverterTest {
     void test_convert_with_and_operation_in_filter() {
         CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
         Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
-        SpelExpression expression = new SpelExpressionParser().parseRaw(String.format("id==1L and id==2L", 1L));
+        SpelExpression expression = expressionParser.parseRaw(String.format("id==1L and id==2L", 1L));
 
         Predicate predicate = SpelExpressionToPredicateConverter.convert(expression, builder, root);
         System.out.println(1);
@@ -98,7 +102,7 @@ class SpelExpressionToPredicateConverterTest {
     void test_convert_with_equal_operation_in_filter() {
         CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
         Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
-        SpelExpression expression = new SpelExpressionParser().parseRaw(String.format("id==1L", 1L));
+        SpelExpression expression = expressionParser.parseRaw(String.format("id==1L", 1L));
 
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate).isNotNull();
@@ -111,7 +115,7 @@ class SpelExpressionToPredicateConverterTest {
     void test_convert_with_greaterThan_operation_in_filter() {
         CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
         Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
-        SpelExpression expression = new SpelExpressionParser().parseRaw(String.format("id>1L", 1L));
+        SpelExpression expression = expressionParser.parseRaw(String.format("id>1L", 1L));
 
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate).isNotNull();
@@ -124,7 +128,7 @@ class SpelExpressionToPredicateConverterTest {
     void test_convert_with_greaterThanOrEqual_operation_in_filter() {
         CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
         Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
-        SpelExpression expression = new SpelExpressionParser().parseRaw(String.format("id>=1L", 1L));
+        SpelExpression expression = expressionParser.parseRaw(String.format("id>=1L", 1L));
 
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate).isNotNull();
@@ -137,7 +141,7 @@ class SpelExpressionToPredicateConverterTest {
     void test_convert_with_lessthan_operation_in_filter() {
         CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
         Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
-        SpelExpression expression = new SpelExpressionParser().parseRaw(String.format("id<1L", 1L));
+        SpelExpression expression = expressionParser.parseRaw(String.format("id<1L", 1L));
 
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate).isNotNull();
@@ -150,7 +154,7 @@ class SpelExpressionToPredicateConverterTest {
     void test_convert_with_lessThanOrEqual_operation_in_filter() {
         CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
         Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
-        SpelExpression expression = new SpelExpressionParser().parseRaw(String.format("id<=1L", 1L));
+        SpelExpression expression = expressionParser.parseRaw(String.format("id<=1L", 1L));
 
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate).isNotNull();
@@ -159,7 +163,32 @@ class SpelExpressionToPredicateConverterTest {
         assertThat(predicate.getRightHandOperand().in(1L));
     }
 
+    @Test
+    void test_convert_with_field_operation_in_filter() {
+        CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+        Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
+        SpelExpression expression = expressionParser.parseRaw(String.format("id == dummyEntityBSet", 1L));
 
+        ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
+        assertThat(predicate).isNotNull();
+        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.EQUAL);
+        assertThat(predicate.getRightHandOperand().isNotNull());
+        assertThat(predicate.getRightHandOperand().in(1L));
+    }
+
+    @Test
+    void test_convert_throws_InvalidFilterException_with_describeError_in_filter() {
+        CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+        Root<DummyEntityA> root = builder.createQuery(DummyEntityA.class).from(DummyEntityA.class);
+        SpelExpression expression = expressionParser.parseRaw(String.format("id!=1", 1L));
+
+        InvalidFilterException exception = assertThrows(
+                InvalidFilterException.class,
+                () -> SpelExpressionToPredicateConverter.convert(expression, builder, root),
+                "TODO: Describe error"
+        );
+        assertTrue(exception.getMessage().contains("TODO: Describe error"));
+    }
 
     private <T, U> ResourceApiController<T, U> getResourceApiController(Class<T> clazz) {
         EntityUtils<T> entityUtils = new EntityUtils<T>(clazz, entityManager);
