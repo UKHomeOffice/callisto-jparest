@@ -36,7 +36,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
     private BuilderConfiguration builderOptions;
 
 
-    private final static Logger LOGGER = Logger.getLogger(HandlerMappingConfigurer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(HandlerMappingConfigurer.class.getName());
 
     private final EntityManager entityManager;
 
@@ -46,8 +46,10 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
     private final ResourceEndpoint resourceEndpoint;
 
-    private static final String URL_ID_PATH_PARAM =  "/{id}";
-    private static final String URL_RELATED_ID_PATH_PARAM =  "/{related_id}";
+    public static final String URL_ID_PATH_PARAM =  "/{id}";
+    public static final String URL_RELATED_ID_PATH_PARAM =  "/{related_id}";
+    public static final String apiRootPath = "/resources";
+    public static final String PATH_DELIMITER = "/";
 
 
     @Autowired
@@ -62,7 +64,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
     }
 
     @PostConstruct
-    public void registerUserController() throws NoSuchMethodException, SecurityException, ClassNotFoundException {
+    public void registerUserController() throws NoSuchMethodException, SecurityException {
 
         requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
         builderOptions = new BuilderConfiguration();
@@ -70,9 +72,6 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
         builderOptions.setPatternParser(requestMappingHandlerMapping.getPatternParser());
 
         List<Class<?>> resourceTypes = resourceEndpoint.getResourceTypes();
-
-        // TODO: Make the path configurable
-        String apiRootPath = "/resources";
 
         LOGGER.fine("Searching for classes annotated as resources");
         for (EntityType<?> entityType : entityManager.getMetamodel().getEntities()) {
@@ -83,12 +82,12 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
             LOGGER.fine("Processing resource" + resource.getName());
             if (resource.isAnnotationPresent(Resource.class)) {
-                Resource resourceAnnotation = resource.getAnnotation(Resource.class);
+                var resourceAnnotation = resource.getAnnotation(Resource.class);
                 String resourcePath = resourceAnnotation.path();
                 if (!StringUtils.hasText(resourcePath)) {
                     resourcePath = entityType.getName().toLowerCase();
                 }
-                String path = apiRootPath + "/" + resourcePath;
+                String path = apiRootPath + PATH_DELIMITER + resourcePath;
                 LOGGER.log(Level.FINE, "root path for resource: {0}", path);
 
                 // Added to endpoint resource types for documentation customiser
@@ -147,7 +146,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
      * @throws NoSuchMethodException
      */
     private void register(Object controller, String methodName, Class<?>[] methodArgs, String path, RequestCondition<?> condition, RequestMethod requestMethod) throws NoSuchMethodException {
-        Method method = ResourceApiController.class.getDeclaredMethod(methodName, methodArgs);
+        var method = ResourceApiController.class.getDeclaredMethod(methodName, methodArgs);
 
         LOGGER.finest("Building RequestMappingInfo");
         RequestMappingInfo.Builder builder = RequestMappingInfo.paths(path).options(this.builderOptions)
@@ -158,7 +157,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
             builder = builder.customCondition(condition);
         }
 
-        RequestMappingInfo requestMappingInfo = builder.build();
+        var requestMappingInfo = builder.build();
 
         LOGGER.finest("Registering mapping");
         requestMappingHandlerMapping.registerMapping(requestMappingInfo, controller, method);
