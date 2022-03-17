@@ -58,9 +58,9 @@ public class ResourceApiController<T, U> {
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
 
     private static WebDataBinder initBinder() {
-        WebDataBinder binder = new WebDataBinder(null);
+        var binder = new WebDataBinder(null);
 
-        StdDateFormat dateFormat2 = new StdDateFormat();
+        var dateFormat2 = new StdDateFormat();
         binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat2, true));
 
         return binder;
@@ -93,16 +93,16 @@ public class ResourceApiController<T, U> {
                                  PlatformTransactionManager transactionManager, EntityUtils<?> entityUtils) {
         this.entityManager = entityManager;
         this.transactionManager = transactionManager;
-        this.repository = new SimpleJpaRepository<T, Serializable>(entityType, entityManager);
+        this.repository = new SimpleJpaRepository<>(entityType, entityManager);
         this.entityUtils = (EntityUtils<T>) entityUtils;
     }
 
     public ApiResponse<T> list(SpelExpression filter, Pageable pageable) {
-        CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+        var builder = this.entityManager.getCriteriaBuilder();
         CriteriaQuery<T> query = builder.createQuery(this.entityUtils.getEntityType());
         Root<T> root = query.from(this.entityUtils.getEntityType());
 
-        Predicate predicate = SpelExpressionToPredicateConverter.convert(filter, builder, root);
+        var predicate = SpelExpressionToPredicateConverter.convert(filter, builder, root);
         if (filter != null) {
             query.where(predicate);
         }
@@ -124,7 +124,7 @@ public class ResourceApiController<T, U> {
     private T getById(U id, String include) {
         Serializable identifier = getIdentifier(id);
 
-        CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+        var builder = this.entityManager.getCriteriaBuilder();
         CriteriaQuery<T> query = builder.createQuery(this.entityUtils.getEntityType());
         Root<T> root = query.from(this.entityUtils.getEntityType());
 
@@ -147,64 +147,64 @@ public class ResourceApiController<T, U> {
     }
 
     public ResponseEntity<ApiResponse<T>> get(@PathVariable U id) {
-        T result = getById(id, null);
+        var result = getById(id, null);
         if (result == null) {
             return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
         }
-        ApiResponse<T> results = new ApiResponse<T>(Arrays.asList(result));
-        return new ResponseEntity<ApiResponse<T>>(results, null, HttpStatus.OK);
+        var results = new ApiResponse<>(Arrays.asList(result));
+        return new ResponseEntity<>(results, null, HttpStatus.OK);
     }
 
     // TODO: Test invalid json payloads
     public ResponseEntity<ApiResponse<T>> create(@RequestBody String body) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
+        var objectMapper = new ObjectMapper();
         T r2;
         try {
             r2 = objectMapper.readValue(body, this.entityUtils.getEntityType());
         } catch (JsonProcessingException ex) {
             return new ResponseEntity<>(null, null, HttpStatus.BAD_REQUEST);
         }
-        TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-        TransactionStatus transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
+        var transactionDefinition = new DefaultTransactionDefinition();
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
         T result;
         try {
-            result = repository.saveAndFlush((T) r2);
+            result = repository.saveAndFlush(r2);
             transactionManager.commit(transactionStatus);
         } catch (RuntimeException ex) {
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
-        ApiResponse<T> results = new ApiResponse<T>(Arrays.asList(result));
-        return new ResponseEntity<ApiResponse<T>>(results, HttpStatus.OK);
+        ApiResponse<T> results = new ApiResponse<>(Arrays.asList(result));
+        return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
     public ResponseEntity<String> delete(@PathVariable U id) {
-        Serializable identifier = getIdentifier(id);
+        var identifier = getIdentifier(id);
 
-        TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-        TransactionStatus transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
+        var transactionDefinition = new DefaultTransactionDefinition();
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
         try {
             repository.deleteById(identifier);
             transactionManager.commit(transactionStatus);
         } catch (EmptyResultDataAccessException ex) {
             transactionManager.rollback(transactionStatus);
-            return new ResponseEntity<String>(null, null, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
         } catch (RuntimeException ex) {
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
-        return new ResponseEntity<String>(null, null, HttpStatus.OK);
+        return new ResponseEntity<>(null, null, HttpStatus.OK);
     }
 
     public ResponseEntity<ApiResponse<T>> update(@PathVariable U id, @RequestBody String body)
             throws JsonProcessingException {
 
-        Serializable identifier = getIdentifier(id);
+        var identifier = getIdentifier(id);
 
-        TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-        TransactionStatus transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
+        var transactionDefinition = new DefaultTransactionDefinition();
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        var objectMapper = new ObjectMapper();
         T r2;
         try {
             r2 = objectMapper.readValue(body, this.entityUtils.getEntityType());
@@ -221,30 +221,30 @@ public class ResourceApiController<T, U> {
         }
         BeanUtils.copyProperties(r2, orig, this.entityUtils.getIdFieldName());
         try {
-            repository.saveAndFlush((T) orig);
+            repository.saveAndFlush(orig);
             transactionManager.commit(transactionStatus);
         } catch (RuntimeException ex) {
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
 
-        ApiResponse<T> results = new ApiResponse<T>(Arrays.asList((T) orig));
-        return new ResponseEntity<ApiResponse<T>>(results, null, HttpStatus.OK);
+        ApiResponse<T> results = new ApiResponse<>(Arrays.asList(orig));
+        return new ResponseEntity<>(results, null, HttpStatus.OK);
     }
 
     public ApiResponse<?> getRelated(@PathVariable U id, @PathVariable String relation,
                                      SpelExpression filter, Pageable pageable) {
         Serializable identifier = getIdentifier(id);
 
-        CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+        var builder = this.entityManager.getCriteriaBuilder();
         Class<?> entityType = this.entityUtils.getRelatedType(relation);
         CriteriaQuery<?> query = builder.createQuery(entityType);
         Root<T> root = query.from(this.entityUtils.getEntityType());
         CriteriaQuery<?> select = query.select(root.join(relation));
         Join<?, ?> relatedJoin = root.getJoins().iterator().next();
 
-        Predicate predicate = builder.equal(root, identifier);
-        Predicate filterPredicate = SpelExpressionToPredicateConverter.convert(filter, builder, relatedJoin);
+        var predicate = builder.equal(root, identifier);
+        var filterPredicate = SpelExpressionToPredicateConverter.convert(filter, builder, relatedJoin);
         if (filterPredicate != null) {
             predicate = builder.and(predicate, filterPredicate);
         }
@@ -265,12 +265,12 @@ public class ResourceApiController<T, U> {
 
     public ResponseEntity<String> deleteRelated(@PathVariable U id, @PathVariable String relation,
                                                 @PathVariable Object[] relatedId)
-            throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+            throws IllegalArgumentException {
 
-        TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-        TransactionStatus transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
+        var transactionDefinition = new DefaultTransactionDefinition();
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
-        T orig = getById(id, relation);
+        var orig = getById(id, relation);
 
         // TODO: Check id on incoming resource and make sure it matches
         if (orig == null) {
@@ -290,25 +290,25 @@ public class ResourceApiController<T, U> {
         }
 
         try {
-            repository.saveAndFlush((T) orig);
+            repository.saveAndFlush(orig);
             transactionManager.commit(transactionStatus);
         } catch (RuntimeException ex) {
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
 
-        return new ResponseEntity<String>(null, null, HttpStatus.OK);
+        return new ResponseEntity<>(null, null, HttpStatus.OK);
     }
 
     @SuppressWarnings(value = {"rawtypes", "unchecked"}) //
     public ResponseEntity<String> addRelated(@PathVariable U id, @PathVariable String relation,
                                              @PathVariable Object[] relatedId)
-            throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+            throws IllegalArgumentException {
 
-        TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-        TransactionStatus transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
+        var transactionDefinition = new DefaultTransactionDefinition();
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
-        T orig = getById(id, relation);
+        var orig = getById(id, relation);
 
         // TODO: Check id on incoming resource and make sure it matches
         if (orig == null) {
@@ -327,14 +327,14 @@ public class ResourceApiController<T, U> {
         }
 
         try {
-            repository.saveAndFlush((T) orig);
+            repository.saveAndFlush(orig);
             transactionManager.commit(transactionStatus);
         } catch (RuntimeException ex) {
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
 
-        return new ResponseEntity<String>(null, null, HttpStatus.OK);
+        return new ResponseEntity<>(null, null, HttpStatus.OK);
     }
 
     private static List<Order> toOrders(Sort sort, Path<?> path, CriteriaBuilder builder) {
