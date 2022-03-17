@@ -71,15 +71,15 @@ public class SpelExpressionToPredicateConverter {
 
         // Handle logical operators
         if (node instanceof OpOr) {
-            Predicate x = getPredicate(node.getChild(0), builder, root);
-            Predicate y = getPredicate(node.getChild(1), builder, root);
+            var x = getPredicate(node.getChild(0), builder, root);
+            var y = getPredicate(node.getChild(1), builder, root);
             predicate = builder.or(x, y);
         } else if (node instanceof OpAnd) {
-            Predicate x = getPredicate(node.getChild(0), builder, root);
-            Predicate y = getPredicate(node.getChild(1), builder, root);
+            var x = getPredicate(node.getChild(0), builder, root);
+            var y = getPredicate(node.getChild(1), builder, root);
             predicate = builder.and(x, y);
         } else if (node instanceof OperatorNot) {
-            Predicate x = getPredicate(node.getChild(0), builder, root);
+            var x = getPredicate(node.getChild(0), builder, root);
             predicate = builder.not(x);
         } else if (node instanceof MethodReference) {
             // delegate method reference to getMethodPredicate 
@@ -169,7 +169,7 @@ public class SpelExpressionToPredicateConverter {
      */
     private static Predicate getMethodPredicate(MethodReference node, CriteriaBuilder builder, From<?, ?> root) {
 
-        MethodReference methodReference = (MethodReference) node;
+        var methodReference = (MethodReference) node;
         Method method;
         try {
             method = Method.valueOf(methodReference.getName().toUpperCase());
@@ -215,7 +215,7 @@ public class SpelExpressionToPredicateConverter {
             items.add(rightValue);
         }
         @SuppressWarnings("unchecked")
-        Comparable<Object>[] result = new Comparable[node.getChildCount() - 1];
+        var result = new Comparable[node.getChildCount() - 1];
         return items.toArray(result);
     }
 
