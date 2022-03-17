@@ -57,7 +57,7 @@ class SpelExpressionToPredicateConverterTest {
     }
 
     @Test
-    public void spelExpressionToPredicateConverter_constructorIsPrivate_exceptionThrownWhenAccessed() {
+    void spelExpressionToPredicateConverter_constructorIsPrivate_exceptionThrownWhenAccessed() {
        var constructor = assertDoesNotThrow(() ->
                SpelExpressionToPredicateConverter.class.getDeclaredConstructor());
         assertTrue(Modifier.isPrivate(constructor.getModifiers()));

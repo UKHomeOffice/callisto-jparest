@@ -30,8 +30,7 @@ public class SpelExpressionArgumentResolver implements HandlerMethodArgumentReso
 
         if (paramValue != null) {
             try {
-                SpelExpression result = (SpelExpression) expressionParser.parseExpression(paramValue);
-                return result;
+                return expressionParser.parseExpression(paramValue);
             } catch (ParseException ex) {
                 throw new MethodArgumentTypeMismatchException(paramValue, parameter.getParameterType(), parameterName, parameter, ex.getCause());
             }
