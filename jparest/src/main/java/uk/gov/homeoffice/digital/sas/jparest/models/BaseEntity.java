@@ -11,7 +11,7 @@ import java.util.logging.Logger;
  */
 public abstract class BaseEntity {
 
-    private final static Logger LOGGER = Logger.getLogger(BaseEntity.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(BaseEntity.class.getName());
 
     private Field idField = getIdField();
 
