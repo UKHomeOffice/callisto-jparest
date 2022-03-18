@@ -21,7 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 
+import java.util.Map;
 import java.util.Map.Entry;
+
+// TODO: Add parameters for post and put
 
 /**
  * Extends the OpenApi model to include the endpoints added by the resource
@@ -87,7 +90,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
                 openApi.path(relatedDescriptor.getPath(), relatedRootPath);
                 PathItem relatedItemPath = createRelatedItemPath(tag, rootDescriptor.getIdFieldType(),
                         relatedDescriptor.getIdFieldType());
-                openApi.path(relatedDescriptor.getPath() + "/{related_id}", relatedItemPath);
+                openApi.path(relatedDescriptor.getPath() + "/{relatedId}", relatedItemPath);
 
             }
         }
@@ -209,7 +212,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", emptyResponse);
 
         var idParameter = getParameter(idClazz, "path", "id");
-        var relatedIdParameter = getArrayParameter(relatedIdClazz, "path", "related_id");
+        var relatedIdParameter = getArrayParameter(relatedIdClazz, "path", "relatedId");
         var delete = new Operation();
         delete.addParametersItem(idParameter);
         delete.addParametersItem(relatedIdParameter);
@@ -390,8 +393,9 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      */
     private static Schema<?> ensureSchema(Components components, String schemaName,
                                           Class<?> clazz) {
-
-        Schema<?> schema = components.getSchemas().get(schemaName);
+        @SuppressWarnings("rawtypes")
+        Map<String, Schema> schemas = components.getSchemas();
+        Schema<?> schema = schemas == null ? null : schemas.get(schemaName);
         if (schema == null) {
             schema = ModelConverters.getInstance()
                     .read(new AnnotatedType(clazz)

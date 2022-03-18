@@ -47,7 +47,7 @@ public class HandlerMappingConfigurerTestUtil {
     }
 
     public static String createApiRelatedResourcePathWithRelatedId(String parentResourcePathName, String relatedResource) {
-        return createApiRelatedResourcePath(parentResourcePathName, relatedResource) + "/{related_id}";
+        return createApiRelatedResourcePath(parentResourcePathName, relatedResource) + "/{relatedId}";
     }
 
 

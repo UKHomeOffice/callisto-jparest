@@ -69,7 +69,7 @@ public class HttpOperationTestUtil {
         arraySchema.setItems(schema);
         parameter.schema(arraySchema);
         parameter.setIn("path");
-        parameter.name("related_id");
+        parameter.name("relatedId");
         parameter.required(true);
         operation.addParametersItem(parameter);
     }
