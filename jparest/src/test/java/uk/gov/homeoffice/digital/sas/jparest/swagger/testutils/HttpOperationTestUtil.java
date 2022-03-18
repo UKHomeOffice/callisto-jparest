@@ -13,6 +13,9 @@ import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 
 import java.lang.reflect.Type;
 
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.ID_PARAM_NAME;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.RELATED_PARAM_NAME;
+
 public class HttpOperationTestUtil {
 
 
@@ -57,7 +60,7 @@ public class HttpOperationTestUtil {
         var parameter = new Parameter();
         parameter.schema(SpringDocAnnotationsUtils.extractSchema(null, returnType, null, null));
         parameter.setIn("path");
-        parameter.name("id");
+        parameter.name(ID_PARAM_NAME);
         parameter.required(true);
         operation.addParametersItem(parameter);
     }
@@ -69,7 +72,7 @@ public class HttpOperationTestUtil {
         arraySchema.setItems(schema);
         parameter.schema(arraySchema);
         parameter.setIn("path");
-        parameter.name("relatedId");
+        parameter.name(RELATED_PARAM_NAME);
         parameter.required(true);
         operation.addParametersItem(parameter);
     }

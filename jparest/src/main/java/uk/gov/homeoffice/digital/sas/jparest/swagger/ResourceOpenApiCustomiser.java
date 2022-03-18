@@ -1,7 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
 
-
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.util.AnnotationsUtils;
@@ -23,6 +22,8 @@ import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 
 import java.util.Map;
 import java.util.Map.Entry;
+
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.*;
 
 // TODO: Add parameters for post and put
 
@@ -77,7 +78,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
             PathItem resourceRootPath = createRootPath(tag, clazz);
             openApi.path(rootDescriptor.getPath(), resourceRootPath);
             PathItem resourceItemPath = createItemPath(tag, clazz, rootDescriptor.getIdFieldType());
-            openApi.path(rootDescriptor.getPath() + "/{id}", resourceItemPath);
+            openApi.path(rootDescriptor.getPath() + URL_ID_PATH_PARAM, resourceItemPath);
 
             // Create documentation for relations in the entity
             for (Entry<Class<?>, ResourceEndpoint.Descriptor> relatedElement : rootDescriptor.getRelations()
@@ -90,7 +91,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
                 openApi.path(relatedDescriptor.getPath(), relatedRootPath);
                 PathItem relatedItemPath = createRelatedItemPath(tag, rootDescriptor.getIdFieldType(),
                         relatedDescriptor.getIdFieldType());
-                openApi.path(relatedDescriptor.getPath() + "/{relatedId}", relatedItemPath);
+                openApi.path(relatedDescriptor.getPath() + URL_RELATED_ID_PATH_PARAM, relatedItemPath);
 
             }
         }
@@ -149,7 +150,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         get.addTagsItem(tag);
         pi.get(get);
 
-        var idParameter = getParameter(idClazz, "path", "id");
+        var idParameter = getParameter(idClazz, "path", ID_PARAM_NAME);
         get.addParametersItem(idParameter);
         var put = new Operation();
         put.setResponses(responses);
@@ -182,7 +183,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         var pi = new PathItem();
         ApiResponse response = getResourceResponse(clazz);
         ApiResponses responses = new ApiResponses().addApiResponse("200", response);
-        var idParameter = getParameter(idClazz, "path", "id");
+        var idParameter = getParameter(idClazz, "path", ID_PARAM_NAME);
 
         var get = new Operation();
         get.addParametersItem(idParameter);
@@ -211,8 +212,8 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
         ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", emptyResponse);
 
-        var idParameter = getParameter(idClazz, "path", "id");
-        var relatedIdParameter = getArrayParameter(relatedIdClazz, "path", "relatedId");
+        var idParameter = getParameter(idClazz, "path", ID_PARAM_NAME);
+        var relatedIdParameter = getArrayParameter(relatedIdClazz, "path", RELATED_PARAM_NAME);
         var delete = new Operation();
         delete.addParametersItem(idParameter);
         delete.addParametersItem(relatedIdParameter);

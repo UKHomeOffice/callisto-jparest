@@ -23,6 +23,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_ID_PATH_PARAM;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_RELATED_ID_PATH_PARAM;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -37,8 +39,7 @@ class ResourceOpenApiCustomiserTest {
 
     private static final String ROOT_PATH = "rootPath";
     private static final String RELATED_ROOT_PATH = "relatedPath";
-    private static final String PATH_ID = "/{id}";
-    private static final String PATH_RELATED_ID = "/{relatedId}";
+
 
     @BeforeEach
     void setUp() {
@@ -91,8 +92,8 @@ class ResourceOpenApiCustomiserTest {
         resourceOpenApiCustomiser.customise(openApi);
 
 
-        assertThat(openApi.getPaths()).containsKey(rootDescriptor.getPath() + PATH_ID);
-        var actualItemPath = openApi.getPaths().get(rootDescriptor.getPath() + PATH_ID);
+        assertThat(openApi.getPaths()).containsKey(rootDescriptor.getPath() + URL_ID_PATH_PARAM);
+        var actualItemPath = openApi.getPaths().get(rootDescriptor.getPath() + URL_ID_PATH_PARAM);
         assertThat(actualItemPath.readOperationsMap()).isNotEmpty();
 
         var actualGetOperation = actualItemPath.readOperationsMap().get(PathItem.HttpMethod.GET);
@@ -160,8 +161,8 @@ class ResourceOpenApiCustomiserTest {
         resourceOpenApiCustomiser.customise(openApi);
 
 
-        assertThat(openApi.getPaths()).containsKey(relatedDescriptor.getPath() + PATH_RELATED_ID);
-        var actualRelatedItemPath = openApi.getPaths().get(relatedDescriptor.getPath() + PATH_RELATED_ID);
+        assertThat(openApi.getPaths()).containsKey(relatedDescriptor.getPath() + URL_RELATED_ID_PATH_PARAM);
+        var actualRelatedItemPath = openApi.getPaths().get(relatedDescriptor.getPath() + URL_RELATED_ID_PATH_PARAM);
         assertThat(actualRelatedItemPath.readOperationsMap()).isNotEmpty();
 
         var actualDeleteOperation = actualRelatedItemPath.readOperationsMap().get(PathItem.HttpMethod.DELETE);
