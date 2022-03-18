@@ -38,7 +38,7 @@ class ResourceOpenApiCustomiserTest {
     private static final String ROOT_PATH = "rootPath";
     private static final String RELATED_ROOT_PATH = "relatedPath";
     private static final String PATH_ID = "/{id}";
-    private static final String PATH_RELATED_ID = "/{related_id}";
+    private static final String PATH_RELATED_ID = "/{relatedId}";
 
     @BeforeEach
     void setUp() {
