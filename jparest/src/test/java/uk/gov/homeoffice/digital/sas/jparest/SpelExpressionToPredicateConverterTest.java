@@ -86,7 +86,8 @@ class SpelExpressionToPredicateConverterTest {
         "id != 2 && id != 3 || id != 4",
         "!(id != 2 && id != 3)",
         "in(id, 1, 2, 3, 4)",
-        "between(id, 1, 4)"
+        "between(id, 1, 4)",
+        "not (id == 1)"
     })
     void convert_when_expressionIsValid_shouldNotThrow(String expressionString){
         SpelExpression spelExpression = (SpelExpression)expressionParser.parseExpression(expressionString);
