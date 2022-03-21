@@ -69,7 +69,7 @@ public class SpelExpressionToPredicateConverter {
     private static Predicate getPredicate(SpelNode node, CriteriaBuilder builder, From<?, ?> root) {
 
         // Handle logical operators
-        Predicate logicalPredicate = getLogicalPredicate(node, builder, root);
+        var logicalPredicate = getLogicalPredicate(node, builder, root);
         if (logicalPredicate != null) {
             return logicalPredicate;
         }
@@ -102,7 +102,7 @@ public class SpelExpressionToPredicateConverter {
         // handle field comparison
         if (rightNode instanceof PropertyOrFieldReference) {
             Path<Comparable<Object>> rightField = root.get(((PropertyOrFieldReference) rightNode).getName());
-            Predicate predicate = getEqualityOrRelativeOperatorPredicate(node, builder, field, rightField);
+            var predicate = getEqualityOrRelativeOperatorPredicate(node, builder, field, rightField);
             if (predicate != null) {
                 return predicate;
             } 
@@ -117,7 +117,7 @@ public class SpelExpressionToPredicateConverter {
             Object rightValue = convertTo(((Literal) rightNode).getLiteralValue().getValue(), clazz);
             @SuppressWarnings("unchecked")
             Comparable<Object> comparableValue = (Comparable<Object>) rightValue;
-            Predicate predicate = getEqualityOrRelativeOperatorPredicate(node, builder, field, comparableValue);
+            var predicate = getEqualityOrRelativeOperatorPredicate(node, builder, field, comparableValue);
             if (predicate != null) {
                 return predicate;
             }
@@ -136,15 +136,15 @@ public class SpelExpressionToPredicateConverter {
 
     private static Predicate getLogicalPredicate(SpelNode node, CriteriaBuilder builder, From<?, ?> root) {
         if (node instanceof OpOr) {
-            Predicate x = getPredicate(node.getChild(0), builder, root);
-            Predicate y = getPredicate(node.getChild(1), builder, root);
+            var x = getPredicate(node.getChild(0), builder, root);
+            var y = getPredicate(node.getChild(1), builder, root);
             return builder.or(x, y);
         } else if (node instanceof OpAnd) {
-            Predicate x = getPredicate(node.getChild(0), builder, root);
-            Predicate y = getPredicate(node.getChild(1), builder, root);
+            var x = getPredicate(node.getChild(0), builder, root);
+            var y = getPredicate(node.getChild(1), builder, root);
             return builder.and(x, y);
         } else if (node instanceof OperatorNot) {
-            Predicate x = getPredicate(node.getChild(0), builder, root);
+            var x = getPredicate(node.getChild(0), builder, root);
             return builder.not(x);
         }
         return null;
@@ -197,13 +197,11 @@ public class SpelExpressionToPredicateConverter {
      * <li>Between</ul>
      */
     private static Predicate getMethodPredicate(MethodReference node, CriteriaBuilder builder, From<?, ?> root) {
-
-        var methodReference = (MethodReference) node;
         Method method;
         try {
-            method = Method.valueOf(methodReference.getName().toUpperCase());
+            method = Method.valueOf(node.getName().toUpperCase());
         } catch (IllegalArgumentException ex) {
-            throw new InvalidFilterException("Unrecognised method " + methodReference.getName());
+            throw new InvalidFilterException("Unrecognised method " + node.getName());
         }
 
         // To handle a method the first argument must be the field reference

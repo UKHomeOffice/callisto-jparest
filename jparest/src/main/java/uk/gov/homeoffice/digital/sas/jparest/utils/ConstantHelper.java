@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.jparest.utils;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
+@SuppressWarnings("squid:S1075")
 public class ConstantHelper {
 
     public static final String ID_PARAM_NAME =  "id";
