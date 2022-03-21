@@ -91,4 +91,16 @@ class SpelExpressionArgumentResolverTest {
     }
 
 
+    @Test
+    public void resolveArgument_paramValueIsBlank_expressionParsingIsSkipped() {
+        given(methodParameter.getParameterName()).willReturn(PARAMETER_NAME);
+        given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn("");
+
+        var result =assertDoesNotThrow(() ->
+                expressionArgumentResolver.resolveArgument(methodParameter, modelAndViewContainer,
+                        nativeWebRequest, webDataBinderFactory));
+        assertThat(result).isNull();
+    }
+
+
 }

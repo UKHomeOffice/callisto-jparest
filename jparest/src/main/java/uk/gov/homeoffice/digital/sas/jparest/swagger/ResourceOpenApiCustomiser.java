@@ -13,6 +13,8 @@ import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springdoc.core.SpringDocAnnotationsUtils;
 import org.springdoc.core.converters.models.Pageable;
 import org.springdoc.core.customizers.OpenApiCustomiser;
@@ -38,6 +40,8 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
     private static ApiResponse emptyResponse = emptyResponse();
     private static Parameter pageableParameter = pageableParameter();
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceOpenApiCustomiser.class);
 
     /**
      * Customises the generated openApi for the endpoints exposed by the
@@ -379,12 +383,14 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
         Resource annotation = clazz.getAnnotation(Resource.class);
         for(ExampleObject exampleObj : annotation.filterExamples()) {
-            var example = AnnotationsUtils.getExample(exampleObj).orElseThrow(() ->
-                    new IllegalArgumentException(String.format(
-                            "Example could not be found in ExampleObject with name: '%s' and ref: '%s'", exampleObj.name(), exampleObj.ref())));
-            parameter.addExample(exampleObj.name(), example);
-        }
 
+            var exampleOpt = AnnotationsUtils.getExample(exampleObj);
+            if (exampleOpt.isPresent()) parameter.addExample(exampleObj.name(), exampleOpt.get());
+            else {
+                LOGGER.error(
+                        "Example could not be found in ExampleObject from resource: " + clazz.getSimpleName());
+            }
+        }
         return parameter;
 
     }

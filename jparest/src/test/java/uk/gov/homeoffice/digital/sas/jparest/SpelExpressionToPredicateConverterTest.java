@@ -10,13 +10,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.PlatformTransactionManager;
-import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
@@ -34,6 +31,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import static org.hibernate.query.criteria.internal.predicate.ComparisonPredicate.ComparisonOperator.*;
+
 @SpringBootTest
 @ContextConfiguration(locations = "/test-context.xml")
 class SpelExpressionToPredicateConverterTest {
@@ -42,9 +41,6 @@ class SpelExpressionToPredicateConverterTest {
     private EntityManager entityManager;
 
     SpelExpressionParser expressionParser = new SpelExpressionParser();
-
-    @Autowired
-    private PlatformTransactionManager transactionManager;
 
     CriteriaBuilder builder=null;
     Root<DummyEntityA> root=null;
@@ -151,33 +147,29 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_with_or_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("id==1L or id==2L", 1L));
+        SpelExpression expression = expressionParser.parseRaw(String.format("id==1L or id>2L", 1L));
         Predicate predicate = SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate).isNotNull();
         assertThat(predicate.getOperator().name()).isEqualTo("OR");
         assertThat(predicate.getExpressions().size()).isEqualTo(2);
-        assertThat(predicate.getExpressions().get(0).in(expression)).isNotNull();
-        assertThat(predicate.getExpressions().get(1).in(expression)).isNotNull();
+        assertThat(((ComparisonPredicate)predicate.getExpressions().get(0)).getComparisonOperator().name()).isEqualTo("EQUAL");
+        assertThat(((ComparisonPredicate)predicate.getExpressions().get(1)).getComparisonOperator().name()).isEqualTo("GREATER_THAN");
     }
 
     @Test
     void test_convert_with_and_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("id==1L and id==2L", 1L));
+        SpelExpression expression = expressionParser.parseRaw(String.format("id==1L and id>2L", 1L));
         Predicate predicate = SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate).isNotNull();
         assertThat(predicate.getOperator().name()).isEqualTo("AND");
         assertThat(predicate.getExpressions().size()).isEqualTo(2);
-        assertThat(predicate.getExpressions().get(0).in(expression)).isNotNull();
-        assertThat(predicate.getExpressions().get(1).in(expression)).isNotNull();
+        assertThat(((ComparisonPredicate)predicate.getExpressions().get(0)).getComparisonOperator().name()).isEqualTo("EQUAL");
+        assertThat(((ComparisonPredicate)predicate.getExpressions().get(1)).getComparisonOperator().name()).isEqualTo("GREATER_THAN");
     }
 
     @Test
     void test_convert_with_equal_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw(String.format("id==1L", 1L));
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate).isNotNull();
-        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.EQUAL);
-        assertThat(predicate.getRightHandOperand()).isNotNull();
+        assertThat(predicate.getComparisonOperator()).isEqualTo(EQUAL);
         assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
@@ -185,9 +177,7 @@ class SpelExpressionToPredicateConverterTest {
     void test_convert_with_greaterThan_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw(String.format("id>1L", 1L));
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate).isNotNull();
-        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.GREATER_THAN);
-        assertThat(predicate.getRightHandOperand()).isNotNull();
+        assertThat(predicate.getComparisonOperator()).isEqualTo(GREATER_THAN);
         assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
@@ -195,9 +185,7 @@ class SpelExpressionToPredicateConverterTest {
     void test_convert_with_greaterThanOrEqual_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw(String.format("id>=1L", 1L));
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate).isNotNull();
-        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.GREATER_THAN_OR_EQUAL);
-        assertThat(predicate.getRightHandOperand()).isNotNull();
+        assertThat(predicate.getComparisonOperator()).isEqualTo(GREATER_THAN_OR_EQUAL);
         assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
@@ -205,9 +193,7 @@ class SpelExpressionToPredicateConverterTest {
     void test_convert_with_lessthan_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw(String.format("id<1L", 1L));
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate).isNotNull();
-        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.LESS_THAN);
-        assertThat(predicate.getRightHandOperand()).isNotNull();
+        assertThat(predicate.getComparisonOperator()).isEqualTo(LESS_THAN);
         assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
@@ -215,9 +201,7 @@ class SpelExpressionToPredicateConverterTest {
     void test_convert_with_lessThanOrEqual_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw(String.format("id<=1L", 1L));
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate).isNotNull();
-        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.LESS_THAN_OR_EQUAL);
-        assertThat(predicate.getRightHandOperand()).isNotNull();
+        assertThat(predicate.getComparisonOperator()).isEqualTo(LESS_THAN_OR_EQUAL);
         assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
@@ -225,42 +209,33 @@ class SpelExpressionToPredicateConverterTest {
     void test_convert_with_field_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw(String.format("id == dummyEntityBSet", 1L));
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate).isNotNull();
-        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.EQUAL);
-        assertThat(predicate.getRightHandOperand()).isNotNull();
+        assertThat(predicate.getComparisonOperator()).isEqualTo(EQUAL);
     }
 
     @Test
     void test_convert_with_field_or_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("id == dummyEntityBSet or id ==2", 1L));
+        SpelExpression expression = expressionParser.parseRaw(String.format("id == dummyEntityBSet or id>2", 1L));
         CompoundPredicate predicate = (CompoundPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate).isNotNull();
         assertThat(predicate.getOperator().name()).isEqualTo("OR");
+        assertThat(((ComparisonPredicate)predicate.getExpressions().get(0)).getComparisonOperator().name()).isEqualTo("EQUAL");
+        assertThat(((ComparisonPredicate)predicate.getExpressions().get(1)).getComparisonOperator().name()).isEqualTo("GREATER_THAN");
     }
 
-    @Test
-    void test_convert_with_field_used_in_filter() {
-        SpelExpression expression = parseExpression("id<=dummyEntityBSet");
-
+    private static Stream<Arguments> fieldFilterTestData() {
+        return Stream.of(
+                Arguments.of("id<=dummyEntityBSet", LESS_THAN_OR_EQUAL),
+                Arguments.of("id<dummyEntityBSet", LESS_THAN),
+                Arguments.of("id==dummyEntityBSet", EQUAL),
+                Arguments.of("id>=dummyEntityBSet", GREATER_THAN_OR_EQUAL),
+                Arguments.of("id>dummyEntityBSet", GREATER_THAN)
+        );
+    }
+    @ParameterizedTest
+    @MethodSource("fieldFilterTestData")
+    void test_convert_with_field_used_in_filter(String expressionString, ComparisonPredicate.ComparisonOperator operator){
+        SpelExpression expression = parseExpression(expressionString);
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate).isNotNull();
-        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.LESS_THAN_OR_EQUAL);
-
-        predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(parseExpression("id<dummyEntityBSet"), builder, root);
-        assertThat(predicate).isNotNull();
-        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.LESS_THAN);
-
-        predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(parseExpression("id==dummyEntityBSet"), builder, root);
-        assertThat(predicate).isNotNull();
-        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.EQUAL);
-
-        predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(parseExpression("id>=dummyEntityBSet"), builder, root);
-        assertThat(predicate).isNotNull();
-        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.GREATER_THAN_OR_EQUAL);
-
-        predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(parseExpression("id>dummyEntityBSet"), builder, root);
-        assertThat(predicate).isNotNull();
-        assertThat(predicate.getComparisonOperator()).isEqualTo(ComparisonPredicate.ComparisonOperator.GREATER_THAN);
+        assertThat(predicate.getComparisonOperator()).isEqualTo(operator);
     }
 
     @Test
@@ -271,11 +246,6 @@ class SpelExpressionToPredicateConverterTest {
                 () -> SpelExpressionToPredicateConverter.convert(expression, builder, root),
                 "Left hand side must be a field"
         );
-    }
-
-    private <T, U> ResourceApiController<T, U> getResourceApiController(Class<T> clazz) {
-        EntityUtils<T> entityUtils = new EntityUtils<T>(clazz, entityManager);
-        return new ResourceApiController<T, U>(clazz, entityManager, transactionManager, entityUtils);
     }
 
     private SpelExpression parseExpression(String expression) {

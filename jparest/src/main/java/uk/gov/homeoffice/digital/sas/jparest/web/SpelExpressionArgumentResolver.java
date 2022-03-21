@@ -2,6 +2,7 @@ package uk.gov.homeoffice.digital.sas.jparest.web;
 
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpression;
@@ -28,7 +29,7 @@ public class SpelExpressionArgumentResolver implements HandlerMethodArgumentReso
         String parameterName = Objects.requireNonNull(parameter.getParameterName());
         String paramValue = webRequest.getParameter(parameterName);
 
-        if (paramValue != null) {
+        if (!StringUtils.isBlank(paramValue)) {
             try {
                 return expressionParser.parseExpression(paramValue);
             } catch (ParseException ex) {
