@@ -2,9 +2,7 @@ package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -26,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
+import uk.gov.homeoffice.digital.sas.jparest.utils.WebDataBinderFactory;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
 import javax.persistence.EntityGraph;
@@ -52,17 +51,8 @@ public class ResourceApiController<T, U> {
     private JpaRepository<T, Serializable> repository;
     private EntityUtils<T> entityUtils;
 
-    private static WebDataBinder binder = initBinder();
+    private static WebDataBinder binder = WebDataBinderFactory.getInstance();
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
-
-    private static WebDataBinder initBinder() {
-        var binder = new WebDataBinder(null);
-
-        var dateFormat2 = new StdDateFormat();
-        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat2, true));
-
-        return binder;
-    }
 
     private @NonNull Serializable getIdentifier(Object identifier) {
         return getIdentifier(identifier, this.entityUtils.getIdFieldType());

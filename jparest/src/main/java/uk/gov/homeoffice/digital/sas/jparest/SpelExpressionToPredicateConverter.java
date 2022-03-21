@@ -1,20 +1,18 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
-import com.fasterxml.jackson.databind.util.StdDateFormat;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.ast.*;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.WebDataBinder;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
+import uk.gov.homeoffice.digital.sas.jparest.utils.WebDataBinderFactory;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.logging.Logger;
 
 /**
@@ -28,17 +26,7 @@ public class SpelExpressionToPredicateConverter {
 
     private static final Logger LOGGER = Logger.getLogger(SpelExpressionToPredicateConverter.class.getName());
 
-    private static WebDataBinder binder = initBinder();
-
-    // TODO: Maybe need to use DI to reuse a single instance
-    private static WebDataBinder initBinder() {
-        var binder = new WebDataBinder(null);
-
-        var dateFormat2 = new StdDateFormat();
-        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat2, true));
-
-        return binder;
-    }
+    private static WebDataBinder binder = WebDataBinderFactory.getInstance();
 
     /**
      * Converts SpelExpression to a JPA predicate
