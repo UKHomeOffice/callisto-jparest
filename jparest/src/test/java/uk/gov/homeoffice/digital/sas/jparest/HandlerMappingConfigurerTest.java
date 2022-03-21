@@ -184,8 +184,7 @@ class HandlerMappingConfigurerTest {
         var entityUtils = new EntityUtils<>(resourceClass, entityManager);
         var relatedResources = entityUtils.getRelatedResources();
 
-        assertThat(relatedResources).isNotNull().hasSize(1);
-        assertThat(relatedResources).allSatisfy(relatedResource -> {
+        assertThat(relatedResources).isNotNull().hasSize(1).allSatisfy(relatedResource -> {
 
             var relatedPath = HandlerMappingConfigurerTestUtil.createApiRelatedResourcePath(resourcePathName, relatedResource);
             var expectedRelatedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
@@ -208,8 +207,7 @@ class HandlerMappingConfigurerTest {
         var entityUtils = new EntityUtils<>(resourceClass, entityManager);
         var relatedResources = entityUtils.getRelatedResources();
 
-        assertThat(relatedResources).isNotNull().hasSize(1);
-        assertThat(relatedResources).allSatisfy(relatedResource -> {
+        assertThat(relatedResources).isNotNull().hasSize(1).allSatisfy(relatedResource -> {
 
             var relatedPath = HandlerMappingConfigurerTestUtil.createApiRelatedResourcePathWithRelatedId(resourcePathName, relatedResource);
             var expectedRelatedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
@@ -232,8 +230,7 @@ class HandlerMappingConfigurerTest {
         var entityUtils = new EntityUtils<>(resourceClass, entityManager);
         var relatedResources = entityUtils.getRelatedResources();
 
-        assertThat(relatedResources).isNotNull().hasSize(1);
-        assertThat(relatedResources).allSatisfy(relatedResource -> {
+        assertThat(relatedResources).isNotNull().hasSize(1).allSatisfy(relatedResource -> {
 
             var relatedPath = HandlerMappingConfigurerTestUtil.createApiRelatedResourcePathWithRelatedId(resourcePathName, relatedResource);
             var expectedRelatedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
@@ -258,8 +255,7 @@ class HandlerMappingConfigurerTest {
         var entityUtils = new EntityUtils<>(resourceClass, entityManager);
         var relatedResources = entityUtils.getRelatedResources();
 
-        assertThat(relatedResources).isNotNull().hasSize(1);
-        assertThat(relatedResources).allSatisfy(relatedResource -> {
+        assertThat(relatedResources).isNotNull().hasSize(1).allSatisfy(relatedResource -> {
 
             var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName) + "/" + relatedResource;
             verify(resourceEndpoint).addRelated(
