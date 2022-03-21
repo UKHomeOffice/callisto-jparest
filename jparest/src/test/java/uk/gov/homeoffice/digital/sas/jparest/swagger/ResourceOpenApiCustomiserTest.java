@@ -1,5 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import io.swagger.v3.oas.models.PathItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
@@ -16,12 +19,13 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.ApiResponseTestUtil;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.HttpOperationTestUtil;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.OpenApiTestUtil;
+import uk.gov.homeoffice.digital.sas.jparest.testutils.logging.LoggerMemoryAppender;
+import uk.gov.homeoffice.digital.sas.jparest.testutils.logging.LoggingUtils;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_ID_PATH_PARAM;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_RELATED_ID_PATH_PARAM;
@@ -181,7 +185,7 @@ class ResourceOpenApiCustomiserTest {
     }
 
     @Test
-    void customise_resourceHasBlankFilterExampleObject_errorThrown() {
+    void customise_resourceHasBlankFilterExampleObject_errorLogged() {
 
         when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
 
@@ -190,12 +194,16 @@ class ResourceOpenApiCustomiserTest {
         when(resourceEndpoint.getDescriptors()).thenReturn(Map.of(
                 resourceClass, rootDescriptor));
 
-        var openApi = OpenApiTestUtil.createDefaultOpenAPI();
+        var logger = (Logger) LoggerFactory.getLogger(ResourceOpenApiCustomiser.class);
+        var loggerMemoryAppender = new LoggerMemoryAppender();
+        LoggingUtils.startMemoryAppender(logger, loggerMemoryAppender, Level.ERROR);
 
-        var actualException = assertThrows(
-                IllegalArgumentException.class,
-                () -> resourceOpenApiCustomiser.customise(openApi));
-        assertThat(actualException.getMessage()).contains("Example could not be found");
+        resourceOpenApiCustomiser.customise(OpenApiTestUtil.createDefaultOpenAPI());
+
+        var expectedLogMessage = "Example could not be found in ExampleObject for ExampleObject within resource: " +
+                resourceClass.getSimpleName();
+        assertThat(loggerMemoryAppender.countEventsForLogger(ResourceOpenApiCustomiser.class.getName())).isEqualTo(1);
+        assertThat(loggerMemoryAppender.search(expectedLogMessage, Level.ERROR).size()).isEqualTo(1);
     }
 
 }
