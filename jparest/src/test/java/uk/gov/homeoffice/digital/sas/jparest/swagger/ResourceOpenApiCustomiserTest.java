@@ -200,7 +200,7 @@ class ResourceOpenApiCustomiserTest {
 
         resourceOpenApiCustomiser.customise(OpenApiTestUtil.createDefaultOpenAPI());
 
-        var expectedLogMessage = "Example could not be found in ExampleObject for ExampleObject within resource: " +
+        var expectedLogMessage = "Example could not be found in ExampleObject from resource: " +
                 resourceClass.getSimpleName();
         assertThat(loggerMemoryAppender.countEventsForLogger(ResourceOpenApiCustomiser.class.getName())).isEqualTo(1);
         assertThat(loggerMemoryAppender.search(expectedLogMessage, Level.ERROR).size()).isEqualTo(1);

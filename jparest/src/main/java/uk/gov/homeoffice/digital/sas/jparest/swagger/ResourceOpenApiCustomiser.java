@@ -388,7 +388,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
             if (exampleOpt.isPresent()) parameter.addExample(exampleObj.name(), exampleOpt.get());
             else {
                 LOGGER.error(
-                        "Example could not be found in ExampleObject for ExampleObject within resource: " + clazz.getSimpleName());
+                        "Example could not be found in ExampleObject from resource: " + clazz.getSimpleName());
             }
         }
         return parameter;
