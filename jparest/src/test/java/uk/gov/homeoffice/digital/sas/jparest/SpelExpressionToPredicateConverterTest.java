@@ -10,13 +10,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.PlatformTransactionManager;
-import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
@@ -44,9 +41,6 @@ class SpelExpressionToPredicateConverterTest {
     private EntityManager entityManager;
 
     SpelExpressionParser expressionParser = new SpelExpressionParser();
-
-    @Autowired
-    private PlatformTransactionManager transactionManager;
 
     CriteriaBuilder builder=null;
     Root<DummyEntityA> root=null;
@@ -252,11 +246,6 @@ class SpelExpressionToPredicateConverterTest {
                 () -> SpelExpressionToPredicateConverter.convert(expression, builder, root),
                 "Left hand side must be a field"
         );
-    }
-
-    private <T, U> ResourceApiController<T, U> getResourceApiController(Class<T> clazz) {
-        EntityUtils<T> entityUtils = new EntityUtils<T>(clazz, entityManager);
-        return new ResourceApiController<T, U>(clazz, entityManager, transactionManager, entityUtils);
     }
 
     private SpelExpression parseExpression(String expression) {
