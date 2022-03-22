@@ -1,6 +1,10 @@
 package uk.gov.homeoffice.digital.sas.jparest.models;
 
+import org.hibernate.proxy.HibernateProxy;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
+
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.logging.Logger;
@@ -18,16 +22,20 @@ public abstract class BaseEntity {
     /**
      * @return {@link Field} annotated with {@link Id}
      */
+    @NotNull
     private Field getIdField() {
-        for (Field field : this.getClass().getDeclaredFields()) {
+
+        var entityClass = this instanceof HibernateProxy ? this.getClass().getSuperclass() : this.getClass();
+        for (Field field : entityClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(Id.class)) {
                 idField = field;
                 idField.setAccessible(true); //NOSONAR
+                return idField;
             }
         }
-        // TODO: Should throw an error as this class should not be extended 
-        // if the subclass will not be annotated with the Id annotation
-        return idField;
+
+        throw new ResourceException(String.format(
+                "%s should not be extended by subclasses that do not have the id annotation", BaseEntity.class.getName()));
     }
 
     private Serializable getId() {
@@ -40,10 +48,6 @@ public abstract class BaseEntity {
         matching type.
     */
     private Serializable getId(Object instance) {
-        // TODO: Can be removed once constructor throws
-        if (this.idField == null) {
-            return null;
-        }
         try {
             return (Serializable) this.idField.get(instance);
         } catch (IllegalArgumentException | IllegalAccessException e) {
