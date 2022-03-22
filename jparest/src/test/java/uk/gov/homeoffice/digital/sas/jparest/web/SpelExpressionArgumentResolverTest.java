@@ -92,7 +92,7 @@ class SpelExpressionArgumentResolverTest {
 
 
     @Test
-    public void resolveArgument_paramValueIsBlank_expressionParsingIsSkipped() {
+    void resolveArgument_paramValueIsBlank_expressionParsingIsSkipped() {
         given(methodParameter.getParameterName()).willReturn(PARAMETER_NAME);
         given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn("");
 
