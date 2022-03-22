@@ -20,10 +20,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
 import javax.persistence.EntityManager;
@@ -33,8 +33,7 @@ import javax.transaction.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -357,6 +356,22 @@ class ResourceApiControllerTest {
         ResponseEntity response = controller.update("10", "{}");
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void update_payloadIdDoesNotMatchUrlPathId_errorThrown() {
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+
+        var payload = "{\"id\": 2 }";
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> controller.update(1, payload))
+                .withMessageContaining("payload resource id value must match the url id");
+    }
+
+    @Test
+    void update_payloadIdNotIncluded_noIdMissMatchErrorThrown() {
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        assertDoesNotThrow(() -> controller.update(1, "{}"));
     }
 
     @ParameterizedTest
