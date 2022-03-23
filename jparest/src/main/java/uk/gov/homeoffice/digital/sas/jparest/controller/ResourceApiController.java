@@ -200,13 +200,14 @@ public class ResourceApiController<T, U> {
         } catch (JsonProcessingException ex) {
             return new ResponseEntity<>(null, null, HttpStatus.BAD_REQUEST);
         }
-        T orig;
-        Optional<T> result = repository.findById(identifier);
 
         var payloadEntityId = (Long) entityManagerFactory.getPersistenceUnitUtil().getIdentifier(r2);
         if (payloadEntityId != null && !payloadEntityId.equals(Long.valueOf(id.toString()))) {
             throw new IllegalArgumentException("The supplied payload resource id value must match the url id path parameter value");
         }
+
+        T orig;
+        Optional<T> result = repository.findById(identifier);
 
         if (result.isEmpty()) {
             return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
