@@ -148,7 +148,7 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_with_or_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("id==1L or id>2L", 1L));
+        SpelExpression expression = expressionParser.parseRaw("id==1L or id>2L");
         Predicate predicate = SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getOperator()).isEqualTo(OR);
         assertThat(predicate.getExpressions().size()).isEqualTo(2);
@@ -158,7 +158,7 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_with_and_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("id==1L and id>2L", 1L));
+        SpelExpression expression = expressionParser.parseRaw("id==1L and id>2L");
         Predicate predicate = SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getOperator()).isEqualTo(AND);
         assertThat(predicate.getExpressions().size()).isEqualTo(2);
@@ -168,7 +168,7 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_with_equal_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("id==1L", 1L));
+        SpelExpression expression = expressionParser.parseRaw("id==1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(EQUAL);
         assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
@@ -176,7 +176,7 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_with_greaterThan_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("id>1L", 1L));
+        SpelExpression expression = expressionParser.parseRaw("id>1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(GREATER_THAN);
         assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
@@ -184,7 +184,7 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_with_greaterThanOrEqual_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("id>=1L", 1L));
+        SpelExpression expression = expressionParser.parseRaw("id>=1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(GREATER_THAN_OR_EQUAL);
         assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
@@ -192,7 +192,7 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_with_lessthan_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("id<1L", 1L));
+        SpelExpression expression = expressionParser.parseRaw("id<1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(LESS_THAN);
         assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
@@ -200,7 +200,7 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_with_lessThanOrEqual_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("id<=1L", 1L));
+        SpelExpression expression = expressionParser.parseRaw("id<=1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(LESS_THAN_OR_EQUAL);
         assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
@@ -208,14 +208,14 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_with_field_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("id == dummyEntityBSet", 1L));
+        SpelExpression expression = expressionParser.parseRaw("id == dummyEntityBSet");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(EQUAL);
     }
 
     @Test
     void test_convert_with_field_or_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("id == dummyEntityBSet or id>2", 1L));
+        SpelExpression expression = expressionParser.parseRaw("id == dummyEntityBSet or id>2");
         CompoundPredicate predicate = (CompoundPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getOperator()).isEqualTo(OR);
         assertThat(((ComparisonPredicate)predicate.getExpressions().get(0)).getComparisonOperator()).isEqualTo(EQUAL);
@@ -241,7 +241,7 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_throws_InvalidFilterException_with_describeError_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw(String.format("1==id", 1L));
+        SpelExpression expression = expressionParser.parseRaw("1==id");
         InvalidFilterException exception = assertThrows(
                 InvalidFilterException.class,
                 () -> SpelExpressionToPredicateConverter.convert(expression, builder, root),
