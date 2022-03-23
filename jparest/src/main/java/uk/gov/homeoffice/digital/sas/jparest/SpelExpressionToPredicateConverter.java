@@ -110,7 +110,6 @@ public class SpelExpressionToPredicateConverter {
                 return predicate;
             }
             if (node instanceof OperatorMatches) {
-                // TODO: Check if clazz is a string
                 return builder.like(field.as(String.class), (String) rightValue);
             }
         

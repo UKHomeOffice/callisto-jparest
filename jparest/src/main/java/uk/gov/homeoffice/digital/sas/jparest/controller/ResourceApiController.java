@@ -35,8 +35,6 @@ import javax.persistence.criteria.*;
 import java.io.Serializable;
 import java.util.*;
 
-// TODO: Added include for related materials and also add metadata to response e.g. next link
-
 /**
  * Spring MVC controller that exposes JPA entities
  * and has common functionality for paging, sorting
@@ -277,7 +275,6 @@ public class ResourceApiController<T, U> {
 
         for (Object object : relatedId) {
             Serializable identitfier = getIdentifier(object, relatedIdType);
-            // TODO: Check for null here also on the add related
             Object f = this.entityUtils.getEntityReference(relation, identitfier);
             if (!relatedEntities.remove(f)) {
                 return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
