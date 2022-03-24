@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.slf4j.Logger;
@@ -26,8 +27,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.*;
-
-// TODO: Add parameters for post and put
 
 /**
  * Extends the OpenApi model to include the endpoints added by the resource
@@ -128,6 +127,9 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         var post = new Operation();
         post.setResponses(responses);
         post.addTagsItem(tag);
+        var requestBody = getRequestBody(clazz);
+        post.setRequestBody(requestBody);
+
         pi.post(post);
 
         return pi;
@@ -157,6 +159,9 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         var idParameter = getParameter(idClazz, "path", ID_PARAM_NAME);
         get.addParametersItem(idParameter);
         var put = new Operation();
+        put.addParametersItem(idParameter);
+        var requestBody = getRequestBody(clazz);
+        put.setRequestBody(requestBody);
         put.setResponses(responses);
         put.addTagsItem(tag);
         pi.put(put);
@@ -330,6 +335,25 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         parameter.name(name);
 
         return parameter;
+    }
+
+    /**This method returns a swagger RequestBody that
+     * contains a schema for the specified class
+     *
+     * @param clazz The type of item to describe in the schema
+     * @return
+     */
+    private RequestBody getRequestBody(Class<?> clazz) {
+
+        var c = new Content();
+        var mt = new MediaType();
+        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
+        mt.schema(schema);
+        c.addMediaType("application/json", mt);
+        
+        var requestBody = new RequestBody();
+        requestBody.setContent(c);
+        return requestBody;
     }
 
     /**
