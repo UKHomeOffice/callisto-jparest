@@ -72,7 +72,7 @@ public class ResourceApiController<T, U> {
         if (ex instanceof InvalidFilterException) {
             message = ex.getMessage();
         }
-        // TODO: Structure this into a nice json response
+
         return new ResponseEntity<>(message, null, HttpStatus.BAD_REQUEST);
     }
 
@@ -144,7 +144,6 @@ public class ResourceApiController<T, U> {
         return new ResponseEntity<>(results, null, HttpStatus.OK);
     }
 
-    // TODO: Test invalid json payloads
     public ResponseEntity<ApiResponse<T>> create(@RequestBody String body) throws JsonProcessingException {
         var objectMapper = new ObjectMapper();
         T r2;
