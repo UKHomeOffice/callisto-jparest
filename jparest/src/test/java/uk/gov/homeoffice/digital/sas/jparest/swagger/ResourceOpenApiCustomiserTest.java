@@ -79,6 +79,7 @@ class ResourceOpenApiCustomiserTest {
         var actualPostOperation = actualRootPath.readOperationsMap().get(PathItem.HttpMethod.POST);
         var expectedPostOperation = HttpOperationTestUtil.createSuccessOperation(
                 resourceClass, ApiResponseTestUtil.createDefaultApiResponse(resourceClass));
+        HttpOperationTestUtil.addRequestBody(expectedPostOperation, resourceClass);
         assertThat(actualPostOperation).isEqualTo(expectedPostOperation);
     }
 
@@ -109,6 +110,8 @@ class ResourceOpenApiCustomiserTest {
         var actualPutOperation = actualItemPath.readOperationsMap().get(PathItem.HttpMethod.PUT);
         var expectedPutOperation = HttpOperationTestUtil.createSuccessOperation(
                 resourceClass, ApiResponseTestUtil.createDefaultApiResponse(resourceClass));
+        HttpOperationTestUtil.addRequestBody(expectedPutOperation, resourceClass);
+        HttpOperationTestUtil.addIdParameterToOperation(expectedPutOperation, rootDescriptor.getIdFieldType());
         assertThat(actualPutOperation).isEqualTo(expectedPutOperation);
 
         var actualDeleteOperation = actualItemPath.readOperationsMap().get(PathItem.HttpMethod.DELETE);

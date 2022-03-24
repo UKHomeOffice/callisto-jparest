@@ -4,7 +4,11 @@ import io.swagger.v3.core.util.AnnotationsUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.springdoc.core.SpringDocAnnotationsUtils;
@@ -75,6 +79,13 @@ public class HttpOperationTestUtil {
         parameter.name(RELATED_PARAM_NAME);
         parameter.required(true);
         operation.addParametersItem(parameter);
+    }
+
+    public static void addRequestBody(Operation operation, Class<?> resourceClass) {
+        var schema = SpringDocAnnotationsUtils.extractSchema(null, resourceClass, null, null);
+        var requestBody = new RequestBody();
+        requestBody.setContent(new Content().addMediaType("application/json", new MediaType().schema(schema)));
+        operation.setRequestBody(requestBody);
     }
 
 
