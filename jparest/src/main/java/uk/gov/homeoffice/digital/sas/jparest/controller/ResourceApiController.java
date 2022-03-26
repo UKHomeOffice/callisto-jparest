@@ -30,6 +30,7 @@ import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.io.Serializable;
@@ -67,13 +68,8 @@ public class ResourceApiController<T, U> {
     }
 
     @ExceptionHandler({InvalidFilterException.class})
-    public ResponseEntity<String> handleException(Exception ex) {
-        String message = null;
-        if (ex instanceof InvalidFilterException) {
-            message = ex.getMessage();
-        }
-
-        return new ResponseEntity<>(message, null, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<String> handleException(InvalidFilterException ex) {
+        return new ResponseEntity<>(ex.getMessage(), null, HttpStatus.BAD_REQUEST);
     }
 
     @SuppressWarnings("unchecked")
@@ -320,6 +316,9 @@ public class ResourceApiController<T, U> {
         try {
             repository.saveAndFlush(orig);
             transactionManager.commit(transactionStatus);
+        } catch (EntityNotFoundException ex){
+            transactionManager.rollback(transactionStatus);
+            return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
         } catch (RuntimeException ex) {
             transactionManager.rollback(transactionStatus);
             throw ex;
