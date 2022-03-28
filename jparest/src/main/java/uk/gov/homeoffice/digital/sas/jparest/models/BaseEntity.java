@@ -27,15 +27,20 @@ public abstract class BaseEntity {
 
         var entityClass = this instanceof HibernateProxy ? this.getClass().getSuperclass() : this.getClass();
         for (Field field : entityClass.getDeclaredFields()) {
-            if (field.isAnnotationPresent(Id.class)) {
+            if (idField == null && field.isAnnotationPresent(Id.class)) {
                 idField = field;
                 idField.setAccessible(true); //NOSONAR
-                return idField;
+
+            } else if (field.isAnnotationPresent(Id.class)) {
+                throw new ResourceException(String.format(
+                        "%s should not be extended by a subclass with multiple id annotations", BaseEntity.class.getName()));
             }
         }
 
-        throw new ResourceException(String.format(
+        if (idField == null) throw new ResourceException(String.format(
                 "%s should not be extended by subclasses that do not have the id annotation", BaseEntity.class.getName()));
+
+        return idField;
     }
 
     private Serializable getId() {
