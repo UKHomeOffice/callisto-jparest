@@ -26,7 +26,7 @@ public class SpelExpressionToPredicateConverter {
 
     private static final Logger LOGGER = Logger.getLogger(SpelExpressionToPredicateConverter.class.getName());
 
-    private static WebDataBinder binder = WebDataBinderFactory.getInstance();
+    private static WebDataBinder binder = WebDataBinderFactory.getWebDataBinder();
 
     /**
      * Converts SpelExpression to a JPA predicate

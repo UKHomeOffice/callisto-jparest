@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.utils;
 
 import com.fasterxml.jackson.databind.util.StdDateFormat;
+import lombok.Getter;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.web.bind.WebDataBinder;
 
@@ -9,18 +10,16 @@ import java.util.Objects;
 
 public class WebDataBinderFactory {
 
-    private static WebDataBinder binder;
+    @Getter
+    private static WebDataBinder webDataBinder;
 
-    private WebDataBinderFactory() {
+    static {
+        webDataBinder = new WebDataBinder(null);
+        var dateFormat2 = new StdDateFormat();
+        webDataBinder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat2, true));
     }
 
-    public static WebDataBinder getInstance(){
-        if(Objects.isNull(binder)){
-            binder = new WebDataBinder(null);
-            var dateFormat2 = new StdDateFormat();
-            binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat2, true));
-        }
-        return binder;
+    private WebDataBinderFactory() {
     }
 
 }

@@ -52,7 +52,7 @@ public class ResourceApiController<T, U> {
     private JpaRepository<T, Serializable> repository;
     private EntityUtils<T> entityUtils;
 
-    private static WebDataBinder binder = WebDataBinderFactory.getInstance();
+    private static WebDataBinder binder = WebDataBinderFactory.getWebDataBinder();
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
 
     private @NonNull Serializable getIdentifier(Object identifier) {
