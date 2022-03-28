@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest.swagger.testutils;
+package uk.gov.homeoffice.digital.sas.jparest.testutils.swagger;
 
 import io.swagger.v3.core.util.AnnotationsUtils;
 import io.swagger.v3.oas.models.Components;

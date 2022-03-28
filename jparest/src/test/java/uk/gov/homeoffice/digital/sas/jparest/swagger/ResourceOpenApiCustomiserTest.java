@@ -13,11 +13,11 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
-import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.ApiResponseTestUtil;
-import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.HttpOperationTestUtil;
-import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.OpenApiTestUtil;
 import uk.gov.homeoffice.digital.sas.jparest.testutils.logging.LoggerMemoryAppender;
 import uk.gov.homeoffice.digital.sas.jparest.testutils.logging.LoggingUtils;
+import uk.gov.homeoffice.digital.sas.jparest.testutils.swagger.ApiResponseTestUtil;
+import uk.gov.homeoffice.digital.sas.jparest.testutils.swagger.HttpOperationTestUtil;
+import uk.gov.homeoffice.digital.sas.jparest.testutils.swagger.OpenApiTestUtil;
 
 import java.util.List;
 import java.util.Map;
