@@ -3,12 +3,9 @@ package uk.gov.homeoffice.digital.sas.jparest.swagger;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import io.swagger.v3.oas.models.PathItem;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
@@ -38,22 +35,15 @@ class ResourceOpenApiCustomiserTest {
     @Mock
     private ResourceEndpoint resourceEndpoint;
 
-    @InjectMocks
-    private ResourceOpenApiCustomiser resourceOpenApiCustomiser;
-
     private static final String ROOT_PATH = "rootPath";
     private static final String RELATED_ROOT_PATH = "relatedPath";
 
 
-    @BeforeEach
-    void setUp() {
-        this.resourceOpenApiCustomiser = new ResourceOpenApiCustomiser();
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void customise_resourceRootPathAddedToOpenApi() {
 
+        var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint);
         when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
 
         var resourceClass = DummyEntityC.class;
@@ -86,6 +76,7 @@ class ResourceOpenApiCustomiserTest {
     @Test
     void customise_resourceItemPathAddedToOpenApi() {
 
+        var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint);
         when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
 
         var resourceClass = DummyEntityC.class;
@@ -124,6 +115,7 @@ class ResourceOpenApiCustomiserTest {
     @Test
     void customise_relatedResourceRootPathAddedToOpenApi() {
 
+        var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint);
         when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
 
         var resourceClass = DummyEntityA.class;
@@ -154,6 +146,7 @@ class ResourceOpenApiCustomiserTest {
     @Test
     void customise_relatedResourceItemPathAddedToOpenApi() {
 
+        var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint);
         when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
 
         var resourceClass = DummyEntityA.class;
@@ -190,6 +183,7 @@ class ResourceOpenApiCustomiserTest {
     @Test
     void customise_resourceHasBlankFilterExampleObject_errorLogged() {
 
+        var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint);
         when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
 
         var resourceClass = DummyEntityD.class;

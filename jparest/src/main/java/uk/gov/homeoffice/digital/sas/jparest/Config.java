@@ -34,8 +34,8 @@ public class Config {
     }
 
     @Bean
-    public OpenApiCustomiser resourceOpenApiCustomiser() {
-        return new ResourceOpenApiCustomiser();
+    public OpenApiCustomiser resourceOpenApiCustomiser(ResourceEndpoint endpoint) {
+        return new ResourceOpenApiCustomiser(endpoint);
     }
 
     @Bean

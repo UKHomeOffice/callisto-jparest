@@ -2,6 +2,7 @@ package uk.gov.homeoffice.digital.sas.jparest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorException;
 
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 
+@Component
 public class ResourceEndpoint {
 
     public static final String RESOURCE_ALREADY_ADDED = "Resource has already been added";

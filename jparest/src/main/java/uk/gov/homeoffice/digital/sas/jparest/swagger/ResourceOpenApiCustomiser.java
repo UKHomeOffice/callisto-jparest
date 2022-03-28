@@ -20,10 +20,10 @@ import org.springdoc.core.SpringDocAnnotationsUtils;
 import org.springdoc.core.converters.models.Pageable;
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 
-import java.util.Map;
 import java.util.Map.Entry;
 
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.*;
@@ -32,15 +32,23 @@ import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.*;
  * Extends the OpenApi model to include the endpoints added by the resource
  * annotation
  */
+@Component
 public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
-    @Autowired
-    private ResourceEndpoint endpoint;
 
-    private static ApiResponse emptyResponse = emptyResponse();
-    private static Parameter pageableParameter = pageableParameter();
+    private final ResourceEndpoint endpoint;
+
+    private static ApiResponse EMPTY_RESPONSE;
+    private static Parameter PAGEABLE_PARAMETER;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceOpenApiCustomiser.class);
+
+    @Autowired
+    public ResourceOpenApiCustomiser(ResourceEndpoint endpoint) {
+        this.endpoint = endpoint;
+        EMPTY_RESPONSE = emptyResponse();
+        PAGEABLE_PARAMETER = pageableParameter();
+    }
 
     /**
      * Customises the generated openApi for the endpoints exposed by the
@@ -118,7 +126,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
 
         var get = new Operation();
-        get.addParametersItem(pageableParameter);
+        get.addParametersItem(PAGEABLE_PARAMETER);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
         get.addTagsItem(tag);
@@ -167,7 +175,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         pi.put(put);
         var delete = new Operation();
 
-        ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", emptyResponse);
+        ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
         delete.addParametersItem(idParameter);
         delete.setResponses(deleteResponses);
         delete.addTagsItem(tag);
@@ -196,7 +204,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
         var get = new Operation();
         get.addParametersItem(idParameter);
-        get.addParametersItem(pageableParameter);
+        get.addParametersItem(PAGEABLE_PARAMETER);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
         get.addTagsItem(tag);
@@ -219,7 +227,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
         var pi = new PathItem();
 
-        ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", emptyResponse);
+        ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
 
         var idParameter = getParameter(idClazz, "path", ID_PARAM_NAME);
         var relatedIdParameter = getArrayParameter(relatedIdClazz, "path", RELATED_PARAM_NAME);
