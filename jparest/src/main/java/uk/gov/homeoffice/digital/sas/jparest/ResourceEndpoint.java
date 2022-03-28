@@ -2,8 +2,8 @@ package uk.gov.homeoffice.digital.sas.jparest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceDescriptorErrorCode;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceDescriptorException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

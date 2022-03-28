@@ -4,15 +4,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceDescriptorErrorCode;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceDescriptorException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint.*;
-import static uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceDescriptorErrorCode.RELATED_RESOURCE_ALREADY_EXISTS;
-import static uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceDescriptorErrorCode.RESOURCE_ALREADY_EXISTS;
+import static uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode.RELATED_RESOURCE_ALREADY_EXISTS;
+import static uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode.RESOURCE_ALREADY_EXISTS;
 
 class ResourceEndpointTest {
 
