@@ -10,18 +10,14 @@ import javax.persistence.Id;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-
 class BaseEntityTest {
 
-    private static final String NO_ID_ANNOTATION_ERROR_MSG =
-            "should not be extended by subclasses that do not have the id annotation";
-    private static final String MULTIPLE_ID_ANNOTATIONS_ERROR_MSG =
-            "should not be extended by a subclass with multiple id annotations";
-
+    private static final String NO_ID_ANNOTATION_ERROR_MSG = "should not be extended by subclasses that do not have the id annotation";
+    private static final String MULTIPLE_ID_ANNOTATIONS_ERROR_MSG = "should not be extended by a subclass with multiple id annotations";
 
     @Test
     void getIdField_classContainsSingleIdAnnotatedField_noExceptionThrown() {
-       assertDoesNotThrow(DummyEntityA::new);
+        assertDoesNotThrow(DummyEntityA::new);
     }
 
     @Test
@@ -45,13 +41,13 @@ class BaseEntityTest {
                 .isThrownBy(BadEntityC::new).withMessageContaining(MULTIPLE_ID_ANNOTATIONS_ERROR_MSG);
     }
 
-
-
     static class BadEntityA extends BaseEntity {
+        @SuppressWarnings("unused") 
         private Long id;
     }
 
-    static class BadEntityB extends BaseEntity {}
+    static class BadEntityB extends BaseEntity {
+    }
 
     static class BadEntityC extends BaseEntity {
         @Id
