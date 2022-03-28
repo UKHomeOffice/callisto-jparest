@@ -84,7 +84,7 @@ class EntityUtilsTest {
     void getRelatedEntities_relatedEntitiesExist_relatedEntitiesReturned() {
 
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        Object findA = entityManager.getReference(DummyEntityA.class, 1L);
+        var findA = entityManager.find(DummyEntityA.class, 1L);
         var actualRelatedEntities = entityUtils.getRelatedEntities(findA, "dummyEntityBSet");
         assertThat(actualRelatedEntities).isNotEmpty();
     }
@@ -92,18 +92,20 @@ class EntityUtilsTest {
     @Test
     void getRelatedEntities_relationDoesntExist_throwsIllegalArgumentException() {
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        Object findA = entityManager.getReference(DummyEntityA.class, 1L);
+        var findA = entityManager.getReference(DummyEntityA.class, 1L);
         assertThrows(IllegalArgumentException.class, () -> entityUtils.getRelatedEntities(findA, "invalidValue"));
     }
 
     @ParameterizedTest
     @MethodSource("getRelatedEntitiesNullArgs")
-    void getRelatedEntities_nullArgs_throwsNullPointerException(Object entity, String relation) {
+    void getRelatedEntities_nullArgs_throwsNullPointerException(DummyEntityA entity, String relation) {
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        assertThrows(NullPointerException.class, () -> entityUtils.getRelatedEntities(entity, relation));
+        assertThrows(NullPointerException.class, () -> entityUtils.getRelatedEntities((DummyEntityA)entity, relation));
     }
 
     //endregion
+
+    //region getEntityReference
 
     @Test
     void getEntityReference_relatedEntityExist_relatedEntityReferenceReturned() {
@@ -134,16 +136,13 @@ class EntityUtilsTest {
         long expectedEntityId = 1;
         var entityUtils = new EntityUtils<DummyEntityC>(DummyEntityC.class, entityManager);
         var actualReference = entityUtils.getEntityReference(expectedEntityId);
-        assertThat(actualReference).isInstanceOf(DummyEntityC.class);
-        DummyEntityC typedActual = (DummyEntityC)actualReference;
-        assertThat(typedActual.getId()).isEqualTo(expectedEntityId);
+        assertThat(actualReference.getId()).isEqualTo(expectedEntityId);
 
     }
 
     @ParameterizedTest
     @MethodSource("invalidReferenceValues")
-    void getEntityReference_when_referenceTypeIsInvalid_throws_illegalArgumentException(Serializable reference) {
-        // int expectedEntityId = 1;
+    void getEntityReference_referenceTypeIsInvalid_throwsIllegalArgumentException(Serializable reference) {
         var entityUtils = new EntityUtils<DummyEntityC>(DummyEntityC.class, entityManager);
         assertThrows(
             IllegalArgumentException.class,
@@ -151,12 +150,15 @@ class EntityUtilsTest {
 
     }
 
+    //endrgion
+
     //region Method sources
     
     private static Stream<Arguments> invalidReferenceValues() {
         return Stream.of(
           Arguments.of(1),
-          Arguments.of("123")
+          Arguments.of("123"),
+          Arguments.of("invalid")
         );
     }
 
@@ -168,10 +170,10 @@ class EntityUtilsTest {
         );
     }
 
-    private Stream<Arguments> getRelatedEntitiesNullArgs() {
+    private static Stream<Arguments> getRelatedEntitiesNullArgs() {
         return Stream.of(
             Arguments.of(null, "relation"),
-            Arguments.of(new Object(), null),
+            Arguments.of(new DummyEntityA(), null),
             Arguments.of(null, null)            
         );
     }
