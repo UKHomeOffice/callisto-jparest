@@ -423,8 +423,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      */
     private static Schema<?> ensureSchema(Components components, String schemaName,
                                           Class<?> clazz) {
-        @SuppressWarnings("rawtypes")
-        Map<String, Schema> schemas = components.getSchemas();
+        var schemas = components.getSchemas();
         Schema<?> schema = schemas == null ? null : schemas.get(schemaName);
         if (schema == null) {
             schema = ModelConverters.getInstance()
