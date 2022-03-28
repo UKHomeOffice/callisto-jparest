@@ -193,8 +193,8 @@ public class ResourceApiController<T, U> {
             return new ResponseEntity<>(null, null, HttpStatus.BAD_REQUEST);
         }
 
-        var payloadEntityId = (Long) this.persistenceUnitUtil.getIdentifier(r2);
-        if (payloadEntityId != null && !payloadEntityId.equals(Long.valueOf(id.toString()))) {
+        var payloadEntityId = this.persistenceUnitUtil.getIdentifier(r2);
+        if (payloadEntityId != null && identifier != getIdentifier(payloadEntityId)) {
             throw new IllegalArgumentException("The supplied payload resource id value must match the url id path parameter value");
         }
 
