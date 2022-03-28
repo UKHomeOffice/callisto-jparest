@@ -49,7 +49,7 @@ class SpelExpressionArgumentResolverTest {
         "name == \"Ricardo\"",
         "1 != 2 && 2 != 3 || 3 != 4"
     })
-    void shouldResolveArgument(String parameterValue){
+    void resolveArgument_validExpression_returnsSpelExpression(String parameterValue){
 
         given(methodParameter.getParameterName()).willReturn(PARAMETER_NAME);
         given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn(parameterValue);
@@ -75,7 +75,7 @@ class SpelExpressionArgumentResolverTest {
         "name == \"Ric\"ardo\"",
         "1 != 2 &(&) 2 != 3 || 3 != 4"
     })
-    void shouldThrowParseException(String parameterValue) {
+    void resolveArgument_invalidExpression_throwsParseException(String parameterValue) {
         given(methodParameter.getParameterName()).willReturn(PARAMETER_NAME);
         given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn(parameterValue);
 
