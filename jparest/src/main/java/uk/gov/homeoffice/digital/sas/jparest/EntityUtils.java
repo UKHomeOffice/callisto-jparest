@@ -98,7 +98,7 @@ public class EntityUtils<T> {
      *                 with ManyToMany
      * @return Collection of entities expressed by the ManyToMany attribute
      */
-    public Collection<Object> getRelatedEntities(@NonNull Object entity, @NonNull String relation) {
+    public Collection<Object> getRelatedEntities(@NonNull T entity, @NonNull String relation) {
         var relatedEntity = this.relations.get(relation);
         if (relatedEntity == null) {
             throw new IllegalArgumentException(String.format("Relation '%s' does not exist", relation));
@@ -126,10 +126,10 @@ public class EntityUtils<T> {
      * @param identifier The value of the Id.
      * @return An instance of entityType with the idField set to the identifier
      */
-    private Object getEntityReference(Class<?> entityType, Field idField, Serializable identifier) throws IllegalArgumentException {
-        Object reference = null;
+    private <Y> Y getEntityReference(Class<Y> entityType, Field idField, Serializable identifier) throws IllegalArgumentException {
+        Y reference = null;
         try {
-            reference = entityType.getConstructor(new Class<?>[]{}).newInstance();
+            reference = entityType.getConstructor(new Class<?>[0]).newInstance();
             idField.set(reference, identifier); //NOSONAR
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
@@ -146,7 +146,7 @@ public class EntityUtils<T> {
      * @return An instance of the entityType represented by the utility class
      * with its identifier set to the given value
      */
-    public Object getEntityReference(Serializable identifier) {
+    public T getEntityReference(Serializable identifier) {
         return getEntityReference(this.entityType, this.idField, identifier);
     }
 
