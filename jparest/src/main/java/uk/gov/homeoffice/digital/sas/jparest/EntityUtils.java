@@ -1,6 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
 import lombok.Getter;
+import lombok.NonNull;
+
 import org.springframework.util.StringUtils;
 
 import javax.persistence.EntityManager;
@@ -43,7 +45,7 @@ public class EntityUtils<T> {
      * @param entityType    The JPA entity class
      * @param entityManager The {@link EntityManager}
      */
-    public EntityUtils(Class<T> entityType, EntityManager entityManager) {
+    public EntityUtils(@NonNull Class<T> entityType, @NonNull EntityManager entityManager) {
 
         Set<String> tmpRelatedResources = new HashSet<>();
 

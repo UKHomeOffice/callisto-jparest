@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -33,12 +35,23 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @Transactional
 @ContextConfiguration(locations = "/test-context.xml")
+@TestInstance(Lifecycle.PER_CLASS)
 class EntityUtilsTest {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(EntityUtilsTest.class);
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    //region Constructor
+
+    @ParameterizedTest
+    @MethodSource("invalidConstructorArgs")
+    void entityUtils_nullArgs_throwsNullException(Class<?> clazz, EntityManager manager) {
+        assertThrows(NullPointerException.class, () -> new EntityUtils<>(clazz, manager));
+    } 
+
+    //endregion
 
     @Test
     void entityUtils_entityTypeHasIdField_idFieldInformationStored() {
@@ -123,11 +136,24 @@ class EntityUtilsTest {
             () -> entityUtils.getEntityReference(reference));
 
     }
+
+    //region Method sources
+    
     private static Stream<Arguments> invalidReferenceValues() {
         return Stream.of(
           Arguments.of(1),
           Arguments.of("123")
         );
     }
+
+    private Stream<Arguments> invalidConstructorArgs() {
+        return Stream.of(
+            Arguments.of(null, this.entityManager),
+            Arguments.of(DummyEntityC.class, null),
+            Arguments.of(null, null)            
+        );
+    }
+
+    //endregion
 
 }
