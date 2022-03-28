@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource;
+package uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor;
 
 public class AddResourceDescriptorException extends RuntimeException {
 
