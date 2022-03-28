@@ -185,9 +185,6 @@ public class ResourceApiController<T, U> {
 
         var identifier = getIdentifier(id);
 
-        var transactionDefinition = new DefaultTransactionDefinition();
-        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
-
         var objectMapper = new ObjectMapper();
         T r2;
         try {
@@ -200,6 +197,9 @@ public class ResourceApiController<T, U> {
         if (payloadEntityId != null && !payloadEntityId.equals(Long.valueOf(id.toString()))) {
             throw new IllegalArgumentException("The supplied payload resource id value must match the url id path parameter value");
         }
+
+        var transactionDefinition = new DefaultTransactionDefinition();
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
         T orig;
         Optional<T> result = repository.findById(identifier);
@@ -257,14 +257,14 @@ public class ResourceApiController<T, U> {
                                                 @PathVariable Object[] relatedId)
             throws IllegalArgumentException {
 
-        var transactionDefinition = new DefaultTransactionDefinition();
-        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
-
         var orig = getById(id, relation);
 
         if (orig == null) {
             return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
         }
+
+        var transactionDefinition = new DefaultTransactionDefinition();
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
         Collection<?> relatedEntities = entityUtils.getRelatedEntities(orig, relation);
         Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
@@ -293,14 +293,14 @@ public class ResourceApiController<T, U> {
                                              @PathVariable Object[] relatedId)
             throws IllegalArgumentException {
 
-        var transactionDefinition = new DefaultTransactionDefinition();
-        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
-
         var orig = getById(id, relation);
 
         if (orig == null) {
             return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
         }
+
+        var transactionDefinition = new DefaultTransactionDefinition();
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
         Collection<Object> relatedEntities = entityUtils.getRelatedEntities(orig, relation);
         Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
