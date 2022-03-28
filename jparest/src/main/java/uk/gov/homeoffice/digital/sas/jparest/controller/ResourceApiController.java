@@ -29,8 +29,8 @@ import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.PersistenceUnitUtil;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.io.Serializable;
@@ -47,7 +47,7 @@ import java.util.*;
 public class ResourceApiController<T, U> {
 
     private EntityManager entityManager;
-    private EntityManagerFactory entityManagerFactory;
+    private PersistenceUnitUtil persistenceUnitUtil;
     private PlatformTransactionManager transactionManager;
     private JpaRepository<T, Serializable> repository;
     private EntityUtils<T> entityUtils;
@@ -79,7 +79,7 @@ public class ResourceApiController<T, U> {
         this.transactionManager = transactionManager;
         this.repository = new SimpleJpaRepository<>(entityType, entityManager);
         this.entityUtils = (EntityUtils<T>) entityUtils;
-        this.entityManagerFactory = entityManager.getEntityManagerFactory();
+        this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
     }
 
     public ApiResponse<T> list(SpelExpression filter, Pageable pageable) {
@@ -193,7 +193,7 @@ public class ResourceApiController<T, U> {
             return new ResponseEntity<>(null, null, HttpStatus.BAD_REQUEST);
         }
 
-        var payloadEntityId = (Long) entityManagerFactory.getPersistenceUnitUtil().getIdentifier(r2);
+        var payloadEntityId = (Long) this.persistenceUnitUtil.getIdentifier(r2);
         if (payloadEntityId != null && !payloadEntityId.equals(Long.valueOf(id.toString()))) {
             throw new IllegalArgumentException("The supplied payload resource id value must match the url id path parameter value");
         }
@@ -288,7 +288,6 @@ public class ResourceApiController<T, U> {
         return new ResponseEntity<>(null, null, HttpStatus.OK);
     }
 
-    @SuppressWarnings(value = {"rawtypes", "unchecked"}) //
     public ResponseEntity<String> addRelated(@PathVariable U id, @PathVariable String relation,
                                              @PathVariable Object[] relatedId)
             throws IllegalArgumentException {
