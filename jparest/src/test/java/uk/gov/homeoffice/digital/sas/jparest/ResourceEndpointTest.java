@@ -4,15 +4,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceErrorCode;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceDescriptorErrorCode;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceDescriptorException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint.*;
-import static uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceErrorCode.RELATED_RESOURCE_ALREADY_EXISTS;
-import static uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceErrorCode.RESOURCE_ALREADY_EXISTS;
+import static uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceDescriptorErrorCode.RELATED_RESOURCE_ALREADY_EXISTS;
+import static uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceDescriptorErrorCode.RESOURCE_ALREADY_EXISTS;
 
 class ResourceEndpointTest {
 
@@ -41,7 +41,7 @@ class ResourceEndpointTest {
 
         // Add the resource again
         var thrown = assertThrows(
-                AddResourceException.class,
+                AddResourceDescriptorException.class,
                 () -> resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE),
                 RESOURCE_ALREADY_ADDED
                 );
@@ -60,11 +60,11 @@ class ResourceEndpointTest {
     @Test
     void addRelated_descriptorsDoesNotContainResource_exceptionThrown() {
         var thrown = assertThrows(
-                AddResourceException.class,
+                AddResourceDescriptorException.class,
                 () -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH, ID_FIELD_TYPE),
                 CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES
         );
-        assertThat(thrown.getErrorCode()).isEqualTo(AddResourceErrorCode.RESOURCE_DOES_NOT_EXIST.getCode());
+        assertThat(thrown.getErrorCode()).isEqualTo(AddResourceDescriptorErrorCode.RESOURCE_DOES_NOT_EXIST.getCode());
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS);
         assertThat(actualDescriptor).isNull();
     }
@@ -84,7 +84,7 @@ class ResourceEndpointTest {
 
         // Try to add related resource again
         var thrown = assertThrows(
-                AddResourceException.class,
+                AddResourceDescriptorException.class,
                 () -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH, RELATED_ID_FIELD_TYPE),
                 RELATED_RESOURCE_ALREADY_ADDED
         );

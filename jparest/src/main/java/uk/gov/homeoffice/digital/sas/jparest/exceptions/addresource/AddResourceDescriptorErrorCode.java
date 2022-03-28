@@ -1,6 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource;
 
-public enum AddResourceErrorCode {
+public enum AddResourceDescriptorErrorCode {
 
     RESOURCE_ALREADY_EXISTS(10),
     RESOURCE_DOES_NOT_EXIST(20),
@@ -8,7 +8,7 @@ public enum AddResourceErrorCode {
 
     private final int code;
 
-    AddResourceErrorCode(int code) {
+    AddResourceDescriptorErrorCode(int code) {
         this.code = code;
     }
 

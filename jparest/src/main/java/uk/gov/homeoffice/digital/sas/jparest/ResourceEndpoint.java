@@ -2,8 +2,8 @@ package uk.gov.homeoffice.digital.sas.jparest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceErrorCode;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceDescriptorErrorCode;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresource.AddResourceDescriptorException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public class ResourceEndpoint {
     public void add(Class<?> clazz, String path, Class<?> idFieldType) {
 
         if (descriptors.containsKey(clazz)) {
-            throw new AddResourceException(RESOURCE_ALREADY_ADDED, AddResourceErrorCode.RESOURCE_ALREADY_EXISTS);
+            throw new AddResourceDescriptorException(RESOURCE_ALREADY_ADDED, AddResourceDescriptorErrorCode.RESOURCE_ALREADY_EXISTS);
         }
 
         var rootDescriptor = new RootDescriptor(idFieldType, path);
@@ -38,13 +38,13 @@ public class ResourceEndpoint {
     public void addRelated(Class<?> clazz, Class<?> relatedClazz, String path, Class<?> idFieldType) {
 
         if (!descriptors.containsKey(clazz)) {
-            throw new AddResourceException(CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES, AddResourceErrorCode.RESOURCE_DOES_NOT_EXIST);
+            throw new AddResourceDescriptorException(CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES, AddResourceDescriptorErrorCode.RESOURCE_DOES_NOT_EXIST);
         }
 
         var rootDescriptor = descriptors.get(clazz);
 
         if (rootDescriptor.getRelations().containsKey(relatedClazz)) {
-            throw new AddResourceException(RELATED_RESOURCE_ALREADY_ADDED, AddResourceErrorCode.RELATED_RESOURCE_ALREADY_EXISTS);
+            throw new AddResourceDescriptorException(RELATED_RESOURCE_ALREADY_ADDED, AddResourceDescriptorErrorCode.RELATED_RESOURCE_ALREADY_EXISTS);
         }
 
         var descriptor = new Descriptor(idFieldType, path);
