@@ -98,15 +98,19 @@ public class EntityUtils<T> {
      *                 with ManyToMany
      * @return Collection of entities expressed by the ManyToMany attribute
      */
-    public Collection<Object> getRelatedEntities(Object entity, String relation) {
+    public Collection<Object> getRelatedEntities(@NonNull Object entity, @NonNull String relation) {
         var relatedEntity = this.relations.get(relation);
-        Collection<Object> result = null;
+        if (relatedEntity == null) {
+            throw new IllegalArgumentException(String.format("Relation '%s' does not exist", relation));
+        }
         try {
-            result = (Collection<Object>) relatedEntity.declaredField.get(entity);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
+            @SuppressWarnings("unchecked")
+            var result = (Collection<Object>) relatedEntity.declaredField.get(entity);
+            return result;
+        } catch (IllegalAccessException e) {
             LOGGER.severe("Unable to access " + relation + " of entity type " + entity.getClass().getName());
         }
-        return result;
+        return null;
     }
 
     /**

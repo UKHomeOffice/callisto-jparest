@@ -46,8 +46,8 @@ class EntityUtilsTest {
     //region Constructor
 
     @ParameterizedTest
-    @MethodSource("invalidConstructorArgs")
-    void entityUtils_nullArgs_throwsNullException(Class<?> clazz, EntityManager manager) {
+    @MethodSource("nullConstructorArgs")
+    void entityUtils_nullArgs_throwsNullPointerException(Class<?> clazz, EntityManager manager) {
         assertThrows(NullPointerException.class, () -> new EntityUtils<>(clazz, manager));
     } 
 
@@ -78,18 +78,32 @@ class EntityUtilsTest {
         assertThat(entityUtils.getRelatedResources()).contains("dummyEntityBSet");
     }
 
+    // region getRelatedEntities
+
     @Test
-    void getRelatedEntities_relatedEntitiesExist_relatedEntitiesReturned() throws JsonMappingException, JsonProcessingException {
-        ObjectMapper om = new ObjectMapper();
-        DummyEntityA a = om.readValue("{ \"id\": 1, \"dummyEntityBSet\": [{ \"id\": 2}]}", DummyEntityA.class);
-        entityManager.persist(a);
-        
+    void getRelatedEntities_relatedEntitiesExist_relatedEntitiesReturned() {
+
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        Object findA = entityManager.getReference(DummyEntityA.class, a.getId());
+        Object findA = entityManager.getReference(DummyEntityA.class, 1L);
         var actualRelatedEntities = entityUtils.getRelatedEntities(findA, "dummyEntityBSet");
         assertThat(actualRelatedEntities).isNotEmpty();
     }
 
+    @Test
+    void getRelatedEntities_relationDoesntExist_throwsIllegalArgumentException() {
+        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
+        Object findA = entityManager.getReference(DummyEntityA.class, 1L);
+        assertThrows(IllegalArgumentException.class, () -> entityUtils.getRelatedEntities(findA, "invalidValue"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRelatedEntitiesNullArgs")
+    void getRelatedEntities_nullArgs_throwsNullPointerException(Object entity, String relation) {
+        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
+        assertThrows(NullPointerException.class, () -> entityUtils.getRelatedEntities(entity, relation));
+    }
+
+    //endregion
 
     @Test
     void getEntityReference_relatedEntityExist_relatedEntityReferenceReturned() {
@@ -146,10 +160,18 @@ class EntityUtilsTest {
         );
     }
 
-    private Stream<Arguments> invalidConstructorArgs() {
+    private Stream<Arguments> nullConstructorArgs() {
         return Stream.of(
             Arguments.of(null, this.entityManager),
             Arguments.of(DummyEntityC.class, null),
+            Arguments.of(null, null)            
+        );
+    }
+
+    private Stream<Arguments> getRelatedEntitiesNullArgs() {
+        return Stream.of(
+            Arguments.of(null, "relation"),
+            Arguments.of(new Object(), null),
             Arguments.of(null, null)            
         );
     }
