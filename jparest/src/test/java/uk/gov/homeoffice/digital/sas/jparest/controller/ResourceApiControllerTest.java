@@ -1,12 +1,24 @@
 package uk.gov.homeoffice.digital.sas.jparest.controller;
 
-import lombok.SneakyThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import javax.transaction.Transactional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.TypeMismatchException;
@@ -19,28 +31,14 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
+
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
-import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
-import javax.transaction.Transactional;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -77,7 +75,6 @@ class ResourceApiControllerTest {
         assertThat(response.getItems().size()).isEqualTo(expectedItems);
     }
 
-
     @Test
     void list_sorted_returnsItemsSortedInCorrectDirection() {
 
@@ -91,9 +88,8 @@ class ResourceApiControllerTest {
 
         assertThat(items.length).isGreaterThanOrEqualTo(2);
         for (var i = 1; i < items.length; i++) {
-            assertThat(items[i].getId()).isGreaterThan(items[i-1].getId());    
+            assertThat(items[i].getId()).isGreaterThan(items[i - 1].getId());
         }
-
 
         sort = Sort.by(Direction.DESC, "id");
         pageable = PageRequest.ofSize(100).withSort(sort);
@@ -103,7 +99,7 @@ class ResourceApiControllerTest {
 
         assertThat(items.length).isGreaterThanOrEqualTo(2);
         for (var i = 1; i < items.length; i++) {
-            assertThat(items[i].getId()).isLessThan(items[i-1].getId());    
+            assertThat(items[i].getId()).isLessThan(items[i - 1].getId());
         }
 
     }
@@ -127,8 +123,7 @@ class ResourceApiControllerTest {
 
     @Test
     void get_idIsNull_throwsIllegalArugmentException() {
-        ResourceApiController<DummyEntityA, Integer> controller = getResourceApiController(DummyEntityA.class,
-                Integer.class);
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
         var thrown = assertThrows(
                 IllegalArgumentException.class,
@@ -139,6 +134,7 @@ class ResourceApiControllerTest {
 
     @ParameterizedTest
     @MethodSource("invalidIDSource")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     void get_idCantBeconvertedToExpectedType_throwsTypeMismatchException(Class<?> clazz, Object id) {
         ResourceApiController controller = getResourceApiController(DummyEntityA.class, clazz);
         assertThatThrownBy(() -> controller.get(id)).isInstanceOf(TypeMismatchException.class);
@@ -233,25 +229,27 @@ class ResourceApiControllerTest {
 
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("invalidPayloads")
     @Transactional
-    void update_emptyPayload_returnsBadRequest() {
+    void update_resourceExistsInvalidPayload_returnsBadRequest(String payload) {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-
-        var response = assertDoesNotThrow(() -> controller.update(1, ""));
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNull();
-    }
-
-    @Test
-    @Transactional
-    void update_invalidPayload_returnsBadRequest() {
-        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        var response = assertDoesNotThrow(() -> controller.update(1, "{ \"someprop\": \"somevalue\" }"));
+        var response = assertDoesNotThrow(() -> controller.update(1, payload));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
+    @ParameterizedTest
+    @MethodSource("invalidPayloads")
+    @Transactional
+    void update_resourceDoesntExistInvalidPayload_returnsBadRequest(String payload) {
+
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+
+        assertThat(controller.get(-1).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+        var response = assertDoesNotThrow(() -> controller.update(-1, payload));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
 
     @Test
     @Transactional
@@ -261,7 +259,6 @@ class ResourceApiControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
-
 
     @Test
     @Transactional
@@ -278,7 +275,7 @@ class ResourceApiControllerTest {
     @Transactional
     void update_payloadOmitsId_noIdMissMatchErrorThrown() {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        var r = assertDoesNotThrow(() -> controller.update(1, "{}"));
+        assertDoesNotThrow(() -> controller.update(1, "{}"));
     }
     // endregion
 
@@ -502,6 +499,12 @@ class ResourceApiControllerTest {
                 Arguments.of(new InvalidFilterException("Invalid Filter Exception")));
     }
 
+    private static Stream<String> invalidPayloads() {
+        return Stream.of(
+                "{ \"someprop\": \"somevalue\" }",
+                "");
+
+    }
     // endregion
 
     private <T, U> ResourceApiController<T, U> getResourceApiController(Class<T> clazz, Class<U> clazzU) {
