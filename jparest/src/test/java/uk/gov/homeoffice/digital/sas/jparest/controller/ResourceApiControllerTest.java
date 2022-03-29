@@ -86,7 +86,7 @@ class ResourceApiControllerTest {
         var response = controller.list(null, pageable);
         var items = response.getItems().toArray(new DummyEntityA[0]);
 
-        assertThat(items.length).isGreaterThanOrEqualTo(2);
+        assertThat(items).hasSizeGreaterThanOrEqualTo(2);
         for (var i = 1; i < items.length; i++) {
             assertThat(items[i].getId()).isGreaterThan(items[i - 1].getId());
         }
@@ -97,7 +97,7 @@ class ResourceApiControllerTest {
         response = controller.list(null, pageable);
         items = response.getItems().toArray(new DummyEntityA[0]);
 
-        assertThat(items.length).isGreaterThanOrEqualTo(2);
+        assertThat(items).hasSizeGreaterThanOrEqualTo(2);
         for (var i = 1; i < items.length; i++) {
             assertThat(items[i].getId()).isLessThan(items[i - 1].getId());
         }
@@ -322,7 +322,7 @@ class ResourceApiControllerTest {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
         var getRelatedResponse = controller.getRelated(10, "dummyEntityBSet", null, Pageable.ofSize(100));
-        assertThat(getRelatedResponse.getItems().size()).isEqualTo(0);
+        assertThat(getRelatedResponse.getItems().size()).isZero();
 
         assertDoesNotThrow(
                 () -> controller.addRelated(10, "dummyEntityBSet", new Object[] { 1 }));
@@ -391,7 +391,7 @@ class ResourceApiControllerTest {
         var getRelatedResponse = controllerA.getRelated(2, "dummyEntityBSet", null, Pageable.ofSize(100));
         @SuppressWarnings("unchecked")
         var items = (List<DummyEntityB>) getRelatedResponse.getItems();
-        assertThat(items.size()).isGreaterThan(0);
+        assertThat(items.size()).isPositive();
         assertThat(items).anyMatch((item) -> item.getId().equals(2L));
 
         var deleteResponse = assertDoesNotThrow(
