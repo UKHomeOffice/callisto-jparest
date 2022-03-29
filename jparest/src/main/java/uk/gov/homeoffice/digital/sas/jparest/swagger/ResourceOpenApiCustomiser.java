@@ -39,7 +39,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     private final ResourceEndpoint endpoint;
 
     private static ApiResponse apiResponse = emptyResponse();
-    private static Parameter parameter = pageableParameter();
+    private static Parameter pageableParameter = pageableParameter();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceOpenApiCustomiser.class);
 
@@ -124,7 +124,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
 
         var get = new Operation();
-        get.addParametersItem(parameter);
+        get.addParametersItem(pageableParameter);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
         get.addTagsItem(tag);
@@ -202,7 +202,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
         var get = new Operation();
         get.addParametersItem(idParameter);
-        get.addParametersItem(parameter);
+        get.addParametersItem(pageableParameter);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
         get.addTagsItem(tag);
