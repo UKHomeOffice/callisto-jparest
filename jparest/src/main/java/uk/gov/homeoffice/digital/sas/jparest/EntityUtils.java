@@ -16,6 +16,8 @@ import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static java.util.Collections.emptyList;
+
 /**
  * Provides utility functions for JPA entities.
  * It provides the entity's id field and entity
@@ -110,7 +112,7 @@ public class EntityUtils<T> {
         } catch (IllegalAccessException e) {
             LOGGER.severe("Unable to access " + relation + " of entity type " + entity.getClass().getName());
         }
-        return null;
+        return emptyList();
     }
 
     /**

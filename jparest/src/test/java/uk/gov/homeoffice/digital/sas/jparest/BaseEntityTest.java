@@ -62,7 +62,7 @@ class BaseEntityTest {
         obj2.setId(100L);
         obj2.setDescription("different");
         assertThat(obj1).isEqualTo(obj2);
-        assertThat(obj1.hashCode()).isEqualTo(obj2.hashCode());
+        assertThat(obj1).hasSameHashCodeAs(obj2);
     }
 
     @ParameterizedTest(name="{0}")

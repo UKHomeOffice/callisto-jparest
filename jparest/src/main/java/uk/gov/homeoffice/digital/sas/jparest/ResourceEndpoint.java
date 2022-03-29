@@ -29,7 +29,7 @@ public class ResourceEndpoint {
     public void add(Class<?> clazz, String path, Class<?> idFieldType) {
 
         if (descriptors.containsKey(clazz)) {
-            throw new AddResourceDescriptorException(RESOURCE_ALREADY_ADDED, AddResourceDescriptorErrorCode.RESOURCE_ALREADY_EXISTS);
+            throw new AddResourceDescriptorException(RESOURCE_ALREADY_ADDED, AddResourceDescriptorErrorCode.RESOURCE_ALREADY_EXISTS.getCode());
         }
 
         var rootDescriptor = new RootDescriptor(idFieldType, path);
@@ -40,13 +40,13 @@ public class ResourceEndpoint {
     public void addRelated(Class<?> clazz, Class<?> relatedClazz, String path, Class<?> idFieldType) {
 
         if (!descriptors.containsKey(clazz)) {
-            throw new AddResourceDescriptorException(CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES, AddResourceDescriptorErrorCode.RESOURCE_DOES_NOT_EXIST);
+            throw new AddResourceDescriptorException(CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES, AddResourceDescriptorErrorCode.RESOURCE_DOES_NOT_EXIST.getCode());
         }
 
         var rootDescriptor = descriptors.get(clazz);
 
         if (rootDescriptor.getRelations().containsKey(relatedClazz)) {
-            throw new AddResourceDescriptorException(RELATED_RESOURCE_ALREADY_ADDED, AddResourceDescriptorErrorCode.RELATED_RESOURCE_ALREADY_EXISTS);
+            throw new AddResourceDescriptorException(RELATED_RESOURCE_ALREADY_ADDED, AddResourceDescriptorErrorCode.RELATED_RESOURCE_ALREADY_EXISTS.getCode());
         }
 
         var descriptor = new Descriptor(idFieldType, path);
