@@ -38,16 +38,14 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
     private final ResourceEndpoint endpoint;
 
-    private static ApiResponse EMPTY_RESPONSE;
-    private static Parameter PAGEABLE_PARAMETER;
+    private static ApiResponse apiResponse = emptyResponse();
+    private static Parameter parameter = pageableParameter();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceOpenApiCustomiser.class);
 
     @Autowired
     public ResourceOpenApiCustomiser(ResourceEndpoint endpoint) {
         this.endpoint = endpoint;
-        EMPTY_RESPONSE = emptyResponse();
-        PAGEABLE_PARAMETER = pageableParameter();
     }
 
     /**
@@ -126,7 +124,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
 
         var get = new Operation();
-        get.addParametersItem(PAGEABLE_PARAMETER);
+        get.addParametersItem(parameter);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
         get.addTagsItem(tag);
@@ -175,7 +173,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         pi.put(put);
         var delete = new Operation();
 
-        ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
+        ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", apiResponse);
         delete.addParametersItem(idParameter);
         delete.setResponses(deleteResponses);
         delete.addTagsItem(tag);
@@ -204,7 +202,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
         var get = new Operation();
         get.addParametersItem(idParameter);
-        get.addParametersItem(PAGEABLE_PARAMETER);
+        get.addParametersItem(parameter);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
         get.addTagsItem(tag);
@@ -227,7 +225,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
         var pi = new PathItem();
 
-        ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
+        ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", apiResponse);
 
         var idParameter = getParameter(idClazz, "path", ID_PARAM_NAME);
         var relatedIdParameter = getArrayParameter(relatedIdClazz, "path", RELATED_PARAM_NAME);
