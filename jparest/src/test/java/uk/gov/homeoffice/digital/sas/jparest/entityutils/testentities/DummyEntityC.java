@@ -14,6 +14,7 @@ public class DummyEntityC extends BaseEntity {
 
     @Id
     @Getter
+    @Setter
     private Long id;
 
     @Getter

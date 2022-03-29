@@ -76,6 +76,8 @@ public abstract class BaseEntity {
         if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
-        return getId() == getId(obj);
+        var thisId = getId();
+        var thatId = getId(obj);
+        return thisId != null && thatId != null && thisId == thatId;
     }
 }
