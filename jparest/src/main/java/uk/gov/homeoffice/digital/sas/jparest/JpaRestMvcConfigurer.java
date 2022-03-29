@@ -12,20 +12,26 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import uk.gov.homeoffice.digital.sas.jparest.web.SpelExpressionArgumentResolver;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 public class JpaRestMvcConfigurer implements WebMvcConfigurer {
 
-    private static final Logger LOGGER = Logger.getLogger(JpaRestMvcConfigurer.class.getName());
+    private ObjectMapper objectMapper;
 
     /**
      * Registers the {@link com.example.misc.ApiRequestParamArgumentResolver}.
      */
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-        LOGGER.info("addArgumentResolvers");
-
         argumentResolvers.add(new SpelExpressionArgumentResolver());
+    }
+
+    private ObjectMapper getObjectMapper() {
+        if(null== objectMapper){
+            objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new Hibernate5Module());
+            objectMapper.registerModule(new JavaTimeModule());
+        }
+        return objectMapper;
     }
 
     /**
@@ -43,17 +49,11 @@ public class JpaRestMvcConfigurer implements WebMvcConfigurer {
      */
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        LOGGER.info("extendMessageConverters");
         for (HttpMessageConverter<?> converter : converters) {
             if (converter instanceof MappingJackson2HttpMessageConverter) {
-                var hibernateModule = new Hibernate5Module();
-
-                final var om = new ObjectMapper();
-                om.registerModule(hibernateModule);
-                om.registerModule(new JavaTimeModule());
-
-                ((MappingJackson2HttpMessageConverter) converter).registerObjectMappersForType(ApiResponse.class, map ->
-                    map.put(MediaType.APPLICATION_JSON, om)
+                ((MappingJackson2HttpMessageConverter) converter).registerObjectMappersForType(
+                        ApiResponse.class,
+                        map -> map.put(MediaType.APPLICATION_JSON, getObjectMapper())
                 );
             }
         }
