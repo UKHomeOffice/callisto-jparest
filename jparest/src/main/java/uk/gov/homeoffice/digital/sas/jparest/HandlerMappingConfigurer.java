@@ -1,5 +1,19 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.API_ROOT_PATH;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.PATH_DELIMITER;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_ID_PATH_PARAM;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_RELATED_ID_PATH_PARAM;
+
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.metamodel.EntityType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;
@@ -9,22 +23,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo.BuilderConfiguration;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
-
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.metamodel.EntityType;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.*;
 
 /**
  * Discovers JPA entities annotated with {@link Resource}
@@ -35,7 +39,6 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
     private BuilderConfiguration builderOptions;
-
 
     private static final Logger LOGGER = Logger.getLogger(HandlerMappingConfigurer.class.getName());
 
@@ -49,9 +52,9 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
     @Autowired
     public HandlerMappingConfigurer(EntityManager entityManager,
-                                    PlatformTransactionManager transactionManager,
-                                    ApplicationContext context,
-                                    ResourceEndpoint resourceEndpoint) {
+            PlatformTransactionManager transactionManager,
+            ApplicationContext context,
+            ResourceEndpoint resourceEndpoint) {
         this.entityManager = entityManager;
         this.transactionManager = transactionManager;
         this.context = context;
@@ -91,15 +94,20 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
                 // Create a controller for the resource
                 LOGGER.fine("Creating controller");
                 EntityUtils<?> entityUtils = new EntityUtils<>(resource, entityManager);
-                ResourceApiController<?, ?> controller = new ResourceApiController<>(resource, entityManager, transactionManager, entityUtils);
+                ResourceApiController<?, ?> controller = new ResourceApiController<>(resource, entityManager,
+                        transactionManager, entityUtils);
                 // Map the CRUD operations to the controllers methods
 
                 LOGGER.fine("Registering common paths");
-                register(controller, "list", new Class<?>[]{SpelExpression.class, Pageable.class}, path, null, RequestMethod.GET);
-                register(controller, "get", new Class<?>[]{Object.class}, path + URL_ID_PATH_PARAM, null, RequestMethod.GET);
-                register(controller, "create", new Class<?>[]{String.class}, path, null, RequestMethod.POST);
-                register(controller, "delete", new Class<?>[]{Object.class}, path + URL_ID_PATH_PARAM, null, RequestMethod.DELETE);
-                register(controller, "update", new Class<?>[]{Object.class, String.class}, path + URL_ID_PATH_PARAM, null, RequestMethod.PUT);
+                register(controller, "list", new Class<?>[] { SpelExpression.class, Pageable.class }, path,
+                        RequestMethod.GET);
+                register(controller, "get", new Class<?>[] { Object.class }, path + URL_ID_PATH_PARAM,
+                        RequestMethod.GET);
+                register(controller, "create", new Class<?>[] { String.class }, path, RequestMethod.POST);
+                register(controller, "delete", new Class<?>[] { Object.class }, path + URL_ID_PATH_PARAM,
+                        RequestMethod.DELETE);
+                register(controller, "update", new Class<?>[] { Object.class, String.class }, path + URL_ID_PATH_PARAM,
+                        RequestMethod.PUT);
 
                 resourceEndpoint.add(resource, path, entityUtils.getIdFieldType());
 
@@ -108,20 +116,25 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
                     Class<?> relatedType = entityUtils.getRelatedType(relation);
                     Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
-                    resourceEndpoint.addRelated(resource, relatedType, path + URL_ID_PATH_PARAM + "/" + relation, relatedIdType);
+                    resourceEndpoint.addRelated(resource, relatedType, path + URL_ID_PATH_PARAM + "/" + relation,
+                            relatedIdType);
 
                     LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
 
-                    register(controller, "getRelated", new Class<?>[]{Object.class, String.class, SpelExpression.class, Pageable.class}, path + createIdAndRelationParams(relation), null, RequestMethod.GET);
-                    register(controller, "deleteRelated", new Class<?>[]{Object.class, String.class, Object[].class}, path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM, null, RequestMethod.DELETE);
-                    register(controller, "addRelated", new Class<?>[]{Object.class, String.class, Object[].class}, path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM, null, RequestMethod.PUT);
+                    register(controller, "getRelated",
+                            new Class<?>[] { Object.class, String.class, SpelExpression.class, Pageable.class },
+                            path + createIdAndRelationParams(relation), RequestMethod.GET);
+                    register(controller, "deleteRelated", new Class<?>[] { Object.class, String.class, Object[].class },
+                            path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM,
+                            RequestMethod.DELETE);
+                    register(controller, "addRelated", new Class<?>[] { Object.class, String.class, Object[].class },
+                            path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM, RequestMethod.PUT);
                 }
 
                 LOGGER.fine("All paths registered");
             }
 
         }
-
 
     }
 
@@ -130,7 +143,8 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
     }
 
     /**
-     * Private help method that finds the specified method on the controller class and maps it to the
+     * Private help method that finds the specified method on the controller class
+     * and maps it to the
      * given path for the given request method.
      *
      * @param controller    The controller to register the mapping to
@@ -140,17 +154,14 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
      * @param requestMethod The request method to map
      * @throws NoSuchMethodException
      */
-    private void register(Object controller, String methodName, Class<?>[] methodArgs, String path, RequestCondition<?> condition, RequestMethod requestMethod) throws NoSuchMethodException {
+    private void register(Object controller, String methodName, Class<?>[] methodArgs, String path,
+            RequestMethod requestMethod) throws NoSuchMethodException {
         var method = ResourceApiController.class.getDeclaredMethod(methodName, methodArgs);
 
         LOGGER.finest("Building RequestMappingInfo");
         var builder = RequestMappingInfo.paths(path).options(this.builderOptions)
                 .methods(requestMethod)
                 .produces(MediaType.APPLICATION_JSON_VALUE);
-
-        if (condition != null) {
-            builder = builder.customCondition(condition);
-        }
 
         var requestMappingInfo = builder.build();
 

@@ -1,42 +1,42 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.stream.Stream;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.domain.Pageable;
-import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
+
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
-import uk.gov.homeoffice.digital.sas.jparest.testutils.HandlerMappingConfigurerTestUtil;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.Mockito.*;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @Transactional
 @ContextConfiguration(locations = "/test-context.xml")
 class HandlerMappingConfigurerTest {
-
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -55,212 +55,68 @@ class HandlerMappingConfigurerTest {
 
     private HandlerMappingConfigurer handlerMappingConfigurer;
 
-    private static final Map<String, Class<?>> RESOURCE_TO_PATH_NAME_MAP = Map.of(
-            DummyEntityA.class.getAnnotation(Resource.class).path(), DummyEntityA.class,
-            DummyEntityB.class.getAnnotation(Resource.class).path(), DummyEntityB.class,
-            DummyEntityC.class.getAnnotation(Entity.class).name().toLowerCase(), DummyEntityC.class
-    );
-
-
     @BeforeEach
     public void setup() {
         when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
-        handlerMappingConfigurer = new HandlerMappingConfigurer(entityManager, transactionManager, context, resourceEndpoint);
+        handlerMappingConfigurer = new HandlerMappingConfigurer(entityManager, transactionManager, context,
+                resourceEndpoint);
     }
 
+    @ParameterizedTest
+    @MethodSource("resources")
+    void registerUserController_classAnnotatedAsResource_registersRestfulEndpoints(Class<?> clazz,
+            String resourceName) {
 
-
-    //Resources Path Registry Tests
-    @Test
-    void registerUserController_listPathsAreRegisteredForResources() {
-
-        assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
-
-            var path = HandlerMappingConfigurerTestUtil.createApiResourcePath(resourcePathName);
-            var expectedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
-                    requestMappingHandlerMapping, path, RequestMethod.GET);
-
-            var expectedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
-                    "list", ResourceApiController.class, SpelExpression.class, Pageable.class);
-
-            verify(requestMappingHandlerMapping).registerMapping(eq(expectedRequestMappingInfo), any(), eq(expectedMethod));
-        });
-    }
-
-
-    @Test
-    void registerUserController_getPathsAreRegisteredForResources() {
+        var expectedCalls = List.of(
+                List.of("{GET [/resources/" + resourceName + "], produces [application/json]}", "list"),
+                List.of("{GET [/resources/" + resourceName + "/{id}], produces [application/json]}", "get"),
+                List.of("{POST [/resources/" + resourceName + "], produces [application/json]}", "create"),
+                List.of("{DELETE [/resources/" + resourceName + "/{id}], produces [application/json]}", "delete"),
+                List.of("{PUT [/resources/" + resourceName + "/{id}], produces [application/json]}", "update"));
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
 
-            var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName);
-            var expectedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
-                    requestMappingHandlerMapping, path, RequestMethod.GET);
-
-            var expectedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
-                    "get", ResourceApiController.class, Object.class);
-
-            verify(requestMappingHandlerMapping).registerMapping(eq(expectedRequestMappingInfo), any(), eq(expectedMethod));
-        });
-    }
-
-
-    @Test
-    void registerUserController_createPathsAreRegisteredForResources() {
-
-        assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
-
-            var path = HandlerMappingConfigurerTestUtil.createApiResourcePath(resourcePathName);
-            var expectedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
-                    requestMappingHandlerMapping, path, RequestMethod.POST);
-
-            var expectedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
-                    "create", ResourceApiController.class, String.class);
-
-            verify(requestMappingHandlerMapping).registerMapping(eq(expectedRequestMappingInfo), any(), eq(expectedMethod));
-        });
-    }
-
-    @Test
-    void registerUserController_deletePathsAreRegisteredForResources() {
-
-        assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
-
-            var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName);
-            var expectedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
-                    requestMappingHandlerMapping, path, RequestMethod.DELETE);
-
-            var expectedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
-                    "delete", ResourceApiController.class, Object.class);
-
-            verify(requestMappingHandlerMapping).registerMapping(eq(expectedRequestMappingInfo), any(), eq(expectedMethod));
-        });
-    }
-
-    @Test
-    void registerUserController_updatePathsAreRegisteredForResources() {
-
-        assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
-
-            var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName);
-            var expectedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
-                    requestMappingHandlerMapping, path, RequestMethod.PUT);
-
-            var expectedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
-                    "update", ResourceApiController.class, Object.class, String.class);
-
-            verify(requestMappingHandlerMapping).registerMapping(eq(expectedRequestMappingInfo), any(), eq(expectedMethod));
-        });
-    }
-
-
-    @Test
-    void registerUserController_resourcesAreAddedToResourceEndpoint() {
-
-        assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        RESOURCE_TO_PATH_NAME_MAP.forEach((resourcePathName, resourceClass) -> {
-
-            var path = HandlerMappingConfigurerTestUtil.createApiResourcePath(resourcePathName);
-            var entityUtils = new EntityUtils<>(resourceClass, entityManager);
-            verify(resourceEndpoint).add(resourceClass, path, entityUtils.getIdFieldType());
-        });
-    }
-
-
-
-    //Related Resources Path Registry Tests
-    @Test
-    void registerUserController_getPathsAreRegisteredForRelatedResources() {
-
-        assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        var resourceClass = DummyEntityA.class;
-        var resourcePathName = DummyEntityA.class.getAnnotation(Resource.class).path();
-
-        var entityUtils = new EntityUtils<>(resourceClass, entityManager);
-        var relatedResources = entityUtils.getRelatedResources();
-
-        assertThat(relatedResources).isNotNull().hasSize(1).allSatisfy(relatedResource -> {
-
-            var relatedPath = HandlerMappingConfigurerTestUtil.createApiRelatedResourcePath(resourcePathName, relatedResource);
-            var expectedRelatedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
-                    requestMappingHandlerMapping, relatedPath, RequestMethod.GET);
-
-            var expectedRelatedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
-                    "getRelated", ResourceApiController.class, Object.class, String.class, SpelExpression.class, Pageable.class);
-
-            verify(requestMappingHandlerMapping).registerMapping(eq(expectedRelatedRequestMappingInfo), any(), eq(expectedRelatedMethod));
-        });
-    }
-
-    @Test
-    void registerUserController_deletePathsAreRegisteredForRelatedResources() {
-
-        assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        var resourceClass = DummyEntityA.class;
-        var resourcePathName = DummyEntityA.class.getAnnotation(Resource.class).path();
-
-        var entityUtils = new EntityUtils<>(resourceClass, entityManager);
-        var relatedResources = entityUtils.getRelatedResources();
-
-        assertThat(relatedResources).isNotNull().hasSize(1).allSatisfy(relatedResource -> {
-
-            var relatedPath = HandlerMappingConfigurerTestUtil.createApiRelatedResourcePathWithRelatedId(resourcePathName, relatedResource);
-            var expectedRelatedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
-                    requestMappingHandlerMapping, relatedPath, RequestMethod.DELETE);
-
-            var expectedRelatedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
-                    "deleteRelated", ResourceApiController.class, Object.class, String.class, Object[].class);
-
-            verify(requestMappingHandlerMapping).registerMapping(eq(expectedRelatedRequestMappingInfo), any(), eq(expectedRelatedMethod));
-        });
-    }
-
-    @Test
-    void registerUserController_updatePathsAreRegisteredForRelatedResources() {
-
-        assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        var resourceClass = DummyEntityA.class;
-        var resourcePathName = DummyEntityA.class.getAnnotation(Resource.class).path();
-
-        var entityUtils = new EntityUtils<>(resourceClass, entityManager);
-        var relatedResources = entityUtils.getRelatedResources();
-
-        assertThat(relatedResources).isNotNull().hasSize(1).allSatisfy(relatedResource -> {
-
-            var relatedPath = HandlerMappingConfigurerTestUtil.createApiRelatedResourcePathWithRelatedId(resourcePathName, relatedResource);
-            var expectedRelatedRequestMappingInfo = HandlerMappingConfigurerTestUtil.createRequestMappingInfo(
-                    requestMappingHandlerMapping, relatedPath, RequestMethod.PUT);
-
-            var expectedRelatedMethod = HandlerMappingConfigurerTestUtil.getMethodFromControllerOrFail(
-                    "addRelated", ResourceApiController.class, Object.class, String.class, Object[].class);
-
-            verify(requestMappingHandlerMapping).registerMapping(eq(expectedRelatedRequestMappingInfo), any(), eq(expectedRelatedMethod));
-        });
+        verifyExpectedHandlerMappingCalls(requestMappingHandlerMapping, clazz, expectedCalls);
 
     }
 
+    private static Stream<Arguments> resources() {
+        return Stream.of(
+                Arguments.of(DummyEntityA.class, "dummyEntityAs"),
+                Arguments.of(DummyEntityB.class, "dummyEntityBs"),
+                Arguments.of(DummyEntityC.class, "dummyentityc"),
+                Arguments.of(DummyEntityD.class, "dummyentityd"));
+    }
 
     @Test
-    void registerUserController_relatedResourcesAreAddedToResourceEndpoint() {
+    void registerUserController_classAnnotatedAsResourceWithManyToManyAnnotation_registersRelatedEndpoints() {
+
+        var expectedCalls = List.of(
+                List.of("{GET [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}], produces [application/json]}",
+                        "getRelated"),
+                List.of("{DELETE [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedId}], produces [application/json]}",
+                        "deleteRelated"),
+                List.of("{PUT [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedId}], produces [application/json]}",
+                        "addRelated"));
 
         assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
-        var resourceClass = DummyEntityA.class;
-        var resourcePathName = DummyEntityA.class.getAnnotation(Resource.class).path();
 
-        var entityUtils = new EntityUtils<>(resourceClass, entityManager);
-        var relatedResources = entityUtils.getRelatedResources();
+        verifyExpectedHandlerMappingCalls(requestMappingHandlerMapping, DummyEntityA.class, expectedCalls);
 
-        assertThat(relatedResources).isNotNull().hasSize(1).allSatisfy(relatedResource -> {
+    }
 
-            var path = HandlerMappingConfigurerTestUtil.createApiResourcePathWithIdParam(resourcePathName) + "/" + relatedResource;
-            verify(resourceEndpoint).addRelated(
-                    resourceClass, entityUtils.getRelatedType(relatedResource), path, entityUtils.getRelatedIdType(relatedResource));
-        });
+    private void verifyExpectedHandlerMappingCalls(RequestMappingHandlerMapping requestMappingHandlerMapping2,
+            Class<?> clazz, List<List<String>> expectedCalls) {
+
+        for (var expected : expectedCalls) {
+
+            Mockito.verify(requestMappingHandlerMapping).registerMapping(
+                    argThat((a) -> a.toString().equals(expected.get(0))),
+                    argThat((b) -> ((ResourceApiController<?,?>) b).getEntityType().equals(clazz)),
+                    argThat((c) -> c.getName().equals(expected.get(1))));
+
+        }
+
     }
 
 }

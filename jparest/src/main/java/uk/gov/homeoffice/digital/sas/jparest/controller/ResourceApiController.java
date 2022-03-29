@@ -21,6 +21,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+
+import lombok.AccessLevel;
+import lombok.Getter;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
@@ -46,6 +50,8 @@ import java.util.*;
 @ResponseBody
 public class ResourceApiController<T, U> {
 
+    @Getter
+    private Class<T> entityType;
     private EntityManager entityManager;
     private PersistenceUnitUtil persistenceUnitUtil;
     private PlatformTransactionManager transactionManager;
@@ -75,6 +81,7 @@ public class ResourceApiController<T, U> {
     @SuppressWarnings("unchecked")
     public ResourceApiController(Class<T> entityType, EntityManager entityManager,
                                  PlatformTransactionManager transactionManager, EntityUtils<?> entityUtils) {
+        this.entityType = entityType;
         this.entityManager = entityManager;
         this.transactionManager = transactionManager;
         this.repository = new SimpleJpaRepository<>(entityType, entityManager);
