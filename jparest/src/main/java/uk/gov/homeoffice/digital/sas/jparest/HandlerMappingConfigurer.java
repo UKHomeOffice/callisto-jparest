@@ -1,19 +1,5 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.API_ROOT_PATH;
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.PATH_DELIMITER;
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_ID_PATH_PARAM;
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_RELATED_ID_PATH_PARAM;
-
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.metamodel.EntityType;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;
@@ -26,9 +12,20 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo.BuilderConfiguration;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
+
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.metamodel.EntityType;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.*;
 
 /**
  * Discovers JPA entities annotated with {@link Resource}
@@ -37,21 +34,18 @@ import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 @Component
 public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
-    private RequestMappingHandlerMapping requestMappingHandlerMapping;
-    private BuilderConfiguration builderOptions;
-
     private static final Logger LOGGER = Logger.getLogger(HandlerMappingConfigurer.class.getName());
 
     private final EntityManager entityManager;
-
     private final PlatformTransactionManager transactionManager;
-
-    ApplicationContext context;
-
     private final ResourceEndpoint resourceEndpoint;
+    ApplicationContext context;
+    private RequestMappingHandlerMapping requestMappingHandlerMapping;
+    private BuilderConfiguration builderOptions;
 
     @Autowired
-    public HandlerMappingConfigurer(EntityManager entityManager,
+    public HandlerMappingConfigurer(
+            EntityManager entityManager,
             PlatformTransactionManager transactionManager,
             ApplicationContext context,
             ResourceEndpoint resourceEndpoint) {
@@ -63,79 +57,91 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
     @PostConstruct
     public void registerUserController() throws NoSuchMethodException, SecurityException {
-
         requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
+
+        createBuilderOptions();
+
+        LOGGER.fine("Searching for classes annotated as resources");
+        List<Class<?>> resourceTypes = resourceEndpoint.getResourceTypes();
+        Set<EntityType<?>> resourceEntityTypes =
+                entityManager.getMetamodel().getEntities()
+                        .stream()
+                        .filter(et -> et.getJavaType().isAnnotationPresent(Resource.class))
+                        .collect(Collectors.toSet());
+
+        // find the id field , build the request mapping path and register the controller
+        for (EntityType<?> entityType : resourceEntityTypes) {
+            Class<?> resource = entityType.getJavaType();
+            LOGGER.fine("Processing resource" + resource.getName());
+            var resourceAnnotation = resource.getAnnotation(Resource.class);
+            String resourcePath = resourceAnnotation.path();
+            if (!StringUtils.hasText(resourcePath)) {
+                resourcePath = entityType.getName().toLowerCase();
+            }
+            String path = API_ROOT_PATH + PATH_DELIMITER + resourcePath;
+            LOGGER.log(Level.FINE, "root path for resource: {0}", path);
+
+            // Added to endpoint resource types for documentation customiser
+            resourceTypes.add(resource);
+
+            // Create a controller for the resource
+            LOGGER.fine("Creating controller");
+            EntityUtils<?> entityUtils = new EntityUtils<>(resource, entityManager);
+            ResourceApiController<?, ?> controller = new ResourceApiController<>(
+                    resource, entityManager,
+                    transactionManager, entityUtils);
+
+            // Map the CRUD operations to the controllers methods
+            mapRestOperationsToController(resource, path, entityUtils, controller);
+
+            LOGGER.fine("Registering related paths");
+            registerRelatedPaths(resource, path, entityUtils, controller);
+
+            LOGGER.fine("All paths registered");
+        }
+    }
+
+    private void mapRestOperationsToController(
+            Class<?> resource, String path, EntityUtils<?> entityUtils,
+            ResourceApiController<?, ?> controller) throws NoSuchMethodException {
+        LOGGER.fine("Registering common paths");
+        register(controller, "list", new Class<?>[]{SpelExpression.class, Pageable.class},
+                path, RequestMethod.GET);
+        register(controller, "get", new Class<?>[]{Object.class},
+                path + URL_ID_PATH_PARAM, RequestMethod.GET);
+        register(controller, "create", new Class<?>[]{String.class},
+                path, RequestMethod.POST);
+        register(controller, "delete", new Class<?>[]{Object.class},
+                path + URL_ID_PATH_PARAM, RequestMethod.DELETE);
+        register(controller, "update", new Class<?>[]{Object.class, String.class},
+                path + URL_ID_PATH_PARAM, RequestMethod.PUT);
+        resourceEndpoint.add(resource, path, entityUtils.getIdFieldType());
+    }
+
+    private void registerRelatedPaths(
+            Class<?> resource, String path, EntityUtils<?> entityUtils,
+            ResourceApiController<?, ?> controller) throws NoSuchMethodException {
+        for (String relation : entityUtils.getRelatedResources()) {
+            Class<?> relatedType = entityUtils.getRelatedType(relation);
+            Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
+            resourceEndpoint.addRelated(resource, relatedType,
+                    path + URL_ID_PATH_PARAM + "/" + relation, relatedIdType);
+            LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
+            register(controller, "getRelated",
+                    new Class<?>[]{Object.class, String.class, SpelExpression.class, Pageable.class},
+                    path + createIdAndRelationParams(relation), RequestMethod.GET);
+            register(controller, "deleteRelated", new Class<?>[]{Object.class, String.class, Object[].class},
+                    path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM,
+                    RequestMethod.DELETE);
+            register(controller, "addRelated", new Class<?>[]{Object.class, String.class, Object[].class},
+                    path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM, RequestMethod.PUT);
+        }
+    }
+
+    private void createBuilderOptions() {
         builderOptions = new BuilderConfiguration();
         builderOptions.setPathMatcher(requestMappingHandlerMapping.getPathMatcher());
         builderOptions.setPatternParser(requestMappingHandlerMapping.getPatternParser());
-
-        List<Class<?>> resourceTypes = resourceEndpoint.getResourceTypes();
-
-        LOGGER.fine("Searching for classes annotated as resources");
-        for (EntityType<?> entityType : entityManager.getMetamodel().getEntities()) {
-            Class<?> resource = entityType.getJavaType();
-
-            // For each entity find the id field and build the request mapping path
-            // and register the controller
-
-            LOGGER.fine("Processing resource" + resource.getName());
-            if (resource.isAnnotationPresent(Resource.class)) {
-                var resourceAnnotation = resource.getAnnotation(Resource.class);
-                String resourcePath = resourceAnnotation.path();
-                if (!StringUtils.hasText(resourcePath)) {
-                    resourcePath = entityType.getName().toLowerCase();
-                }
-                String path = API_ROOT_PATH + PATH_DELIMITER + resourcePath;
-                LOGGER.log(Level.FINE, "root path for resource: {0}", path);
-
-                // Added to endpoint resource types for documentation customiser
-                resourceTypes.add(resource);
-
-                // Create a controller for the resource
-                LOGGER.fine("Creating controller");
-                EntityUtils<?> entityUtils = new EntityUtils<>(resource, entityManager);
-                ResourceApiController<?, ?> controller = new ResourceApiController<>(resource, entityManager,
-                        transactionManager, entityUtils);
-                // Map the CRUD operations to the controllers methods
-
-                LOGGER.fine("Registering common paths");
-                register(controller, "list", new Class<?>[] { SpelExpression.class, Pageable.class }, path,
-                        RequestMethod.GET);
-                register(controller, "get", new Class<?>[] { Object.class }, path + URL_ID_PATH_PARAM,
-                        RequestMethod.GET);
-                register(controller, "create", new Class<?>[] { String.class }, path, RequestMethod.POST);
-                register(controller, "delete", new Class<?>[] { Object.class }, path + URL_ID_PATH_PARAM,
-                        RequestMethod.DELETE);
-                register(controller, "update", new Class<?>[] { Object.class, String.class }, path + URL_ID_PATH_PARAM,
-                        RequestMethod.PUT);
-
-                resourceEndpoint.add(resource, path, entityUtils.getIdFieldType());
-
-                LOGGER.fine("Registering related paths");
-                for (String relation : entityUtils.getRelatedResources()) {
-
-                    Class<?> relatedType = entityUtils.getRelatedType(relation);
-                    Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
-                    resourceEndpoint.addRelated(resource, relatedType, path + URL_ID_PATH_PARAM + "/" + relation,
-                            relatedIdType);
-
-                    LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
-
-                    register(controller, "getRelated",
-                            new Class<?>[] { Object.class, String.class, SpelExpression.class, Pageable.class },
-                            path + createIdAndRelationParams(relation), RequestMethod.GET);
-                    register(controller, "deleteRelated", new Class<?>[] { Object.class, String.class, Object[].class },
-                            path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM,
-                            RequestMethod.DELETE);
-                    register(controller, "addRelated", new Class<?>[] { Object.class, String.class, Object[].class },
-                            path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM, RequestMethod.PUT);
-                }
-
-                LOGGER.fine("All paths registered");
-            }
-
-        }
-
     }
 
     private String createIdAndRelationParams(String relation) {
@@ -168,7 +174,6 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
         LOGGER.finest("Registering mapping");
         requestMappingHandlerMapping.registerMapping(requestMappingInfo, controller, method);
         LOGGER.finest("Mapping registered");
-
     }
 
 }
