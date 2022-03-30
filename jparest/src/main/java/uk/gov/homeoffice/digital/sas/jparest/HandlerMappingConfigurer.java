@@ -39,7 +39,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
     private final EntityManager entityManager;
     private final PlatformTransactionManager transactionManager;
     private final ResourceEndpoint resourceEndpoint;
-    ApplicationContext context;
+    private final ApplicationContext context;
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
     private BuilderConfiguration builderOptions;
 
