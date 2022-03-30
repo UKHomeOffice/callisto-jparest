@@ -7,6 +7,7 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -57,7 +58,7 @@ public abstract class BaseEntity {
             return (Serializable) this.idField.get(instance);
         } catch (IllegalArgumentException | IllegalAccessException e) {
             // This shouldn't happen as we set it to accessible
-            LOGGER.severe("Error accessing field " + this.idField.getName());
+            LOGGER.log(Level.SEVERE, "Error accessing ID field " + this.idField.getName(), e);
         }
         return null;
     }
