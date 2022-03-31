@@ -1,26 +1,22 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.LoggerFactory;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
-import uk.gov.homeoffice.digital.sas.jparest.testutils.logging.LoggerMemoryAppender;
-import uk.gov.homeoffice.digital.sas.jparest.testutils.logging.LoggingUtils;
-import uk.gov.homeoffice.digital.sas.jparest.testutils.swagger.ApiResponseTestUtil;
-import uk.gov.homeoffice.digital.sas.jparest.testutils.swagger.HttpOperationTestUtil;
 import uk.gov.homeoffice.digital.sas.jparest.testutils.swagger.OpenApiTestUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -35,172 +31,112 @@ class ResourceOpenApiCustomiserTest {
     @Mock
     private ResourceEndpoint resourceEndpoint;
 
-    private static final String ROOT_PATH = "rootPath";
-    private static final String RELATED_ROOT_PATH = "relatedPath";
+    @Mock
+    private PathItemCreator pathItemCreator;
+
+    private ResourceOpenApiCustomiser resourceOpenApiCustomiser;
+
+    private ResourceEndpoint.RootDescriptor rootDescriptor;
+    private ResourceEndpoint.RootDescriptor relatedDescriptor;
+
+    private static final Class<?> RESOURCE_CLASS = DummyEntityA.class;
+    private static final Class<?> RELATED_RESOURCE_CLASS = DummyEntityB.class;
 
 
-
-    @Test
-    void customise_resourceRootPathAddedToOpenApi() {
-
-        var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint);
+    @BeforeEach
+    public void setup() {
+        rootDescriptor = resourceEndpoint.new RootDescriptor(Long.class, "rootPath");
+        relatedDescriptor = resourceEndpoint.new RootDescriptor(RELATED_RESOURCE_CLASS, "relatedPath");
+        resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint, pathItemCreator);
         when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
+        when(resourceEndpoint.getDescriptors()).thenReturn(Map.of(RESOURCE_CLASS, rootDescriptor));
+    }
 
-        var resourceClass = DummyEntityC.class;
-        var rootDescriptor = resourceEndpoint.new RootDescriptor(Long.class, ROOT_PATH);
-        when(resourceEndpoint.getDescriptors()).thenReturn(Map.of(
-                resourceClass, rootDescriptor));
+
+    @ParameterizedTest
+    @MethodSource("pathItemsSource")
+    void customise_resourceRootPathAddedToOpenApi(PathItem.HttpMethod pathItemHttpMethod,
+                                                  PathItem resourceRootPath,
+                                                  Operation operation) {
+
+        when(pathItemCreator.createRootPath(RESOURCE_CLASS.getSimpleName(), RESOURCE_CLASS)).thenReturn(resourceRootPath);
 
         var openApi = OpenApiTestUtil.createDefaultOpenAPI();
         resourceOpenApiCustomiser.customise(openApi);
-
 
         assertThat(openApi.getPaths()).containsKey(rootDescriptor.getPath());
         var actualRootPath = openApi.getPaths().get(rootDescriptor.getPath());
-        assertThat(actualRootPath.readOperationsMap()).isNotEmpty();
-
-        var actualGetOperation = actualRootPath.readOperationsMap().get(PathItem.HttpMethod.GET);
-        var expectedGetOperation = HttpOperationTestUtil.createSuccessOperation(
-                resourceClass, ApiResponseTestUtil.createDefaultApiResponse(resourceClass));
-        HttpOperationTestUtil.addPageableParameterToOperation(expectedGetOperation);
-        HttpOperationTestUtil.addFilterParameterToOperation(expectedGetOperation, resourceClass);
-        assertThat(actualGetOperation).isEqualTo(expectedGetOperation);
-
-        var actualPostOperation = actualRootPath.readOperationsMap().get(PathItem.HttpMethod.POST);
-        var expectedPostOperation = HttpOperationTestUtil.createSuccessOperation(
-                resourceClass, ApiResponseTestUtil.createDefaultApiResponse(resourceClass));
-        HttpOperationTestUtil.addRequestBody(expectedPostOperation, resourceClass);
-        assertThat(actualPostOperation).isEqualTo(expectedPostOperation);
+        assertThat(actualRootPath.readOperationsMap()).containsEntry(pathItemHttpMethod, operation);
     }
 
-    @Test
-    void customise_resourceItemPathAddedToOpenApi() {
+    @ParameterizedTest
+    @MethodSource("pathItemsSource")
+    void customise_resourceItemPathAddedToOpenApi(PathItem.HttpMethod pathItemHttpMethod,
+                                                  PathItem resourceItemPath,
+                                                  Operation operation) {
 
-        var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint);
-        when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
-
-        var resourceClass = DummyEntityC.class;
-        var rootDescriptor = resourceEndpoint.new RootDescriptor(Long.class, ROOT_PATH);
-        when(resourceEndpoint.getDescriptors()).thenReturn(Map.of(
-                resourceClass, rootDescriptor));
+        when(pathItemCreator.createItemPath(RESOURCE_CLASS.getSimpleName(), RESOURCE_CLASS, Long.class)).thenReturn(resourceItemPath);
 
         var openApi = OpenApiTestUtil.createDefaultOpenAPI();
         resourceOpenApiCustomiser.customise(openApi);
-
 
         assertThat(openApi.getPaths()).containsKey(rootDescriptor.getPath() + URL_ID_PATH_PARAM);
         var actualItemPath = openApi.getPaths().get(rootDescriptor.getPath() + URL_ID_PATH_PARAM);
-        assertThat(actualItemPath.readOperationsMap()).isNotEmpty();
+        assertThat(actualItemPath.readOperationsMap()).containsEntry(pathItemHttpMethod, operation);
 
-        var actualGetOperation = actualItemPath.readOperationsMap().get(PathItem.HttpMethod.GET);
-        var expectedGetOperation = HttpOperationTestUtil.createSuccessOperation(
-                resourceClass, ApiResponseTestUtil.createDefaultApiResponse(resourceClass));
-        HttpOperationTestUtil.addIdParameterToOperation(expectedGetOperation, rootDescriptor.getIdFieldType());
-        assertThat(actualGetOperation).isEqualTo(expectedGetOperation);
-
-        var actualPutOperation = actualItemPath.readOperationsMap().get(PathItem.HttpMethod.PUT);
-        var expectedPutOperation = HttpOperationTestUtil.createSuccessOperation(
-                resourceClass, ApiResponseTestUtil.createDefaultApiResponse(resourceClass));
-        HttpOperationTestUtil.addRequestBody(expectedPutOperation, resourceClass);
-        HttpOperationTestUtil.addIdParameterToOperation(expectedPutOperation, rootDescriptor.getIdFieldType());
-        assertThat(actualPutOperation).isEqualTo(expectedPutOperation);
-
-        var actualDeleteOperation = actualItemPath.readOperationsMap().get(PathItem.HttpMethod.DELETE);
-        var expectedDeleteOperation = HttpOperationTestUtil.createSuccessOperation(
-                resourceClass, ApiResponseTestUtil.createEmptyApiResponse());
-        HttpOperationTestUtil.addIdParameterToOperation(expectedDeleteOperation, rootDescriptor.getIdFieldType());
-        assertThat(actualDeleteOperation).isEqualTo(expectedDeleteOperation);
     }
 
-    @Test
-    void customise_relatedResourceRootPathAddedToOpenApi() {
+    @ParameterizedTest
+    @MethodSource("pathItemsSource")
+    void customise_relatedResourceRootPathAddedToOpenApi(PathItem.HttpMethod pathItemHttpMethod,
+                                                         PathItem relatedResourceRootPath,
+                                                         Operation operation) {
 
-        var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint);
-        when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
-
-        var resourceClass = DummyEntityA.class;
-        var relatedResourceClass = DummyEntityB.class;
-        var rootDescriptor = resourceEndpoint.new RootDescriptor(Long.class, ROOT_PATH);
-        var relatedDescriptor = resourceEndpoint.new Descriptor(relatedResourceClass, RELATED_ROOT_PATH);
-        rootDescriptor.getRelations().put(relatedResourceClass, relatedDescriptor);
-        when(resourceEndpoint.getDescriptors()).thenReturn(Map.of(
-                resourceClass, rootDescriptor));
+        rootDescriptor.getRelations().put(RELATED_RESOURCE_CLASS, relatedDescriptor);
+        when(pathItemCreator.createRelatedRootPath(RESOURCE_CLASS.getSimpleName(), RELATED_RESOURCE_CLASS, rootDescriptor.getIdFieldType()))
+                .thenReturn(relatedResourceRootPath);
 
         var openApi = OpenApiTestUtil.createDefaultOpenAPI();
         resourceOpenApiCustomiser.customise(openApi);
-
 
         assertThat(openApi.getPaths()).containsKey(relatedDescriptor.getPath());
         var actualRelatedRootPath = openApi.getPaths().get(relatedDescriptor.getPath());
-        assertThat(actualRelatedRootPath.readOperationsMap()).isNotEmpty();
-
-        var actualGetOperation = actualRelatedRootPath.readOperationsMap().get(PathItem.HttpMethod.GET);
-        var expectedGetOperation = HttpOperationTestUtil.createSuccessOperation(
-                resourceClass, ApiResponseTestUtil.createDefaultApiResponse(relatedResourceClass));
-        HttpOperationTestUtil.addIdParameterToOperation(expectedGetOperation, rootDescriptor.getIdFieldType());
-        HttpOperationTestUtil.addPageableParameterToOperation(expectedGetOperation);
-        HttpOperationTestUtil.addFilterParameterToOperation(expectedGetOperation, resourceClass);
-        assertThat(actualGetOperation).isEqualTo(expectedGetOperation);
+        assertThat(actualRelatedRootPath.readOperationsMap()).containsEntry(pathItemHttpMethod, operation);
     }
 
-    @Test
-    void customise_relatedResourceItemPathAddedToOpenApi() {
+    @ParameterizedTest
+    @MethodSource("pathItemsSource")
+    void customise_relatedResourceItemPathAddedToOpenApi(PathItem.HttpMethod pathItemHttpMethod,
+                                                         PathItem relatedResourceItemPath,
+                                                         Operation operation) {
 
-        var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint);
-        when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
-
-        var resourceClass = DummyEntityA.class;
-        var relatedResourceClass = DummyEntityB.class;
-        var rootDescriptor = resourceEndpoint.new RootDescriptor(Long.class, ROOT_PATH);
-        var relatedDescriptor = resourceEndpoint.new Descriptor(relatedResourceClass, RELATED_ROOT_PATH);
-        rootDescriptor.getRelations().put(relatedResourceClass, relatedDescriptor);
-        when(resourceEndpoint.getDescriptors()).thenReturn(Map.of(
-                resourceClass, rootDescriptor));
+        rootDescriptor.getRelations().put(RELATED_RESOURCE_CLASS, relatedDescriptor);
+        when(pathItemCreator.createRelatedItemPath(RESOURCE_CLASS.getSimpleName(), rootDescriptor.getIdFieldType(), relatedDescriptor.getIdFieldType()))
+                .thenReturn(relatedResourceItemPath);
 
         var openApi = OpenApiTestUtil.createDefaultOpenAPI();
         resourceOpenApiCustomiser.customise(openApi);
 
-
         assertThat(openApi.getPaths()).containsKey(relatedDescriptor.getPath() + URL_RELATED_ID_PATH_PARAM);
         var actualRelatedItemPath = openApi.getPaths().get(relatedDescriptor.getPath() + URL_RELATED_ID_PATH_PARAM);
-        assertThat(actualRelatedItemPath.readOperationsMap()).isNotEmpty();
-
-        var actualDeleteOperation = actualRelatedItemPath.readOperationsMap().get(PathItem.HttpMethod.DELETE);
-        var expectedDeleteOperation = HttpOperationTestUtil.createSuccessOperation(
-                resourceClass, ApiResponseTestUtil.createEmptyApiResponse());
-        HttpOperationTestUtil.addIdParameterToOperation(expectedDeleteOperation, rootDescriptor.getIdFieldType());
-        HttpOperationTestUtil.addArrayRelatedIdParameterToOperation(expectedDeleteOperation, relatedDescriptor.getIdFieldType());
-        assertThat(actualDeleteOperation).isEqualTo(expectedDeleteOperation);
-
-        var actualPutOperation = actualRelatedItemPath.readOperationsMap().get(PathItem.HttpMethod.PUT);
-        var expectedPutOperation = HttpOperationTestUtil.createSuccessOperation(
-                resourceClass, ApiResponseTestUtil.createEmptyApiResponse());
-        HttpOperationTestUtil.addIdParameterToOperation(expectedPutOperation, rootDescriptor.getIdFieldType());
-        HttpOperationTestUtil.addArrayRelatedIdParameterToOperation(expectedPutOperation, relatedDescriptor.getIdFieldType());
-        assertThat(actualPutOperation).isEqualTo(expectedPutOperation);
+        assertThat(actualRelatedItemPath.readOperationsMap()).containsEntry(pathItemHttpMethod, operation);
     }
 
-    @Test
-    void customise_resourceHasBlankFilterExampleObject_errorLogged() {
 
-        var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint);
-        when(resourceEndpoint.getResourceTypes()).thenReturn(List.of());
 
-        var resourceClass = DummyEntityD.class;
-        var rootDescriptor = resourceEndpoint.new RootDescriptor(Long.class, ROOT_PATH);
-        when(resourceEndpoint.getDescriptors()).thenReturn(Map.of(
-                resourceClass, rootDescriptor));
+    private static Stream<Arguments> pathItemsSource() {
 
-        var logger = (Logger) LoggerFactory.getLogger(ResourceOpenApiCustomiser.class);
-        var loggerMemoryAppender = new LoggerMemoryAppender();
-        LoggingUtils.startMemoryAppender(logger, loggerMemoryAppender, Level.ERROR);
+        var pathItemGet = OpenApiTestUtil.createGetPathItem();
+        var pathItemPost = OpenApiTestUtil.createPostPathItem();
+        var pathItemPut = OpenApiTestUtil.createPutPathItem();
+        var pathItemDelete = OpenApiTestUtil.createDeletePathItem();
 
-        resourceOpenApiCustomiser.customise(OpenApiTestUtil.createDefaultOpenAPI());
-
-        var expectedLogMessage = "Example could not be found in ExampleObject from resource: " +
-                resourceClass.getSimpleName();
-        assertThat(loggerMemoryAppender.countEventsForLogger(ResourceOpenApiCustomiser.class.getName())).isEqualTo(1);
-        assertThat(loggerMemoryAppender.search(expectedLogMessage, Level.ERROR).size()).isEqualTo(1);
+        return Stream.of(
+                Arguments.of(PathItem.HttpMethod.GET, pathItemGet, pathItemGet.getGet()),
+                Arguments.of(PathItem.HttpMethod.POST, pathItemPost, pathItemPost.getPost()),
+                Arguments.of(PathItem.HttpMethod.PUT, pathItemPut, pathItemPut.getPut()),
+                Arguments.of(PathItem.HttpMethod.DELETE, pathItemDelete, pathItemDelete.getDelete())
+        );
     }
 
 }

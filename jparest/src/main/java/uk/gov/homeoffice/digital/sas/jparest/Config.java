@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.PlatformTransactionManager;
+import uk.gov.homeoffice.digital.sas.jparest.swagger.PathItemCreator;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.ResourceOpenApiCustomiser;
 
 import javax.persistence.EntityManager;
@@ -34,8 +35,13 @@ public class Config {
     }
 
     @Bean
-    public OpenApiCustomiser resourceOpenApiCustomiser(ResourceEndpoint endpoint) {
-        return new ResourceOpenApiCustomiser(endpoint);
+    public OpenApiCustomiser resourceOpenApiCustomiser(ResourceEndpoint endpoint, PathItemCreator pathItemCreator) {
+        return new ResourceOpenApiCustomiser(endpoint, pathItemCreator);
+    }
+
+    @Bean
+    public PathItemCreator pathItemCreator() {
+        return new PathItemCreator();
     }
 
     @Bean
