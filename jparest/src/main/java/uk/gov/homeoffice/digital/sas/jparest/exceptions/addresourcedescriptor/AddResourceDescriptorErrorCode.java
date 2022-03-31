@@ -4,7 +4,8 @@ public enum AddResourceDescriptorErrorCode {
 
     RESOURCE_ALREADY_EXISTS(10),
     RESOURCE_DOES_NOT_EXIST(20),
-    RELATED_RESOURCE_ALREADY_EXISTS(30);
+    RELATED_RESOURCE_ALREADY_EXISTS(30),
+    PATH_ALREADY_EXISTS(40);
 
     private final int code;
 
