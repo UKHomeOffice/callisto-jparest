@@ -189,7 +189,7 @@ public class PathItemCreator {
         var mt = new MediaType();
         Schema<?> responseSchema = getTypedApiResponseSchema(clazz);
         mt.schema(responseSchema);
-        c.addMediaType("*/*", mt);
+        c.addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mt);
         response.content(c);
 
         return response;
@@ -280,7 +280,7 @@ public class PathItemCreator {
         var mt = new MediaType();
         Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
         mt.schema(schema);
-        c.addMediaType("application/json", mt);
+        c.addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mt);
 
         var requestBody = new RequestBody();
         requestBody.setContent(c);
@@ -299,7 +299,7 @@ public class PathItemCreator {
         var deleteContent = new Content();
         var deleteMediaType = new MediaType();
         deleteMediaType.schema(new StringSchema());
-        deleteContent.addMediaType("*/*", deleteMediaType);
+        deleteContent.addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, deleteMediaType);
         deleteResponse.content(deleteContent);
         return deleteResponse;
 
