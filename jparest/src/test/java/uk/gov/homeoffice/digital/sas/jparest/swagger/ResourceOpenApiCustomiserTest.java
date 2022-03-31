@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
-import uk.gov.homeoffice.digital.sas.jparest.testutils.swagger.OpenApiTestUtil;
+import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.OpenApiTestUtil;
 
 import java.util.List;
 import java.util.Map;
