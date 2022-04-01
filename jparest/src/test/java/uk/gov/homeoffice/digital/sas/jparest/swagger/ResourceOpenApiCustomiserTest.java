@@ -34,8 +34,6 @@ class ResourceOpenApiCustomiserTest {
         @Mock
         private ResourceEndpoint resourceEndpoint;
 
-        private static final String ROOT_PATH = "rootPath";
-
         @Test
         void customise_noResourceEndpoints_noPathsAdded() {
                 var resourceEndpoint = new ResourceEndpoint();
