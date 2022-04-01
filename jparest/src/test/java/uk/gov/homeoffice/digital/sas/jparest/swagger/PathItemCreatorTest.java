@@ -8,6 +8,8 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
@@ -242,9 +244,8 @@ class PathItemCreatorTest {
     }
 
     private void assertRequestBody(RequestBody actualRequestBody) {
-        var mediaTypeName = "application/json";
-        assertThat(actualRequestBody.getContent().get(mediaTypeName)).isNotNull();
-        assertThat(actualRequestBody.getContent().get(mediaTypeName).getSchema()).isNotNull();
+        assertThat(actualRequestBody.getContent().get(MediaType.APPLICATION_JSON_VALUE)).isNotNull();
+        assertThat(actualRequestBody.getContent().get(MediaType.APPLICATION_JSON_VALUE).getSchema()).isNotNull();
     }
 
 
