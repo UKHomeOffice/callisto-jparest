@@ -33,7 +33,7 @@ public abstract class BaseEntity {
         List<Field> idFields = Arrays
                 .stream(entityClass.getDeclaredFields())
                 .filter(e -> e.isAnnotationPresent(Id.class))
-                .collect(Collectors.toList());
+                .toList();
         if (idFields.size()!=1) {
             throw new ResourceException(String.format(ID_ERROR_MESSAGE,BaseEntity.class.getName(), entityClass.getName(), idFields.size()));
         }

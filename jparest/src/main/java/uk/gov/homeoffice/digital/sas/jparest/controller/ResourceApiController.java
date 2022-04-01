@@ -228,10 +228,10 @@ public class ResourceApiController<T, U> {
         return new ResponseEntity<>(results, null, HttpStatus.OK);
     }
 
-    public ApiResponse<?> getRelated(@PathVariable U id, @PathVariable String relation,
-                                     SpelExpression filter, Pageable pageable) {
+    public ApiResponse getRelated( //NOSONAR
+            @PathVariable U id, @PathVariable String relation,
+            SpelExpression filter, Pageable pageable) {
         Serializable identifier = getIdentifier(id);
-
         var builder = this.entityManager.getCriteriaBuilder();
         Class<?> relatedEntityType = this.entityUtils.getRelatedType(relation);
         CriteriaQuery<?> query = builder.createQuery(relatedEntityType);
