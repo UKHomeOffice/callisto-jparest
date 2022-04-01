@@ -238,9 +238,8 @@ class PathItemCreatorTest {
     }
 
     private void assertResourceResponse(ApiResponse actualResponse) {
-        var mediaTypeName = "*/*";
-        assertThat(actualResponse.getContent().get(mediaTypeName)).isNotNull();
-        assertThat(actualResponse.getContent().get(mediaTypeName).getSchema()).isNotNull();
+        assertThat(actualResponse.getContent().get(MediaType.APPLICATION_JSON_VALUE)).isNotNull();
+        assertThat(actualResponse.getContent().get(MediaType.APPLICATION_JSON_VALUE).getSchema()).isNotNull();
     }
 
     private void assertRequestBody(RequestBody actualRequestBody) {
