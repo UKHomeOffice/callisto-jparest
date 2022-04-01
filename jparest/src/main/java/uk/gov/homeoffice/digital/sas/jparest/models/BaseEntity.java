@@ -7,8 +7,11 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Provides an implementation of equals and hashCode that
@@ -17,6 +20,7 @@ import java.util.logging.Logger;
 public abstract class BaseEntity {
 
     private static final Logger LOGGER = Logger.getLogger(BaseEntity.class.getName());
+    public static final String ID_ERROR_MESSAGE = "%s should not be extended by a subclass  %s with %s number of @Id annotations";
 
     private Field idField = getIdField();
 
@@ -25,23 +29,16 @@ public abstract class BaseEntity {
      */
     @NotNull
     private Field getIdField() {
-
         var entityClass = this instanceof HibernateProxy ? this.getClass().getSuperclass() : this.getClass();
-        for (Field field : entityClass.getDeclaredFields()) {
-            if (idField == null && field.isAnnotationPresent(Id.class)) {
-                idField = field;
-                idField.setAccessible(true); //NOSONAR
-
-            } else if (field.isAnnotationPresent(Id.class)) {
-                throw new ResourceException(String.format(
-                        "%s should not be extended by a subclass with multiple id annotations", BaseEntity.class.getName()));
-            }
+        List<Field> idFields = Arrays
+                .stream(entityClass.getDeclaredFields())
+                .filter(e -> e.isAnnotationPresent(Id.class))
+                .collect(Collectors.toList());
+        if (idFields.size()!=1) {
+            throw new ResourceException(String.format(ID_ERROR_MESSAGE,BaseEntity.class.getName(), entityClass.getName(), idFields.size()));
         }
-
-        if (idField == null) throw new ResourceException(String.format(
-                "%s should not be extended by subclasses that do not have the id annotation", BaseEntity.class.getName()));
-
-        return idField;
+        idFields.get(0).setAccessible(true);
+        return idFields.get(0);
     }
 
     private Serializable getId() {

@@ -24,8 +24,7 @@ import java.util.stream.Stream;
 
 class BaseEntityTest {
 
-    private static final String NO_ID_ANNOTATION_ERROR_MSG = "should not be extended by subclasses that do not have the id annotation";
-    private static final String MULTIPLE_ID_ANNOTATIONS_ERROR_MSG = "should not be extended by a subclass with multiple id annotations";
+    public static final String SHOULD_NOT_BE_EXTENDED_BY_A_SUBCLASS = "uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity should not be extended by a subclass";
 
     @Test
     void getIdField_classContainsSingleIdAnnotatedField_noExceptionThrown() {
@@ -34,23 +33,26 @@ class BaseEntityTest {
 
     @Test
     void getIdField_fieldsExist_noIdAnnotatedFieldExists_exceptionThrown() {
-
         assertThatExceptionOfType(ResourceException.class)
-                .isThrownBy(BadEntityA::new).withMessageContaining(NO_ID_ANNOTATION_ERROR_MSG);
+                .isThrownBy(BadEntityA::new)
+                .withMessageContaining(SHOULD_NOT_BE_EXTENDED_BY_A_SUBCLASS)
+                .withMessageContaining("with 0 number of @Id annotations");
     }
 
     @Test
     void getIdField_noFieldsExist_exceptionThrown() {
-
         assertThatExceptionOfType(ResourceException.class)
-                .isThrownBy(BadEntityB::new).withMessageContaining(NO_ID_ANNOTATION_ERROR_MSG);
+                .isThrownBy(BadEntityB::new)
+                .withMessageContaining(SHOULD_NOT_BE_EXTENDED_BY_A_SUBCLASS)
+                .withMessageContaining("with 0 number of @Id annotations");
     }
 
     @Test
     void getIdField_multipleIdAnnotatedFieldExists_exceptionThrown() {
-
         assertThatExceptionOfType(ResourceException.class)
-                .isThrownBy(BadEntityC::new).withMessageContaining(MULTIPLE_ID_ANNOTATIONS_ERROR_MSG);
+                .isThrownBy(BadEntityC::new)
+                .withMessageContaining(SHOULD_NOT_BE_EXTENDED_BY_A_SUBCLASS)
+                .withMessageContaining("with 2 number of @Id annotations");
     }
 
     @Test
@@ -93,7 +95,6 @@ class BaseEntityTest {
     }
 
     static class GuidIdEntity extends BaseEntity {
-
         @Id
         @Getter
         @Setter
