@@ -233,8 +233,8 @@ public class ResourceApiController<T, U> {
         Serializable identifier = getIdentifier(id);
 
         var builder = this.entityManager.getCriteriaBuilder();
-        Class<?> entityType = this.entityUtils.getRelatedType(relation);
-        CriteriaQuery<?> query = builder.createQuery(entityType);
+        Class<?> relatedEntityType = this.entityUtils.getRelatedType(relation);
+        CriteriaQuery<?> query = builder.createQuery(relatedEntityType);
         Root<T> root = query.from(this.entityUtils.getEntityType());
         CriteriaQuery<?> select = query.select(root.join(relation));
         Join<?, ?> relatedJoin = root.getJoins().iterator().next();
