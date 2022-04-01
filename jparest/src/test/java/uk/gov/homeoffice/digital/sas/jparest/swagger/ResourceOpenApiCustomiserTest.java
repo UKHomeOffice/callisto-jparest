@@ -1,15 +1,11 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.PathItem.HttpMethod;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.parameters.Parameter;
-import io.swagger.v3.oas.models.responses.ApiResponses;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,30 +14,19 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.LoggerFactory;
 import org.springdoc.core.SpringDocAnnotationsUtils;
 
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem.HttpMethod;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.OpenApiTestUtil;
-import uk.gov.homeoffice.digital.sas.jparest.testutils.logging.LoggerMemoryAppender;
-import uk.gov.homeoffice.digital.sas.jparest.testutils.logging.LoggingUtils;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import com.fasterxml.classmate.types.ResolvedInterfaceType;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_ID_PATH_PARAM;
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_RELATED_ID_PATH_PARAM;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceOpenApiCustomiserTest {
@@ -50,7 +35,6 @@ class ResourceOpenApiCustomiserTest {
         private ResourceEndpoint resourceEndpoint;
 
         private static final String ROOT_PATH = "rootPath";
-
 
         @Test
         void customise_noResourceEndpoints_noPathsAdded() {
@@ -123,14 +107,15 @@ class ResourceOpenApiCustomiserTest {
 
                 var firstRelationPath = path + "/{id}/dummyb";
                 var firstRelatedResourceType = DummyEntityB.class;
-                var firstRelatedIdType =  UUID.class;
+                var firstRelatedIdType = UUID.class;
 
                 var secondRelationPath = path + "/{id}/dummyc";
                 var secondRelatedResourceType = DummyEntityC.class;
-                var secondRelatedIdType =  Long.class;
+                var secondRelatedIdType = Long.class;
 
                 resourceEndpoint.addRelated(resource, firstRelatedResourceType, firstRelationPath, firstRelatedIdType);
-                resourceEndpoint.addRelated(resource, secondRelatedResourceType, secondRelationPath, secondRelatedIdType);
+                resourceEndpoint.addRelated(resource, secondRelatedResourceType, secondRelationPath,
+                                secondRelatedIdType);
 
                 var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint, new PathItemCreator());
                 var openApi = OpenApiTestUtil.createDefaultOpenAPI();
@@ -197,7 +182,7 @@ class ResourceOpenApiCustomiserTest {
 
         // endregion validation operations
 
-        //region validation related operations
+        // region validation related operations
 
         private void validateRelatedRead(Paths paths, String path, Class<?> parentIdFieldType, Class<?> resource) {
                 var pathItem = paths.get(path);
@@ -233,7 +218,7 @@ class ResourceOpenApiCustomiserTest {
 
         }
 
-        //endregion validation related operations
+        // endregion validation related operations
 
         // region validation parameter
         private void validateIdParameter(List<Parameter> parameters, Class<?> clazz) {
@@ -278,7 +263,9 @@ class ResourceOpenApiCustomiserTest {
 
         private void validateRequestBody(Operation operation, Class<?> clazz) {
                 assertThat(operation).extracting(
-                                p -> p.getRequestBody().getContent().get(org.springframework.http.MediaType.APPLICATION_JSON_VALUE).getSchema().get$ref())
+                                p -> p.getRequestBody().getContent()
+                                                .get(org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+                                                .getSchema().get$ref())
                                 .isEqualTo("#/components/schemas/" + clazz.getSimpleName());
 
         }
@@ -288,7 +275,8 @@ class ResourceOpenApiCustomiserTest {
                 var successResponse = responses.get("200");
                 assertThat(successResponse).isNotNull();
                 assertThat(successResponse)
-                                .extracting(r -> r.getContent().get(org.springframework.http.MediaType.APPLICATION_JSON_VALUE))
+                                .extracting(r -> r.getContent()
+                                                .get(org.springframework.http.MediaType.APPLICATION_JSON_VALUE))
                                 .extracting(c -> c.getSchema())
                                 .extracting(
                                                 s -> s.getName(),
@@ -301,7 +289,6 @@ class ResourceOpenApiCustomiserTest {
         }
 
         // endregion validation
-
 
         private static Stream<Arguments> resourceTypes() {
                 var clazzes = new Class<?>[] {
