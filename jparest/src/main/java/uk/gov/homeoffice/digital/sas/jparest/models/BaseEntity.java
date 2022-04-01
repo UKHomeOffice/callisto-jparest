@@ -37,7 +37,7 @@ public abstract class BaseEntity {
         if (idFields.size()!=1) {
             throw new ResourceException(String.format(ID_ERROR_MESSAGE,BaseEntity.class.getName(), entityClass.getName(), idFields.size()));
         }
-        idFields.get(0).setAccessible(true);
+        idFields.get(0).setAccessible(true); //NOSONAR
         return idFields.get(0);
     }
 
