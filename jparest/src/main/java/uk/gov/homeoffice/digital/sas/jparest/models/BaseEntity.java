@@ -22,7 +22,7 @@ public abstract class BaseEntity {
     private static final Logger LOGGER = Logger.getLogger(BaseEntity.class.getName());
     public static final String ID_ERROR_MESSAGE = "%s should not be extended by a subclass  %s with %s number of @Id annotations";
 
-    private Field idField = getIdField();
+    private final Field idField = getIdField();
 
     /**
      * @return {@link Field} annotated with {@link Id}
