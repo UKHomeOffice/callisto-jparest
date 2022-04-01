@@ -131,7 +131,7 @@ public class EntityUtils<T> {
     private <Y> Y getEntityReference(Class<Y> entityType, Field idField, Serializable identifier) throws IllegalArgumentException {
         Y reference = null;
         try {
-            reference = entityType.getConstructor(new Class<?>[0]).newInstance();
+            reference = entityType.getConstructor().newInstance();
             idField.set(reference, identifier); //NOSONAR
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
