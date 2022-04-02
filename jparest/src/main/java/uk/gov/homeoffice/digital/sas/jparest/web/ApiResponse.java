@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.List;
 
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Used to return responses from the {@link ResourceApiController}
