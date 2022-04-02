@@ -317,12 +317,13 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
+    @SuppressWarnings("unchecked")
     void addRelated_allResourcesExist_addsRelatedItems() {
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
         var getRelatedResponse = controller.getRelated(10, "dummyEntityBSet", null, Pageable.ofSize(100));
-        assertThat(getRelatedResponse.getItems().size()).isZero();
+        assertThat(getRelatedResponse.getItems()).isEmpty();
 
         assertDoesNotThrow(
                 () -> controller.addRelated(10, "dummyEntityBSet", new Object[] { 1 }));
@@ -366,6 +367,7 @@ class ResourceApiControllerTest {
 
     @ParameterizedTest
     @MethodSource("relatedResourceFilters")
+    @SuppressWarnings("unchecked")
     void getRelated_filterExpressionProvided_returnsFilteredResources(int resourceId, SpelExpression expression,
             int expectedItems) {
 
@@ -391,7 +393,7 @@ class ResourceApiControllerTest {
         var getRelatedResponse = controllerA.getRelated(2, "dummyEntityBSet", null, Pageable.ofSize(100));
         @SuppressWarnings("unchecked")
         var items = (List<DummyEntityB>) getRelatedResponse.getItems();
-        assertThat(items.size()).isPositive();
+        assertThat(items).isNotEmpty();
         assertThat(items).anyMatch((item) -> item.getId().equals(2L));
 
         var deleteResponse = assertDoesNotThrow(
