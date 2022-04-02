@@ -228,7 +228,8 @@ public class ResourceApiController<T, U> {
         return new ResponseEntity<>(results, null, HttpStatus.OK);
     }
 
-    public ApiResponse getRelated( //NOSONAR
+    @SuppressWarnings("rawtypes")
+    public ApiResponse getRelated(
             @PathVariable U id, @PathVariable String relation,
             SpelExpression filter, Pageable pageable) {
         Serializable identifier = getIdentifier(id);

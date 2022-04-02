@@ -218,14 +218,13 @@ public class SpelExpressionToPredicateConverter {
     /**
      * Gets literal values from the spel expression as the given type
      */
+    @SuppressWarnings("unchecked")
     private static Comparable<Object>[] getLiteralValues(SpelNode node, int startPos, Class<?> clazz) {
         ArrayList<Comparable<Object>> items = new ArrayList<>();
         for (int i = startPos; i < node.getChildCount(); i++) {
-            @SuppressWarnings("unchecked")
             Comparable<Object> rightValue = (Comparable<Object>) convertTo(((Literal) node.getChild(i)).getLiteralValue().getValue(), clazz);
             items.add(rightValue);
         }
-        @SuppressWarnings("unchecked")
         var result = new Comparable[node.getChildCount() - 1];
         return items.toArray(result);
     }

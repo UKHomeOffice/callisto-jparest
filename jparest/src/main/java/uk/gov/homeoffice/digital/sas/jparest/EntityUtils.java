@@ -47,6 +47,8 @@ public class EntityUtils<T> {
      * @param entityType    The JPA entity class
      * @param entityManager The {@link EntityManager}
      */
+    @SuppressWarnings("squid:S3011") // Need to set accessibility of field to create instances with id set without
+                                     // touching the database
     public EntityUtils(@NonNull Class<T> entityType, @NonNull EntityManager entityManager) {
 
         Set<String> tmpRelatedResources = new HashSet<>();
@@ -59,7 +61,7 @@ public class EntityUtils<T> {
         for (Field field : entityType.getDeclaredFields()) {
             if (field.isAnnotationPresent(Id.class)) {
                 tmpIdField = field;
-                tmpIdField.setAccessible(true); //NOSONAR
+                tmpIdField.setAccessible(true);
                 tmpIdFieldName = field.getName();
                 tmpIdFieldType = field.getType();
             }
@@ -76,7 +78,7 @@ public class EntityUtils<T> {
                     EntityType<?> ret = entityManager.getMetamodel().entity((Class<?>) relatedEntityType);
                     Class<?> relatedIdType = ret.getIdType().getJavaType();
                     var relatedIdField = (Field) ret.getDeclaredId((Class<?>) relatedIdType).getJavaMember();
-                    field.setAccessible(true); //NOSONAR
+                    field.setAccessible(true);
                     relations.putIfAbsent(field.getName(), new RelatedEntity(field, (Class<?>) relatedEntityType, relatedIdType, relatedIdField));
                     tmpRelatedResources.add(field.getName());
                 }
@@ -128,11 +130,13 @@ public class EntityUtils<T> {
      * @param identifier The value of the Id.
      * @return An instance of entityType with the idField set to the identifier
      */
+    @SuppressWarnings("squid:S3011") // Need to set accessibility of field to create instances with id set without
+                                     // touching the database
     private <Y> Y getEntityReference(Class<Y> entityType, Field idField, Serializable identifier) throws IllegalArgumentException {
         Y reference = null;
         try {
             reference = entityType.getConstructor().newInstance();
-            idField.set(reference, identifier); //NOSONAR
+            idField.set(reference, identifier);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             LOGGER.severe("Unable to create reference for entity " + entityType.getName());

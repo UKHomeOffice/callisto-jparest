@@ -167,6 +167,7 @@ class SpelExpressionToPredicateConverterTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     void test_convert_with_equal_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("id==1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
@@ -175,6 +176,7 @@ class SpelExpressionToPredicateConverterTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     void test_convert_with_greaterThan_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("id>1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
@@ -183,6 +185,7 @@ class SpelExpressionToPredicateConverterTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     void test_convert_with_greaterThanOrEqual_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("id>=1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
@@ -191,6 +194,7 @@ class SpelExpressionToPredicateConverterTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     void test_convert_with_lessthan_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("id<1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
@@ -199,6 +203,7 @@ class SpelExpressionToPredicateConverterTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     void test_convert_with_lessThanOrEqual_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("id<=1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
@@ -242,7 +247,7 @@ class SpelExpressionToPredicateConverterTest {
     @Test
     void test_convert_throws_InvalidFilterException_with_describeError_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("1==id");
-        InvalidFilterException exception = assertThrows(
+        assertThrows(
                 InvalidFilterException.class,
                 () -> SpelExpressionToPredicateConverter.convert(expression, builder, root),
                 "Left hand side must be a field"
