@@ -50,8 +50,8 @@ public class JpaRestMvcConfigurer implements WebMvcConfigurer {
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         for (HttpMessageConverter<?> converter : converters) {
-            if (converter instanceof MappingJackson2HttpMessageConverter) {
-                ((MappingJackson2HttpMessageConverter) converter).registerObjectMappersForType(
+            if (converter instanceof MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter) {
+                mappingJackson2HttpMessageConverter.registerObjectMappersForType(
                         ApiResponse.class,
                         map -> map.put(MediaType.APPLICATION_JSON, getObjectMapper())
                 );
