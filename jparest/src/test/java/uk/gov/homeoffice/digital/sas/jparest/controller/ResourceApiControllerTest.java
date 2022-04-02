@@ -61,7 +61,7 @@ class ResourceApiControllerTest {
         var response = controller.list(null, Pageable.ofSize(100));
 
         assertThat(response).isNotNull();
-        assertThat(response.getItems().size()).isEqualTo(10);
+        assertThat(response.getItems()).hasSize(10);
     }
 
     @ParameterizedTest
@@ -72,7 +72,7 @@ class ResourceApiControllerTest {
         var response = controller.list(expression, Pageable.ofSize(100));
 
         assertThat(response).isNotNull();
-        assertThat(response.getItems().size()).isEqualTo(expectedItems);
+        assertThat(response.getItems()).hasSize(expectedItems);
     }
 
     @Test
@@ -117,7 +117,7 @@ class ResourceApiControllerTest {
         var apiResponse = response.getBody();
         var dummy = apiResponse.getItems().get(0);
 
-        assertThat(apiResponse.getItems().size()).isEqualTo(1);
+        assertThat(apiResponse.getItems()).hasSize(1);
         assertThat(dummy.getId()).isEqualTo(2);
     }
 
@@ -160,7 +160,7 @@ class ResourceApiControllerTest {
         var apiResponse = response.getBody();
         var dummy = apiResponse.getItems().get(0);
 
-        assertThat(apiResponse.getItems().size()).isEqualTo(1);
+        assertThat(apiResponse.getItems()).hasSize(1);
         assertThat(dummy).isNotNull();
         assertThat(dummy.getId()).isNotNull();
 
@@ -217,7 +217,7 @@ class ResourceApiControllerTest {
         var updateBody = updateResponse.getBody();
         var dummy = updateBody.getItems().get(0);
 
-        assertThat(updateBody.getItems().size()).isEqualTo(1);
+        assertThat(updateBody.getItems()).hasSize(1);
         assertThat(dummy).isNotNull();
         assertThat(dummy.getId()).isEqualTo(100);
         assertThat(dummy.getIndex()).isEqualTo(2);
@@ -328,7 +328,7 @@ class ResourceApiControllerTest {
                 () -> controller.addRelated(10, "dummyEntityBSet", new Object[] { 1 }));
 
         getRelatedResponse = controller.getRelated(10, "dummyEntityBSet", null, Pageable.ofSize(100));
-        assertThat(getRelatedResponse.getItems().size()).isEqualTo(1);
+        assertThat(getRelatedResponse.getItems()).hasSize(1);
         var resource = (DummyEntityB) getRelatedResponse.getItems().get(0);
         assertThat(resource.getId()).isEqualTo(1);
 
@@ -374,7 +374,7 @@ class ResourceApiControllerTest {
         var apiResponse = controller.getRelated(resourceId, "dummyEntityBSet", expression, Pageable.ofSize(100));
 
         assertThat(apiResponse).isNotNull();
-        assertThat(apiResponse.getItems().size()).isEqualTo(expectedItems);
+        assertThat(apiResponse.getItems()).hasSize(expectedItems);
 
     }
 

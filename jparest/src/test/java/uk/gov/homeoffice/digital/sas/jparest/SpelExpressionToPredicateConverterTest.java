@@ -151,7 +151,7 @@ class SpelExpressionToPredicateConverterTest {
         SpelExpression expression = expressionParser.parseRaw("id==1L or id>2L");
         Predicate predicate = SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getOperator()).isEqualTo(OR);
-        assertThat(predicate.getExpressions().size()).isEqualTo(2);
+        assertThat(predicate.getExpressions()).hasSize(2);
         assertThat(((ComparisonPredicate)predicate.getExpressions().get(0)).getComparisonOperator()).isEqualTo(EQUAL);
         assertThat(((ComparisonPredicate)predicate.getExpressions().get(1)).getComparisonOperator()).isEqualTo(GREATER_THAN);
     }
@@ -161,7 +161,7 @@ class SpelExpressionToPredicateConverterTest {
         SpelExpression expression = expressionParser.parseRaw("id==1L and id>2L");
         Predicate predicate = SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getOperator()).isEqualTo(AND);
-        assertThat(predicate.getExpressions().size()).isEqualTo(2);
+        assertThat(predicate.getExpressions()).hasSize(2);
         assertThat(((ComparisonPredicate)predicate.getExpressions().get(0)).getComparisonOperator()).isEqualTo(EQUAL);
         assertThat(((ComparisonPredicate)predicate.getExpressions().get(1)).getComparisonOperator()).isEqualTo(GREATER_THAN);
     }

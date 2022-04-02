@@ -34,7 +34,7 @@ class JpaRestMvcConfigurerTest {
     void addArgumentResolvers_shouldAddArgumentResolvers() {
         List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
         jpaRestMvcConfigurer.addArgumentResolvers(argumentResolvers);
-        assertThat(argumentResolvers.size()).isEqualTo(1);
+        assertThat(argumentResolvers).hasSize(1);
         assertThat(argumentResolvers.get(0)).isInstanceOf(SpelExpressionArgumentResolver.class);
     }
 
