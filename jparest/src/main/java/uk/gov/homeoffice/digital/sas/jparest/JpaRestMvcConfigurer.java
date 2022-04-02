@@ -15,7 +15,7 @@ import java.util.List;
 
 public class JpaRestMvcConfigurer implements WebMvcConfigurer {
 
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = getObjectMapper();
 
     /**
      * Registers the {@link com.example.misc.ApiRequestParamArgumentResolver}.
@@ -26,12 +26,10 @@ public class JpaRestMvcConfigurer implements WebMvcConfigurer {
     }
 
     private ObjectMapper getObjectMapper() {
-        if(null== objectMapper){
-            objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new Hibernate5Module());
-            objectMapper.registerModule(new JavaTimeModule());
-        }
-        return objectMapper;
+        var om = new ObjectMapper();
+        om.registerModule(new Hibernate5Module());
+        om.registerModule(new JavaTimeModule());
+        return om;
     }
 
     /**
@@ -53,7 +51,7 @@ public class JpaRestMvcConfigurer implements WebMvcConfigurer {
             if (converter instanceof MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter) {
                 mappingJackson2HttpMessageConverter.registerObjectMappersForType(
                         ApiResponse.class,
-                        map -> map.put(MediaType.APPLICATION_JSON, getObjectMapper())
+                        map -> map.put(MediaType.APPLICATION_JSON, objectMapper)
                 );
             }
         }
