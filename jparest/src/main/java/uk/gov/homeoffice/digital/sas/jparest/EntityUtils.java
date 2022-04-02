@@ -71,8 +71,8 @@ public class EntityUtils<T> {
                 ManyToMany m2m = field.getAnnotation(ManyToMany.class);
                 if (!StringUtils.hasText(m2m.mappedBy())) {
                     var relatedEntityType = field.getGenericType();
-                    if (relatedEntityType instanceof ParameterizedType) {
-                        relatedEntityType = ((ParameterizedType) relatedEntityType).getActualTypeArguments()[0];
+                    if (relatedEntityType instanceof ParameterizedType parameterizedType) {
+                        relatedEntityType = parameterizedType.getActualTypeArguments()[0];
                     }
 
                     EntityType<?> ret = entityManager.getMetamodel().entity((Class<?>) relatedEntityType);
