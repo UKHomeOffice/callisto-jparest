@@ -393,8 +393,8 @@ class ResourceApiControllerTest {
         var getRelatedResponse = controllerA.getRelated(2, "dummyEntityBSet", null, Pageable.ofSize(100));
         @SuppressWarnings("unchecked")
         var items = (List<DummyEntityB>) getRelatedResponse.getItems();
-        assertThat(items).isNotEmpty();
-        assertThat(items).anyMatch((item) -> item.getId().equals(2L));
+        assertThat(items).isNotEmpty()
+                .anyMatch((item) -> item.getId().equals(2L));
 
         var deleteResponse = assertDoesNotThrow(
                 () -> controllerA.deleteRelated(2, "dummyEntityBSet", new Object[] { 2 }));
