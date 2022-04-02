@@ -63,8 +63,8 @@ public class SpelExpressionToPredicateConverter {
         }
 
         // Handle method references 
-        if (node instanceof MethodReference) {
-            return getMethodPredicate((MethodReference) node, builder, root);
+        if (node instanceof MethodReference methodReference) {
+            return getMethodPredicate(methodReference, builder, root);
         }
 
         // At this point we are looking for "property {operator} property/literal"
@@ -88,8 +88,8 @@ public class SpelExpressionToPredicateConverter {
         // Get the right side
         SpelNode rightNode = node.getChild(1);
         // handle field comparison
-        if (rightNode instanceof PropertyOrFieldReference) {
-            Path<Comparable<Object>> rightField = root.get(((PropertyOrFieldReference) rightNode).getName());
+        if (rightNode instanceof PropertyOrFieldReference propertyOrFieldReference) {
+            Path<Comparable<Object>> rightField = root.get(propertyOrFieldReference.getName());
             var predicate = getEqualityOrRelativeOperatorPredicate(node, builder, field, rightField);
             if (predicate != null) {
                 return predicate;
