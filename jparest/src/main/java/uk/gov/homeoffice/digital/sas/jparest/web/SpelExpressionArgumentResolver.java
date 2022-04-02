@@ -1,5 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest.web;
 
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpression;
@@ -21,15 +24,14 @@ public class SpelExpressionArgumentResolver implements HandlerMethodArgumentReso
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws MethodArgumentTypeMismatchException {
 
-        String parameterName = parameter.getParameterName();
+        String parameterName = Objects.requireNonNull(parameter.getParameterName());
         String paramValue = webRequest.getParameter(parameterName);
 
-        if (paramValue != null) {
+        if (!StringUtils.isBlank(paramValue)) {
             try {
-                SpelExpression result = (SpelExpression) expressionParser.parseExpression(paramValue);
-                return result;
+                return expressionParser.parseExpression(paramValue);
             } catch (ParseException ex) {
                 throw new MethodArgumentTypeMismatchException(paramValue, parameter.getParameterType(), parameterName, parameter, ex.getCause());
             }

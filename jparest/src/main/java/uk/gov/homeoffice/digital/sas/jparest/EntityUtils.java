@@ -1,6 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
 import lombok.Getter;
+import lombok.NonNull;
+
 import org.springframework.util.StringUtils;
 
 import javax.persistence.EntityManager;
@@ -11,9 +13,10 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.logging.Logger;
+
+import static java.util.Collections.emptyList;
 
 /**
  * Provides utility functions for JPA entities.
@@ -25,18 +28,18 @@ import java.util.logging.Logger;
  */
 public class EntityUtils<T> {
 
-    private final static Logger LOGGER = Logger.getLogger(EntityUtils.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(EntityUtils.class.getName());
 
     @Getter
     private Class<T> entityType;
     @Getter
-    private Set<String> relatedResources = new HashSet<String>();
+    private Set<String> relatedResources = new HashSet<>();
     private Field idField;
     @Getter
     private Class<?> idFieldType;
     @Getter
     private String idFieldName;
-    private Map<String, RelatedEntity> relations = new HashMap<String, RelatedEntity>();
+    private Map<String, RelatedEntity> relations = new HashMap<>();
 
     /**
      * Creates a utility class for the specified entityType
@@ -44,47 +47,50 @@ public class EntityUtils<T> {
      * @param entityType    The JPA entity class
      * @param entityManager The {@link EntityManager}
      */
-    public EntityUtils(Class<T> entityType, EntityManager entityManager) {
+    @SuppressWarnings("squid:S3011") // Need to set accessibility of field to create instances with id set without
+                                     // touching the database
+    public EntityUtils(@NonNull Class<T> entityType, @NonNull EntityManager entityManager) {
 
-        Set<String> relatedResources = new HashSet<String>();
+        Set<String> tmpRelatedResources = new HashSet<>();
 
         // Iterate the declared fields to find the field annotated with Id
         // and to find the fields markerd ManyToMany
-        String idFieldName = null;
-        Class<?> idFieldType = null;
-        Field idField = null;
+        String tmpIdFieldName = null;
+        Class<?> tmpIdFieldType = null;
+        Field tmpIdField = null;
         for (Field field : entityType.getDeclaredFields()) {
             if (field.isAnnotationPresent(Id.class)) {
-                idField = field;
-                idFieldName = field.getName();
-                idFieldType = field.getType();
+                tmpIdField = field;
+                tmpIdField.setAccessible(true);
+                tmpIdFieldName = field.getName();
+                tmpIdFieldType = field.getType();
             }
 
             // Only record relationships that aren't mapped by another class
             if (field.isAnnotationPresent(ManyToMany.class)) {
                 ManyToMany m2m = field.getAnnotation(ManyToMany.class);
                 if (!StringUtils.hasText(m2m.mappedBy())) {
-                    Type relatedEntityType = field.getGenericType();
-                    if (relatedEntityType instanceof ParameterizedType) {
-                        relatedEntityType = ((ParameterizedType) relatedEntityType).getActualTypeArguments()[0];
+                    var relatedEntityType = field.getGenericType();
+                    if (relatedEntityType instanceof ParameterizedType parameterizedType) {
+                        relatedEntityType = parameterizedType.getActualTypeArguments()[0];
                     }
 
                     EntityType<?> ret = entityManager.getMetamodel().entity((Class<?>) relatedEntityType);
-                    Class<?> related_id_type = ret.getIdType().getJavaType();
-                    Field related_id_field = (Field) ret.getDeclaredId((Class<?>) related_id_type).getJavaMember();
+                    Class<?> relatedIdType = ret.getIdType().getJavaType();
+                    var relatedIdField = (Field) ret.getDeclaredId((Class<?>) relatedIdType).getJavaMember();
                     field.setAccessible(true);
-                    relations.putIfAbsent(field.getName(), new RelatedEntity(field, (Class<?>) relatedEntityType, related_id_type, related_id_field));
-                    relatedResources.add(field.getName());
+                    relations.putIfAbsent(field.getName(), new RelatedEntity(field, (Class<?>) relatedEntityType, relatedIdType, relatedIdField));
+                    tmpRelatedResources.add(field.getName());
                 }
             }
 
         }
 
         this.entityType = entityType;
-        this.relatedResources = relatedResources;
-        this.idField = idField;
-        this.idFieldType = idFieldType;
-        this.idFieldName = idFieldName;
+        this.relatedResources = tmpRelatedResources;
+        this.idField = tmpIdField;
+        this.idFieldType = tmpIdFieldType;
+        this.idFieldName = tmpIdFieldName;
     }
 
     /**
@@ -96,15 +102,19 @@ public class EntityUtils<T> {
      *                 with ManyToMany
      * @return Collection of entities expressed by the ManyToMany attribute
      */
-    public Collection<?> getRelatedEntities(Object entity, String relation) {
-        RelatedEntity relatedEntity = this.relations.get(relation);
-        Collection<?> result = null;
+    public Collection<Object> getRelatedEntities(@NonNull T entity, @NonNull String relation) {
+        var relatedEntity = this.relations.get(relation);
+        if (relatedEntity == null) {
+            throw new IllegalArgumentException(String.format("Relation '%s' does not exist", relation));
+        }
         try {
-            result = (Collection<?>) relatedEntity.declaredField.get(entity);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
+            @SuppressWarnings("unchecked")
+            var result = (Collection<Object>) relatedEntity.declaredField.get(entity);
+            return result;
+        } catch (IllegalAccessException e) {
             LOGGER.severe("Unable to access " + relation + " of entity type " + entity.getClass().getName());
         }
-        return result;
+        return emptyList();
     }
 
     /**
@@ -120,12 +130,14 @@ public class EntityUtils<T> {
      * @param identifier The value of the Id.
      * @return An instance of entityType with the idField set to the identifier
      */
-    private Object getEntityReference(Class<?> entityType, Field idField, Serializable identifier) {
-        Object reference = null;
+    @SuppressWarnings("squid:S3011") // Need to set accessibility of field to create instances with id set without
+                                     // touching the database
+    private <Y> Y getEntityReference(Class<Y> entityType, Field idField, Serializable identifier) throws IllegalArgumentException {
+        Y reference = null;
         try {
-            reference = entityType.getConstructor(new Class<?>[]{}).newInstance(new Object[]{});
+            reference = entityType.getConstructor().newInstance();
             idField.set(reference, identifier);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             LOGGER.severe("Unable to create reference for entity " + entityType.getName());
         }
@@ -140,7 +152,7 @@ public class EntityUtils<T> {
      * @return An instance of the entityType represented by the utility class
      * with its identifier set to the given value
      */
-    public Object getEntityReference(Serializable identifier) {
+    public T getEntityReference(Serializable identifier) {
         return getEntityReference(this.entityType, this.idField, identifier);
     }
 
@@ -149,7 +161,7 @@ public class EntityUtils<T> {
      * relation.
      */
     public Object getEntityReference(String relation, Serializable identifier) {
-        RelatedEntity relatedEntity = this.relations.get(relation);
+        var relatedEntity = this.relations.get(relation);
         return getEntityReference(relatedEntity.entityType, relatedEntity.idField, identifier);
     }
 

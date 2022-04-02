@@ -17,11 +17,16 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Resource(path = "artists")
+@Resource(path = "artists", filterExamples = {
+    @ExampleObject(name = "performance_name match", value = "performance_name matches '%the%'"),
+    @ExampleObject(name = "artist_id less than", value = "artisit_id < 5"),
+    @ExampleObject(name = "artist_id less than or eaqual to", value = "artisit_id <= 10")
+})
 @Entity(name = "artists")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @NoArgsConstructor @Getter @Setter

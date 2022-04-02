@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest;
+package uk.gov.homeoffice.digital.sas.jparest.exceptions;
 
 /**
  * Thrown when a SpelExpression can't be converted to a

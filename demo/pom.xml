@@ -8,6 +8,9 @@
 		<version>0.0.0</version>
 	</parent>
 
+	<properties>
+		<sonar.skip>true</sonar.skip>
+	</properties>
 
 	<groupId>uk.gov.homeoffice.digital.sas</groupId>
 	<artifactId>demo</artifactId>
@@ -51,6 +54,7 @@
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+
 	</dependencies>
 
 	<dependencyManagement>
@@ -64,5 +68,17 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.0.0-M5</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 
 </project>

@@ -12,22 +12,24 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import uk.gov.homeoffice.digital.sas.jparest.web.SpelExpressionArgumentResolver;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.logging.Logger;
 
 public class JpaRestMvcConfigurer implements WebMvcConfigurer {
 
-    private final static Logger LOGGER = Logger.getLogger(JpaRestMvcConfigurer.class.getName());
+    private final ObjectMapper objectMapper = getObjectMapper();
 
     /**
      * Registers the {@link com.example.misc.ApiRequestParamArgumentResolver}.
      */
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-        LOGGER.info("addArgumentResolvers");
-
         argumentResolvers.add(new SpelExpressionArgumentResolver());
+    }
+
+    private ObjectMapper getObjectMapper() {
+        var om = new ObjectMapper();
+        om.registerModule(new Hibernate5Module());
+        om.registerModule(new JavaTimeModule());
+        return om;
     }
 
     /**
@@ -45,24 +47,12 @@ public class JpaRestMvcConfigurer implements WebMvcConfigurer {
      */
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        LOGGER.info("extendMessageConverters");
         for (HttpMessageConverter<?> converter : converters) {
-            if (converter instanceof MappingJackson2HttpMessageConverter) {
-                Hibernate5Module hibernateModule = new Hibernate5Module();
-//                hibernateModule.configure(Hibernate5Module.Feature.SERIALIZE_IDENTIFIER_FOR_LAZY_NOT_LOADED_OBJECTS, true);
-
-                final ObjectMapper om = new ObjectMapper();
-                om.registerModule(hibernateModule);
-                om.registerModule(new JavaTimeModule());
-//                om.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-
-                Consumer<Map<MediaType, ObjectMapper>> consumer = new Consumer<Map<MediaType, ObjectMapper>>() {
-                    public void accept(Map<MediaType, ObjectMapper> map) {
-                        map.put(MediaType.APPLICATION_JSON, om);
-                    }
-                };
-
-                ((MappingJackson2HttpMessageConverter) converter).registerObjectMappersForType(ApiResponse.class, consumer);
+            if (converter instanceof MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter) {
+                mappingJackson2HttpMessageConverter.registerObjectMappersForType(
+                        ApiResponse.class,
+                        map -> map.put(MediaType.APPLICATION_JSON, objectMapper)
+                );
             }
         }
     }

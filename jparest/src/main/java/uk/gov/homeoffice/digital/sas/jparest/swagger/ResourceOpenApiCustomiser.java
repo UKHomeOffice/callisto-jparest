@@ -1,390 +1,137 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
+
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.*;
-import io.swagger.v3.oas.models.parameters.Parameter;
-import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import org.springdoc.core.SpringDocAnnotationsUtils;
 import org.springdoc.core.converters.models.Pageable;
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 
 import java.util.Map.Entry;
+
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_ID_PATH_PARAM;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_RELATED_ID_PATH_PARAM;
 
 /**
  * Extends the OpenApi model to include the endpoints added by the resource
  * annotation
  */
+@Component
 public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
-    // private final static Logger LOGGER =
-    // Logger.getLogger(ResourceOpenApiCustomiser.class.getName());
+
+    private final ResourceEndpoint endpoint;
+    private final PathItemCreator pathItemCreator;
 
     @Autowired
-    private ResourceEndpoint endpoint;
+    public ResourceOpenApiCustomiser(ResourceEndpoint endpoint, PathItemCreator pathItemCreator) {
+        this.endpoint = endpoint;
+        this.pathItemCreator = pathItemCreator;
+    }
 
-    private static ApiResponse emptyResponse = emptyResponse();
-    private static Parameter pageableParameter = pageableParameter();
-    private static Parameter filterParameter = filterParameter();
+
 
     /**
      * Customises the generated openApi for the endpoints exposed by the
      * ResourceApiController
      */
     public void customise(OpenAPI openApi) {
-        Components components = openApi.getComponents();
 
-        // Ensure the ApiResponse schema is registered
-        // along with the metadata schema
-        Schema<?> apiResponseSchema = ensureSchema(components, "ApiResponse", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
-        ensureSchema(components, "Metadata", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
-        ensureSchema(components, "Pageable", Pageable.class);
+        var components = openApi.getComponents();
+        var apiResponseSchema = registerSchema(components);
+        setResponseSchema(apiResponseSchema, components);
 
-        // Get the schema for the response object and then extend the items
-        // property to be one of the entities exposed by the controller
-        ComposedSchema composedSchema = new ComposedSchema();
-        for (Class<?> resource : endpoint.getResourceTypes()) {
-            composedSchema.addOneOfItem(
-                    SpringDocAnnotationsUtils.extractSchema(components, resource, null, null));
-        }
-        ArraySchema arraySchema = (ArraySchema) apiResponseSchema.getProperties()
-                .get("items");
-        arraySchema.setItems(composedSchema);
 
         // Iterate the ResourceEndpoint descriptors to
         // generate documentation for all of the registered endpoints
         for (Entry<Class<?>, ResourceEndpoint.RootDescriptor> element : endpoint.getDescriptors().entrySet()) {
-            Class<?> clazz = element.getKey();
-            ResourceEndpoint.RootDescriptor rootDescriptor = element.getValue();
+
+            var clazz = element.getKey();
+            var rootDescriptor = element.getValue();
 
             // Group all of the resource endpoints together
-            String tag = clazz.getSimpleName();
+            var tag = clazz.getSimpleName();
 
             // Create documentation for the entity
-            PathItem resourceRootPath = createRootPath(tag, clazz);
-            openApi.path(rootDescriptor.getPath(), resourceRootPath);
-            PathItem resourceItemPath = createItemPath(tag, clazz, rootDescriptor.getIdFieldType());
-            openApi.path(rootDescriptor.getPath() + "/{id}", resourceItemPath);
+            setParentResourcePaths(openApi, rootDescriptor, clazz, tag);
 
             // Create documentation for relations in the entity
             for (Entry<Class<?>, ResourceEndpoint.Descriptor> relatedElement : rootDescriptor.getRelations()
                     .entrySet()) {
 
-                Class<?> relatedClazz = relatedElement.getKey();
-                ResourceEndpoint.Descriptor relatedDescriptor = relatedElement.getValue();
-
-                PathItem relatedRootPath = createRelatedRootPath(tag, relatedClazz, rootDescriptor.getIdFieldType());
-                openApi.path(relatedDescriptor.getPath(), relatedRootPath);
-                PathItem relatedItemPath = createRelatedItemPath(tag, relatedClazz, rootDescriptor.getIdFieldType(),
-                        relatedDescriptor.getIdFieldType());
-                openApi.path(relatedDescriptor.getPath() + "/{related_id}", relatedItemPath);
-
+                var relatedClazz = relatedElement.getKey();
+                var relatedDescriptor = relatedElement.getValue();
+                setRelatedResourcePaths(openApi, rootDescriptor, relatedDescriptor, relatedClazz, tag);
             }
         }
     }
 
+
+
     /**
-     * Creates documentation for the endpoints of the resource
-     * covers get many and post
-     *
-     * @param tag   The tag to group the endpoints together. Expected to be the
-     *              simplename of the resource
-     * @param clazz The class representing the resource exposed by the endpoint
-     * @return PathItem documenting the GET many and POST endpoints
+     * Ensures the ApiResponse schema is registered along with the metadata schema
      */
-    private PathItem createRootPath(String tag, Class<?> clazz) {
-
-        PathItem pi = new PathItem();
-
-        ApiResponse response = getResourceResponse(clazz);
-        ApiResponses responses = new ApiResponses().addApiResponse("200", response);
-
-
-        Operation get = new Operation();
-        get.addParametersItem(pageableParameter);
-        get.addParametersItem(filterParameter);
-        get.setResponses(responses);
-        get.addTagsItem(tag);
-        pi.get(get);
-
-        Operation post = new Operation();
-        post.setResponses(responses);
-        post.addTagsItem(tag);
-        pi.post(post);
-
-        return pi;
+    private Schema<?> registerSchema(Components components) {
+        var apiResponseSchema = ensureSchema(components, "ApiResponse", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
+        ensureSchema(components, "Metadata", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
+        var pageableSchema = ensureSchema(components, "Pageable", Pageable.class);
+        var value = new Pageable(0,10, null);
+        pageableSchema.setExample(value);
+        return apiResponseSchema;
     }
 
     /**
-     * Creates documentation for the endpoints of the resource
-     * covers get and put (update) individual resource
-     *
-     * @param tag     The tag to group the endpoints together. Expected to be the
-     *                simplename of the resource
-     * @param clazz   The class representing the resource exposed by the endpoint
-     * @param idClazz The type of the identifier for the specified resource
-     * @return PathItem documenting the GET one and PUT endpoints
+     * Gets the schema for the response object and then extends the items
+     * property to be one of the entities exposed by the controller
      */
-    private PathItem createItemPath(String tag, Class<?> clazz, Class<?> idClazz) {
-
-        PathItem pi = new PathItem();
-
-        ApiResponse response = getResourceResponse(clazz);
-        ApiResponses responses = new ApiResponses().addApiResponse("200", response);
-        Operation get = new Operation();
-        get.setResponses(responses);
-        get.addTagsItem(tag);
-        pi.get(get);
-
-        Parameter idParameter = getParameter(idClazz, "path", "id");
-        get.addParametersItem(idParameter);
-        Operation put = new Operation();
-        put.setResponses(responses);
-        put.addTagsItem(tag);
-        pi.put(put);
-        Operation delete = new Operation();
-
-        ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", emptyResponse);
-        delete.addParametersItem(idParameter);
-        delete.setResponses(deleteResponses);
-        delete.addTagsItem(tag);
-        pi.delete(delete);
-
-        return pi;
+    private void setResponseSchema(Schema<?> apiResponseSchema, Components components) {
+        var composedSchema = new ComposedSchema();
+        for (Class<?> resource : endpoint.getResourceTypes()) {
+            composedSchema.addOneOfItem(
+                    SpringDocAnnotationsUtils.extractSchema(components, resource, null, null));
+        }
+        var arraySchema = (ArraySchema) apiResponseSchema.getProperties()
+                .get("items");
+        arraySchema.setItems(composedSchema);
     }
 
-    /**
-     * Creates documentation for the endpoints of the resource
-     * covers get related resources for an individual resource
-     *
-     * @param tag     The tag to group the endpoints together. Expected to be the
-     *                simplename of the parent resource
-     * @param clazz   The class representing the related resource exposed by the
-     *                endpoint
-     * @param idClazz The type of the identifier for the parent resource
-     * @return PathItem documenting the GET many related items endpoint
-     */
-    private PathItem createRelatedRootPath(String tag, Class<?> clazz, Class<?> idClazz) {
 
-        PathItem pi = new PathItem();
-        ApiResponse response = getResourceResponse(clazz);
-        ApiResponses responses = new ApiResponses().addApiResponse("200", response);
-        Parameter idParameter = getParameter(idClazz, "path", "id");
-
-        Operation get = new Operation();
-        get.addParametersItem(idParameter);
-        get.addParametersItem(pageableParameter);
-        get.addParametersItem(filterParameter);
-        get.setResponses(responses);
-        get.addTagsItem(tag);
-        pi.get(get);
-        return pi;
+    private void setParentResourcePaths(OpenAPI openApi, ResourceEndpoint.RootDescriptor rootDescriptor, Class<?> clazz, String tag) {
+        var resourceRootPath = pathItemCreator.createRootPath(tag, clazz);
+        openApi.path(rootDescriptor.getPath(), resourceRootPath);
+        var resourceItemPath = pathItemCreator.createItemPath(tag, clazz, rootDescriptor.getIdFieldType());
+        openApi.path(rootDescriptor.getPath() + URL_ID_PATH_PARAM, resourceItemPath);
     }
 
-    /**
-     * Creates documentation for the endpoints of the resource
-     * covers delete and put related resources for an individual resource
-     *
-     * @param tag            The tag to group the endpoints together. Expected to be
-     *                       the simplename of the parent resource
-     * @param clazz          The class representing the related resource exposed by
-     *                       the endpoint
-     * @param idClazz        The type of the identifier for the parent resource
-     * @param relatedIdClazz The type of the identifier for the related resource
-     * @return PathItem documenting the DELETE/PUT many related items
-     */
-    private PathItem createRelatedItemPath(String tag, Class<?> relatedClazz, Class<?> idClazz,
-                                           Class<?> relatedIdClazz) {
+    private void setRelatedResourcePaths(OpenAPI openApi,
+                                         ResourceEndpoint.RootDescriptor rootDescriptor,
+                                         ResourceEndpoint.Descriptor relatedDescriptor,
+                                         Class<?> relatedClazz, String tag) {
 
-        PathItem pi = new PathItem();
-
-        ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", emptyResponse);
-
-        Parameter idParameter = getParameter(idClazz, "path", "id");
-        Parameter relatedIdParameter = getArrayParameter(relatedIdClazz, "path", "related_id");
-        Operation delete = new Operation();
-        delete.addParametersItem(idParameter);
-        delete.addParametersItem(relatedIdParameter);
-        delete.setResponses(defaultResponses);
-        delete.addTagsItem(tag);
-        pi.delete(delete);
-
-        Operation put = new Operation();
-        put.addParametersItem(idParameter);
-        put.addParametersItem(relatedIdParameter);
-        put.setResponses(defaultResponses);
-        put.addTagsItem(tag);
-        pi.put(put);
-
-        return pi;
+        var relatedRootPath = pathItemCreator.createRelatedRootPath(tag, relatedClazz, rootDescriptor.getIdFieldType());
+        openApi.path(relatedDescriptor.getPath(), relatedRootPath);
+        var relatedItemPath = pathItemCreator.createRelatedItemPath(tag, rootDescriptor.getIdFieldType(),
+                relatedDescriptor.getIdFieldType());
+        openApi.path(relatedDescriptor.getPath() + URL_RELATED_ID_PATH_PARAM, relatedItemPath);
     }
 
-    /**
-     * The {@link uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse ApiResponse}
-     * can return any type of resource in its items
-     * property. This method returns a swagger ApiResponse that
-     * contains a schema for the
-     * {@link uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse ApiResponse}
-     * with its items set to the specified class
-     *
-     * @param clazz The type of items to describe in the schema
-     * @return
-     */
-    private ApiResponse getResourceResponse(Class<?> clazz) {
-        ApiResponse response = new ApiResponse();
 
-        Content c = new Content();
-        MediaType mt = new MediaType();
-        Schema<?> responseSchema = getTypedApiResponseSchema(clazz);
-        mt.schema(responseSchema);
-        c.addMediaType("*/*", mt);
-        response.content(c);
-
-        return response;
-    }
-
-    /**
-     * Returns a schema for the
-     * {@link uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse ApiResponse}
-     * class with the items property containing a schema for the given class
-     *
-     * @param clazz The type to generate a schema for
-     * @return Schema for the ApiResponse
-     */
-    private Schema<?> getTypedApiResponseSchema(Class<?> clazz) {
-
-        // Generate a schema for the ApiResponse
-        Schema<?> schema = ModelConverters.getInstance()
-                .read(new AnnotatedType(uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class)
-                        .resolveAsRef(false))
-                .get("ApiResponse");
-
-        // Get the schema for the given class
-        Components newComponents = new Components();
-        Schema<?> clazzSchema = SpringDocAnnotationsUtils.extractSchema(newComponents, clazz, null, null);
-
-        // Set the schema of the items property to the class schema
-        ArraySchema arraySchema = (ArraySchema) schema.getProperties().get("items");
-        arraySchema.setItems(clazzSchema);
-
-        return schema;
-
-    }
-
-    /**
-     * Generates a parameter for the specified class
-     * with the given name
-     *
-     * @param clazz The parameter type
-     * @param setIn Where the parameter is set
-     * @param name  The name of the parameter
-     * @return A Parameter with a schema for the given class
-     */
-    private Parameter getParameter(Class<?> clazz, String setIn, String name) {
-        Parameter parameter = new Parameter();
-
-        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
-
-        parameter.schema(schema);
-        parameter.setIn(setIn);
-        parameter.required(true);
-        parameter.name(name);
-
-        return parameter;
-    }
-
-    /**
-     * Generates a parameter for an array of the specified class
-     * with the given name
-     *
-     * @param clazz The parameter type
-     * @param setIn Where the parameter is set
-     * @param name  The name of the parameter
-     * @return A Parameter with an array schema for items of the given class
-     */
-    private Parameter getArrayParameter(Class<?> clazz, String setIn, String name) {
-        Parameter parameter = new Parameter();
-        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
-        ArraySchema as = new ArraySchema();
-        as.setItems(schema);
-
-        parameter.schema(as);
-        parameter.setIn(setIn);
-        parameter.required(true);
-        parameter.name(name);
-
-        return parameter;
-    }
-
-    /**
-     * Generates an empty/unspecified response.
-     * This will be replaced as the ResourceApiController
-     * is refined to define all expected response
-     *
-     * @return An empty ApiResponse
-     */
-    private static ApiResponse emptyResponse() {
-        ApiResponse deleteResponse = new io.swagger.v3.oas.models.responses.ApiResponse();
-        Content deleteContent = new Content();
-        MediaType deleteMediaType = new MediaType();
-        deleteMediaType.schema(new StringSchema());
-        deleteContent.addMediaType("*/*", deleteMediaType);
-        deleteResponse.content(deleteContent);
-        return deleteResponse;
-
-    }
-
-    /**
-     * @return Parameter representing pageable class
-     */
-    private static Parameter pageableParameter() {
-        Parameter parameter = new Parameter();
-        Components newComponents = new Components();
-
-        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(newComponents, Pageable.class, null, null);
-
-        parameter.schema(schema);
-        parameter.required(true);
-        parameter.setIn("query");
-        parameter.name("pageable");
-
-        return parameter;
-
-    }
-
-    /**
-     * @return Parameter representing SpelExpression
-     */
-    private static Parameter filterParameter() {
-        Parameter parameter = new Parameter();
-        Components newComponents = new Components();
-
-        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(newComponents, SpelExpression.class, null, null);
-
-        parameter.schema(schema);
-        parameter.required(false);
-        parameter.setIn("query");
-        parameter.name("filter");
-
-        return parameter;
-
-    }
 
     /**
      * Util function to get or create schema
      */
     private static Schema<?> ensureSchema(Components components, String schemaName,
                                           Class<?> clazz) {
-
-        Schema<?> schema = components.getSchemas().get(schemaName);
+        var schemas = components.getSchemas();
+        var schema = schemas == null ? null : schemas.get(schemaName);
         if (schema == null) {
             schema = ModelConverters.getInstance()
                     .read(new AnnotatedType(clazz)
