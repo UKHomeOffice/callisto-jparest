@@ -2,6 +2,7 @@ package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
@@ -9,32 +10,22 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.expression.spel.standard.SpelExpression;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-
-import lombok.Getter;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 import uk.gov.homeoffice.digital.sas.jparest.utils.WebDataBinderFactory;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceUnitUtil;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
 import javax.persistence.criteria.*;
 import java.io.Serializable;
 import java.util.*;
@@ -59,6 +50,7 @@ public class ResourceApiController<T, U> {
 
     private static WebDataBinder binder = WebDataBinderFactory.getWebDataBinder();
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
+    private static final String RESOURCE_NOT_FOUND_ERROR_FORMAT = "Resource with id: %s was not found";
 
     private @NonNull Serializable getIdentifier(Object identifier) {
         return getIdentifier(identifier, this.entityUtils.getIdFieldType());
@@ -72,10 +64,7 @@ public class ResourceApiController<T, U> {
         return result;
     }
 
-    @ExceptionHandler({InvalidFilterException.class})
-    public ResponseEntity<String> handleException(InvalidFilterException ex) {
-        return new ResponseEntity<>(ex.getMessage(), null, HttpStatus.BAD_REQUEST);
-    }
+
 
     @SuppressWarnings("unchecked")
     public ResourceApiController(Class<T> entityType, EntityManager entityManager,
@@ -137,23 +126,17 @@ public class ResourceApiController<T, U> {
         return result2.get(0);
     }
 
-    public ResponseEntity<ApiResponse<T>> get(@PathVariable U id) {
+    public ApiResponse<T> get(@PathVariable U id) {
         var result = getById(id, null);
         if (result == null) {
-            return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, id));
         }
-        var results = new ApiResponse<>(Arrays.asList(result));
-        return new ResponseEntity<>(results, null, HttpStatus.OK);
+        return new ApiResponse<>(Arrays.asList(result));
     }
 
-    public ResponseEntity<ApiResponse<T>> create(@RequestBody String body) throws JsonProcessingException {
+    public ApiResponse<T> create(@RequestBody String body) throws JsonProcessingException {
         var objectMapper = new ObjectMapper();
-        T r2;
-        try {
-            r2 = objectMapper.readValue(body, this.entityUtils.getEntityType());
-        } catch (JsonProcessingException ex) {
-            return new ResponseEntity<>(null, null, HttpStatus.BAD_REQUEST);
-        }
+        var r2 = objectMapper.readValue(body, this.entityUtils.getEntityType());
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
         T result;
@@ -164,11 +147,10 @@ public class ResourceApiController<T, U> {
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
-        ApiResponse<T> results = new ApiResponse<>(Arrays.asList(result));
-        return new ResponseEntity<>(results, HttpStatus.OK);
+        return new ApiResponse<>(Arrays.asList(result));
     }
 
-    public ResponseEntity<String> delete(@PathVariable U id) {
+    public void delete(@PathVariable U id) {
         var identifier = getIdentifier(id);
 
         var transactionDefinition = new DefaultTransactionDefinition();
@@ -178,26 +160,20 @@ public class ResourceApiController<T, U> {
             transactionManager.commit(transactionStatus);
         } catch (EmptyResultDataAccessException ex) {
             transactionManager.rollback(transactionStatus);
-            return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("Error accessing data for deletion for entity with id: " + id);
         } catch (RuntimeException ex) {
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
-        return new ResponseEntity<>(null, null, HttpStatus.OK);
     }
 
-    public ResponseEntity<ApiResponse<T>> update(@PathVariable U id, @RequestBody String body)
+    public ApiResponse<T> update(@PathVariable U id, @RequestBody String body)
             throws JsonProcessingException {
 
         var identifier = getIdentifier(id);
 
         var objectMapper = new ObjectMapper();
-        T r2;
-        try {
-            r2 = objectMapper.readValue(body, this.entityUtils.getEntityType());
-        } catch (JsonProcessingException ex) {
-            return new ResponseEntity<>(null, null, HttpStatus.BAD_REQUEST);
-        }
+        var r2 = objectMapper.readValue(body, this.entityUtils.getEntityType());
 
         var payloadEntityId = this.persistenceUnitUtil.getIdentifier(r2);
         if (payloadEntityId != null && identifier != getIdentifier(payloadEntityId)) {
@@ -211,7 +187,7 @@ public class ResourceApiController<T, U> {
         Optional<T> result = repository.findById(identifier);
 
         if (result.isEmpty()) {
-            return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, id));
         } else {
             orig = result.get();
         }
@@ -224,8 +200,7 @@ public class ResourceApiController<T, U> {
             throw ex;
         }
 
-        ApiResponse<T> results = new ApiResponse<>(Arrays.asList(orig));
-        return new ResponseEntity<>(results, null, HttpStatus.OK);
+        return new ApiResponse<>(Arrays.asList(orig));
     }
 
     @SuppressWarnings("rawtypes")
@@ -260,14 +235,14 @@ public class ResourceApiController<T, U> {
         return new ApiResponse<>(result);
     }
 
-    public ResponseEntity<String> deleteRelated(@PathVariable U id, @PathVariable String relation,
+    public void deleteRelated(@PathVariable U id, @PathVariable String relation,
                                                 @PathVariable Object[] relatedId)
             throws IllegalArgumentException {
 
         var orig = getById(id, relation);
 
         if (orig == null) {
-            return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, id));
         }
 
         var transactionDefinition = new DefaultTransactionDefinition();
@@ -280,7 +255,7 @@ public class ResourceApiController<T, U> {
             Serializable identitfier = getIdentifier(object, relatedIdType);
             Object f = this.entityUtils.getEntityReference(relation, identitfier);
             if (!relatedEntities.remove(f)) {
-                return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
+                throw new ResourceNotFoundException("Related resources could not be deleted for resource with id: " + id);
             }
         }
 
@@ -291,18 +266,16 @@ public class ResourceApiController<T, U> {
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
-
-        return new ResponseEntity<>(null, null, HttpStatus.OK);
     }
 
-    public ResponseEntity<String> addRelated(@PathVariable U id, @PathVariable String relation,
+    public void addRelated(@PathVariable U id, @PathVariable String relation,
                                              @PathVariable Object[] relatedId)
             throws IllegalArgumentException {
 
         var orig = getById(id, relation);
 
         if (orig == null) {
-            return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, id));
         }
 
         var transactionDefinition = new DefaultTransactionDefinition();
@@ -324,13 +297,12 @@ public class ResourceApiController<T, U> {
             transactionManager.commit(transactionStatus);
         } catch (EntityNotFoundException ex){
             transactionManager.rollback(transactionStatus);
-            return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("Error adding related resources for resource with id: " + id);
         } catch (RuntimeException ex) {
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
 
-        return new ResponseEntity<>(null, null, HttpStatus.OK);
     }
 
     private static List<Order> toOrders(Sort sort, Path<?> path, CriteriaBuilder builder) {

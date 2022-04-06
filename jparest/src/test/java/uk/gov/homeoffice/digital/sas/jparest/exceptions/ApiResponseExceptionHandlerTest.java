@@ -54,6 +54,14 @@ public class ApiResponseExceptionHandlerTest {
         assertResponseData(response, exception, HttpStatus.BAD_REQUEST);
     }
 
+    @Test
+    void handleInvalidFilterException_responseWithErrorDataIsReturned() {
+
+        var exception = new InvalidFilterException(ERROR_MESSAGE);
+        var response = apiResponseExceptionHandler.handleInvalidFilterException(exception);
+        assertResponseData(response, exception, HttpStatus.BAD_REQUEST);
+    }
+
 
 
     private void assertResponseData(ResponseEntity<ApiErrorResponse> response, Exception exception, HttpStatus httpStatus) {

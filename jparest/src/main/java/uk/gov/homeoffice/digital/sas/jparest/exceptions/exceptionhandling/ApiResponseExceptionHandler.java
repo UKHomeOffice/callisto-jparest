@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 
 import java.io.IOException;
@@ -35,6 +36,11 @@ public class ApiResponseExceptionHandler {
 
     @ExceptionHandler(IOException.class)
     public ResponseEntity<ApiErrorResponse> handleIOException(IOException ex) {
+        return createResponseEntity(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidFilterException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidFilterException(InvalidFilterException ex) {
         return createResponseEntity(ex, HttpStatus.BAD_REQUEST);
     }
 
