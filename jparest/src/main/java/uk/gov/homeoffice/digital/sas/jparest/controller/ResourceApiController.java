@@ -29,6 +29,7 @@ import javax.persistence.*;
 import javax.persistence.criteria.*;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Spring MVC controller that exposes JPA entities
@@ -251,12 +252,16 @@ public class ResourceApiController<T, U> {
         Collection<?> relatedEntities = entityUtils.getRelatedEntities(orig, relation);
         Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
 
+        var notDeletableRelatedIds = new HashSet<>();
         for (Object object : relatedId) {
             Serializable identitfier = getIdentifier(object, relatedIdType);
             Object f = this.entityUtils.getEntityReference(relation, identitfier);
-            if (!relatedEntities.remove(f)) {
-                throw new ResourceNotFoundException("Related resources could not be deleted for resource with id: " + id);
-            }
+            if (!relatedEntities.remove(f))  notDeletableRelatedIds.add(object);
+        }
+        if (!notDeletableRelatedIds.isEmpty()) {
+            var notDeletableRelatedIdsCsv = notDeletableRelatedIds.stream().map(String::valueOf).collect(Collectors.joining(", "));
+            throw new ResourceNotFoundException(String.format(
+                    "No related resources removed as the following resources could not be found. Ids:[%s]", notDeletableRelatedIdsCsv));
         }
 
         try {
