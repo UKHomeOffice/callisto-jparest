@@ -10,8 +10,6 @@ import lombok.*;
 @AllArgsConstructor
 public class ApiErrorResponse {
 
-    private final String httpStatus;
     private final String message;
-    private final String time;
 
 }
