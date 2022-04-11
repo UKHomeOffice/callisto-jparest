@@ -22,8 +22,11 @@ import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -176,6 +179,19 @@ class ResourceApiControllerTest {
         assertThatThrownBy(() -> controller.create("{}")).isInstanceOf(PersistenceException.class);
     }
 
+    @Test
+    void create_unrecognizedPropertyOnPayload_unknownResourcePropertyExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        assertThatThrownBy(() -> controller.create("{\"otherUnknownProperty\": 1}")).isInstanceOf(UnknownResourcePropertyException.class);
+    }
+
+    @Test
+    void create_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityD.class, Integer.class);
+        assertThatThrownBy(() -> controller.create("{}")).isInstanceOf(ResourceConstraintViolationException.class)
+                .hasMessageContainingAll("description", "telephone", "has the following error(s):");
+    }
+
     // endregion
 
     // region update
@@ -237,6 +253,12 @@ class ResourceApiControllerTest {
     }
 
     @Test
+    void update_unrecognizedPropertyOnPayload_unknownResourcePropertyExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        assertThatThrownBy(() -> controller.update(-1, "{\"someprop\": \"somevalue\"}")).isInstanceOf(UnknownResourcePropertyException.class);
+    }
+
+    @Test
     @Transactional
     void update_resourceDoesntExist_resourceNotFoundExceptionThrown() {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
@@ -260,6 +282,14 @@ class ResourceApiControllerTest {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
         assertDoesNotThrow(() -> controller.update(1, "{}"));
     }
+
+    @Test
+    void update_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityD.class, Integer.class);
+        assertThatThrownBy(() -> controller.update(-1, "{}")).isInstanceOf(ResourceConstraintViolationException.class)
+                .hasMessageContainingAll("description", "telephone", "has the following error(s):");
+    }
+
     // endregion
 
     // region delete
@@ -453,9 +483,7 @@ class ResourceApiControllerTest {
     }
 
     private static Stream<String> invalidPayloads() {
-        return Stream.of(
-                "{ \"someprop\": \"somevalue\" }",
-                "");
+        return Stream.of("");
 
     }
     // endregion

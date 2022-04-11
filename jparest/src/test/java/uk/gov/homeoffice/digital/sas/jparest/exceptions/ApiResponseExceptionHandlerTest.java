@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiErrorResponse;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
 
+import javax.persistence.PersistenceException;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
@@ -35,7 +36,7 @@ public class ApiResponseExceptionHandlerTest {
 
         var exception = new IllegalArgumentException(ERROR_MESSAGE);
         var response = apiResponseExceptionHandler.handleIllegalArgumentException(exception);
-        assertResponseData(response, exception, HttpStatus.BAD_REQUEST);
+        assertResponseData(response, exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -43,7 +44,7 @@ public class ApiResponseExceptionHandlerTest {
 
         var exception = new ResourceNotFoundException(ERROR_MESSAGE);
         var response = apiResponseExceptionHandler.handleResourceNotFoundException(exception);
-        assertResponseData(response, exception, HttpStatus.NOT_FOUND);
+        assertResponseData(response, exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -51,7 +52,7 @@ public class ApiResponseExceptionHandlerTest {
 
         var exception = new IOException(ERROR_MESSAGE);
         var response = apiResponseExceptionHandler.handleIOException(exception);
-        assertResponseData(response, exception, HttpStatus.BAD_REQUEST);
+        assertResponseData(response, exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -59,16 +60,42 @@ public class ApiResponseExceptionHandlerTest {
 
         var exception = new InvalidFilterException(ERROR_MESSAGE);
         var response = apiResponseExceptionHandler.handleInvalidFilterException(exception);
-        assertResponseData(response, exception, HttpStatus.BAD_REQUEST);
+        assertResponseData(response, exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void handleResourceConstraintViolationException_responseWithErrorDataIsReturned() {
+
+        var exception = new ResourceConstraintViolationException(ERROR_MESSAGE);
+        var response = apiResponseExceptionHandler.handleResourceConstraintViolationException(exception);
+        assertResponseData(response, exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void handleUnknownResourcePropertyException_responseWithErrorDataIsReturned() {
+
+        var exception = new UnknownResourcePropertyException(ERROR_MESSAGE);
+        var response = apiResponseExceptionHandler.handleUnknownResourcePropertyException(exception);
+        assertResponseData(response, exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void handlePersistenceException_responseWithErrorDataIsReturned() {
+
+        var exception = new PersistenceException(ERROR_MESSAGE);
+        var response = apiResponseExceptionHandler.handlePersistenceException(exception);
+        var msg = "There was an error persisting data. Payloads must be constructed correctly.";
+        assertResponseData(response, msg, HttpStatus.BAD_REQUEST);
     }
 
 
 
-    private void assertResponseData(ResponseEntity<ApiErrorResponse> response, Exception exception, HttpStatus httpStatus) {
+
+    private void assertResponseData(ResponseEntity<ApiErrorResponse> response, String message, HttpStatus httpStatus) {
         assertThat(response.getStatusCode()).isEqualTo(httpStatus);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getHttpStatus()).isEqualTo(String.valueOf(httpStatus.value()));
-        assertThat(response.getBody().getMessage()).isEqualTo(exception.getMessage());
+        assertThat(response.getBody().getMessage()).isEqualTo(message);
         assertThat(response.getBody().getTime()).isEqualTo(Date.from(clock.instant()).toString());
     }
 

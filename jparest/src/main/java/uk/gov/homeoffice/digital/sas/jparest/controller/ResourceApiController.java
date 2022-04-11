@@ -2,6 +2,7 @@ package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import lombok.Getter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -20,13 +21,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
+import uk.gov.homeoffice.digital.sas.jparest.utils.ValidatorUtils;
 import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.utils.WebDataBinderFactory;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
 import javax.persistence.*;
 import javax.persistence.criteria.*;
+import javax.persistence.criteria.Path;
+import javax.validation.Validator;
 import java.io.Serializable;
 import java.util.*;
 
@@ -47,10 +52,12 @@ public class ResourceApiController<T, U> {
     private PlatformTransactionManager transactionManager;
     private JpaRepository<T, Serializable> repository;
     private EntityUtils<T> entityUtils;
+    private final Validator validator = ValidatorUtils.initValidator();
 
     private static WebDataBinder binder = WebDataBinderFactory.getWebDataBinder();
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
     private static final String RESOURCE_NOT_FOUND_ERROR_FORMAT = "Resource with id: %s was not found";
+    private static final String UNKNOWN_PROPERTY_ERROR_FORMAT = "%s is an unknown property for the resource entity: %s";
 
     private @NonNull Serializable getIdentifier(Object identifier) {
         return getIdentifier(identifier, this.entityUtils.getIdFieldType());
@@ -136,7 +143,16 @@ public class ResourceApiController<T, U> {
 
     public ApiResponse<T> create(@RequestBody String body) throws JsonProcessingException {
         var objectMapper = new ObjectMapper();
-        var r2 = objectMapper.readValue(body, this.entityUtils.getEntityType());
+        T r2;
+        try {
+            r2 = objectMapper.readValue(body, this.entityUtils.getEntityType());
+        } catch (UnrecognizedPropertyException ex) {
+            throw new UnknownResourcePropertyException(String.format(UNKNOWN_PROPERTY_ERROR_FORMAT,
+                    ex.getPropertyName(), ex.getReferringClass().getSimpleName()));
+        }
+
+        ValidatorUtils.validateAndThrowIfErrorsExist(validator, r2);
+
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
         T result;
@@ -173,12 +189,20 @@ public class ResourceApiController<T, U> {
         var identifier = getIdentifier(id);
 
         var objectMapper = new ObjectMapper();
-        var r2 = objectMapper.readValue(body, this.entityUtils.getEntityType());
+        T r2;
+        try {
+            r2 = objectMapper.readValue(body, this.entityUtils.getEntityType());
+        } catch (UnrecognizedPropertyException ex) {
+            throw new UnknownResourcePropertyException(String.format(UNKNOWN_PROPERTY_ERROR_FORMAT,
+                    ex.getPropertyName(), ex.getReferringClass().getSimpleName()));
+        }
 
         var payloadEntityId = this.persistenceUnitUtil.getIdentifier(r2);
         if (payloadEntityId != null && identifier != getIdentifier(payloadEntityId)) {
             throw new IllegalArgumentException("The supplied payload resource id value must match the url id path parameter value");
         }
+
+        ValidatorUtils.validateAndThrowIfErrorsExist(validator, r2);
 
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
