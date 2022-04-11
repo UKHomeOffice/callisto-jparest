@@ -9,18 +9,12 @@ import uk.gov.homeoffice.digital.sas.jparest.swagger.PathItemCreator;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.ResourceOpenApiCustomiser;
 
 import javax.persistence.EntityManager;
-import java.time.Clock;
 import java.util.logging.Logger;
 
 @Configuration
 public class Config {
 
     private static final Logger LOGGER = Logger.getLogger(Config.class.getName());
-
-    @Bean
-    public Clock utcClock() {
-        return Clock.systemUTC();
-    }
 
     @Bean
     @Lazy(false)
@@ -55,11 +49,8 @@ public class Config {
     }
 
     @Bean
-    public ApiResponseExceptionHandler apiResponseExceptionHandler(Clock clock) {
-        return new ApiResponseExceptionHandler(clock);
+    public ApiResponseExceptionHandler apiResponseExceptionHandler() {
+        return new ApiResponseExceptionHandler();
     }
-
-
-
 
 }

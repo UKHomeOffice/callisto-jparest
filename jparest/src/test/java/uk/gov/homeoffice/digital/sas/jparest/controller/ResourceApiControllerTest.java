@@ -305,6 +305,7 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
         assertDoesNotThrow(() -> controller.create(payload));
+        assertDoesNotThrow(() -> controller.get(100));
         assertDoesNotThrow(() -> controller.delete(100));
         assertThrows(ResourceNotFoundException.class, () -> controller.get(100));
     }
@@ -442,7 +443,27 @@ class ResourceApiControllerTest {
 
         assertThatThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { -1 }))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Related resources could not be deleted for resource with id: 1");
+                .hasMessage("No related resources removed as the following resources could not be found. Ids:[-1]");
+    }
+
+    @Test
+    @Transactional
+    void deleteRelated_resourceExists_relatedIdsResultInFoundAndNotFound_exceptionIncludesNotFoundIdsInMessage() {
+
+        var controllerA = getResourceApiController(DummyEntityA.class, Integer.class);
+
+        assertDoesNotThrow(() -> controllerA.get(1));
+
+        var getRelatedResponse = controllerA.getRelated(1, "dummyEntityBSet", null, Pageable.ofSize(100));
+        @SuppressWarnings("unchecked")
+        var checkItems = (List<DummyEntityB>) getRelatedResponse.getItems();
+        assertThat(checkItems).noneMatch((item) -> item.getId().equals(-1L));
+        assertThat(checkItems).noneMatch((item) -> item.getId().equals(-2L));
+        assertThat(checkItems).isNotEmpty().anyMatch((item) -> item.getId().equals(2L));
+
+        assertThatThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { -1, -2, 2 }))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContainingAll("No related resources removed as the following resources could not be found. Ids:", "-1", "-2");
     }
 
     // endregion
