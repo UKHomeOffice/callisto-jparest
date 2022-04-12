@@ -35,7 +35,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -149,7 +148,7 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
-        assertThrows(ResourceNotFoundException.class, () -> controller.get(-1));
+        assertThatThrownBy(() -> controller.get(-1)).isInstanceOf(ResourceNotFoundException.class);
 
         var apiResponse = assertDoesNotThrow(() -> controller.create(payload));
         var dummy = apiResponse.getItems().get(0);
@@ -167,7 +166,7 @@ class ResourceApiControllerTest {
     @Test
     void create_emptyPayload_jsonExceptionThrown() {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        assertThrows(JsonProcessingException.class, () -> controller.create(""));
+        assertThatThrownBy(() -> controller.create("")).isInstanceOf(JsonProcessingException.class);
     }
 
     @Test
@@ -223,7 +222,7 @@ class ResourceApiControllerTest {
     @Transactional
     void update_resourceExistsInvalidPayload_jsonExceptionThrown(String payload) {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        assertThrows(JsonProcessingException.class, () -> controller.update(1, payload));
+        assertThatThrownBy(() -> controller.update(1, payload)).isInstanceOf(JsonProcessingException.class);
     }
 
     @ParameterizedTest
@@ -232,15 +231,15 @@ class ResourceApiControllerTest {
     void update_resourceDoesntExistInvalidPayload_jsonExceptionThrown(String payload) {
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        assertThrows(ResourceNotFoundException.class, () -> controller.get(-1));
-        assertThrows(JsonProcessingException.class, () -> controller.update(-1, payload));
+        assertThatThrownBy(() -> controller.get(-1)).isInstanceOf(ResourceNotFoundException.class);
+        assertThatThrownBy(() -> controller.update(-1, payload)).isInstanceOf(JsonProcessingException.class);
     }
 
     @Test
     @Transactional
     void update_resourceDoesntExist_resourceNotFoundExceptionThrown() {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        assertThrows(ResourceNotFoundException.class, () -> controller.update(-1, "{}"));
+        assertThatThrownBy(() -> controller.update(-1, "{}")).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -277,7 +276,7 @@ class ResourceApiControllerTest {
         assertDoesNotThrow(() -> controller.create(payload));
         assertDoesNotThrow(() -> controller.get(100));
         assertDoesNotThrow(() -> controller.delete(100));
-        assertThrows(ResourceNotFoundException.class, () -> controller.get(100));
+        assertThatThrownBy(() -> controller.get(100)).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -391,7 +390,7 @@ class ResourceApiControllerTest {
 
         var controllerA = getResourceApiController(DummyEntityA.class, Integer.class);
 
-        assertThrows(ResourceNotFoundException.class, () -> controllerA.get(-1));
+        assertThatThrownBy(() -> controllerA.get(-1)).isInstanceOf(ResourceNotFoundException.class);
 
         assertThatThrownBy(() ->  controllerA.deleteRelated(-1, "dummyEntityBSet", new Object[] { 2 }))
                 .isInstanceOf(ResourceNotFoundException.class)
