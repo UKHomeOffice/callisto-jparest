@@ -29,6 +29,7 @@ import java.lang.reflect.Modifier;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 import static org.hibernate.query.criteria.internal.predicate.ComparisonPredicate.ComparisonOperator.*;
@@ -121,11 +122,9 @@ class SpelExpressionToPredicateConverterTest {
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
 
-        var thrown = assertThrows(
-                InvalidFilterException.class,
-                () -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root)
-        );
-        assertTrue(thrown.getMessage().startsWith(errorMessage));
+        assertThatThrownBy(() -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root))
+                .isInstanceOf(InvalidFilterException.class)
+                .hasMessageStartingWith(errorMessage);
     }
 
     @ParameterizedTest
@@ -247,11 +246,10 @@ class SpelExpressionToPredicateConverterTest {
     @Test
     void test_convert_throws_InvalidFilterException_with_describeError_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("1==id");
-        assertThrows(
-                InvalidFilterException.class,
-                () -> SpelExpressionToPredicateConverter.convert(expression, builder, root),
-                "Left hand side must be a field"
-        );
+
+        assertThatThrownBy(() -> SpelExpressionToPredicateConverter.convert(expression, builder, root))
+                .isInstanceOf(InvalidFilterException.class)
+                .hasMessage("Left hand side must be a field");
     }
 
     private SpelExpression parseExpression(String expression) {

@@ -25,7 +25,7 @@ import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -44,7 +44,7 @@ class EntityUtilsTest {
     @ParameterizedTest
     @MethodSource("nullConstructorArgs")
     void entityUtils_nullArgs_throwsNullPointerException(Class<?> clazz, EntityManager manager) {
-        assertThrows(NullPointerException.class, () -> new EntityUtils<>(clazz, manager));
+        assertThatThrownBy(() -> new EntityUtils<>(clazz, manager)).isInstanceOf(NullPointerException.class);
     } 
 
     //endregion
@@ -89,14 +89,14 @@ class EntityUtilsTest {
     void getRelatedEntities_relationDoesntExist_throwsIllegalArgumentException() {
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
         var findA = entityManager.getReference(DummyEntityA.class, 1L);
-        assertThrows(IllegalArgumentException.class, () -> entityUtils.getRelatedEntities(findA, "invalidValue"));
+        assertThatThrownBy(() -> entityUtils.getRelatedEntities(findA, "invalidValue")).isInstanceOf(IllegalArgumentException.class);
     }
 
     @ParameterizedTest
     @MethodSource("getRelatedEntitiesNullArgs")
     void getRelatedEntities_nullArgs_throwsNullPointerException(DummyEntityA entity, String relation) {
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        assertThrows(NullPointerException.class, () -> entityUtils.getRelatedEntities((DummyEntityA)entity, relation));
+        assertThatThrownBy(() -> entityUtils.getRelatedEntities(entity, relation)).isInstanceOf(NullPointerException.class);
     }
 
     //endregion
@@ -122,9 +122,8 @@ class EntityUtilsTest {
 
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
 
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> entityUtils.getEntityReference("dummyEntityBSet", reference));
+        assertThatThrownBy(() -> entityUtils.getEntityReference("dummyEntityBSet", reference))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -139,10 +138,8 @@ class EntityUtilsTest {
     @ParameterizedTest
     @MethodSource("invalidReferenceValues")
     void getEntityReference_referenceTypeIsInvalid_throwsIllegalArgumentException(Serializable reference) {
-        var entityUtils = new EntityUtils<DummyEntityC>(DummyEntityC.class, entityManager);
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> entityUtils.getEntityReference(reference));
+        var entityUtils = new EntityUtils<>(DummyEntityC.class, entityManager);
+        assertThatThrownBy(() -> entityUtils.getEntityReference(reference)).isInstanceOf(IllegalArgumentException.class);
 
     }
 
