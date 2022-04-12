@@ -12,9 +12,12 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 
 import javax.persistence.PersistenceException;
+import java.util.logging.Logger;
 
 @ControllerAdvice(assignableTypes = {ResourceApiController.class})
 public class ApiResponseExceptionHandler {
+
+    private static final Logger LOGGER = Logger.getLogger(ApiResponseExceptionHandler.class.getName());
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
@@ -49,6 +52,7 @@ public class ApiResponseExceptionHandler {
 
     @ExceptionHandler(PersistenceException.class)
     public ResponseEntity<ApiErrorResponse> handlePersistenceException(PersistenceException ex) {
+        LOGGER.severe("Persistence exception occurred whilst saving a resource. " + ex.getMessage());
         var msg = "There was an error persisting data. Payloads must be valid.";
         return createResponseEntity(msg, HttpStatus.BAD_REQUEST);
     }

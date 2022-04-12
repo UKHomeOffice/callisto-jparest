@@ -9,7 +9,7 @@ import javax.validation.Validator;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class ValidatorUtilsTest {
+class ValidatorUtilsTest {
 
 
     @Test
@@ -21,8 +21,10 @@ public class ValidatorUtilsTest {
 
     @Test
     void validateAndThrowIfErrorsExist_constraintViolationsExists_resourceConstraintViolationExceptionThrown() {
+        var entity = new DummyEntityD();
+        var validator = ValidatorUtils.initValidator();
         assertThatThrownBy(
-                () -> ValidatorUtils.validateAndThrowIfErrorsExist(ValidatorUtils.initValidator(), new DummyEntityD()))
+                () -> ValidatorUtils.validateAndThrowIfErrorsExist(validator, entity))
                 .isInstanceOf(ResourceConstraintViolationException.class);
     }
 
@@ -32,9 +34,10 @@ public class ValidatorUtilsTest {
 
         var entity = new DummyEntityD();
         entity.setTelephone("-123456");
+        var validator = ValidatorUtils.initValidator();
 
         assertThatThrownBy(
-                () -> ValidatorUtils.validateAndThrowIfErrorsExist(ValidatorUtils.initValidator(), entity))
+                () -> ValidatorUtils.validateAndThrowIfErrorsExist(validator, entity))
                 .isInstanceOf(ResourceConstraintViolationException.class)
                 .hasMessageContainingAll(
                         "description has the following error(s): must not be empty",
