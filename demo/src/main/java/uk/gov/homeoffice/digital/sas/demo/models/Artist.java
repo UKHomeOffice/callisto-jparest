@@ -6,12 +6,14 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import java.util.Set;
+import java.util.UUID;
 
 @Resource(path = "artists", filterExamples = {
     @ExampleObject(name = "performance_name match", value = "performance_name matches '%the%'"),
@@ -27,6 +29,10 @@ public class Artist extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long artist_id;
     private Long profile_id;
+
+    @GeneratedValue
+    @Type(type="uuid-char")
+    private UUID tenant_id;
 
     @NotEmpty
     private String performance_name;

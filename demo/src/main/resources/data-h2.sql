@@ -1,29 +1,27 @@
-INSERT INTO profiles (profile_id, preferences, bio, phone_number, dob, first_release)
-VALUES  (1, 'My preferences for 1', 'My Bio for 1', '07879 899101', '1979-01-01', '1979-01-01'),
-        (2, 'My preferences for 2', 'My Bio for 2', '07879 899102', '1973-06-12', '1979-01-01'),
-        (3, 'My preferences for 3', 'My Bio for 3', '07879 899103', '1976-11-21', '1979-01-01'),
-        (4, 'My preferences for 4', 'My Bio for 4', '07879 899104', '1979-04-12', '1976-01-01'),
-        (5, 'My preferences for 5', 'My Bio for 5', '07879 899105', '1972-06-19', '1979-01-01'),
-        (6, 'My preferences for 6', 'My Bio for 6', '07879 899106', '1974-01-01', '1972-01-01');
+INSERT INTO profiles (profile_id, tenant_id, preferences, bio, phone_number, dob, first_release)
+VALUES  (1, 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My preferences for 1',  'My Bio for 1', '07879 899101', '1979-01-01', '1979-01-01'),
+        (2, 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My preferences for 2', 'My Bio for 2', '07879 899102', '1973-06-12', '1979-01-01'),
+        (3, 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My preferences for 3', 'My Bio for 3', '07879 899103', '1976-11-21', '1979-01-01'),
+        (4, '7a7c7da4-bb29-11ec-8422-0242ac120002', 'My preferences for 4', 'My Bio for 4', '07879 899104', '1979-04-12', '1976-01-01'),
+        (5, '7a7c7da4-bb29-11ec-8422-0242ac120002', 'My preferences for 5', 'My Bio for 5', '07879 899105', '1972-06-19', '1979-01-01'),
+        (6, '7a7c7da4-bb29-11ec-8422-0242ac120002', 'My preferences for 6', 'My Bio for 6', '07879 899106', '1974-01-01', '1972-01-01');
 
-INSERT INTO artists (artist_id, profile_id, performance_name)
-VALUES  (1, 1, 'Beautiful South'),
-        (2, 2, 'Oasis'),
-        (3, 3, 'Pink'),
-        (4, 4, 'Adele'),
-        (5, 5, 'Beach Boys'),
-        (6, 6, 'Queen');
+INSERT INTO artists (artist_id, profile_id, tenant_id, performance_name)
+VALUES  (1, 1, 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Beautiful South'),
+        (2, 2, 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Oasis'),
+        (3, 3, 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Pink'),
+        (4, 4, '7a7c7da4-bb29-11ec-8422-0242ac120002', 'Adele'),
+        (5, 5, '7a7c7da4-bb29-11ec-8422-0242ac120002', 'Beach Boys'),
+        (6, 6, '7a7c7da4-bb29-11ec-8422-0242ac120002', 'Queen');
 
-INSERT INTO concerts (concert_id, concert_name) VALUES
-    (1, 'Live Aid 2020'),
-    (2, 'Live Aid 2021');
+INSERT INTO concerts (concert_id, tenant_id, concert_name) VALUES
+    (1, 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Live Aid 2020'),
+    (2, '7a7c7da4-bb29-11ec-8422-0242ac120002', 'Live Aid 2021'),
+    (3, 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Live Aid 2020');
 
 INSERT INTO concert_artists (concert_id, artist_id) VALUES
     (1, 1),
     (1, 2),
-    (2, 1),
-    (2, 2),
-    (2, 3),
     (2, 4),
     (2, 5),
     (2, 6);

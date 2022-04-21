@@ -19,8 +19,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidTenantIdException;
+import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.utils.ValidatorUtils;
 import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
@@ -44,7 +47,7 @@ import java.util.stream.Collectors;
  * Resources for ManyToMany relationships can also be queried.
  */
 @ResponseBody
-public class ResourceApiController<T, U> {
+public class ResourceApiController<T extends BaseEntity, U> {
 
     @Getter
     private Class<T> entityType;
@@ -56,9 +59,11 @@ public class ResourceApiController<T, U> {
     private final Validator validator = ValidatorUtils.initValidator();
 
     private static WebDataBinder binder = WebDataBinderFactory.getWebDataBinder();
+    private static final String ENTITY_TENANT_ID_FIELD_NAME = "tenant_id";
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
     private static final String RESOURCE_NOT_FOUND_ERROR_FORMAT = "Resource with id: %s was not found";
     private static final String UNKNOWN_PROPERTY_ERROR_FORMAT = "%s is an unknown property for the resource entity: %s";
+
 
     private @NonNull Serializable getIdentifier(Object identifier) {
         return getIdentifier(identifier, this.entityUtils.getIdFieldType());
@@ -85,15 +90,18 @@ public class ResourceApiController<T, U> {
         this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
     }
 
-    public ApiResponse<T> list(SpelExpression filter, Pageable pageable) {
+    public ApiResponse<T> list(SpelExpression filter, Pageable pageable,  @RequestParam UUID tenantId) {
+
         var builder = this.entityManager.getCriteriaBuilder();
         CriteriaQuery<T> query = builder.createQuery(this.entityUtils.getEntityType());
         Root<T> root = query.from(this.entityUtils.getEntityType());
 
-        var predicate = SpelExpressionToPredicateConverter.convert(filter, builder, root);
-        if (filter != null) {
-            query.where(predicate);
-        }
+        var tenantPredicate = builder.equal(root.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
+        var filterPredicate = SpelExpressionToPredicateConverter.convert(filter, builder, root);
+        var finalPredicate = filter != null
+                ? builder.and(tenantPredicate, filterPredicate) : tenantPredicate;
+        query.where(finalPredicate);
+        validateTenantId(tenantId);
 
         EntityGraph<T> entityGraph = this.entityManager.createEntityGraph(this.entityUtils.getEntityType());
 
@@ -109,15 +117,19 @@ public class ResourceApiController<T, U> {
         return new ApiResponse<>(result);
     }
 
-    private T getById(U id, String include) {
+    private T getById(U id, String include, UUID tenantId) {
         Serializable identifier = getIdentifier(id);
 
         var builder = this.entityManager.getCriteriaBuilder();
         CriteriaQuery<T> query = builder.createQuery(this.entityUtils.getEntityType());
         Root<T> root = query.from(this.entityUtils.getEntityType());
 
-        Predicate filter = builder.equal(root, identifier);
-        query.where(filter);
+
+        var tenantPredicate = builder.equal(root.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
+        var filterPredicate = builder.equal(root, identifier);
+        var finalPredicate = builder.and(tenantPredicate, filterPredicate);
+        query.where(finalPredicate);
+        validateTenantId(tenantId);
 
         EntityGraph<T> entityGraph = this.entityManager.createEntityGraph(this.entityUtils.getEntityType());
         if (StringUtils.hasText(include)) {
@@ -134,23 +146,17 @@ public class ResourceApiController<T, U> {
         return result2.get(0);
     }
 
-    public ApiResponse<T> get(@PathVariable U id) {
-        var result = getById(id, null);
-        if (result == null) {
-            throw new ResourceNotFoundException(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, id));
-        }
+    public ApiResponse<T> get(@PathVariable U id, @RequestParam UUID tenantId) {
+        var result = getResourceById(id, null, tenantId);
         return new ApiResponse<>(Arrays.asList(result));
     }
 
-    public ApiResponse<T> create(@RequestBody String body) throws JsonProcessingException {
-        var objectMapper = new ObjectMapper();
-        T r2;
-        try {
-            r2 = objectMapper.readValue(body, this.entityUtils.getEntityType());
-        } catch (UnrecognizedPropertyException ex) {
-            throw new UnknownResourcePropertyException(String.format(UNKNOWN_PROPERTY_ERROR_FORMAT,
-                    ex.getPropertyName(), ex.getReferringClass().getSimpleName()));
-        }
+    public ApiResponse<T> create(@RequestBody String body, @RequestParam UUID tenantId) throws JsonProcessingException {
+
+        T r2 = readPayload(body);
+
+        r2.setTenant_id(tenantId);
+        validateTenantId(tenantId);
 
         ValidatorUtils.validateAndThrowIfErrorsExist(validator, r2);
 
@@ -167,36 +173,35 @@ public class ResourceApiController<T, U> {
         return new ApiResponse<>(Arrays.asList(result));
     }
 
-    public void delete(@PathVariable U id) {
+    public void delete(@PathVariable U id, @RequestParam UUID tenantId) {
+
         var identifier = getIdentifier(id);
+
+        var dataAccessErrorMessage = "Error accessing data for deletion for entity with id: " + id;
+        T resource = repository.findById(identifier).orElseThrow(() -> new ResourceNotFoundException(dataAccessErrorMessage));
+        validateResourceTenantId(tenantId, resource, id);
 
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
+
         try {
             repository.deleteById(identifier);
             transactionManager.commit(transactionStatus);
         } catch (EmptyResultDataAccessException ex) {
             transactionManager.rollback(transactionStatus);
-            throw new ResourceNotFoundException("Error accessing data for deletion for entity with id: " + id);
+            throw new ResourceNotFoundException(dataAccessErrorMessage);
         } catch (RuntimeException ex) {
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
     }
 
-    public ApiResponse<T> update(@PathVariable U id, @RequestBody String body)
-            throws JsonProcessingException {
+    public ApiResponse<T> update(@PathVariable U id,
+                                 @RequestBody String body,
+                                 @RequestParam UUID tenantId) throws JsonProcessingException {
 
         var identifier = getIdentifier(id);
-
-        var objectMapper = new ObjectMapper();
-        T r2;
-        try {
-            r2 = objectMapper.readValue(body, this.entityUtils.getEntityType());
-        } catch (UnrecognizedPropertyException ex) {
-            throw new UnknownResourcePropertyException(String.format(UNKNOWN_PROPERTY_ERROR_FORMAT,
-                    ex.getPropertyName(), ex.getReferringClass().getSimpleName()));
-        }
+        T r2 = readPayload(body);
 
         var payloadEntityId = this.persistenceUnitUtil.getIdentifier(r2);
         if (payloadEntityId != null && identifier != getIdentifier(payloadEntityId)) {
@@ -208,15 +213,12 @@ public class ResourceApiController<T, U> {
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
-        T orig;
-        Optional<T> result = repository.findById(identifier);
+        T orig = repository.findById(identifier).orElseThrow(() ->
+                new ResourceNotFoundException(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, id)));
 
-        if (result.isEmpty()) {
-            throw new ResourceNotFoundException(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, id));
-        } else {
-            orig = result.get();
-        }
-        BeanUtils.copyProperties(r2, orig, this.entityUtils.getIdFieldName());
+        validateResourceTenantId(tenantId, orig, id);
+
+        BeanUtils.copyProperties(r2, orig, this.entityUtils.getIdFieldName(), ENTITY_TENANT_ID_FIELD_NAME);
         try {
             repository.saveAndFlush(orig);
             transactionManager.commit(transactionStatus);
@@ -229,9 +231,11 @@ public class ResourceApiController<T, U> {
     }
 
     @SuppressWarnings("rawtypes")
-    public ApiResponse getRelated(
-            @PathVariable U id, @PathVariable String relation,
-            SpelExpression filter, Pageable pageable) {
+    public ApiResponse getRelated(@PathVariable U id,
+                                  @PathVariable String relation,
+                                  SpelExpression filter, Pageable pageable,
+                                  @RequestParam UUID tenantId) {
+
         Serializable identifier = getIdentifier(id);
         var builder = this.entityManager.getCriteriaBuilder();
         Class<?> relatedEntityType = this.entityUtils.getRelatedType(relation);
@@ -245,7 +249,11 @@ public class ResourceApiController<T, U> {
         if (filterPredicate != null) {
             predicate = builder.and(predicate, filterPredicate);
         }
-        select.where(predicate);
+        var parentTenantPredicate = builder.equal(root.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
+        var relatedTenantPredicate = builder.equal(relatedJoin.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
+        var finalPredicate = builder.and(parentTenantPredicate, relatedTenantPredicate, predicate);
+        select.where(finalPredicate);
+        validateTenantId(tenantId);
 
         List<Order> orderBy = toOrders(pageable.getSort(), relatedJoin, builder);
         select.orderBy(orderBy);
@@ -260,15 +268,16 @@ public class ResourceApiController<T, U> {
         return new ApiResponse<>(result);
     }
 
-    public void deleteRelated(@PathVariable U id, @PathVariable String relation,
-                                                @PathVariable Object[] relatedId)
-            throws IllegalArgumentException {
 
-        var orig = getById(id, relation);
 
-        if (orig == null) {
-            throw new ResourceNotFoundException(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, id));
-        }
+    public void deleteRelated(@PathVariable U id,
+                              @PathVariable String relation,
+                              @PathVariable Object[] relatedId,
+                              @RequestParam UUID tenantId) throws IllegalArgumentException {
+
+        var orig = getResourceById(id, relation, tenantId);
+
+        validateTenantId(tenantId);
 
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
@@ -276,6 +285,7 @@ public class ResourceApiController<T, U> {
         Collection<?> relatedEntities = entityUtils.getRelatedEntities(orig, relation);
         Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
 
+        //TODO: same as add related
         var notDeletableRelatedIds = new HashSet<>();
         for (Object object : relatedId) {
             Serializable identitfier = getIdentifier(object, relatedIdType);
@@ -297,15 +307,14 @@ public class ResourceApiController<T, U> {
         }
     }
 
-    public void addRelated(@PathVariable U id, @PathVariable String relation,
-                                             @PathVariable Object[] relatedId)
-            throws IllegalArgumentException {
+    public void addRelated(@PathVariable U id,
+                           @PathVariable String relation,
+                           @PathVariable Object[] relatedId,
+                           @RequestParam UUID tenantId) throws IllegalArgumentException {
 
-        var orig = getById(id, relation);
+        var orig = getResourceById(id, relation, tenantId);
 
-        if (orig == null) {
-            throw new ResourceNotFoundException(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, id));
-        }
+        validateTenantId(tenantId);
 
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
@@ -313,6 +322,8 @@ public class ResourceApiController<T, U> {
         Collection<Object> relatedEntities = entityUtils.getRelatedEntities(orig, relation);
         Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
 
+        //TODO: We are not currently checking the tenant ID against the related resources.
+        // We need to be able to validate the request tenantID against the related entity tenantIds
         for (Object object : relatedId) {
             Serializable identifier = getIdentifier(object, relatedIdType);
             Object f = this.entityUtils.getEntityReference(relation, identifier);
@@ -358,4 +369,48 @@ public class ResourceApiController<T, U> {
         return orders;
 
     }
+
+
+    private T readPayload(String body) throws JsonProcessingException {
+        try {
+            var objectMapper = new ObjectMapper();
+            return objectMapper.readValue(body, this.entityUtils.getEntityType());
+        } catch (UnrecognizedPropertyException ex) {
+            throw new UnknownResourcePropertyException(String.format(UNKNOWN_PROPERTY_ERROR_FORMAT,
+                    ex.getPropertyName(), ex.getReferringClass().getSimpleName()));
+        }
+    }
+
+    private T getResourceById(U id, String relation, UUID tenantId) {
+        var orig = getById(id, relation, tenantId);
+        if (orig == null)
+            throw new ResourceNotFoundException(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, id));
+        return orig;
+    }
+
+    private void validateResourceTenantId(UUID tenantId, T resource, U resourceId) {
+        if (!tenantId.equals(resource.getTenant_id()))
+            throw new InvalidTenantIdException("The provided tenant id does not match the tenant id of the resource with id: " + resourceId);
+    }
+
+
+
+    //TODO: This will be replaced with reading tenant Ids from DB configuration
+    private Set<UUID> getTenantIds() {
+        return Set.of(
+                UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120002"),
+                UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120002")
+        );
+    }
+
+    // As a temporary solution this is checking the given tenantId against all our distinct tenantIDs
+    // TODO: Needs to compare with the tenantId of the resource we're working on
+    private void validateTenantId(UUID tenantId) {
+
+        if (!getTenantIds().contains(tenantId)) {
+            throw new InvalidTenantIdException("The provided tenant id does not match the tenant id of the resource(s)");
+        }
+    }
+
+
 }

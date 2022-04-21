@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.demo.models;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
+import org.hibernate.annotations.Type;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,6 +30,10 @@ public class Profile extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long profile_id;
+
+    @GeneratedValue
+    @Type(type="uuid-char")
+    private UUID tenant_id;
 
     @NotEmpty
     private String preferences;

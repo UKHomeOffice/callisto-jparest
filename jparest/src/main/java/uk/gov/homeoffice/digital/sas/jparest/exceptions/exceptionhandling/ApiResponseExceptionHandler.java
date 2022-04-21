@@ -6,10 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.*;
 
 import javax.persistence.PersistenceException;
 import java.util.logging.Logger;
@@ -55,6 +52,11 @@ public class ApiResponseExceptionHandler {
         LOGGER.severe("Persistence exception occurred whilst saving a resource. " + ex.getMessage());
         var msg = "There was an error persisting data. Payloads must be valid.";
         return createResponseEntity(msg, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidTenantIdException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidTenantIdException(InvalidTenantIdException ex) {
+        return createResponseEntity(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     

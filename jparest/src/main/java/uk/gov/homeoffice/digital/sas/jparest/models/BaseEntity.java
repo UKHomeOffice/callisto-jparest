@@ -1,5 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.models;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
 
@@ -9,6 +11,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +23,10 @@ public abstract class BaseEntity {
 
     private static final Logger LOGGER = Logger.getLogger(BaseEntity.class.getName());
     public static final String ID_ERROR_MESSAGE = "%s should not be extended by a subclass  %s with %s number of @Id annotations";
+
+    @Getter
+    @Setter
+    private UUID tenant_id;
 
     private final Field idField = getIdField();
 

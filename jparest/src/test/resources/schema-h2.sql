@@ -1,16 +1,19 @@
 CREATE TABLE dummyEntityA
 (
-    id           SERIAL PRIMARY KEY
+    id           SERIAL PRIMARY KEY,
+    tenant_id    varchar(36) NOT NULL
 );
 
 CREATE TABLE dummyEntityB
 (
-    id           SERIAL PRIMARY KEY
+    id           SERIAL PRIMARY KEY,
+    tenant_id    varchar(36) NOT NULL
 );
 
 CREATE TABLE dummyEntityC
 (
     id           SERIAL PRIMARY KEY,
+    tenant_id    varchar(36) NOT NULL,
     description  varchar(800) NULL,
     index        integer NOT NULL
 );

@@ -1,6 +1,7 @@
 CREATE TABLE profiles
 (
     profile_id      SERIAL PRIMARY KEY,
+    tenant_id       varchar(36) NOT NULL,
     preferences     varchar(80) NULL,
     bio             varchar(800) NULL,
     phone_number    varchar(20) NULL,
@@ -12,12 +13,14 @@ CREATE TABLE artists
 (
     artist_id           SERIAL PRIMARY KEY,
     profile_id          integer NOT NULL REFERENCES profiles (profile_id),
+    tenant_id           varchar(36) NOT NULL,
     performance_name    varchar(80) NULL
 );
 
 CREATE TABLE concerts
 (
     concert_id          SERIAL PRIMARY KEY,
+    tenant_id           varchar(36) NOT NULL,
     concert_name        varchar(80) NULL
 );
 

@@ -79,6 +79,15 @@ class ApiResponseExceptionHandlerTest {
         assertResponseData(response, msg, HttpStatus.BAD_REQUEST);
     }
 
+    @Test
+    void handleInvalidTenantIdException_forbiddenRequestWithErrorDataIsReturned() {
+
+        var apiResponseExceptionHandler = new ApiResponseExceptionHandler();
+        var exception = new InvalidTenantIdException(ERROR_MESSAGE);
+        var response = apiResponseExceptionHandler.handleInvalidTenantIdException(exception);
+        assertResponseData(response, exception.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
 
     private void assertResponseData(ResponseEntity<ApiErrorResponse> response, String message, HttpStatus httpStatus) {
         assertThat(response.getStatusCode()).isEqualTo(httpStatus);

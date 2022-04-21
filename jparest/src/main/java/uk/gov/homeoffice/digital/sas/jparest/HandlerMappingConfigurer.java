@@ -14,12 +14,14 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo.BuilderConf
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
+import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.EntityType;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -71,7 +73,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
         // find the id field , build the request mapping path and register the controller
         for (EntityType<?> entityType : resourceEntityTypes) {
-            Class<?> resource = entityType.getJavaType();
+            Class<? extends BaseEntity> resource = (Class<? extends BaseEntity>) entityType.getJavaType();
             LOGGER.fine("Processing resource" + resource.getName());
             var resourceAnnotation = resource.getAnnotation(Resource.class);
             String resourcePath = resourceAnnotation.path();
@@ -105,15 +107,15 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
             Class<?> resource, String path, EntityUtils<?> entityUtils,
             ResourceApiController<?, ?> controller) throws NoSuchMethodException {
         LOGGER.fine("Registering common paths");
-        register(controller, "list", new Class<?>[]{SpelExpression.class, Pageable.class},
+        register(controller, "list", new Class<?>[]{SpelExpression.class, Pageable.class, UUID.class},
                 path, RequestMethod.GET);
-        register(controller, "get", new Class<?>[]{Object.class},
+        register(controller, "get", new Class<?>[]{Object.class, UUID.class},
                 path + URL_ID_PATH_PARAM, RequestMethod.GET);
-        register(controller, "create", new Class<?>[]{String.class},
+        register(controller, "create", new Class<?>[]{String.class, UUID.class},
                 path, RequestMethod.POST);
-        register(controller, "delete", new Class<?>[]{Object.class},
+        register(controller, "delete", new Class<?>[]{Object.class, UUID.class},
                 path + URL_ID_PATH_PARAM, RequestMethod.DELETE);
-        register(controller, "update", new Class<?>[]{Object.class, String.class},
+        register(controller, "update", new Class<?>[]{Object.class, String.class, UUID.class},
                 path + URL_ID_PATH_PARAM, RequestMethod.PUT);
         resourceEndpoint.add(resource, path, entityUtils.getIdFieldType());
     }
@@ -128,12 +130,12 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
                     path + URL_ID_PATH_PARAM + "/" + relation, relatedIdType);
             LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
             register(controller, "getRelated",
-                    new Class<?>[]{Object.class, String.class, SpelExpression.class, Pageable.class},
+                    new Class<?>[]{Object.class, String.class, SpelExpression.class, Pageable.class, UUID.class},
                     path + createIdAndRelationParams(relation), RequestMethod.GET);
-            register(controller, "deleteRelated", new Class<?>[]{Object.class, String.class, Object[].class},
+            register(controller, "deleteRelated", new Class<?>[]{Object.class, String.class, Object[].class, UUID.class},
                     path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM,
                     RequestMethod.DELETE);
-            register(controller, "addRelated", new Class<?>[]{Object.class, String.class, Object[].class},
+            register(controller, "addRelated", new Class<?>[]{Object.class, String.class, Object[].class, UUID.class},
                     path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM, RequestMethod.PUT);
         }
     }
