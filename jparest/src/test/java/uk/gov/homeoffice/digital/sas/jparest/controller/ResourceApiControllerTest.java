@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.UUID;
@@ -125,11 +124,9 @@ class ResourceApiControllerTest {
     void get_idIsNull_throwsIllegalArugmentException() {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
-        var thrown = assertThrows(
-                IllegalArgumentException.class,
-                () -> controller.get(null));
-
-        assertThat(thrown.getMessage()).isEqualTo("identifier must not be null");
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> controller.get(null))
+                .withMessage("identifier must not be null");
     }
 
     @ParameterizedTest

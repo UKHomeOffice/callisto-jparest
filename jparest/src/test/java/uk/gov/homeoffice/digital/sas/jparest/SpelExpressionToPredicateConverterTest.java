@@ -67,8 +67,9 @@ class SpelExpressionToPredicateConverterTest {
         assertTrue(Modifier.isPrivate(constructor.getModifiers()));
         constructor.setAccessible(true);
 
-        var actualException = assertThrows(InvocationTargetException.class, constructor::newInstance);
-        assertThat(actualException.getTargetException()).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(constructor::newInstance)
+                .isInstanceOf(InvocationTargetException.class)
+                .getRootCause().isInstanceOf(IllegalStateException.class);
     }
 
     @ParameterizedTest

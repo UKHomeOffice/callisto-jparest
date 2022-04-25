@@ -168,7 +168,7 @@ public class ResourceApiController<T, U> {
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
-    public ResponseEntity<String> delete(@PathVariable U id) {
+    public ResponseEntity<Void> delete(@PathVariable U id) {
         var identifier = getIdentifier(id);
 
         var transactionDefinition = new DefaultTransactionDefinition();
