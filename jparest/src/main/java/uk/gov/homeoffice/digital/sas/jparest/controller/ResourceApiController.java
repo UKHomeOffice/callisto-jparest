@@ -146,7 +146,7 @@ public class ResourceApiController<T, U> {
         return new ResponseEntity<>(results, null, HttpStatus.OK);
     }
 
-    public ResponseEntity<ApiResponse<T>> create(@RequestBody String body) throws JsonProcessingException {
+    public ResponseEntity<ApiResponse<T>> create(@RequestBody String body) {
         var objectMapper = new ObjectMapper();
         T r2;
         try {
@@ -186,8 +186,7 @@ public class ResourceApiController<T, U> {
         return new ResponseEntity<>(null, null, HttpStatus.OK);
     }
 
-    public ResponseEntity<ApiResponse<T>> update(@PathVariable U id, @RequestBody String body)
-            throws JsonProcessingException {
+    public ResponseEntity<ApiResponse<T>> update(@PathVariable U id, @RequestBody String body) {
 
         var identifier = getIdentifier(id);
 
