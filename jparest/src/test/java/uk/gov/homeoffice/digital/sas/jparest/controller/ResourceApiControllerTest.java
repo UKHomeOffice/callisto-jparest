@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
@@ -83,24 +84,23 @@ class ResourceApiControllerTest {
         var pageable = PageRequest.ofSize(100).withSort(sort);
 
         var response = controller.list(null, pageable);
-        var items = response.getItems().toArray(new DummyEntityA[0]);
+        final var items = response.getItems().toArray(new DummyEntityA[0]);
 
         assertThat(items).hasSizeGreaterThanOrEqualTo(2);
-        for (var i = 1; i < items.length; i++) {
-            assertThat(items[i].getId()).isGreaterThan(items[i - 1].getId());
-        }
+        IntStream.range(1, items.length).forEach(i -> {
+            assertThat(items[i].getId().intValue()).isGreaterThan(items[i-1].getId().intValue());
+        });
 
         sort = Sort.by(Direction.DESC, "id");
         pageable = PageRequest.ofSize(100).withSort(sort);
 
         response = controller.list(null, pageable);
-        items = response.getItems().toArray(new DummyEntityA[0]);
+        final var items2 = response.getItems().toArray(new DummyEntityA[0]);
 
-        assertThat(items).hasSizeGreaterThanOrEqualTo(2);
-        for (var i = 1; i < items.length; i++) {
-            assertThat(items[i].getId()).isLessThan(items[i - 1].getId());
-        }
-
+        assertThat(items2).hasSizeGreaterThanOrEqualTo(2);
+        IntStream.range(1, items2.length).forEach(i -> {
+            assertThat(items2[i].getId()).isLessThan(items2[i-1].getId());
+        });
     }
 
     // endregion
