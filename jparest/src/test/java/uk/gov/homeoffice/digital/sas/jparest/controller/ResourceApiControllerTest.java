@@ -88,7 +88,7 @@ class ResourceApiControllerTest {
 
         assertThat(items).hasSizeGreaterThanOrEqualTo(2);
         IntStream.range(1, items.length).forEach(i -> {
-            assertThat(items[i].getId().intValue()).isGreaterThan(items[i-1].getId().intValue());
+            assertThat(items[i].getId()).isGreaterThan(items[i-1].getId());
         });
 
         sort = Sort.by(Direction.DESC, "id");
