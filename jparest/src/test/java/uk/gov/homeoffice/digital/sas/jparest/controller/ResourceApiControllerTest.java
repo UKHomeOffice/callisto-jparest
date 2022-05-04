@@ -22,8 +22,11 @@ import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -35,6 +38,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Named.named;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -49,6 +53,7 @@ class ResourceApiControllerTest {
     private PlatformTransactionManager transactionManager;
 
     private static final String RESOURCE_NOT_FOUND_ERROR_FORMAT = "Resource with id: %s was not found";
+    private static final String RELATED_RESOURCE_NOT_FOUND_ERROR_FORMAT = "No related %s resources removed as the following resources could not be found. Ids:[%s]";
 
     // region list
 
@@ -175,6 +180,19 @@ class ResourceApiControllerTest {
         assertThatThrownBy(() -> controller.create("{}")).isInstanceOf(PersistenceException.class);
     }
 
+    @Test
+    void create_unrecognizedPropertyOnPayload_unknownResourcePropertyExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        assertThatThrownBy(() -> controller.create("{\"otherUnknownProperty\": 1}")).isInstanceOf(UnknownResourcePropertyException.class);
+    }
+
+    @Test
+    void create_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityD.class, Integer.class);
+        assertThatThrownBy(() -> controller.create("{}")).isInstanceOf(ResourceConstraintViolationException.class)
+                .hasMessageContainingAll("description", "telephone", "has the following error(s):");
+    }
+
     // endregion
 
     // region update
@@ -217,7 +235,7 @@ class ResourceApiControllerTest {
 
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name="{0}")
     @MethodSource("invalidPayloads")
     @Transactional
     void update_resourceExistsInvalidPayload_jsonExceptionThrown(String payload) {
@@ -225,7 +243,7 @@ class ResourceApiControllerTest {
         assertThatThrownBy(() -> controller.update(1, payload)).isInstanceOf(JsonProcessingException.class);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name="{0}")
     @MethodSource("invalidPayloads")
     @Transactional
     void update_resourceDoesntExistInvalidPayload_jsonExceptionThrown(String payload) {
@@ -233,6 +251,13 @@ class ResourceApiControllerTest {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
         assertThatThrownBy(() -> controller.get(-1)).isInstanceOf(ResourceNotFoundException.class);
         assertThatThrownBy(() -> controller.update(-1, payload)).isInstanceOf(JsonProcessingException.class);
+    }
+
+    @ParameterizedTest(name="{0}")
+    @MethodSource("invalidProperty")
+    void update_unrecognizedPropertyOnPayload_unknownResourcePropertyExceptionThrown(String payload) {
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        assertThatThrownBy(() -> controller.update(-1, payload)).isInstanceOf(UnknownResourcePropertyException.class);
     }
 
     @Test
@@ -259,6 +284,14 @@ class ResourceApiControllerTest {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
         assertDoesNotThrow(() -> controller.update(1, "{}"));
     }
+
+    @Test
+    void update_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityD.class, Integer.class);
+        assertThatThrownBy(() -> controller.update(-1, "{}")).isInstanceOf(ResourceConstraintViolationException.class)
+                .hasMessageContainingAll("description", "telephone", "has the following error(s):");
+    }
+
     // endregion
 
     // region delete
@@ -285,7 +318,7 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
         assertThatThrownBy(() -> controller.delete(-1)).isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Error accessing data for deletion for entity with id: -1");
+                .hasMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, -1));
     }
 
     // endregion
@@ -332,7 +365,7 @@ class ResourceApiControllerTest {
 
         assertThatThrownBy(() ->  controller.addRelated(1, "dummyEntityBSet", new Object[] { -1 }))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Error adding related resources for resource with id: 1");
+                .hasMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, 1));
 
     }
 
@@ -412,7 +445,7 @@ class ResourceApiControllerTest {
 
         assertThatThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { -1 }))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("No related resources removed as the following resources could not be found. Ids:[-1]");
+                .hasMessage(String.format(RELATED_RESOURCE_NOT_FOUND_ERROR_FORMAT, DummyEntityB.class, -1));
     }
 
     @Test
@@ -426,13 +459,14 @@ class ResourceApiControllerTest {
         var getRelatedResponse = controllerA.getRelated(1, "dummyEntityBSet", null, Pageable.ofSize(100));
         @SuppressWarnings("unchecked")
         var checkItems = (List<DummyEntityB>) getRelatedResponse.getItems();
-        assertThat(checkItems).noneMatch((item) -> item.getId().equals(-1L));
-        assertThat(checkItems).noneMatch((item) -> item.getId().equals(-2L));
-        assertThat(checkItems).isNotEmpty().anyMatch((item) -> item.getId().equals(2L));
+        assertThat(checkItems)
+                .noneMatch((item) -> item.getId().equals(-1L))
+                .noneMatch((item) -> item.getId().equals(-2L))
+                .isNotEmpty().anyMatch((item) -> item.getId().equals(2L));
 
         assertThatThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { -1, -2, 2 }))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContainingAll("No related resources removed as the following resources could not be found. Ids:", "-1", "-2");
+                .hasMessageContainingAll(String.format(RELATED_RESOURCE_NOT_FOUND_ERROR_FORMAT, DummyEntityB.class, "-1, -2"));
     }
 
     // endregion
@@ -472,11 +506,23 @@ class ResourceApiControllerTest {
                 Arguments.of(new InvalidFilterException("Invalid Filter Exception")));
     }
 
-    private static Stream<String> invalidPayloads() {
+    private static Stream<Arguments> invalidPayloads() {
         return Stream.of(
-                "{ \"someprop\": \"somevalue\" }",
-                "");
+                Arguments.of(named("empty string", "")),
+                Arguments.of(named("a string is not valid json", "example string")),
+                Arguments.of(named("array not closed", "{ \"id\": [ \"string\" }")),
+                Arguments.of(named("string not quoted", "{ \"id\": [ unquoted string ] }")),
+                Arguments.of(named("back ticks not valid", "{ `id`: [ \"string\" ] }")),
+                Arguments.of(named("no opening and closing braces with invalid property", "\"problem\": [ \"string\" ]"))
+        );
+    }
 
+    private static Stream<Arguments> invalidProperty() {
+        return Stream.of(
+                Arguments.of(named("invalid property",  "{\"someProp\": \"someValue\"}")),
+                Arguments.of(named("array not closed and property is invalid", "{ \"someProp\": [ \"string\" }")),
+                Arguments.of(named("string not quoted and property is invalid", "{ \"someProp\": [ unquoted string ] }"))
+        );
     }
     // endregion
 
