@@ -1,20 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
-import javax.transaction.Transactional;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,15 +16,33 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
-
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import javax.transaction.Transactional;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+
+import static org.junit.jupiter.api.Named.named;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -51,6 +55,9 @@ class ResourceApiControllerTest {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+
+    private static final String RESOURCE_NOT_FOUND_ERROR_FORMAT = "Resource with id: %s was not found";
+    private static final String RELATED_RESOURCE_NOT_FOUND_ERROR_FORMAT = "No related %s resources removed as the following resources could not be found. Ids:[%s]";
 
     // region list
 
@@ -111,9 +118,8 @@ class ResourceApiControllerTest {
     void get_resourceWithIdExists_returnsEntity() {
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        var response = controller.get(2);
 
-        var apiResponse = response.getBody();
+        var apiResponse = controller.get(2);
         var dummy = apiResponse.getItems().get(0);
 
         assertThat(apiResponse.getItems()).hasSize(1);
@@ -132,7 +138,7 @@ class ResourceApiControllerTest {
     @ParameterizedTest
     @MethodSource("invalidIDSource")
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    void get_idCantBeconvertedToExpectedType_throwsTypeMismatchException(Class<?> clazz, Object id) {
+    void get_idCantBeConvertedToExpectedType_throwsTypeMismatchException(Class<?> clazz, Object id) {
         ResourceApiController controller = getResourceApiController(DummyEntityA.class, clazz);
         assertThatExceptionOfType(TypeMismatchException.class).isThrownBy(() -> controller.get(id));
     }
@@ -143,17 +149,16 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void create_resourceIsValid_resourceIsPersisted() {
+    void create_resourceIsValid_resourceIsPersisted() throws JsonProcessingException {
         String payload = "{\n" +
                 "            \"id\": -1\n" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
-        var initialResponse = controller.get(-1);
-        assertThat(initialResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        var response = controller.create(payload);
-        var apiResponse = response.getBody();
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.get(-1));
+
+        var apiResponse = controller.create(payload);
         var dummy = apiResponse.getItems().get(0);
 
         assertThat(apiResponse.getItems()).hasSize(1);
@@ -161,25 +166,34 @@ class ResourceApiControllerTest {
         assertThat(dummy.getId()).isNotNull();
 
         var retryResponse = controller.get(-1);
-        var retryResource = retryResponse.getBody().getItems().get(0);
+        var retryResource = retryResponse.getItems().get(0);
         assertThat(retryResource).isEqualTo(dummy);
 
     }
 
     @Test
-    void create_emptyPayload_returnsBadRequest() {
+    void create_emptyPayload_jsonExceptionThrown() {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-
-        var response = controller.create("");
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNull();
+        assertThatExceptionOfType(JsonProcessingException.class).isThrownBy(() -> controller.create(""));
     }
 
     @Test
-    void create_invalidPayload_returnsBadRequest() {
+    void create_invalidPayload_persistenceExceptionThrown() {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
         assertThatExceptionOfType(PersistenceException.class).isThrownBy(() -> controller.create("{}"));
+    }
+
+    @Test
+    void create_unrecognizedPropertyOnPayload_unknownResourcePropertyExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        assertThatExceptionOfType(UnknownResourcePropertyException.class).isThrownBy(() -> controller.create("{\"otherUnknownProperty\": 1}"));
+    }
+
+    @Test
+    void create_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityD.class, Integer.class);
+        assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() -> controller.create("{}"))
+                .withMessageContainingAll("description", "telephone", "has the following error(s):");
     }
 
     // endregion
@@ -188,7 +202,7 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void update_resourceExists_persistsChanges() {
+    void update_resourceExists_persistsChanges() throws JsonProcessingException {
 
         String payload = "{" +
                 "            \"id\": 100," +
@@ -204,56 +218,56 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
 
-        controller.create(payload);
+        assertThatNoException().isThrownBy(() -> controller.create(payload));
         var getResponse = controller.get(100);
-        var getResource = getResponse.getBody().getItems().get(0);
+        var getResource = getResponse.getItems().get(0);
         assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C 100");
 
         var updateResponse = controller.update(100, updatedPayload);
-        var updateBody = updateResponse.getBody();
-        var dummy = updateBody.getItems().get(0);
+        var dummy = updateResponse.getItems().get(0);
 
-        assertThat(updateBody.getItems()).hasSize(1);
+        assertThat(updateResponse.getItems()).hasSize(1);
         assertThat(dummy).isNotNull();
         assertThat(dummy.getId()).isEqualTo(100);
         assertThat(dummy.getIndex()).isEqualTo(2);
         assertThat(dummy.getDescription()).isEqualTo("Updated Dummy Entity C 100");
 
         var checkResponse = controller.get(100);
-        var checkResource = checkResponse.getBody().getItems().get(0);
+        var checkResource = checkResponse.getItems().get(0);
         assertThat(checkResource).isEqualTo(dummy);
 
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name="{0}")
     @MethodSource("invalidPayloads")
     @Transactional
-    void update_resourceExistsInvalidPayload_returnsBadRequest(String payload) {
+    void update_resourceExistsInvalidPayload_jsonExceptionThrown(String payload) {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        var response = controller.update(1, payload);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThatExceptionOfType(JsonProcessingException.class).isThrownBy(() -> controller.update(1, payload));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name="{0}")
     @MethodSource("invalidPayloads")
     @Transactional
-    void update_resourceDoesntExistInvalidPayload_returnsBadRequest(String payload) {
+    void update_resourceDoesntExistInvalidPayload_jsonExceptionThrown(String payload) {
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.get(-1));
+        assertThatExceptionOfType(JsonProcessingException.class).isThrownBy(() -> controller.update(-1, payload));
+    }
 
-        assertThat(controller.get(-1).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-
-        var response = controller.update(-1, payload);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    @ParameterizedTest(name="{0}")
+    @MethodSource("invalidProperty")
+    void update_unrecognizedPropertyOnPayload_unknownResourcePropertyExceptionThrown(String payload) {
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        assertThatExceptionOfType(UnknownResourcePropertyException.class).isThrownBy(() -> controller.update(-1, payload));
     }
 
     @Test
     @Transactional
-    void update_resourceDoesntExist_returnsNotFound() {
+    void update_resourceDoesntExist_resourceNotFoundExceptionThrown() {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        var response = controller.update(-1, "{}");
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.update(-1, "{}"));
     }
 
     @Test
@@ -273,6 +287,14 @@ class ResourceApiControllerTest {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
         assertThatNoException().isThrownBy(() -> controller.update(1, "{}"));
     }
+
+    @Test
+    void update_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityD.class, Integer.class);
+        assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() -> controller.update(-1, "{}"))
+                .withMessageContainingAll("description", "telephone", "has the following error(s):");
+    }
+
     // endregion
 
     // region delete
@@ -287,24 +309,19 @@ class ResourceApiControllerTest {
                 "        }";
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
-        controller.create(payload);
-        var response = controller.get(100);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        controller.delete(100);
-
-        response = controller.get(100);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThatNoException().isThrownBy(() -> controller.create(payload));
+        assertThatNoException().isThrownBy(() -> controller.get(100));
+        assertThatNoException().isThrownBy(() -> controller.delete(100));
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.get(100));
     }
 
     @Test
     @Transactional
-    void delete_resourceDoesNotExist_return404() {
+    void delete_resourceDoesNotExist_resourceNotFoundExceptionThrown() {
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
-        var response = controller.delete(-1);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.delete(-1))
+                .withMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, -1));
     }
 
     // endregion
@@ -321,7 +338,8 @@ class ResourceApiControllerTest {
         var getRelatedResponse = controller.getRelated(10, "dummyEntityBSet", null, Pageable.ofSize(100));
         assertThat(getRelatedResponse.getItems()).isEmpty();
 
-        controller.addRelated(10, "dummyEntityBSet", new Object[] { 1 });
+        assertThatNoException()
+                .isThrownBy(() -> controller.addRelated(10, "dummyEntityBSet", new Object[] { 1 }));
 
         getRelatedResponse = controller.getRelated(10, "dummyEntityBSet", null, Pageable.ofSize(100));
         assertThat(getRelatedResponse.getItems()).hasSize(1);
@@ -332,25 +350,25 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void addRelated_resourceDoesntExist_returns404() {
+    void addRelated_resourceDoesntExist_resourceNotFoundExceptionThrown() {
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        var response = controller.addRelated(-1, "dummyEntityBSet", new Object[] { 1 });
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+        	.isThrownBy(() -> controller.addRelated(-1, "dummyEntityBSet", new Object[] { 1 }))
+                .withMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, -1));
     }
 
     @Test
     @Transactional
-    void addRelated_relatedResourceDoesntExist_returns404() {
+    void addRelated_relatedResourceDoesntExist_resourceNotFoundExceptionThrown() {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
-        var getResponse = controller.get(1);
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThatNoException().isThrownBy(() -> controller.get(1));
 
-        var response = controller.addRelated(1, "dummyEntityBSet", new Object[] { -1 });
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+        	.isThrownBy(() ->  controller.addRelated(1, "dummyEntityBSet", new Object[] { -1 }))
+                .withMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, 1));
 
     }
 
@@ -389,9 +407,8 @@ class ResourceApiControllerTest {
         assertThat(items).isNotEmpty()
                 .anyMatch((item) -> item.getId().equals(2L));
 
-        var deleteResponse = controllerA.deleteRelated(2, "dummyEntityBSet", new Object[] { 2 });
-
-        assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThatNoException().isThrownBy(
+                () -> controllerA.deleteRelated(2, "dummyEntityBSet", new Object[] { 2 }));
 
         getRelatedResponse = controllerA.getRelated(2, "dummyEntityBSet", null, Pageable.ofSize(100));
         @SuppressWarnings("unchecked")
@@ -399,63 +416,64 @@ class ResourceApiControllerTest {
         assertThat(checkItems).noneMatch((item) -> item.getId().equals(2L));
 
         var controllerB = getResourceApiController(DummyEntityB.class, Integer.class);
-        var resourceB = controllerB.get(2);
-        assertThat(resourceB).isNotNull();
-        assertThat(resourceB.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThatNoException().isThrownBy(() -> controllerB.get(2));
 
     }
 
     @Test
     @Transactional
-    void deleteRelated_resourceDoesntExist_returns404() {
+    void deleteRelated_resourceDoesntExist_resourceNotFoundExceptionThrown() {
 
         var controllerA = getResourceApiController(DummyEntityA.class, Integer.class);
 
-        var getResponse = controllerA.get(-1);
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controllerA.get(-1));
 
-        var deleteResponse = controllerA.deleteRelated(-1, "dummyEntityBSet", new Object[] { 2 });
-
-        assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+        	.isThrownBy(() ->  controllerA.deleteRelated(-1, "dummyEntityBSet", new Object[] { 2 }))
+                .withMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, -1));
     }
 
     @Test
     @Transactional
-    void deleteRelated_resourceExistsButRelationshipDoesnt_returns404() {
+    void deleteRelated_resourceExistsButRelationshipDoesnt_resourceNotFoundExceptionThrown() {
 
         var controllerA = getResourceApiController(DummyEntityA.class, Integer.class);
 
-        var getResponse = controllerA.get(1);
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThatNoException().isThrownBy(() -> controllerA.get(1));
 
         var getRelatedResponse = controllerA.getRelated(1, "dummyEntityBSet", null, Pageable.ofSize(100));
         @SuppressWarnings("unchecked")
         var checkItems = (List<DummyEntityB>) getRelatedResponse.getItems();
         assertThat(checkItems).noneMatch((item) -> item.getId().equals(-1L));
 
-        var deleteResponse = controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { -1 });
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+        	.isThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { -1 }))
+                .withMessage(String.format(RELATED_RESOURCE_NOT_FOUND_ERROR_FORMAT, DummyEntityB.class, -1));
+    }
 
-        assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    @Test
+    @Transactional
+    void deleteRelated_resourceExists_relatedIdsResultInFoundAndNotFound_exceptionIncludesNotFoundIdsInMessage() {
 
+        var controllerA = getResourceApiController(DummyEntityA.class, Integer.class);
+
+        assertThatNoException().isThrownBy(() -> controllerA.get(1));
+
+        var getRelatedResponse = controllerA.getRelated(1, "dummyEntityBSet", null, Pageable.ofSize(100));
+        @SuppressWarnings("unchecked")
+        var checkItems = (List<DummyEntityB>) getRelatedResponse.getItems();
+        assertThat(checkItems)
+                .noneMatch((item) -> item.getId().equals(-1L))
+                .noneMatch((item) -> item.getId().equals(-2L))
+                .isNotEmpty().anyMatch((item) -> item.getId().equals(2L));
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+        	.isThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { -1, -2, 2 }))
+                .withMessageContainingAll(String.format(RELATED_RESOURCE_NOT_FOUND_ERROR_FORMAT, DummyEntityB.class, "-1, -2"));
     }
 
     // endregion
 
-    // region handleException
-
-    @ParameterizedTest
-    @MethodSource("exceptionSource")
-    void handleException_returns400WithExceptionMessage(InvalidFilterException exception) {
-        var controller = getResourceApiController(DummyEntityA.class, String.class);
-        var response = controller.handleException(exception);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-
-        assertThat(response.getBody()).isEqualTo(exception.getMessage());
-    }
-
-    // endregion
 
     // region Method Sources
 
@@ -484,18 +502,23 @@ class ResourceApiControllerTest {
                 Arguments.of(UUID.class, "blah"));
     }
 
-    private static Stream<Arguments> exceptionSource() {
+    private static Stream<Arguments> invalidPayloads() {
         return Stream.of(
-                Arguments.of(new InvalidFilterException()),
-                Arguments.of(new InvalidFilterException("Another reason")),
-                Arguments.of(new InvalidFilterException("Invalid Filter Exception")));
+                Arguments.of(named("empty string", "")),
+                Arguments.of(named("a string is not valid json", "example string")),
+                Arguments.of(named("array not closed", "{ \"id\": [ \"string\" }")),
+                Arguments.of(named("string not quoted", "{ \"id\": [ unquoted string ] }")),
+                Arguments.of(named("back ticks not valid", "{ `id`: [ \"string\" ] }")),
+                Arguments.of(named("no opening and closing braces with invalid property", "\"problem\": [ \"string\" ]"))
+        );
     }
 
-    private static Stream<String> invalidPayloads() {
+    private static Stream<Arguments> invalidProperty() {
         return Stream.of(
-                "{ \"someprop\": \"somevalue\" }",
-                "");
-
+                Arguments.of(named("invalid property",  "{\"someProp\": \"someValue\"}")),
+                Arguments.of(named("array not closed and property is invalid", "{ \"someProp\": [ \"string\" }")),
+                Arguments.of(named("string not quoted and property is invalid", "{ \"someProp\": [ unquoted string ] }"))
+        );
     }
     // endregion
 

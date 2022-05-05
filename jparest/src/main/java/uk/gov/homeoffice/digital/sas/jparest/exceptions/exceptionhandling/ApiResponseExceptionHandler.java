@@ -1,39 +1,50 @@
 package uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import javax.persistence.PersistenceException;
+import java.util.logging.Logger;
 
 @ControllerAdvice(assignableTypes = {ResourceApiController.class})
 public class ApiResponseExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return createResponseEntity(ex, HttpStatus.BAD_REQUEST);
+    private static final Logger LOGGER = Logger.getLogger(ApiResponseExceptionHandler.class.getName());
+
+    @ExceptionHandler({
+            IllegalArgumentException.class,
+            JsonProcessingException.class,
+            InvalidFilterException.class,
+            ResourceConstraintViolationException.class,
+            UnknownResourcePropertyException.class,
+    })
+    public ResponseEntity<ApiErrorResponse> handleException(Exception ex) {
+        return createResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        return createResponseEntity(ex, HttpStatus.NOT_FOUND);
+        return createResponseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(JsonProcessingException.class)
-    public ResponseEntity<ApiErrorResponse> handleJsonProcessingException(JsonProcessingException ex) {
-        return createResponseEntity(ex, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(PersistenceException.class)
+    public ResponseEntity<ApiErrorResponse> handlePersistenceException(PersistenceException ex) {
+        LOGGER.severe("Persistence exception occurred whilst saving a resource. " + ex.getMessage());
+        var msg = "There was an error persisting data.";
+        return createResponseEntity(msg, HttpStatus.BAD_REQUEST);
     }
+    
+    private ResponseEntity<ApiErrorResponse> createResponseEntity(String message, HttpStatus httpStatus) {
 
-    private ResponseEntity<ApiErrorResponse> createResponseEntity(Exception exception, HttpStatus httpStatus) {
-
-        var apiErrorResponse = new ApiErrorResponse(exception.getMessage());
-
+        var apiErrorResponse = new ApiErrorResponse(message);
         return new ResponseEntity<>(apiErrorResponse, httpStatus);
     }
-
-
 }
