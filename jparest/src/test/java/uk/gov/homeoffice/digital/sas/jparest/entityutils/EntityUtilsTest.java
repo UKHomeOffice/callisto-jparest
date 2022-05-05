@@ -25,7 +25,7 @@ import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -44,7 +44,7 @@ class EntityUtilsTest {
     @ParameterizedTest
     @MethodSource("nullConstructorArgs")
     void entityUtils_nullArgs_throwsNullPointerException(Class<?> clazz, EntityManager manager) {
-        assertThrows(NullPointerException.class, () -> new EntityUtils<>(clazz, manager));
+        assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> new EntityUtils<>(clazz, manager));
     } 
 
     //endregion
@@ -89,14 +89,14 @@ class EntityUtilsTest {
     void getRelatedEntities_relationDoesntExist_throwsIllegalArgumentException() {
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
         var findA = entityManager.getReference(DummyEntityA.class, 1L);
-        assertThrows(IllegalArgumentException.class, () -> entityUtils.getRelatedEntities(findA, "invalidValue"));
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> entityUtils.getRelatedEntities(findA, "invalidValue"));
     }
 
     @ParameterizedTest
     @MethodSource("getRelatedEntitiesNullArgs")
     void getRelatedEntities_nullArgs_throwsNullPointerException(DummyEntityA entity, String relation) {
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        assertThrows(NullPointerException.class, () -> entityUtils.getRelatedEntities((DummyEntityA)entity, relation));
+        assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> entityUtils.getRelatedEntities(entity, relation));
     }
 
     //endregion
@@ -122,9 +122,8 @@ class EntityUtilsTest {
 
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
 
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> entityUtils.getEntityReference("dummyEntityBSet", reference));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> entityUtils.getEntityReference("dummyEntityBSet", reference));
     }
 
     @Test
@@ -139,10 +138,8 @@ class EntityUtilsTest {
     @ParameterizedTest
     @MethodSource("invalidReferenceValues")
     void getEntityReference_referenceTypeIsInvalid_throwsIllegalArgumentException(Serializable reference) {
-        var entityUtils = new EntityUtils<DummyEntityC>(DummyEntityC.class, entityManager);
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> entityUtils.getEntityReference(reference));
+        var entityUtils = new EntityUtils<>(DummyEntityC.class, entityManager);
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> entityUtils.getEntityReference(reference));
 
     }
 

@@ -8,8 +8,8 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolat
 
 import javax.validation.Validation;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 class ValidatorUtilsTest {
 
@@ -25,8 +25,7 @@ class ValidatorUtilsTest {
         validationMockedStatic.when(Validation::buildDefaultValidatorFactory).thenReturn(null);
 
         var validatorUtils =  new ValidatorUtils();
-        assertDoesNotThrow(
-                () -> validatorUtils.validateAndThrowIfErrorsExist(entity));
+        assertThatNoException().isThrownBy(() -> validatorUtils.validateAndThrowIfErrorsExist(entity));
         validationMockedStatic.close();
     }
 
@@ -34,9 +33,8 @@ class ValidatorUtilsTest {
     void validateAndThrowIfErrorsExist_constraintViolationsExists_resourceConstraintViolationExceptionThrown() {
         var entity = new DummyEntityD();
         var validatorUtils =  new ValidatorUtils();
-        assertThatThrownBy(
-                () -> validatorUtils.validateAndThrowIfErrorsExist(entity))
-                .isInstanceOf(ResourceConstraintViolationException.class);
+        assertThatExceptionOfType(ResourceConstraintViolationException.class)
+            .isThrownBy(() -> validatorUtils.validateAndThrowIfErrorsExist(entity));
     }
 
     @Test
@@ -46,13 +44,12 @@ class ValidatorUtilsTest {
         entity.setTelephone("-123456");
         var validatorUtils = new ValidatorUtils();
 
-        assertThatThrownBy(
-                () -> validatorUtils.validateAndThrowIfErrorsExist(entity))
-                .isInstanceOf(ResourceConstraintViolationException.class)
-                .hasMessageContainingAll(
-                        "description has the following error(s): must not be empty",
-                        "telephone has the following error(s): ",
-                        "numeric value out of bounds (<5 digits>.<0 digits> expected)", "must be greater than 0");
+        assertThatExceptionOfType(ResourceConstraintViolationException.class)
+            .isThrownBy(() -> validatorUtils.validateAndThrowIfErrorsExist(entity))
+            .withMessageContainingAll(
+                "description has the following error(s): must not be empty",
+                "telephone has the following error(s): ",
+                "numeric value out of bounds (<5 digits>.<0 digits> expected)", "must be greater than 0");
     }
 
 }

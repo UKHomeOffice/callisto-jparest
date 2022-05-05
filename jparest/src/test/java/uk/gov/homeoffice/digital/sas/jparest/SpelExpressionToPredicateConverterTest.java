@@ -24,12 +24,11 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 import static org.hibernate.query.criteria.internal.predicate.ComparisonPredicate.ComparisonOperator.*;
 import static javax.persistence.criteria.Predicate.BooleanOperator.*;
@@ -59,17 +58,6 @@ class SpelExpressionToPredicateConverterTest {
         Assertions.assertNull(result);
     }
 
-    @Test
-    void spelExpressionToPredicateConverter_constructorIsPrivate_exceptionThrownWhenAccessed() {
-       var constructor = assertDoesNotThrow(() ->
-               SpelExpressionToPredicateConverter.class.getDeclaredConstructor());
-        assertTrue(Modifier.isPrivate(constructor.getModifiers()));
-        constructor.setAccessible(true);
-
-        var actualException = assertThrows(InvocationTargetException.class, constructor::newInstance);
-        assertThat(actualException.getTargetException()).isInstanceOf(IllegalStateException.class);
-    }
-
     @ParameterizedTest
     @ValueSource(strings = {
         "id == 1",
@@ -97,7 +85,7 @@ class SpelExpressionToPredicateConverterTest {
         var entityUtils = new EntityUtils<>(DummyEntityC.class, entityManager);
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
-        assertDoesNotThrow( () -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root) );
+        assertThatNoException().isThrownBy(() -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root) );
     }
 
     private static Stream<Arguments> invalidFilterValues() {
@@ -121,11 +109,9 @@ class SpelExpressionToPredicateConverterTest {
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
 
-        var thrown = assertThrows(
-                InvalidFilterException.class,
-                () -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root)
-        );
-        assertTrue(thrown.getMessage().startsWith(errorMessage));
+        assertThatExceptionOfType(InvalidFilterException.class)
+            .isThrownBy(() -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root))
+            .withMessageStartingWith(errorMessage);
     }
 
     @ParameterizedTest
@@ -143,7 +129,7 @@ class SpelExpressionToPredicateConverterTest {
         var entityUtils = new EntityUtils<>(DummyEntityC.class, entityManager);
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
-        assertDoesNotThrow( () -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root) );
+        assertThatNoException().isThrownBy( () -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root) );
     }
 
     @Test
@@ -247,11 +233,10 @@ class SpelExpressionToPredicateConverterTest {
     @Test
     void test_convert_throws_InvalidFilterException_with_describeError_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("1==id");
-        assertThrows(
-                InvalidFilterException.class,
-                () -> SpelExpressionToPredicateConverter.convert(expression, builder, root),
-                "Left hand side must be a field"
-        );
+
+        assertThatExceptionOfType(InvalidFilterException.class)
+            .isThrownBy(() -> SpelExpressionToPredicateConverter.convert(expression, builder, root))
+            .withMessage("Left hand side must be a field");
     }
 
     private SpelExpression parseExpression(String expression) {

@@ -26,7 +26,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 
@@ -78,7 +78,7 @@ class HandlerMappingConfigurerTest {
                 List.of("{POST [/resources/" + resourceName + "], produces [application/json]}", "create"),
                 List.of("{DELETE [/resources/" + resourceName + "/{id}], produces [application/json]}", "delete"),
                 List.of("{PUT [/resources/" + resourceName + "/{id}], produces [application/json]}", "update"));
-        assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
+        assertThatNoException().isThrownBy(() -> handlerMappingConfigurer.registerUserController());
         verifyExpectedHandlerMappingCalls(requestMappingHandlerMapping, clazz, expectedCalls);
     }
 
@@ -91,7 +91,7 @@ class HandlerMappingConfigurerTest {
                         "deleteRelated"),
                 List.of("{PUT [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedId}], produces [application/json]}",
                         "addRelated"));
-        assertDoesNotThrow(() -> handlerMappingConfigurer.registerUserController());
+        assertThatNoException().isThrownBy(() -> handlerMappingConfigurer.registerUserController());
         verifyExpectedHandlerMappingCalls(requestMappingHandlerMapping, DummyEntityA.class, expectedCalls);
     }
 

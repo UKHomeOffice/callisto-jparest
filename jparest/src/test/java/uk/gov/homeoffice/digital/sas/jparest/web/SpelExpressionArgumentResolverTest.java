@@ -16,7 +16,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -55,8 +54,8 @@ class SpelExpressionArgumentResolverTest {
         given(methodParameter.getParameterName()).willReturn(PARAMETER_NAME);
         given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn(parameterValue);
 
-        SpelExpression expression = (SpelExpression) assertDoesNotThrow(() -> expressionArgumentResolver
-                .resolveArgument(methodParameter, modelAndViewContainer, nativeWebRequest, webDataBinderFactory));
+        SpelExpression expression = (SpelExpression) expressionArgumentResolver
+                .resolveArgument(methodParameter, modelAndViewContainer, nativeWebRequest, webDataBinderFactory);
 
         String value = expression.getExpressionString();
         assertThat(value).isEqualTo(parameterValue);
@@ -97,9 +96,8 @@ class SpelExpressionArgumentResolverTest {
         given(methodParameter.getParameterName()).willReturn(PARAMETER_NAME);
         given(nativeWebRequest.getParameter(PARAMETER_NAME)).willReturn("");
 
-        var result =assertDoesNotThrow(() ->
-                expressionArgumentResolver.resolveArgument(methodParameter, modelAndViewContainer,
-                        nativeWebRequest, webDataBinderFactory));
+        var result =expressionArgumentResolver.resolveArgument(methodParameter, modelAndViewContainer,
+                        nativeWebRequest, webDataBinderFactory);
         assertThat(result).isNull();
     }
 

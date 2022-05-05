@@ -179,8 +179,7 @@ public class ResourceApiController<T, U> {
         }
     }
 
-    public ApiResponse<T> update(@PathVariable U id, @RequestBody String body)
-            throws JsonProcessingException {
+    public ApiResponse<T> update(@PathVariable U id, @RequestBody String body) throws JsonProcessingException {
 
         var identifier = getIdentifier(id);
 
@@ -255,8 +254,7 @@ public class ResourceApiController<T, U> {
     }
 
     public void deleteRelated(@PathVariable U id, @PathVariable String relation,
-                                                @PathVariable Object[] relatedId)
-            throws IllegalArgumentException {
+                                                @PathVariable Object[] relatedId) {
 
         var orig = getById(id, relation);
 
@@ -291,8 +289,7 @@ public class ResourceApiController<T, U> {
     }
 
     public void addRelated(@PathVariable U id, @PathVariable String relation,
-                                             @PathVariable Object[] relatedId)
-            throws IllegalArgumentException {
+                                             @PathVariable Object[] relatedId) {
 
         var orig = getById(id, relation);
 
