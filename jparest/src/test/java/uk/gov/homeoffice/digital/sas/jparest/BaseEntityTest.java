@@ -16,7 +16,7 @@ import javax.persistence.Id;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Named.named;
 
 import java.util.UUID;
@@ -28,7 +28,7 @@ class BaseEntityTest {
 
     @Test
     void getIdField_classContainsSingleIdAnnotatedField_noExceptionThrown() {
-        assertDoesNotThrow(DummyEntityA::new);
+        assertThatNoException().isThrownBy(DummyEntityA::new);
     }
 
     @Test

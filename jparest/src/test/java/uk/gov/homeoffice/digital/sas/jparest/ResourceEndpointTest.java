@@ -7,8 +7,8 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.Ad
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint.*;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode.RELATED_RESOURCE_ALREADY_EXISTS;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode.RESOURCE_ALREADY_EXISTS;
@@ -33,9 +33,10 @@ class ResourceEndpointTest {
         assertThat(actualDescriptor.getIdFieldType()).isEqualTo(ID_FIELD_TYPE);
 
         // Add the resource again
-        assertThatThrownBy(() -> resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE))
-                .isInstanceOf(AddResourceDescriptorException.class)
-                .hasMessage(RESOURCE_ALREADY_ADDED)
+        
+        assertThatExceptionOfType(AddResourceDescriptorException.class)
+                .isThrownBy(() -> resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE))
+                .withMessage(RESOURCE_ALREADY_ADDED)
                 .extracting(EXCEPTION_ERROR_CODE_FIELD_NAME).isEqualTo(RESOURCE_ALREADY_EXISTS.getCode());
     }
 
@@ -44,9 +45,10 @@ class ResourceEndpointTest {
         var resourceEndpoint = new ResourceEndpoint();
         resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE);
 
-        assertThatThrownBy(() -> resourceEndpoint.add(RELATED_RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE))
+        assertThatExceptionOfType(AddResourceDescriptorException.class)
+                .isThrownBy(() -> resourceEndpoint.add(RELATED_RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE))
                 .isInstanceOf(AddResourceDescriptorException.class)
-                .hasMessage(PATH_ALREADY_EXISTS)
+                .withMessage(PATH_ALREADY_EXISTS)
                 .extracting(EXCEPTION_ERROR_CODE_FIELD_NAME).isEqualTo(AddResourceDescriptorErrorCode.PATH_ALREADY_EXISTS.getCode());
 
     }
@@ -54,7 +56,7 @@ class ResourceEndpointTest {
     @Test
     void add_descriptorsDoesNotContainResource_resourceAdded() {
         var resourceEndpoint = new ResourceEndpoint();
-        assertDoesNotThrow(() -> resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE));
+        assertThatNoException().isThrownBy(() -> resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE));
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS);
         assertThat(actualDescriptor.getPath()).isEqualTo(RESOURCE_PATH);
         assertThat(actualDescriptor.getIdFieldType()).isEqualTo(ID_FIELD_TYPE);
@@ -65,9 +67,9 @@ class ResourceEndpointTest {
         var resourceEndpoint = new ResourceEndpoint();
         resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE);
 
-        assertThatThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE))
-                .isInstanceOf(AddResourceDescriptorException.class)
-                .hasMessage(PATH_ALREADY_EXISTS)
+        assertThatExceptionOfType(AddResourceDescriptorException.class)
+                .isThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE))
+                .withMessage(PATH_ALREADY_EXISTS)
                 .extracting(EXCEPTION_ERROR_CODE_FIELD_NAME).isEqualTo(AddResourceDescriptorErrorCode.PATH_ALREADY_EXISTS.getCode());
     }
 
@@ -75,9 +77,9 @@ class ResourceEndpointTest {
     void addRelated_descriptorsDoesNotContainResource_exceptionThrown() {
         var resourceEndpoint = new ResourceEndpoint();
 
-        assertThatThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH, ID_FIELD_TYPE))
-                .isInstanceOf(AddResourceDescriptorException.class)
-                .hasMessage(CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES)
+        assertThatExceptionOfType(AddResourceDescriptorException.class)
+                .isThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH, ID_FIELD_TYPE))
+                .withMessage(CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES)
                 .extracting(EXCEPTION_ERROR_CODE_FIELD_NAME).isEqualTo(AddResourceDescriptorErrorCode.RESOURCE_DOES_NOT_EXIST.getCode());
 
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS);
@@ -101,9 +103,9 @@ class ResourceEndpointTest {
         assertThat(relatedDescriptor.getIdFieldType()).isEqualTo(RELATED_ID_FIELD_TYPE);
 
         // Try to add related resource again
-        assertThatThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH, RELATED_ID_FIELD_TYPE))
-                .isInstanceOf(AddResourceDescriptorException.class)
-                .hasMessage(RELATED_RESOURCE_ALREADY_ADDED)
+        assertThatExceptionOfType(AddResourceDescriptorException.class)
+                .isThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH, RELATED_ID_FIELD_TYPE))
+                .withMessage(RELATED_RESOURCE_ALREADY_ADDED)
                 .extracting(EXCEPTION_ERROR_CODE_FIELD_NAME).isEqualTo(RELATED_RESOURCE_ALREADY_EXISTS.getCode());
     }
 
