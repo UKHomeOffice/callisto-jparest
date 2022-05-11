@@ -16,12 +16,12 @@ public class ResourceNotFoundException extends RuntimeException {
         super(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, id));
     }
 
-    public ResourceNotFoundException(Set<Object> ids, Object relatedType) {
+    public ResourceNotFoundException(Set<Object> ids, Class<?> relatedType) {
         super(String.format(RELATED_RESOURCE_NOT_FOUND_ERROR_FORMAT, relatedType, formatIdsToCsv(ids)));
     }
 
-    private static String formatIdsToCsv(Set<Object> notDeletableRelatedIds) {
-        return notDeletableRelatedIds.stream().map(String::valueOf).collect(Collectors.joining(", "));
+    private static String formatIdsToCsv(Set<Object> ids) {
+        return ids.stream().map(String::valueOf).collect(Collectors.joining(", "));
     }
 
 }
