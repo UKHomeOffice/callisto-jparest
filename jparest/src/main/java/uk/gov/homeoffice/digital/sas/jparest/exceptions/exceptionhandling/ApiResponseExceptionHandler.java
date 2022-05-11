@@ -16,42 +16,29 @@ public class ApiResponseExceptionHandler {
 
     private static final Logger LOGGER = Logger.getLogger(ApiResponseExceptionHandler.class.getName());
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return createResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
-    }
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        return createResponseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-
-    @ExceptionHandler(JsonProcessingException.class)
-    public ResponseEntity<ApiErrorResponse> handleJsonProcessingException(JsonProcessingException ex) {
-        return createResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(InvalidFilterException.class)
-    public ResponseEntity<ApiErrorResponse> handleInvalidFilterException(InvalidFilterException ex) {
-        return createResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(ResourceConstraintViolationException.class)
-    public ResponseEntity<ApiErrorResponse> handleResourceConstraintViolationException(ResourceConstraintViolationException ex) {
-        return createResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(UnknownResourcePropertyException.class)
-    public ResponseEntity<ApiErrorResponse> handleUnknownResourcePropertyException(UnknownResourcePropertyException ex) {
+    @ExceptionHandler({
+            IllegalArgumentException.class,
+            JsonProcessingException.class,
+            InvalidFilterException.class,
+            ResourceConstraintViolationException.class,
+            UnknownResourcePropertyException.class,
+    })
+    public ResponseEntity<ApiErrorResponse> handleException(Exception ex) {
         return createResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PersistenceException.class)
     public ResponseEntity<ApiErrorResponse> handlePersistenceException(PersistenceException ex) {
         LOGGER.severe("Persistence exception occurred whilst saving a resource. " + ex.getMessage());
-        var msg = "There was an error persisting data. Payloads must be valid.";
+        var msg = "There was an error persisting data.";
         return createResponseEntity(msg, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return createResponseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(InvalidTenantIdException.class)
@@ -65,6 +52,8 @@ public class ApiResponseExceptionHandler {
         var apiErrorResponse = new ApiErrorResponse(message);
         return new ResponseEntity<>(apiErrorResponse, httpStatus);
     }
+
+
 
 
 }

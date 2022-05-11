@@ -1,9 +1,11 @@
 package uk.gov.homeoffice.digital.sas.jparest.utils;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 
-import javax.validation.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.NoProviderFoundException;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,26 +13,27 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 
-
-@UtilityClass
 public class ValidatorUtils {
 
     private static final Logger LOGGER = Logger.getLogger(ValidatorUtils.class.getName());
+    private Validator validator = null;
 
-    public static Validator initValidator() {
+    public ValidatorUtils() {
         try {
             var factory = Validation.buildDefaultValidatorFactory();
-            if (factory != null) return factory.getValidator();
+            if (factory != null) {
+                this.validator = factory.getValidator();
+            }
         } catch (NoProviderFoundException ex) {
             LOGGER.log(Level.WARNING, "No validation provider available", ex);
         }
-        return null;
     }
 
 
-    public static void validateAndThrowIfErrorsExist(Validator validator, Object objectToValidate) {
-        if (validator != null) {
-            var constraintViolations = validator.validate(objectToValidate);
+    public void validateAndThrowIfErrorsExist(Object objectToValidate) {
+        if (this.validator != null) {
+            var constraintViolations = this.validator.validate(objectToValidate);
+
             if (!constraintViolations.isEmpty()) {
                 throw new ResourceConstraintViolationException(createResourceConstraintViolationMessage(constraintViolations));
             }
