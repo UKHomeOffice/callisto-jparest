@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 
 import org.springframework.util.StringUtils;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
@@ -16,6 +17,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 /**
@@ -29,6 +31,7 @@ import static java.util.Collections.emptyList;
 public class EntityUtils<T> {
 
     private static final Logger LOGGER = Logger.getLogger(EntityUtils.class.getName());
+    public static final String MORE_THAN_ONE_ID_FIELD = "'%s' entity should not have more than one @Id field";
 
     @Getter
     private Class<T> entityType;
@@ -51,20 +54,22 @@ public class EntityUtils<T> {
                                      // touching the database
     public EntityUtils(@NonNull Class<T> entityType, @NonNull EntityManager entityManager) {
 
+        this.entityType = entityType;
+
+        EntityType<T> entity = entityManager.getMetamodel().entity(entityType);
+        if(entity.hasSingleIdAttribute()){
+            this.idField = (Field) entity.getDeclaredId((Class<?>) entity.getIdType().getJavaType()).getJavaMember();
+            this.idField.setAccessible(true);
+            this.idFieldType = idField.getType();
+            this.idFieldName = idField.getName();
+        } else {
+            throw new ResourceException(format(MORE_THAN_ONE_ID_FIELD, entity.getName()));
+        }
+
         Set<String> tmpRelatedResources = new HashSet<>();
 
-        // Iterate the declared fields to find the field annotated with Id
-        // and to find the fields markerd ManyToMany
-        String tmpIdFieldName = null;
-        Class<?> tmpIdFieldType = null;
-        Field tmpIdField = null;
+        // Iterate the declared fields to find the fields marked ManyToMany
         for (Field field : entityType.getDeclaredFields()) {
-            if (field.isAnnotationPresent(Id.class)) {
-                tmpIdField = field;
-                tmpIdField.setAccessible(true);
-                tmpIdFieldName = field.getName();
-                tmpIdFieldType = field.getType();
-            }
 
             // Only record relationships that aren't mapped by another class
             if (field.isAnnotationPresent(ManyToMany.class)) {
@@ -85,12 +90,8 @@ public class EntityUtils<T> {
             }
 
         }
-
-        this.entityType = entityType;
         this.relatedResources = tmpRelatedResources;
-        this.idField = tmpIdField;
-        this.idFieldType = tmpIdFieldType;
-        this.idFieldName = tmpIdFieldName;
+
     }
 
     /**
@@ -105,7 +106,7 @@ public class EntityUtils<T> {
     public Collection<Object> getRelatedEntities(@NonNull T entity, @NonNull String relation) {
         var relatedEntity = this.relations.get(relation);
         if (relatedEntity == null) {
-            throw new IllegalArgumentException(String.format("Relation '%s' does not exist", relation));
+            throw new IllegalArgumentException(format("Relation '%s' does not exist", relation));
         }
         try {
             @SuppressWarnings("unchecked")
