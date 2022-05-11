@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.entityutils;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -16,6 +17,9 @@ import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityE;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
+import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -24,8 +28,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -72,6 +75,18 @@ class EntityUtilsTest {
 
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
         assertThat(entityUtils.getRelatedResources()).contains("dummyEntityBSet");
+    }
+
+    @Test
+    void entityUtils_moreThanOneIdField_throwsResourceException(){
+        assertThatExceptionOfType(ResourceException.class)
+                .isThrownBy(() -> new EntityUtils<>(DummyEntityE.class, entityManager));
+    }
+
+    @Test
+    void entityUtils_oneIdField_noExceptionThrows(){
+        assertThatNoException()
+                .isThrownBy(() -> new EntityUtils<>(DummyEntityA.class, entityManager));
     }
 
     // region getRelatedEntities
