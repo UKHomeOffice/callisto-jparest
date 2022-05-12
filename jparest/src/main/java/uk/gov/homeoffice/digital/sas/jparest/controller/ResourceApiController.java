@@ -25,6 +25,7 @@ import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidTenantIdException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.utils.ValidatorUtils;
@@ -85,7 +86,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
     }
 
-    public ApiResponse<T> list(SpelExpression filter, Pageable pageable,  @RequestParam UUID tenantId) {
+    public ApiResponse<T> list(SpelExpression filter, Pageable pageable, @RequestParam UUID tenantId) {
 
         var builder = this.entityManager.getCriteriaBuilder();
         CriteriaQuery<T> query = builder.createQuery(this.entityUtils.getEntityType());
@@ -96,7 +97,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var finalPredicate = filter != null
                 ? builder.and(tenantPredicate, filterPredicate) : tenantPredicate;
         query.where(finalPredicate);
-        validateTenantId(tenantId);
 
         EntityGraph<T> entityGraph = this.entityManager.createEntityGraph(this.entityUtils.getEntityType());
 
@@ -113,6 +113,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
     }
 
     private T getById(U id, String include, UUID tenantId) {
+
         Serializable identifier = getIdentifier(id);
 
         var builder = this.entityManager.getCriteriaBuilder();
@@ -124,7 +125,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var filterPredicate = builder.equal(root, identifier);
         var finalPredicate = builder.and(tenantPredicate, filterPredicate);
         query.where(finalPredicate);
-        validateTenantId(tenantId);
 
         EntityGraph<T> entityGraph = this.entityManager.createEntityGraph(this.entityUtils.getEntityType());
         if (StringUtils.hasText(include)) {
@@ -146,12 +146,12 @@ public class ResourceApiController<T extends BaseEntity, U> {
         return new ApiResponse<>(Arrays.asList(result));
     }
 
+
+
     public ApiResponse<T> create(@RequestBody String body, @RequestParam UUID tenantId) throws JsonProcessingException {
 
         T r2 = readPayload(body);
-
-        r2.setTenant_id(tenantId);
-        validateTenantId(tenantId);
+        validateTenantIdPayloadMatch(tenantId, r2);
 
         this.validatorUtils.validateAndThrowIfErrorsExist(r2);
 
@@ -197,7 +197,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
         var identifier = getIdentifier(id);
         T r2 = readPayload(body);
-
+        validateTenantIdPayloadMatch(tenantId, r2);
 
         var payloadEntityId = this.persistenceUnitUtil.getIdentifier(r2);
         if (payloadEntityId != null && identifier != getIdentifier(payloadEntityId)) {
@@ -214,7 +214,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
         validateResourceTenantId(tenantId, orig, id);
 
-        BeanUtils.copyProperties(r2, orig, this.entityUtils.getIdFieldName(), ENTITY_TENANT_ID_FIELD_NAME);
+        BeanUtils.copyProperties(r2, orig, this.entityUtils.getIdFieldName());
 
         try {
             repository.saveAndFlush(orig);
@@ -250,7 +250,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var relatedTenantPredicate = builder.equal(relatedJoin.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
         var finalPredicate = builder.and(parentTenantPredicate, relatedTenantPredicate, predicate);
         select.where(finalPredicate);
-        validateTenantId(tenantId);
 
         List<Order> orderBy = toOrders(pageable.getSort(), relatedJoin, builder);
         select.orderBy(orderBy);
@@ -380,14 +379,23 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
     private T getResourceById(U id, String relation, UUID tenantId) {
         var orig = getById(id, relation, tenantId);
-        if (orig == null)
-            throw new ResourceNotFoundException(id);
+        if (orig == null) throw new ResourceNotFoundException(id);
         return orig;
     }
 
-    private void validateResourceTenantId(UUID tenantId, T resource, U resourceId) {
-        if (!tenantId.equals(resource.getTenant_id()))
-            throw new InvalidTenantIdException("The provided tenant id does not match the tenant id of the resource with id: " + resourceId);
+    private void validateResourceTenantId(UUID requestTenantId, T resource, U resourceId) {
+        if (!requestTenantId.equals(resource.getTenant_id()))
+            throw new ResourceNotFoundException(resourceId);
+    }
+
+    private void validateTenantIdPayloadMatch(UUID requestTenantId, T payload) {
+
+        if (payload.getTenant_id() != null && !requestTenantId.equals(payload.getTenant_id())) {
+            throw new TenantIdMismatchException("The supplied payload tenant id value must match the url tenant id query parameter value");
+
+        } else if (payload.getTenant_id() == null) {
+            payload.setTenant_id(requestTenantId);
+        }
     }
 
 

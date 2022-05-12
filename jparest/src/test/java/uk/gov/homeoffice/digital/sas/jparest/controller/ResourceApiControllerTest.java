@@ -23,10 +23,7 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidTenantIdException;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.*;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import javax.persistence.EntityManager;
@@ -118,12 +115,12 @@ class ResourceApiControllerTest {
     }
 
     @Test
-    void list_requestTenantIdDoesNotMatchResourceTenantIds_invalidTenantIdExceptionThrown() {
+    void list_requestTenantIdDoesNotMatchResourceTenantIds_noResourcesReturned() {
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
-        assertThatExceptionOfType(InvalidTenantIdException.class).isThrownBy(() ->
-                controller.list(null, Pageable.ofSize(100), INVALID_TENANT_ID));
+        var response = controller.list(null, Pageable.ofSize(100), INVALID_TENANT_ID);
+        assertThat(response.getItems().toArray(new DummyEntityA[0])).isEmpty();
     }
 
     // endregion
@@ -171,10 +168,10 @@ class ResourceApiControllerTest {
     }
 
     @Test
-    void get_requestTenantIdDoesNotMatchResourceTenantId_invalidTenantIdExceptionThrown() {
+    void get_requestTenantIdDoesNotMatchResourceTenantId_resourceNotFoundExceptionThrown() {
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        assertThatExceptionOfType(InvalidTenantIdException.class).isThrownBy(() -> controller.get(2, INVALID_TENANT_ID));
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.get(2, INVALID_TENANT_ID));
     }
 
     // endregion
@@ -232,9 +229,10 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void create_requestTenantIdIsValid_resourceIsCreatedWithTenantId() throws JsonProcessingException {
+    void create_requestTenantIdMatchesPayloadTenantId_resourceIsCreatedWithTenantId() throws JsonProcessingException {
         String payload = "{\n" +
-                "            \"id\": -1\n" +
+                "            \"id\": -1,\n" +
+                "            \"tenant_id\": \"" + TENANT_ID + "\"" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
@@ -246,13 +244,29 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void create_requestTenantIdIsInvalid_invalidTenantIdExceptionThrown() {
+    void create_requestTenantIdDoesNotMatchPayloadTenantId_tenantIdMismatchExceptionThrown() {
         String payload = "{\n" +
-                "            \"id\": -1\n" +
+                "            \"id\": -1,\n" +
+                "            \"tenant_id\": \"" + TENANT_ID + "\"" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        assertThatExceptionOfType(InvalidTenantIdException.class).isThrownBy(() -> controller.create(payload, INVALID_TENANT_ID));
+        assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.create(payload, INVALID_TENANT_ID));
+    }
+
+    @Test
+    @Transactional
+    void create_requestTenantIdIsPresent_payloadTenantIdIsNotPresent_tenantIdIsSavedWithResource() throws JsonProcessingException {
+        String payload = """
+                {
+                    "id": -1
+                }""";
+
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        var apiResponse = controller.create(payload, TENANT_ID);
+
+        assertThat(apiResponse.getItems()).hasSize(1);
+        assertThat(apiResponse.getItems().get(0).getTenant_id()).isEqualTo(TENANT_ID);
     }
 
     // endregion
@@ -382,7 +396,7 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void update_requestTenantIdMatchesResourceTenantId_payloadContainsInvalidTenantId_existingResourceTenantIdRemainsUnchanged() {
+    void update_requestTenantIdDoesNotMatchResourceTenantId_resourceNotFoundExceptionThrown() {
 
         String payload = "{" +
                 "            \"id\": 100," +
@@ -392,7 +406,6 @@ class ResourceApiControllerTest {
 
         String updatedPayload = "{" +
                 "            \"id\": 100," +
-                "            \"tenant_id\": \"" + INVALID_TENANT_ID + "\"," +
                 "            \"description\": \"Updated Dummy Entity C 100\"," +
                 "            \"index\": 2" +
                 "        }";
@@ -401,17 +414,64 @@ class ResourceApiControllerTest {
 
         assertThatNoException().isThrownBy(() -> controller.create(payload, TENANT_ID));
         assertThatNoException().isThrownBy(() -> controller.get(100, TENANT_ID));
-        assertThatNoException().isThrownBy(() -> controller.update(100, updatedPayload, TENANT_ID));
-        var checkResponse = controller.get(100, TENANT_ID);
-        assertThat(checkResponse.getItems().get(0).getTenant_id()).isEqualTo(TENANT_ID);
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.update(100, updatedPayload, INVALID_TENANT_ID));
     }
 
     @Test
     @Transactional
-    void update_requestTenantIdDoesNotMatchResourceTenantId_invalidTenantIdExceptionThrown() {
+    void update_requestTenantIdMatchesPayloadTenantId_noExceptionThrown() {
 
         String payload = "{" +
                 "            \"id\": 100," +
+                "            \"tenant_id\": \"" + TENANT_ID + "\"," +
+                "            \"description\": \"Dummy Entity C 100\"," +
+                "            \"index\": 1" +
+                "        }";
+
+        String updatedPayload = "{" +
+                "            \"id\": 100," +
+                "            \"tenant_id\": \"" + TENANT_ID + "\"," +
+                "            \"description\": \"Updated Dummy Entity C 100\"," +
+                "            \"index\": 2" +
+                "        }";
+
+        var controller = getResourceApiController(DummyEntityC.class, Integer.class);
+
+        assertThatNoException().isThrownBy(() -> controller.create(payload, TENANT_ID));
+        assertThatNoException().isThrownBy(() -> controller.update(100, updatedPayload, TENANT_ID));
+    }
+
+    @Test
+    @Transactional
+    void update_requestTenantIdDoesNotMatchPayloadTenantId_tenantIdMismatchExceptionThrown() {
+
+        String payload = "{" +
+                "            \"id\": 100," +
+                "            \"tenant_id\": \"" + TENANT_ID + "\"," +
+                "            \"description\": \"Dummy Entity C 100\"," +
+                "            \"index\": 1" +
+                "        }";
+
+        String updatedPayload = "{" +
+                "            \"id\": 100," +
+                "            \"tenant_id\": \"" + TENANT_ID + "\"," +
+                "            \"description\": \"Updated Dummy Entity C 100\"," +
+                "            \"index\": 2" +
+                "        }";
+
+        var controller = getResourceApiController(DummyEntityC.class, Integer.class);
+
+        assertThatNoException().isThrownBy(() -> controller.create(payload, TENANT_ID));
+        assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.update(100, updatedPayload, INVALID_TENANT_ID));
+    }
+
+    @Test
+    @Transactional
+    void update_requestTenantIdIsPresentAndPayloadTenantIdIsNotPresent_tenantIdIsSavedWithResource() throws JsonProcessingException {
+
+        String payload = "{" +
+                "            \"id\": 100," +
+                "            \"tenant_id\": \"" + TENANT_ID + "\"," +
                 "            \"description\": \"Dummy Entity C 100\"," +
                 "            \"index\": 1" +
                 "        }";
@@ -425,8 +485,12 @@ class ResourceApiControllerTest {
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
 
         assertThatNoException().isThrownBy(() -> controller.create(payload, TENANT_ID));
-        assertThatNoException().isThrownBy(() -> controller.get(100, TENANT_ID));
-        assertThatExceptionOfType(InvalidTenantIdException.class).isThrownBy(() -> controller.update(100, updatedPayload, INVALID_TENANT_ID));
+        var updateResponse = controller.update(100, updatedPayload, TENANT_ID);
+
+        var dummy = updateResponse.getItems().get(0);
+        assertThat(updateResponse.getItems()).hasSize(1);
+        assertThat(dummy).isNotNull();
+        assertThat(dummy.getTenant_id()).isEqualTo(TENANT_ID);
     }
 
 
@@ -476,7 +540,7 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void delete_requestTenantIdDoesNotMatchResourceTenantId_invalidTenantIdExceptionThrown() {
+    void delete_requestTenantIdDoesNotMatchResourceTenantId_resourceNotFoundExceptionThrown() {
         String payload = "{" +
                 "            \"id\": 100," +
                 "            \"description\": \"Dummy Entity C 100\"," +
@@ -486,7 +550,7 @@ class ResourceApiControllerTest {
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
         assertThatNoException().isThrownBy(() -> controller.create(payload, TENANT_ID));
         assertThatNoException().isThrownBy(() -> controller.get(100, TENANT_ID));
-        assertThatExceptionOfType(InvalidTenantIdException.class).isThrownBy(() -> controller.delete(100, INVALID_TENANT_ID));
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.delete(100, INVALID_TENANT_ID));
     }
 
     // endregion
@@ -547,10 +611,10 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void addRelated_requestTenantIdDoesNotMatchParentTenantId_invalidTenantIdExceptionThrown() {
+    void addRelated_requestTenantIdDoesNotMatchParentTenantId_resourceNotFoundExceptionThrown() {
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        assertThatExceptionOfType(InvalidTenantIdException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> controller.addRelated(10, "dummyEntityBSet", new Object[] { 1 }, INVALID_TENANT_ID));
     }
 
@@ -582,11 +646,13 @@ class ResourceApiControllerTest {
     }
 
     @Test
-    void getRelated_requestTenantIdDoesNotMatchParentAndRelatedResourceTenantIds_invalidTenantIdExceptionThrown() {
+    void getRelated_requestTenantIdDoesNotMatchParentAndRelatedResourceTenantIds_noResourcesReturned() {
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
-        assertThatExceptionOfType(InvalidTenantIdException.class)
-                .isThrownBy(() -> controller.getRelated(1, "dummyEntityBSet", null, Pageable.ofSize(100), INVALID_TENANT_ID));
+        var apiResponse = controller.getRelated(1, "dummyEntityBSet", null, Pageable.ofSize(100), INVALID_TENANT_ID);
+
+        assertThat(apiResponse).isNotNull();
+        assertThat(apiResponse.getItems()).isEmpty();
     }
 
     // endregion
@@ -694,7 +760,7 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void deleteRelated_requestTenantIdDoesNotMatchParentTenantId_invalidTenantIdExceptionThrown() {
+    void deleteRelated_requestTenantIdDoesNotMatchParentTenantId_resourceNotFoundExceptionThrown() {
 
         var controllerA = getResourceApiController(DummyEntityA.class, Integer.class);
 
@@ -704,7 +770,7 @@ class ResourceApiControllerTest {
         assertThat(items).isNotEmpty()
                 .anyMatch((item) -> item.getId().equals(2L));
 
-        assertThatExceptionOfType(InvalidTenantIdException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> controllerA.deleteRelated(2, "dummyEntityBSet", new Object[] { 2 }, INVALID_TENANT_ID));
     }
 

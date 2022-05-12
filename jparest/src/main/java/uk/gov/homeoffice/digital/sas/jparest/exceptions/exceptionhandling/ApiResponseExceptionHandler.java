@@ -23,6 +23,7 @@ public class ApiResponseExceptionHandler {
             InvalidFilterException.class,
             ResourceConstraintViolationException.class,
             UnknownResourcePropertyException.class,
+            TenantIdMismatchException.class,
     })
     public ResponseEntity<ApiErrorResponse> handleException(Exception ex) {
         return createResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
@@ -46,7 +47,7 @@ public class ApiResponseExceptionHandler {
         return createResponseEntity(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
 
-    
+
     private ResponseEntity<ApiErrorResponse> createResponseEntity(String message, HttpStatus httpStatus) {
 
         var apiErrorResponse = new ApiErrorResponse(message);
