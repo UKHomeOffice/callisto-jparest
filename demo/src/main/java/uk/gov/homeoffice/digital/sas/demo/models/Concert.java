@@ -24,10 +24,6 @@ public class Concert extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long concert_id;
 
-    @GeneratedValue
-    @Type(type="uuid-char")
-    private UUID tenant_id;
-
     @NotEmpty
     private String concert_name;
  

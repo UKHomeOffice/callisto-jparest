@@ -30,10 +30,6 @@ public class Artist extends BaseEntity {
     private Long artist_id;
     private Long profile_id;
 
-    @GeneratedValue
-    @Type(type="uuid-char")
-    private UUID tenant_id;
-
     @NotEmpty
     private String performance_name;
 

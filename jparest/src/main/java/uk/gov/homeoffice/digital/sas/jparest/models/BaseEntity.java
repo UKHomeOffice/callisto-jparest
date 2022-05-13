@@ -2,10 +2,11 @@ package uk.gov.homeoffice.digital.sas.jparest.models;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 import org.hibernate.proxy.HibernateProxy;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
 
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -19,6 +20,7 @@ import java.util.logging.Logger;
  * Provides an implementation of equals and hashCode that
  * uses the field of the subclass marked with the {@link Id} annotation.
  */
+@MappedSuperclass
 public abstract class BaseEntity {
 
     private static final Logger LOGGER = Logger.getLogger(BaseEntity.class.getName());
@@ -26,9 +28,10 @@ public abstract class BaseEntity {
 
     @Getter
     @Setter
+    @Type(type="uuid-char")
     private UUID tenant_id;
 
-    private final Field idField = getIdField();
+    private transient final Field idField = getIdField();
 
     /**
      * @return {@link Field} annotated with {@link Id}

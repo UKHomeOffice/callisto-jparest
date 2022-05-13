@@ -31,10 +31,6 @@ public class Profile extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long profile_id;
 
-    @GeneratedValue
-    @Type(type="uuid-char")
-    private UUID tenant_id;
-
     @NotEmpty
     private String preferences;
 
