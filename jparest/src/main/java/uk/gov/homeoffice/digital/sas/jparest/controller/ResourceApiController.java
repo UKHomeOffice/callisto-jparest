@@ -57,7 +57,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
     private final ValidatorUtils validatorUtils = new ValidatorUtils();
 
     private static WebDataBinder binder = WebDataBinderFactory.getWebDataBinder();
-    private static final String ENTITY_TENANT_ID_FIELD_NAME = "tenant_id";
+    private static final String ENTITY_TENANT_ID_FIELD_NAME = "tenantId";
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
 
 
@@ -384,17 +384,17 @@ public class ResourceApiController<T extends BaseEntity, U> {
     }
 
     private void validateResourceTenantId(UUID requestTenantId, T resource, U resourceId) {
-        if (!requestTenantId.equals(resource.getTenant_id()))
+        if (!requestTenantId.equals(resource.getTenantId()))
             throw new ResourceNotFoundException(resourceId);
     }
 
     private void validateTenantIdPayloadMatch(UUID requestTenantId, T payload) {
 
-        if (payload.getTenant_id() != null && !requestTenantId.equals(payload.getTenant_id())) {
+        if (payload.getTenantId() != null && !requestTenantId.equals(payload.getTenantId())) {
             throw new TenantIdMismatchException("The supplied payload tenant id value must match the url tenant id query parameter value");
 
-        } else if (payload.getTenant_id() == null) {
-            payload.setTenant_id(requestTenantId);
+        } else if (payload.getTenantId() == null) {
+            payload.setTenantId(requestTenantId);
         }
     }
 

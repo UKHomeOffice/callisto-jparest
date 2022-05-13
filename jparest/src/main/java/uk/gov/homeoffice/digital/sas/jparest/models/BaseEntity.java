@@ -6,7 +6,9 @@ import org.hibernate.annotations.Type;
 import org.hibernate.proxy.HibernateProxy;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -29,7 +31,7 @@ public abstract class BaseEntity {
     @Getter
     @Setter
     @Type(type="uuid-char")
-    private UUID tenant_id;
+    private UUID tenantId;
 
     private transient final Field idField = getIdField();
 
