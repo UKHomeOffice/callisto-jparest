@@ -33,6 +33,7 @@ CREATE TABLE concert_artists
 CREATE TABLE records
 (
     record_id       SERIAL PRIMARY KEY,
+    tenant_id       varchar(36) NOT NULL,
     artist_id       integer NOT NULL REFERENCES artists (artist_id),
     record_name     varchar(800) NULL
 );
