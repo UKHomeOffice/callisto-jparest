@@ -23,8 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidTenantIdException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
@@ -36,6 +36,7 @@ import javax.persistence.*;
 import javax.persistence.criteria.*;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Spring MVC controller that exposes JPA entities
@@ -272,8 +273,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
                               @RequestParam UUID tenantId) throws IllegalArgumentException {
 
         var orig = getResourceById(id, relation, tenantId);
-
-        validateTenantId(tenantId);
+        validateRelatedResourcesTenantIds(relation, relatedId, tenantId);
 
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
@@ -281,7 +281,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
         Collection<?> relatedEntities = entityUtils.getRelatedEntities(orig, relation);
         Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
 
-        //TODO: same as add related
         var notDeletableRelatedIds = new HashSet<>();
         for (Object object : relatedId) {
             Serializable identitfier = getIdentifier(object, relatedIdType);
@@ -290,7 +289,8 @@ public class ResourceApiController<T extends BaseEntity, U> {
         }
         if (!notDeletableRelatedIds.isEmpty()) {
             Class<?> relatedType = entityUtils.getRelatedType(relation);
-            throw new ResourceNotFoundException(notDeletableRelatedIds, relatedType);
+            throw new ResourceNotFoundException(
+                    ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage(relatedType, notDeletableRelatedIds));
         }
 
         try {
@@ -310,8 +310,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
 
         var orig = getResourceById(id, relation, tenantId);
-
-        validateTenantId(tenantId);
+        validateRelatedResourcesTenantIds(relation, relatedId, tenantId);
 
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
@@ -319,8 +318,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
         Collection<Object> relatedEntities = entityUtils.getRelatedEntities(orig, relation);
         Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
 
-        //TODO: We are not currently checking the tenant ID against the related resources.
-        // We need to be able to validate the request tenantID against the related entity tenantIds
         for (Object object : relatedId) {
             Serializable identifier = getIdentifier(object, relatedIdType);
             Object f = this.entityUtils.getEntityReference(relation, identifier);
@@ -388,6 +385,20 @@ public class ResourceApiController<T extends BaseEntity, U> {
             throw new ResourceNotFoundException(resourceId);
     }
 
+    private void validateRelatedResourcesTenantIds(String relation, Object[] relatedIds, UUID tenantId) {
+
+        var builder = this.entityManager.getCriteriaBuilder();
+        var query = builder.createQuery(Long.class);
+        var relatedRoot = query.from(this.entityUtils.getRelatedType(relation));
+        var relatedIdPredicate = relatedRoot.get(this.entityUtils.getRelatedIdField(relation).getName()).in(relatedIds);
+        var relatedTenantPredicate = builder.equal(relatedRoot.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
+        var relatedSelect = query.select(builder.count(relatedRoot)).where(builder.and(relatedIdPredicate, relatedTenantPredicate));
+        var tenantIdMatchesRelatedResources = this.entityManager.createQuery(relatedSelect).getSingleResult() == relatedIds.length;
+
+        if (!tenantIdMatchesRelatedResources) throw new ResourceNotFoundException(
+                    ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage(Arrays.stream(relatedIds).collect(Collectors.toSet())));
+    }
+
     private void validateTenantIdPayloadMatch(UUID requestTenantId, T payload) {
 
         if (payload.getTenantId() != null && !requestTenantId.equals(payload.getTenantId())) {
@@ -398,24 +409,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
         }
     }
 
-
-
-    //TODO: This will be replaced with reading tenant Ids from DB configuration
-    private Set<UUID> getTenantIds() {
-        return Set.of(
-                UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120002"),
-                UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120002")
-        );
-    }
-
-    // As a temporary solution this is checking the given tenantId against all our distinct tenantIDs
-    // TODO: Needs to compare with the tenantId of the resource we're working on
-    private void validateTenantId(UUID tenantId) {
-
-        if (!getTenantIds().contains(tenantId)) {
-            throw new InvalidTenantIdException("The provided tenant id does not match the tenant id of the resource(s)");
-        }
-    }
 
 
 }

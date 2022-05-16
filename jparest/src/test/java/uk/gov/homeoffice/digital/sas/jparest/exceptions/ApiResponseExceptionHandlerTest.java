@@ -33,7 +33,7 @@ class ApiResponseExceptionHandlerTest {
     @Test
     void handleResourceNotFoundException_notFoundWithErrorDataIsReturned() {
         var apiResponseExceptionHandler = new ApiResponseExceptionHandler();
-        var exception = new ResourceNotFoundException(ERROR_MESSAGE);
+        var exception = new ResourceNotFoundException(1);
         var response = apiResponseExceptionHandler.handleResourceNotFoundException(exception);
         assertResponseData(response, exception.getMessage(), HttpStatus.NOT_FOUND);
     }

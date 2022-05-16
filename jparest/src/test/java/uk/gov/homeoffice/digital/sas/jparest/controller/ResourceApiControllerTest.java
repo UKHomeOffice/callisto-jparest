@@ -55,7 +55,6 @@ class ResourceApiControllerTest {
     private static final UUID TENANT_ID = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120002");
     private static final UUID INVALID_TENANT_ID = UUID.randomUUID();
 
-    private static final String RELATED_RESOURCE_NOT_FOUND_ERROR_FORMAT = "No related %s resources removed as the following resources could not be found. Ids:[%s]";
 
     // region list
 
@@ -597,12 +596,12 @@ class ResourceApiControllerTest {
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() ->  controller.addRelated(1, "dummyEntityBSet", new Object[] { -1 }, TENANT_ID))
-                .withMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, 1));
+                .withMessageContainingAll("related resources", "1");
     }
 
     @Test
     @Transactional
-    void addRelated_requestTenantIdMatchesParentResourceTenantId_noExceptionThrown() {
+    void addRelated_requestTenantIdMatchesParentAndRelatedResourcesTenantIds_noExceptionThrown() {
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
         assertThatNoException().isThrownBy(
@@ -615,8 +614,30 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> controller.addRelated(10, "dummyEntityBSet", new Object[] { 1 }, INVALID_TENANT_ID));
+                .isThrownBy(() -> controller.addRelated(10, "dummyEntityBSet", new Object[] { 1 }, INVALID_TENANT_ID))
+                .withMessageContaining("10");
     }
+
+    @Test
+    @Transactional
+    void addRelated_requestTenantIdMatchesParentAndAllRelatedResourcesTenantIdsDoNotMatch_resourceNotFoundExceptionThrown() {
+
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
+                controller.addRelated(10, "dummyEntityBSet", new Object[] { 11, 12 }, TENANT_ID))
+                .withMessageContainingAll("related resources", "11", "12");
+    }
+
+    @Test
+    @Transactional
+    void addRelated_requestTenantIdMatchesParentAndSomeRelatedResourcesTenantIdsDoNotMatch_resourceNotFoundExceptionThrown() {
+
+        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
+                controller.addRelated(10, "dummyEntityBSet", new Object[] { 3, 11, 12 }, TENANT_ID))
+                .withMessageContainingAll("related resources", "11", "12");
+    }
+
 
     // endregion
 
@@ -715,7 +736,7 @@ class ResourceApiControllerTest {
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { -1 }, TENANT_ID))
-                .withMessage(String.format(RELATED_RESOURCE_NOT_FOUND_ERROR_FORMAT, DummyEntityB.class, -1));
+                .withMessageContainingAll("related resources", "-1");
 
     }
 
@@ -733,18 +754,18 @@ class ResourceApiControllerTest {
         var checkItems = (List<DummyEntityB>) getRelatedResponse.getItems();
 
         assertThat(checkItems)
-                .noneMatch((item) -> item.getId().equals(-1L))
-                .noneMatch((item) -> item.getId().equals(-2L))
+                .noneMatch((item) -> item.getId().equals(3L))
+                .noneMatch((item) -> item.getId().equals(4L))
                 .isNotEmpty().anyMatch((item) -> item.getId().equals(2L));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { -1, -2, 2 }, TENANT_ID))
-                .withMessageContainingAll(String.format(RELATED_RESOURCE_NOT_FOUND_ERROR_FORMAT, DummyEntityB.class, "-1, -2"));
+                .isThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { 3, 4, 2 }, TENANT_ID))
+                .withMessageContainingAll(String.format("No related", "resources removed", DummyEntityB.class, "3, 4"));
     }
 
     @Test
     @Transactional
-    void deleteRelated_requestTenantIdMatchesParentResourceTenantId_noExceptionThrown() {
+    void deleteRelated_requestTenantIdMatchesParentAndRelatedResourcesTenantIds_noExceptionThrown() {
 
         var controllerA = getResourceApiController(DummyEntityA.class, Integer.class);
 
@@ -771,7 +792,36 @@ class ResourceApiControllerTest {
                 .anyMatch((item) -> item.getId().equals(2L));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> controllerA.deleteRelated(2, "dummyEntityBSet", new Object[] { 2 }, INVALID_TENANT_ID));
+                .isThrownBy(() -> controllerA.deleteRelated(2, "dummyEntityBSet", new Object[] { 1 }, INVALID_TENANT_ID))
+                .withMessageContaining("2");
+    }
+
+    @Test
+    @Transactional
+    void deleteRelated_requestTenantIdMatchesParentAndAllRelatedResourcesTenantIdsDoNotMatch_resourceNotFoundExceptionThrown() {
+
+        var controllerA = getResourceApiController(DummyEntityA.class, Integer.class);
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> controllerA.deleteRelated(2, "dummyEntityBSet", new Object[] { 11, 12 }, TENANT_ID))
+                .withMessageContainingAll("related resources", "11", "12");
+    }
+
+    @Test
+    @Transactional
+    void deleteRelated_requestTenantIdMatchesParentAndSomeRelatedResourcesTenantIdsDoNotMatch_resourceNotFoundExceptionThrown() {
+
+        var controllerA = getResourceApiController(DummyEntityA.class, Integer.class);
+
+        var getRelatedResponse = controllerA.getRelated(2, "dummyEntityBSet", null, Pageable.ofSize(100), TENANT_ID);
+        @SuppressWarnings("unchecked")
+        var items = (List<DummyEntityB>) getRelatedResponse.getItems();
+        assertThat(items).isNotEmpty()
+                .anyMatch((item) -> item.getId().equals(2L));
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { 2, 11, 12 }, TENANT_ID))
+                .withMessageContainingAll("related resources", "11", "12");
     }
 
     // endregion
