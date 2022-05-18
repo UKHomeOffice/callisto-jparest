@@ -38,16 +38,6 @@ class ApiResponseExceptionHandlerTest {
         assertResponseData(response, exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-
-    @Test
-    void handleInvalidTenantIdException_forbiddenRequestWithErrorDataIsReturned() {
-
-        var apiResponseExceptionHandler = new ApiResponseExceptionHandler();
-        var exception = new InvalidTenantIdException(ERROR_MESSAGE);
-        var response = apiResponseExceptionHandler.handleInvalidTenantIdException(exception);
-        assertResponseData(response, exception.getMessage(), HttpStatus.FORBIDDEN);
-    }
-
     @Test
     void handlePersistenceException_badRequestWithErrorDataIsReturned() {
 

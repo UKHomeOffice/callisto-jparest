@@ -7,7 +7,7 @@ public final class ResourceNotFoundExceptionMessageUtil {
 
 
     private static final String RESOURCES_NOT_FOUND_ERROR_FORMAT = "Not all related resources could be found for the following Ids:[%s]";
-    private static final String DELETABLE_RELATED_RESOURCES_NOT_FOUND_ERROR_FORMAT = "No related %s resources removed as the following resources could not be found. Ids:[%s]";
+    private static final String DELETABLE_RELATED_RESOURCES_NOT_FOUND_ERROR_FORMAT = "No related %s resources removed as the following related resources could not be found. Ids:[%s]";
 
 
     private ResourceNotFoundExceptionMessageUtil() {}

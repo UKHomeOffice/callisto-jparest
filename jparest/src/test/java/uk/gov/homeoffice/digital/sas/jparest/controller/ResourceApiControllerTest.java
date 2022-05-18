@@ -54,6 +54,12 @@ class ResourceApiControllerTest {
 
     private static final UUID TENANT_ID = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120002");
     private static final UUID INVALID_TENANT_ID = UUID.randomUUID();
+    
+    private static final String ID_FIELD_NAME = "id";
+    private static final String TENANT_ID_FIELD_NAME = "tenantId";
+    private static final String DESCRIPTION_FIELD_NAME = "description";
+    private static final String INDEX_FIELD_NAME = "index";
+    
 
 
     // region list
@@ -181,7 +187,7 @@ class ResourceApiControllerTest {
     @Transactional
     void create_resourceIsValid_resourceIsPersisted() throws JsonProcessingException {
         String payload = "{\n" +
-                "            \"id\": -1\n" +
+                "            \"" + ID_FIELD_NAME + "\": -1\n" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
@@ -230,8 +236,8 @@ class ResourceApiControllerTest {
     @Transactional
     void create_requestTenantIdMatchesPayloadTenantId_resourceIsCreatedWithTenantId() throws JsonProcessingException {
         String payload = "{\n" +
-                "            \"id\": -1,\n" +
-                "            \"tenantId\": \"" + TENANT_ID + "\"" +
+                "            \"" + ID_FIELD_NAME + "\": -1,\n" +
+                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
@@ -245,8 +251,8 @@ class ResourceApiControllerTest {
     @Transactional
     void create_requestTenantIdDoesNotMatchPayloadTenantId_tenantIdMismatchExceptionThrown() {
         String payload = "{\n" +
-                "            \"id\": -1,\n" +
-                "            \"tenantId\": \"" + TENANT_ID + "\"" +
+                "            \"" + ID_FIELD_NAME + "\": -1,\n" +
+                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
@@ -277,15 +283,15 @@ class ResourceApiControllerTest {
     void update_resourceExists_persistsChanges() throws JsonProcessingException {
 
         String payload = "{" +
-                "            \"id\": 100," +
-                "            \"description\": \"Dummy Entity C 100\"," +
-                "            \"index\": 1" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
-                "            \"id\": 100," +
-                "            \"description\": \"Updated Dummy Entity C 100\"," +
-                "            \"index\": 2" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 2" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
@@ -350,7 +356,7 @@ class ResourceApiControllerTest {
     void update_payloadIdDoesNotMatchUrlPathId_throwsError() {
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
 
-        var payload = "{\"id\": 2 }";
+        var payload = "{\"" + ID_FIELD_NAME + "\": 2 }";
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> controller.update(1, payload, TENANT_ID))
                 .withMessageContaining("payload resource id value must match the url id");
@@ -375,15 +381,15 @@ class ResourceApiControllerTest {
     void update_requestTenantIdMatchesResourceTenantId_noExceptionThrown() {
 
         String payload = "{" +
-                "            \"id\": 100," +
-                "            \"description\": \"Dummy Entity C 100\"," +
-                "            \"index\": 1" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
-                "            \"id\": 100," +
-                "            \"description\": \"Updated Dummy Entity C 100\"," +
-                "            \"index\": 2" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 2" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
@@ -398,15 +404,15 @@ class ResourceApiControllerTest {
     void update_requestTenantIdDoesNotMatchResourceTenantId_resourceNotFoundExceptionThrown() {
 
         String payload = "{" +
-                "            \"id\": 100," +
-                "            \"description\": \"Dummy Entity C 100\"," +
-                "            \"index\": 1" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
-                "            \"id\": 100," +
-                "            \"description\": \"Updated Dummy Entity C 100\"," +
-                "            \"index\": 2" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 2" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
@@ -421,17 +427,17 @@ class ResourceApiControllerTest {
     void update_requestTenantIdMatchesPayloadTenantId_noExceptionThrown() {
 
         String payload = "{" +
-                "            \"id\": 100," +
-                "            \"tenantId\": \"" + TENANT_ID + "\"," +
-                "            \"description\": \"Dummy Entity C 100\"," +
-                "            \"index\": 1" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
-                "            \"id\": 100," +
-                "            \"tenantId\": \"" + TENANT_ID + "\"," +
-                "            \"description\": \"Updated Dummy Entity C 100\"," +
-                "            \"index\": 2" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 2" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
@@ -445,17 +451,17 @@ class ResourceApiControllerTest {
     void update_requestTenantIdDoesNotMatchPayloadTenantId_tenantIdMismatchExceptionThrown() {
 
         String payload = "{" +
-                "            \"id\": 100," +
-                "            \"tenantId\": \"" + TENANT_ID + "\"," +
-                "            \"description\": \"Dummy Entity C 100\"," +
-                "            \"index\": 1" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
-                "            \"id\": 100," +
-                "            \"tenantId\": \"" + TENANT_ID + "\"," +
-                "            \"description\": \"Updated Dummy Entity C 100\"," +
-                "            \"index\": 2" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 2" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
@@ -469,16 +475,16 @@ class ResourceApiControllerTest {
     void update_requestTenantIdIsPresentAndPayloadTenantIdIsNotPresent_tenantIdIsSavedWithResource() throws JsonProcessingException {
 
         String payload = "{" +
-                "            \"id\": 100," +
-                "            \"tenantId\": \"" + TENANT_ID + "\"," +
-                "            \"description\": \"Dummy Entity C 100\"," +
-                "            \"index\": 1" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
-                "            \"id\": 100," +
-                "            \"description\": \"Updated Dummy Entity C 100\"," +
-                "            \"index\": 2" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 2" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
@@ -501,9 +507,9 @@ class ResourceApiControllerTest {
     @Transactional
     void delete_resourceExists_resourceIsDeleted() {
         String payload = "{" +
-                "            \"id\": 100," +
-                "            \"description\": \"Dummy Entity C 100\"," +
-                "            \"index\": 1" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
@@ -526,9 +532,9 @@ class ResourceApiControllerTest {
     @Transactional
     void delete_requestTenantIdMatchesResourceTenantId_noExceptionThrown() {
         String payload = "{" +
-                "            \"id\": 100," +
-                "            \"description\": \"Dummy Entity C 100\"," +
-                "            \"index\": 1" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
@@ -541,9 +547,9 @@ class ResourceApiControllerTest {
     @Transactional
     void delete_requestTenantIdDoesNotMatchResourceTenantId_resourceNotFoundExceptionThrown() {
         String payload = "{" +
-                "            \"id\": 100," +
-                "            \"description\": \"Dummy Entity C 100\"," +
-                "            \"index\": 1" +
+                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityC.class, Integer.class);
@@ -858,8 +864,8 @@ class ResourceApiControllerTest {
         return Stream.of(
                 Arguments.of(named("empty string", "")),
                 Arguments.of(named("a string is not valid json", "example string")),
-                Arguments.of(named("array not closed", "{ \"id\": [ \"string\" }")),
-                Arguments.of(named("string not quoted", "{ \"id\": [ unquoted string ] }")),
+                Arguments.of(named("array not closed", "{ \"" + ID_FIELD_NAME + "\": [ \"string\" }")),
+                Arguments.of(named("string not quoted", "{ \"" + ID_FIELD_NAME + "\": [ unquoted string ] }")),
                 Arguments.of(named("back ticks not valid", "{ `id`: [ \"string\" ] }")),
                 Arguments.of(named("no opening and closing braces with invalid property", "\"problem\": [ \"string\" ]"))
         );

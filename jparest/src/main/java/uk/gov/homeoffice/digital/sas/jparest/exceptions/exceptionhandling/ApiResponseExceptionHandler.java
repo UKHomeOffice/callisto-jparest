@@ -42,11 +42,6 @@ public class ApiResponseExceptionHandler {
         return createResponseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(InvalidTenantIdException.class)
-    public ResponseEntity<ApiErrorResponse> handleInvalidTenantIdException(InvalidTenantIdException ex) {
-        return createResponseEntity(ex.getMessage(), HttpStatus.FORBIDDEN);
-    }
-
 
     private ResponseEntity<ApiErrorResponse> createResponseEntity(String message, HttpStatus httpStatus) {
 

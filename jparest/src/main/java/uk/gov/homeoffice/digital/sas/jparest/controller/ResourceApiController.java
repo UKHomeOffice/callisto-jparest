@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
@@ -37,6 +36,9 @@ import javax.persistence.criteria.*;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage;
+import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage;
 
 /**
  * Spring MVC controller that exposes JPA entities
@@ -136,14 +138,13 @@ public class ResourceApiController<T extends BaseEntity, U> {
         TypedQuery<T> typedQuery = this.entityManager.createQuery(select);
         typedQuery.setHint(QUERY_HINT, entityGraph);
         List<T> result2 = typedQuery.getResultList();
-        if (result2.isEmpty()) {
-            return null;
-        }
+
+        if (result2.isEmpty()) throw new ResourceNotFoundException(id);
         return result2.get(0);
     }
 
     public ApiResponse<T> get(@PathVariable U id, @RequestParam UUID tenantId) {
-        var result = getResourceById(id, null, tenantId);
+        var result = getById(id, null, tenantId);
         return new ApiResponse<>(Arrays.asList(result));
     }
 
@@ -272,7 +273,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
                               @PathVariable Object[] relatedId,
                               @RequestParam UUID tenantId) throws IllegalArgumentException {
 
-        var orig = getResourceById(id, relation, tenantId);
+        var orig = getById(id, relation, tenantId);
         validateRelatedResourcesTenantIds(relation, relatedId, tenantId);
 
         var transactionDefinition = new DefaultTransactionDefinition();
@@ -283,14 +284,13 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
         var notDeletableRelatedIds = new HashSet<>();
         for (Object object : relatedId) {
-            Serializable identitfier = getIdentifier(object, relatedIdType);
-            Object f = this.entityUtils.getEntityReference(relation, identitfier);
+            Serializable identifier = getIdentifier(object, relatedIdType);
+            Object f = this.entityUtils.getEntityReference(relation, identifier);
             if (!relatedEntities.remove(f))  notDeletableRelatedIds.add(object);
         }
         if (!notDeletableRelatedIds.isEmpty()) {
             Class<?> relatedType = entityUtils.getRelatedType(relation);
-            throw new ResourceNotFoundException(
-                    ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage(relatedType, notDeletableRelatedIds));
+            throw new ResourceNotFoundException(deletableRelatedResourcesMessage(relatedType, notDeletableRelatedIds));
         }
 
         try {
@@ -309,7 +309,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
                            @RequestParam UUID tenantId) throws IllegalArgumentException {
 
 
-        var orig = getResourceById(id, relation, tenantId);
+        var orig = getById(id, relation, tenantId);
         validateRelatedResourcesTenantIds(relation, relatedId, tenantId);
 
         var transactionDefinition = new DefaultTransactionDefinition();
@@ -374,12 +374,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
         }
     }
 
-    private T getResourceById(U id, String relation, UUID tenantId) {
-        var orig = getById(id, relation, tenantId);
-        if (orig == null) throw new ResourceNotFoundException(id);
-        return orig;
-    }
-
     private void validateResourceTenantId(UUID requestTenantId, T resource, U resourceId) {
         if (!requestTenantId.equals(resource.getTenantId()))
             throw new ResourceNotFoundException(resourceId);
@@ -396,7 +390,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var tenantIdMatchesRelatedResources = this.entityManager.createQuery(relatedSelect).getSingleResult() == relatedIds.length;
 
         if (!tenantIdMatchesRelatedResources) throw new ResourceNotFoundException(
-                    ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage(Arrays.stream(relatedIds).collect(Collectors.toSet())));
+                    relatedResourcesMessage(Arrays.stream(relatedIds).collect(Collectors.toSet())));
     }
 
     private void validateTenantIdPayloadMatch(UUID requestTenantId, T payload) {
