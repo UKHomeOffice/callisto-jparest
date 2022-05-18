@@ -6,7 +6,6 @@ import org.hibernate.annotations.Type;
 import org.hibernate.proxy.HibernateProxy;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
 
-import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;

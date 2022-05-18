@@ -1,16 +1,16 @@
-CREATE TABLE dummyEntityA
+CREATE TABLE dummy_EntityA
 (
     id           SERIAL PRIMARY KEY,
     tenant_id    varchar(36) NOT NULL
 );
 
-CREATE TABLE dummyEntityB
+CREATE TABLE dummy_EntityB
 (
     id           SERIAL PRIMARY KEY,
     tenant_id    varchar(36) NOT NULL
 );
 
-CREATE TABLE dummyEntityC
+CREATE TABLE dummy_EntityC
 (
     id           SERIAL PRIMARY KEY,
     tenant_id    varchar(36) NOT NULL,
@@ -18,14 +18,14 @@ CREATE TABLE dummyEntityC
     index        integer NOT NULL
 );
 
-CREATE TABLE dummyEntityD
+CREATE TABLE dummy_EntityD
 (
     id           SERIAL PRIMARY KEY,
     description  varchar(800) NULL
 );
 
-CREATE TABLE dummyEntityA_dummyEntityB
+CREATE TABLE dummy_EntityA_dummy_EntityB
 (
-    dummyEntityA  integer NOT NULL REFERENCES dummyEntityA (id),
-    dummyEntityB   integer NOT NULL REFERENCES dummyEntityB (id)
+    dummy_EntityA  integer NOT NULL REFERENCES dummy_EntityA (id),
+    dummy_EntityB   integer NOT NULL REFERENCES dummy_EntityB (id)
 );

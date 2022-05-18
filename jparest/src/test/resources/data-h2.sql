@@ -1,4 +1,4 @@
-INSERT INTO dummyEntityA (id, tenant_id) VALUES
+INSERT INTO dummy_EntityA (id, tenant_id) VALUES
     (1, 'b7e813a2-bb28-11ec-8422-0242ac120002'),
     (2, 'b7e813a2-bb28-11ec-8422-0242ac120002'),
     (3, 'b7e813a2-bb28-11ec-8422-0242ac120002'),
@@ -10,7 +10,7 @@ INSERT INTO dummyEntityA (id, tenant_id) VALUES
     (9, 'b7e813a2-bb28-11ec-8422-0242ac120002'),
     (10, 'b7e813a2-bb28-11ec-8422-0242ac120002');
 
-INSERT INTO dummyEntityB (id, tenant_id) VALUES
+INSERT INTO dummy_EntityB (id, tenant_id) VALUES
     (1, 'b7e813a2-bb28-11ec-8422-0242ac120002'),
     (2, 'b7e813a2-bb28-11ec-8422-0242ac120002'),
     (3, 'b7e813a2-bb28-11ec-8422-0242ac120002'),
@@ -22,15 +22,15 @@ INSERT INTO dummyEntityB (id, tenant_id) VALUES
     (9, 'b7e813a2-bb28-11ec-8422-0242ac120002'),
     (10, 'b7e813a2-bb28-11ec-8422-0242ac120002');
 
-INSERT INTO dummyEntityC (id, tenant_id, description, index) VALUES
+INSERT INTO dummy_EntityC (id, tenant_id, description, index) VALUES
     (1, 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Dummy Entity C number 1' , 1),
     (2, 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Dummy Entity C number 2', 2);
 
-INSERT INTO dummyEntityD (id, description) VALUES
+INSERT INTO dummy_EntityD (id, description) VALUES
     (1, 'Dummy Entity D number 1'),
     (2, 'Dummy Entity D number 2');
 
-INSERT INTO dummyEntityA_dummyEntityB (dummyEntityA, dummyEntityB) VALUES
+INSERT INTO dummy_EntityA_dummy_EntityB (dummy_EntityA, dummy_EntityB) VALUES
     (1, 1),
     (1, 2),
     (2, 2);

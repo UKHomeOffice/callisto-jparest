@@ -231,14 +231,14 @@ class ResourceApiControllerTest {
     void create_requestTenantIdMatchesPayloadTenantId_resourceIsCreatedWithTenantId() throws JsonProcessingException {
         String payload = "{\n" +
                 "            \"id\": -1,\n" +
-                "            \"tenant_id\": \"" + TENANT_ID + "\"" +
+                "            \"tenantId\": \"" + TENANT_ID + "\"" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
         var apiResponse = controller.create(payload, TENANT_ID);
 
         assertThat(apiResponse.getItems()).hasSize(1);
-        assertThat(apiResponse.getItems().get(0).getTenant_id()).isEqualTo(TENANT_ID);
+        assertThat(apiResponse.getItems().get(0).getTenantId()).isEqualTo(TENANT_ID);
     }
 
     @Test
@@ -246,7 +246,7 @@ class ResourceApiControllerTest {
     void create_requestTenantIdDoesNotMatchPayloadTenantId_tenantIdMismatchExceptionThrown() {
         String payload = "{\n" +
                 "            \"id\": -1,\n" +
-                "            \"tenant_id\": \"" + TENANT_ID + "\"" +
+                "            \"tenantId\": \"" + TENANT_ID + "\"" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityA.class, Integer.class);
@@ -265,7 +265,7 @@ class ResourceApiControllerTest {
         var apiResponse = controller.create(payload, TENANT_ID);
 
         assertThat(apiResponse.getItems()).hasSize(1);
-        assertThat(apiResponse.getItems().get(0).getTenant_id()).isEqualTo(TENANT_ID);
+        assertThat(apiResponse.getItems().get(0).getTenantId()).isEqualTo(TENANT_ID);
     }
 
     // endregion
@@ -422,14 +422,14 @@ class ResourceApiControllerTest {
 
         String payload = "{" +
                 "            \"id\": 100," +
-                "            \"tenant_id\": \"" + TENANT_ID + "\"," +
+                "            \"tenantId\": \"" + TENANT_ID + "\"," +
                 "            \"description\": \"Dummy Entity C 100\"," +
                 "            \"index\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
                 "            \"id\": 100," +
-                "            \"tenant_id\": \"" + TENANT_ID + "\"," +
+                "            \"tenantId\": \"" + TENANT_ID + "\"," +
                 "            \"description\": \"Updated Dummy Entity C 100\"," +
                 "            \"index\": 2" +
                 "        }";
@@ -446,14 +446,14 @@ class ResourceApiControllerTest {
 
         String payload = "{" +
                 "            \"id\": 100," +
-                "            \"tenant_id\": \"" + TENANT_ID + "\"," +
+                "            \"tenantId\": \"" + TENANT_ID + "\"," +
                 "            \"description\": \"Dummy Entity C 100\"," +
                 "            \"index\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
                 "            \"id\": 100," +
-                "            \"tenant_id\": \"" + TENANT_ID + "\"," +
+                "            \"tenantId\": \"" + TENANT_ID + "\"," +
                 "            \"description\": \"Updated Dummy Entity C 100\"," +
                 "            \"index\": 2" +
                 "        }";
@@ -470,7 +470,7 @@ class ResourceApiControllerTest {
 
         String payload = "{" +
                 "            \"id\": 100," +
-                "            \"tenant_id\": \"" + TENANT_ID + "\"," +
+                "            \"tenantId\": \"" + TENANT_ID + "\"," +
                 "            \"description\": \"Dummy Entity C 100\"," +
                 "            \"index\": 1" +
                 "        }";
@@ -489,7 +489,7 @@ class ResourceApiControllerTest {
         var dummy = updateResponse.getItems().get(0);
         assertThat(updateResponse.getItems()).hasSize(1);
         assertThat(dummy).isNotNull();
-        assertThat(dummy.getTenant_id()).isEqualTo(TENANT_ID);
+        assertThat(dummy.getTenantId()).isEqualTo(TENANT_ID);
     }
 
 

@@ -1,7 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities;
 
 import java.util.Set;
-import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -11,7 +10,6 @@ import javax.persistence.ManyToMany;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
@@ -26,13 +24,8 @@ public class DummyEntityA extends BaseEntity {
 
     @Getter
     @Setter
-    @Type(type="uuid-char")
-    private UUID tenant_id;
-
-    @Getter
-    @Setter
     @ManyToMany
-    @JoinTable(name = "dummyEntityA_dummyEntityB", joinColumns = @JoinColumn(name = "dummyEntityA"), inverseJoinColumns = @JoinColumn(name = "dummyEntityB"))
+    @JoinTable(name = "dummy_EntityA_dummy_EntityB", joinColumns = @JoinColumn(name = "dummy_EntityA"), inverseJoinColumns = @JoinColumn(name = "dummy_EntityB"))
     private Set<DummyEntityB> dummyEntityBSet;
 
 }
