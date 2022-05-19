@@ -42,9 +42,10 @@ class PathItemCreatorTest {
         assertThat(actualGetOperation.getTags()).containsExactly(TAG);
 
         //params
-        assertThat(actualGetOperation.getParameters()).hasSize(2);
-        assertPageableParameterValues(actualGetOperation.getParameters().get(0));
-        assertFilterParameterValues(actualGetOperation.getParameters().get(1));
+        assertThat(actualGetOperation.getParameters()).hasSize(3);
+        assertTenantIdParameterValues(actualGetOperation.getParameters().get(0));
+        assertPageableParameterValues(actualGetOperation.getParameters().get(1));
+        assertFilterParameterValues(actualGetOperation.getParameters().get(2));
 
         //responses
         assertThat(actualGetOperation.getResponses()).containsKey(HTTP_200_KEY);
@@ -80,10 +81,11 @@ class PathItemCreatorTest {
         assertThat(actualGetOperation.getTags()).containsExactly(TAG);
 
         //params
-        assertThat(actualGetOperation.getParameters()).hasSize(3);
+        assertThat(actualGetOperation.getParameters()).hasSize(4);
         assertIdParameterValues(actualGetOperation.getParameters().get(0));
-        assertPageableParameterValues(actualGetOperation.getParameters().get(1));
-        assertFilterParameterValues(actualGetOperation.getParameters().get(2));
+        assertTenantIdParameterValues(actualGetOperation.getParameters().get(1));
+        assertPageableParameterValues(actualGetOperation.getParameters().get(2));
+        assertFilterParameterValues(actualGetOperation.getParameters().get(3));
 
         //responses
         assertThat(actualGetOperation.getResponses()).containsKey(HTTP_200_KEY);
@@ -103,8 +105,9 @@ class PathItemCreatorTest {
         assertThat(actualGetOperation.getTags()).containsExactly(TAG);
 
         //params
-        assertThat(actualGetOperation.getParameters()).hasSize(1);
+        assertThat(actualGetOperation.getParameters()).hasSize(2);
         assertIdParameterValues(actualGetOperation.getParameters().get(0));
+        assertTenantIdParameterValues(actualGetOperation.getParameters().get(1));
 
         //responses
         assertThat(actualGetOperation.getResponses()).containsKey(HTTP_200_KEY);
@@ -128,8 +131,9 @@ class PathItemCreatorTest {
         assertResourceResponse(actualPutOperation.getResponses().get(HTTP_200_KEY));
 
         //params
-        assertThat(actualPutOperation.getParameters()).hasSize(1);
+        assertThat(actualPutOperation.getParameters()).hasSize(2);
         assertIdParameterValues(actualPutOperation.getParameters().get(0));
+        assertTenantIdParameterValues(actualPutOperation.getParameters().get(1));
     }
 
     @Test
@@ -144,8 +148,9 @@ class PathItemCreatorTest {
         assertThat(actualDeleteOperation.getTags()).containsExactly(TAG);
 
         //params
-        assertThat(actualDeleteOperation.getParameters()).hasSize(1);
+        assertThat(actualDeleteOperation.getParameters()).hasSize(2);
         assertIdParameterValues(actualDeleteOperation.getParameters().get(0));
+        assertTenantIdParameterValues(actualDeleteOperation.getParameters().get(1));
 
         //responses
         assertThat(actualDeleteOperation.getResponses()).containsKey(HTTP_200_KEY);
@@ -164,9 +169,10 @@ class PathItemCreatorTest {
         assertThat(actualDeleteOperation.getTags()).containsExactly(TAG);
 
         //params
-        assertThat(actualDeleteOperation.getParameters()).hasSize(2);
+        assertThat(actualDeleteOperation.getParameters()).hasSize(3);
         assertIdParameterValues(actualDeleteOperation.getParameters().get(0));
         assertArrayParameterValues(actualDeleteOperation.getParameters().get(1));
+        assertTenantIdParameterValues(actualDeleteOperation.getParameters().get(2));
 
         //responses
         assertThat(actualDeleteOperation.getResponses()).containsKey(HTTP_200_KEY);
@@ -185,9 +191,10 @@ class PathItemCreatorTest {
         assertThat(actualPutOperation.getTags()).containsExactly(TAG);
 
         //params
-        assertThat(actualPutOperation.getParameters()).hasSize(2);
+        assertThat(actualPutOperation.getParameters()).hasSize(3);
         assertIdParameterValues(actualPutOperation.getParameters().get(0));
-        assertArrayParameterValues(actualPutOperation.getParameters().get(1));
+        assertTenantIdParameterValues(actualPutOperation.getParameters().get(1));
+        assertArrayParameterValues(actualPutOperation.getParameters().get(2));
 
         //responses
         assertThat(actualPutOperation.getResponses()).containsKey(HTTP_200_KEY);
@@ -223,6 +230,10 @@ class PathItemCreatorTest {
 
     private void assertIdParameterValues(Parameter actualParam) {
         assertParameterValues(actualParam, true, "path", ID_PARAM_NAME);
+    }
+
+    private void assertTenantIdParameterValues(Parameter actualParam) {
+        assertParameterValues(actualParam, true, "query", "tenantId");
     }
 
     private void assertArrayParameterValues(Parameter actualParam) {

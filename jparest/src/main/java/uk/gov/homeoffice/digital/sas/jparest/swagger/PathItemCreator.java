@@ -26,9 +26,12 @@ import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.RELATED
 public class PathItemCreator {
 
     private static final ApiResponse EMPTY_RESPONSE = emptyResponse();
-    private static final Parameter PAGEABLE_PARAMETER = pageableParameter();
+    public static final String PAGEABLE = "pageable";
+    private static final Parameter PAGEABLE_PARAMETER = getQueryParameter(PAGEABLE, Pageable.class);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PathItemCreator.class);
+    private static final String TENANT_ID = "tenantId";
+    public static final String PATH = "path";
 
 
     /**
@@ -49,6 +52,7 @@ public class PathItemCreator {
 
 
         var get = new Operation();
+        get.addParametersItem(getQueryParameter(TENANT_ID, String.class));
         get.addParametersItem(PAGEABLE_PARAMETER);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
@@ -57,6 +61,7 @@ public class PathItemCreator {
 
         var post = new Operation();
         post.setResponses(responses);
+        post.addParametersItem(getQueryParameter(TENANT_ID, String.class));
         post.addTagsItem(tag);
         var requestBody = getRequestBody(clazz);
         post.setRequestBody(requestBody);
@@ -87,19 +92,22 @@ public class PathItemCreator {
         get.addTagsItem(tag);
         pi.get(get);
 
-        var idParameter = getParameter(idClazz, "path", ID_PARAM_NAME);
+        var idParameter = getParameter(idClazz, PATH, ID_PARAM_NAME);
         get.addParametersItem(idParameter);
+        get.addParametersItem(getQueryParameter(TENANT_ID, String.class));
         var put = new Operation();
         put.addParametersItem(idParameter);
         var requestBody = getRequestBody(clazz);
         put.setRequestBody(requestBody);
         put.setResponses(responses);
+        put.addParametersItem(getQueryParameter(TENANT_ID, String.class));
         put.addTagsItem(tag);
         pi.put(put);
         var delete = new Operation();
 
         ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
         delete.addParametersItem(idParameter);
+        delete.addParametersItem(getQueryParameter(TENANT_ID, String.class));
         delete.setResponses(deleteResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
@@ -123,10 +131,11 @@ public class PathItemCreator {
         var pi = new PathItem();
         ApiResponse response = getResourceResponse(clazz);
         ApiResponses responses = new ApiResponses().addApiResponse("200", response);
-        var idParameter = getParameter(idClazz, "path", ID_PARAM_NAME);
+        var idParameter = getParameter(idClazz, PATH, ID_PARAM_NAME);
 
         var get = new Operation();
         get.addParametersItem(idParameter);
+        get.addParametersItem(getQueryParameter(TENANT_ID, String.class));
         get.addParametersItem(PAGEABLE_PARAMETER);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
@@ -152,17 +161,19 @@ public class PathItemCreator {
 
         ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
 
-        var idParameter = getParameter(idClazz, "path", ID_PARAM_NAME);
-        var relatedIdParameter = getArrayParameter(relatedIdClazz, "path", RELATED_PARAM_NAME);
+        var idParameter = getParameter(idClazz, PATH, ID_PARAM_NAME);
+        var relatedIdParameter = getArrayParameter(relatedIdClazz, PATH, RELATED_PARAM_NAME);
         var delete = new Operation();
         delete.addParametersItem(idParameter);
         delete.addParametersItem(relatedIdParameter);
+        delete.addParametersItem(getQueryParameter(TENANT_ID, String.class));
         delete.setResponses(defaultResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
 
         var put = new Operation();
         put.addParametersItem(idParameter);
+        put.addParametersItem(getQueryParameter(TENANT_ID, String.class));
         put.addParametersItem(relatedIdParameter);
         put.setResponses(defaultResponses);
         put.addTagsItem(tag);
@@ -306,20 +317,19 @@ public class PathItemCreator {
     }
 
     /**
-     * @return Parameter representing pageable class
+     * @return Parameter representing the passed in paramType class
      */
-    private static Parameter pageableParameter() {
+    private static Parameter getQueryParameter(String paramName, Class<?> paramType) {
         var parameter = new Parameter();
         var newComponents = new Components();
 
-        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(newComponents, Pageable.class, null, null);
+        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(newComponents, paramType, null, null);
 
         parameter.schema(schema);
         parameter.required(true);
         parameter.setIn("query");
-        parameter.name("pageable");
+        parameter.name(paramName);
         return parameter;
-
     }
 
     /**

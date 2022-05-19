@@ -139,7 +139,8 @@ class ResourceOpenApiCustomiserTest {
                 var post = pathItem.getPost();
                 assertThat(post).isNotNull();
                 var parameters = post.getParameters();
-                assertThat(parameters).isNull();
+                assertThat(parameters).isNotNull();
+                validateTenantIdParameter(parameters);
                 validateRequestBody(post, resource);
                 validateApiResponse(post, resource);
 
@@ -237,6 +238,15 @@ class ResourceOpenApiCustomiserTest {
                                 .containsExactly(
                                                 "path",
                                                 idSchema);
+        }
+
+        private void validateTenantIdParameter(List<Parameter> parameters) {
+                assertThat(parameters).filteredOn(p -> p.getName().equals("tenantId")).first().extracting(
+                                p -> p.getIn(),
+                                p -> p.getSchema().getType())
+                        .containsExactly(
+                                "query",
+                                "string");
         }
 
         private void validatePageableParameter(List<Parameter> parameters) {
