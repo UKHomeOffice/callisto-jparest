@@ -23,10 +23,6 @@ import java.util.Date;
 @AllArgsConstructor
 public class Profile extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long profile_id;
-
     @NotEmpty
     private String preferences;
 

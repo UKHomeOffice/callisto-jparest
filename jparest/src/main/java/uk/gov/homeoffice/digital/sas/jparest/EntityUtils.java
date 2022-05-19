@@ -77,7 +77,7 @@ public class EntityUtils<T> {
 
                     EntityType<?> ret = entityManager.getMetamodel().entity((Class<?>) relatedEntityType);
                     Class<?> relatedIdType = ret.getIdType().getJavaType();
-                    var relatedIdField = (Field) ret.getDeclaredId((Class<?>) relatedIdType).getJavaMember();
+                    var relatedIdField = (Field) ret.getId((Class<?>) relatedIdType).getJavaMember();
                     field.setAccessible(true);
                     relations.putIfAbsent(field.getName(), new RelatedEntity(field, (Class<?>) relatedEntityType, relatedIdType, relatedIdField));
                     tmpRelatedResources.add(field.getName());

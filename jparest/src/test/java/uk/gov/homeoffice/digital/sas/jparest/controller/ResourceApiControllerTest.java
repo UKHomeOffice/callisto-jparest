@@ -44,6 +44,14 @@ import static org.junit.jupiter.api.Named.named;
 @ContextConfiguration(locations = "/test-context.xml")
 class ResourceApiControllerTest {
 
+    public static final String sampleId100S ="\"b7e813a2-bb28-11ec-8422-0242ac130001\"";
+    public static final UUID sampleId100 = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac130001");
+    // public static final String sampleId100S ="\"b7e813a2-bb28-11ec-8422-0242ac130001\"";
+
+    public static final UUID sampleId2 = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120002");
+    public static final UUID sampleIdm1 = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120011");
+    public static final UUID sampleTenantId = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120001");
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -67,7 +75,7 @@ class ResourceApiControllerTest {
     @Test
     void list_withoutFilter_returnsAllEntities() {
 
-        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        var controller = getResourceApiController(DummyEntityA.class, UUID.class);
         var response = controller.list(null, Pageable.ofSize(100), TENANT_ID);
 
         assertThat(response).isNotNull();
@@ -283,13 +291,13 @@ class ResourceApiControllerTest {
     void update_resourceExists_persistsChanges() throws JsonProcessingException {
 
         String payload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": \""+ sampleId100 +"\"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": \""+ sampleId100 +"\"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 2" +
                 "        }";
@@ -381,36 +389,36 @@ class ResourceApiControllerTest {
     void update_requestTenantIdMatchesResourceTenantId_noExceptionThrown() {
 
         String payload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100S +"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100S +"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 2" +
                 "        }";
 
-        var controller = getResourceApiController(DummyEntityC.class, Integer.class);
-
+        var controller = getResourceApiController(DummyEntityC.class, UUID.class);
         assertThatNoException().isThrownBy(() -> controller.create(payload, TENANT_ID));
-        assertThatNoException().isThrownBy(() -> controller.get(100, TENANT_ID));
-        assertThatNoException().isThrownBy(() -> controller.update(100, updatedPayload, TENANT_ID));
+        assertThatNoException().isThrownBy(() -> controller.get(sampleId100, TENANT_ID));
+        assertThatNoException().isThrownBy(() -> controller.update(sampleId100, updatedPayload, TENANT_ID));
     }
+
 
     @Test
     @Transactional
     void update_requestTenantIdDoesNotMatchResourceTenantId_resourceNotFoundExceptionThrown() {
 
         String payload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100S+"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100S+"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 2" +
                 "        }";
@@ -427,14 +435,14 @@ class ResourceApiControllerTest {
     void update_requestTenantIdMatchesPayloadTenantId_noExceptionThrown() {
 
         String payload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100 +"," +
                 "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100 +"," +
                 "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 2" +
@@ -451,14 +459,14 @@ class ResourceApiControllerTest {
     void update_requestTenantIdDoesNotMatchPayloadTenantId_tenantIdMismatchExceptionThrown() {
 
         String payload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100 +"," +
                 "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100 +"," +
                 "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 2" +
@@ -475,14 +483,14 @@ class ResourceApiControllerTest {
     void update_requestTenantIdIsPresentAndPayloadTenantIdIsNotPresent_tenantIdIsSavedWithResource() throws JsonProcessingException {
 
         String payload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100 +"," +
                 "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
         String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100 +"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 2" +
                 "        }";
@@ -507,7 +515,7 @@ class ResourceApiControllerTest {
     @Transactional
     void delete_resourceExists_resourceIsDeleted() {
         String payload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100 +"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
@@ -532,7 +540,7 @@ class ResourceApiControllerTest {
     @Transactional
     void delete_requestTenantIdMatchesResourceTenantId_noExceptionThrown() {
         String payload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100 +"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
@@ -547,7 +555,7 @@ class ResourceApiControllerTest {
     @Transactional
     void delete_requestTenantIdDoesNotMatchResourceTenantId_resourceNotFoundExceptionThrown() {
         String payload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": 100," +
+                "            \"" + ID_FIELD_NAME + "\": "+ sampleId100 +"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";

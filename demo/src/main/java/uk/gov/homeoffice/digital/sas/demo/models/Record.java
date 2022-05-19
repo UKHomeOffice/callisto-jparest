@@ -18,10 +18,6 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor @Getter @Setter
 public class Record extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long record_id;
-
     @NotNull
     private Long artist_id;
 

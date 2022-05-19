@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.models;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.proxy.HibernateProxy;
@@ -13,6 +14,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,69 +31,56 @@ public abstract class BaseEntity {
 
     @Getter
     @Setter
+    @Id
+    @Type(type="uuid-char")
+    private UUID id;
+
+    @Getter
+    @Setter
     @Type(type="uuid-char")
     private UUID tenantId;
 
-    private transient final Field idField = getIdField();
-
     /**
+     * Disabling this more than one Id field validation as it is done now in Entityutils as part of EAHW-1851,
+     * TODO: remove the commented code after the discussion with team
      * @return {@link Field} annotated with {@link Id}
-     */
+
     @NotNull
     // S3011: Need to be able to read id field for equals and hashcode
     // S3958: ToList is not identified as a terminal operator
     // https://community.sonarsource.com/t/s3958-stream-tolist-jdk-16-is-not-recognized-as-terminal-operator/41501
     // Suppresion can be removed when our sonar is updated
-    @SuppressWarnings({"squid:S3011", "squid:S3958"}) 
+    @SuppressWarnings({"squid:S3011", "squid:S3958"})
     private Field getIdField() {
         var entityClass = this instanceof HibernateProxy ? this.getClass().getSuperclass() : this.getClass();
         List<Field> idFields = Arrays
                 .stream(entityClass.getDeclaredFields())
                 .filter(e -> e.isAnnotationPresent(Id.class))
                 .toList();
-        if (idFields.size() != 1) {
+        if (idFields.size() > 0) {
             throw new ResourceException(String.format(ID_ERROR_MESSAGE, BaseEntity.class.getName(),
-                    entityClass.getName(), idFields.size()));
+                    entityClass.getName(), idFields.size()+1));
         }
         idFields.get(0).setAccessible(true);
         return idFields.get(0);
     }
-
-    private Serializable getId() {
-        return getId(this);
-    }
-
-    /*
-     * Calling methods ensure that this method is not called
-     * before checking that the instance specified is a
-     * matching type.
      */
-    private Serializable getId(Object instance) {
-        try {
-            return (Serializable) this.idField.get(instance);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            // This shouldn't happen as we set it to accessible
-            LOGGER.log(Level.SEVERE, "Error accessing ID field {} {}", new Object[] { this.idField.getName(), e });
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BaseEntity)) return false;
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
         }
-        return null;
+        BaseEntity that = (BaseEntity) o;
+        return (null!=getId() && null!=that.getId() && getId().equals(that.getId())) &&
+                (null!=getTenantId() && null!=that.getTenantId() && getTenantId().equals(that.getTenantId()));
     }
 
     @Override
     public int hashCode() {
-        Serializable id = getId();
-        if (id != null) {
-            return id.hashCode();
-        }
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null || this.getClass() != obj.getClass()) {
-            return false;
-        }
-        var thisId = getId();
-        var thatId = getId(obj);
-        return thisId != null && thatId != null && thisId == thatId;
+        return Objects.hash(getId(), getTenantId());
     }
 }

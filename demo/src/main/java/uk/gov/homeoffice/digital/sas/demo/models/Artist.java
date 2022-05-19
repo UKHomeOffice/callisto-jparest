@@ -23,9 +23,6 @@ import java.util.Set;
 @NoArgsConstructor @Getter @Setter
 public class Artist extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long artist_id;
     private Long profile_id;
 
     @NotEmpty

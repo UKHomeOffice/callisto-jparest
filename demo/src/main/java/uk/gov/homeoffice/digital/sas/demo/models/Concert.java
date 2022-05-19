@@ -18,10 +18,6 @@ import java.util.Set;
 @NoArgsConstructor @Getter @Setter
 public class Concert extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long concert_id;
-
     @NotEmpty
     private String concert_name;
  

@@ -125,7 +125,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
 
         var tenantPredicate = builder.equal(root.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
-        var filterPredicate = builder.equal(root, identifier);
+        var filterPredicate = builder.equal(root.get("id"), identifier);
         var finalPredicate = builder.and(tenantPredicate, filterPredicate);
         query.where(finalPredicate);
 
@@ -202,7 +202,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         validateTenantIdPayloadMatch(tenantId, r2);
 
         var payloadEntityId = this.persistenceUnitUtil.getIdentifier(r2);
-        if (payloadEntityId != null && identifier != getIdentifier(payloadEntityId)) {
+        if (payloadEntityId != null && !identifier.equals(getIdentifier(payloadEntityId))) {
             throw new IllegalArgumentException("The supplied payload resource id value must match the url id path parameter value");
         }
 
