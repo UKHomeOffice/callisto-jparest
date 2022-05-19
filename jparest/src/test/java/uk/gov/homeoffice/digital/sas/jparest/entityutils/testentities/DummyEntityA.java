@@ -23,4 +23,7 @@ public class DummyEntityA extends BaseEntity {
     @JoinTable(name = "dummy_EntityA_dummy_EntityB", joinColumns = @JoinColumn(name = "dummy_EntityA"), inverseJoinColumns = @JoinColumn(name = "dummy_EntityB"))
     private Set<DummyEntityB> dummyEntityBSet;
 
+
+    private Long id2;
+
 }
