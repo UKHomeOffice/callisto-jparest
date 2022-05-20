@@ -8,9 +8,10 @@ import lombok.Setter;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @Resource(path = "records")
 @Entity(name = "records")
@@ -18,14 +19,11 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor @Getter @Setter
 public class Record extends BaseEntity {
 
-    @NotNull
-    private Long artist_id;
-
     @NotEmpty
     private String record_name;
 
     @ManyToOne
-    @JoinColumn(name="artist_id", nullable=false, insertable=false, updatable=false)
+    @JoinColumn(name="artist_id", nullable=false, updatable=false)
     @JsonIgnore
     private Artist artist;
 }

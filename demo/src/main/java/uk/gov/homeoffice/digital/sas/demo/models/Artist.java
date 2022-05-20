@@ -23,13 +23,11 @@ import java.util.Set;
 @NoArgsConstructor @Getter @Setter
 public class Artist extends BaseEntity {
 
-    private Long profile_id;
-
     @NotEmpty
     private String performance_name;
 
     @OneToOne(optional=false)
-    @JoinColumn(name="profile_id", unique=true, nullable=false, insertable=false, updatable=false)
+    @JoinColumn(name="profile_id", unique=true, nullable=false, updatable=false)
     @JsonIgnore
     private Profile profile;
 
