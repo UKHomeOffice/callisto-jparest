@@ -55,18 +55,9 @@ public class EntityUtils<T> {
 
         // Iterate the declared fields to find the field annotated with Id
         // and to find the fields markerd ManyToMany
-        String tmpIdFieldName = null;
-        Class<?> tmpIdFieldType = null;
-        Field tmpIdField = null;
-        for (Field field : entityType.getSuperclass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(Id.class)) {
-                tmpIdField = field;
-                tmpIdField.setAccessible(true);
-                tmpIdFieldName = field.getName();
-                tmpIdFieldType = field.getType();
-            }
-
+        for (Field field : entityType.getDeclaredFields()) {
             // Only record relationships that aren't mapped by another class
+            // TODO need to do the error validation for more number of id field here in entity class
             if (field.isAnnotationPresent(ManyToMany.class)) {
                 ManyToMany m2m = field.getAnnotation(ManyToMany.class);
                 if (!StringUtils.hasText(m2m.mappedBy())) {
@@ -88,9 +79,12 @@ public class EntityUtils<T> {
 
         this.entityType = entityType;
         this.relatedResources = tmpRelatedResources;
-        this.idField = tmpIdField;
-        this.idFieldType = tmpIdFieldType;
-        this.idFieldName = tmpIdFieldName;
+        // TODO need to do the error validation for more number of id field here in BaseEntity class
+        Field idField = Arrays.stream(entityType.getSuperclass().getDeclaredFields()).filter(f -> f.isAnnotationPresent(Id.class)).findAny().get();
+        idField.setAccessible(true);
+        this.idField = idField;
+        this.idFieldType = idField.getType();
+        this.idFieldName = idField.getName();
     }
 
     /**

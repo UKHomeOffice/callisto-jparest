@@ -61,6 +61,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
     private static WebDataBinder binder = WebDataBinderFactory.getWebDataBinder();
     private static final String ENTITY_TENANT_ID_FIELD_NAME = "tenantId";
+    private static final String ENTITY_ID_FIELD_NAME = "id";
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
 
 
@@ -125,7 +126,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
 
         var tenantPredicate = builder.equal(root.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
-        var filterPredicate = builder.equal(root.get("id"), identifier);
+        var filterPredicate = builder.equal(root.get(ENTITY_ID_FIELD_NAME), identifier);
         var finalPredicate = builder.and(tenantPredicate, filterPredicate);
         query.where(finalPredicate);
 
@@ -243,7 +244,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         CriteriaQuery<?> select = query.select(root.join(relation));
         Join<?, ?> relatedJoin = root.getJoins().iterator().next();
 
-        var predicate = builder.equal(root, identifier);
+        var predicate = builder.equal(root.get(ENTITY_ID_FIELD_NAME), identifier);
         var filterPredicate = SpelExpressionToPredicateConverter.convert(filter, builder, relatedJoin);
         if (filterPredicate != null) {
             predicate = builder.and(predicate, filterPredicate);
