@@ -58,7 +58,7 @@ public class EntityUtils<T> {
         String tmpIdFieldName = null;
         Class<?> tmpIdFieldType = null;
         Field tmpIdField = null;
-        for (Field field : entityType.getDeclaredFields()) {
+        for (Field field : entityType.getSuperclass().getDeclaredFields()) {
             if (field.isAnnotationPresent(Id.class)) {
                 tmpIdField = field;
                 tmpIdField.setAccessible(true);

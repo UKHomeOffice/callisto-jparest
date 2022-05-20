@@ -19,6 +19,8 @@ import org.springdoc.core.converters.models.Pageable;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 
+import java.util.UUID;
+
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.ID_PARAM_NAME;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.RELATED_PARAM_NAME;
 
@@ -52,7 +54,7 @@ public class PathItemCreator {
 
 
         var get = new Operation();
-        get.addParametersItem(getQueryParameter(TENANT_ID, String.class));
+        get.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
         get.addParametersItem(PAGEABLE_PARAMETER);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
@@ -61,7 +63,7 @@ public class PathItemCreator {
 
         var post = new Operation();
         post.setResponses(responses);
-        post.addParametersItem(getQueryParameter(TENANT_ID, String.class));
+        post.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
         post.addTagsItem(tag);
         var requestBody = getRequestBody(clazz);
         post.setRequestBody(requestBody);
@@ -94,20 +96,20 @@ public class PathItemCreator {
 
         var idParameter = getParameter(idClazz, PATH, ID_PARAM_NAME);
         get.addParametersItem(idParameter);
-        get.addParametersItem(getQueryParameter(TENANT_ID, String.class));
+        get.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
         var put = new Operation();
         put.addParametersItem(idParameter);
         var requestBody = getRequestBody(clazz);
         put.setRequestBody(requestBody);
         put.setResponses(responses);
-        put.addParametersItem(getQueryParameter(TENANT_ID, String.class));
+        put.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
         put.addTagsItem(tag);
         pi.put(put);
         var delete = new Operation();
 
         ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
         delete.addParametersItem(idParameter);
-        delete.addParametersItem(getQueryParameter(TENANT_ID, String.class));
+        delete.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
         delete.setResponses(deleteResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
@@ -135,7 +137,7 @@ public class PathItemCreator {
 
         var get = new Operation();
         get.addParametersItem(idParameter);
-        get.addParametersItem(getQueryParameter(TENANT_ID, String.class));
+        get.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
         get.addParametersItem(PAGEABLE_PARAMETER);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
@@ -166,14 +168,14 @@ public class PathItemCreator {
         var delete = new Operation();
         delete.addParametersItem(idParameter);
         delete.addParametersItem(relatedIdParameter);
-        delete.addParametersItem(getQueryParameter(TENANT_ID, String.class));
+        delete.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
         delete.setResponses(defaultResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
 
         var put = new Operation();
         put.addParametersItem(idParameter);
-        put.addParametersItem(getQueryParameter(TENANT_ID, String.class));
+        put.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
         put.addParametersItem(relatedIdParameter);
         put.setResponses(defaultResponses);
         put.addTagsItem(tag);
