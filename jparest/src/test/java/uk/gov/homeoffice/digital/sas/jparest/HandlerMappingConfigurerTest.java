@@ -87,9 +87,9 @@ class HandlerMappingConfigurerTest {
         var expectedCalls = List.of(
                 List.of("{GET [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}], produces [application/json]}",
                         "getRelated"),
-                List.of("{DELETE [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedId}], produces [application/json]}",
+                List.of("{DELETE [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedIds}], produces [application/json]}",
                         "deleteRelated"),
-                List.of("{PUT [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedId}], produces [application/json]}",
+                List.of("{PUT [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedIds}], produces [application/json]}",
                         "addRelated"));
         assertThatNoException().isThrownBy(() -> handlerMappingConfigurer.registerUserController());
         verifyExpectedHandlerMappingCalls(requestMappingHandlerMapping, DummyEntityA.class, expectedCalls);
