@@ -1,7 +1,8 @@
 CREATE TABLE dummy_EntityA
 (
     id           varchar(36) NOT NULL PRIMARY KEY,
-    tenant_id    varchar(36) NOT NULL
+    tenant_id    varchar(36) NOT NULL,
+    profile_id   integer
 );
 
 CREATE TABLE dummy_EntityB
@@ -15,7 +16,8 @@ CREATE TABLE dummy_EntityC
     id           varchar(36) NOT NULL PRIMARY KEY,
     tenant_id    varchar(36) NOT NULL,
     description  varchar(800) NULL,
-    index        integer NOT NULL
+    index        integer NOT NULL,
+    profile_id   integer
 );
 
 CREATE TABLE dummy_EntityD

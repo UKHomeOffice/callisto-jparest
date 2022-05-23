@@ -22,6 +22,7 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class EntityUtilsTest {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(EntityUtilsTest.class);
+    public static final UUID sampleId = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac110001");
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -57,7 +59,7 @@ class EntityUtilsTest {
         var entityUtils = new EntityUtils<>(resourceClass, entityManager);
         Field expectedField = null;
         try {
-            expectedField = resourceClass.getDeclaredField(idFieldName);
+            expectedField = resourceClass.getSuperclass().getDeclaredField(idFieldName);
         } catch (NoSuchFieldException e) {
             LOGGER.info("{} field not found on class {}", idFieldName, resourceClass.toString());
         }
@@ -80,7 +82,7 @@ class EntityUtilsTest {
     void getRelatedEntities_relatedEntitiesExist_relatedEntitiesReturned() {
 
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        var findA = entityManager.find(DummyEntityA.class, 1L);
+        var findA = entityManager.find(DummyEntityA.class, sampleId);
         var actualRelatedEntities = entityUtils.getRelatedEntities(findA, "dummyEntityBSet");
         assertThat(actualRelatedEntities).isNotEmpty();
     }
@@ -88,7 +90,7 @@ class EntityUtilsTest {
     @Test
     void getRelatedEntities_relationDoesntExist_throwsIllegalArgumentException() {
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        var findA = entityManager.getReference(DummyEntityA.class, 1L);
+        var findA = entityManager.getReference(DummyEntityA.class, sampleId);
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> entityUtils.getRelatedEntities(findA, "invalidValue"));
     }
 
@@ -107,7 +109,7 @@ class EntityUtilsTest {
     void getEntityReference_relatedEntityExist_relatedEntityReferenceReturned() {
 
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        long relatedEntityReference = 123;
+        UUID relatedEntityReference = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120001");
         var actualReference = entityUtils.getEntityReference("dummyEntityBSet", relatedEntityReference);
         assertThat(actualReference).isInstanceOf(DummyEntityB.class);
         DummyEntityB typedActual = (DummyEntityB)actualReference;
@@ -128,10 +130,9 @@ class EntityUtilsTest {
 
     @Test
     void getEntityReference_entityReferenceReturned() {
-        long expectedEntityId = 1;
         var entityUtils = new EntityUtils<DummyEntityC>(DummyEntityC.class, entityManager);
-        var actualReference = entityUtils.getEntityReference(expectedEntityId);
-        assertThat(actualReference.getId()).isEqualTo(expectedEntityId);
+        var actualReference = entityUtils.getEntityReference(sampleId);
+        assertThat(actualReference.getId()).isEqualTo(sampleId);
 
     }
 

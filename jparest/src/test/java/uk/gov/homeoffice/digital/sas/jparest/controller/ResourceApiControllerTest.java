@@ -594,11 +594,11 @@ class ResourceApiControllerTest {
     @Transactional
     void addRelated_resourceDoesntExist_resourceNotFoundExceptionThrown() {
 
-        var controller = getResourceApiController(DummyEntityA.class, Integer.class);
+        var controller = getResourceApiController(DummyEntityA.class, UUID.class);
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> controller.addRelated(-1, "dummyEntityBSet", new Object[] { 1 }, TENANT_ID))
-                .withMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, -1));
+                .isThrownBy(() -> controller.addRelated(sampleId100, "dummyEntityBSet", new Object[] { sampleId100 }, TENANT_ID))
+                .withMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, sampleId100));
     }
 
     @Test
