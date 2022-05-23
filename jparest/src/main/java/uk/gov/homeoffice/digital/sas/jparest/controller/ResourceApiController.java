@@ -35,6 +35,7 @@ import javax.persistence.*;
 import javax.persistence.criteria.*;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage;
@@ -271,23 +272,25 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
     public void deleteRelated(@PathVariable U id,
                               @PathVariable String relation,
-                              @PathVariable Object[] relatedId,
+                              @PathVariable Object[] relatedIds,
                               @RequestParam UUID tenantId) throws IllegalArgumentException {
 
-        var orig = getById(id, relation, tenantId);
-        validateRelatedResourcesTenantIds(relation, relatedId, tenantId);
+        var originalEntity = getById(id, relation, tenantId);
+        validateRelatedResourcesTenantIds(relation, relatedIds, tenantId);
 
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
-        Collection<?> relatedEntities = entityUtils.getRelatedEntities(orig, relation);
+        var relatedEntities = entityUtils.getRelatedEntities(originalEntity, relation);
+        var relatedEntityIdToEntityMap = relatedEntities.stream().map(entity -> (BaseEntity) entity)
+                .collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
+
         Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
 
         var notDeletableRelatedIds = new HashSet<>();
-        for (Object object : relatedId) {
-            Serializable identifier = getIdentifier(object, relatedIdType);
-            Object f = this.entityUtils.getEntityReference(relation, identifier);
-            if (!relatedEntities.remove(f))  notDeletableRelatedIds.add(object);
+        for (var relatedId: relatedIds) {
+            var entityReference = (BaseEntity) this.entityUtils.getEntityReference(relation, getIdentifier(relatedId, relatedIdType));
+            if (!relatedEntities.remove(relatedEntityIdToEntityMap.get(entityReference.getId()))) notDeletableRelatedIds.add(relatedId);
         }
         if (!notDeletableRelatedIds.isEmpty()) {
             Class<?> relatedType = entityUtils.getRelatedType(relation);
@@ -295,7 +298,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         }
 
         try {
-            repository.saveAndFlush(orig);
+            repository.saveAndFlush(originalEntity);
             transactionManager.commit(transactionStatus);
         } catch (RuntimeException ex) {
             transactionManager.rollback(transactionStatus);
@@ -306,29 +309,29 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
     public void addRelated(@PathVariable U id,
                            @PathVariable String relation,
-                           @PathVariable Object[] relatedId,
+                           @PathVariable Object[] relatedIds,
                            @RequestParam UUID tenantId) throws IllegalArgumentException {
 
 
-        var orig = getById(id, relation, tenantId);
-        validateRelatedResourcesTenantIds(relation, relatedId, tenantId);
+        var originalEntity = getById(id, relation, tenantId);
+        validateRelatedResourcesTenantIds(relation, relatedIds, tenantId);
 
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
-        Collection<Object> relatedEntities = entityUtils.getRelatedEntities(orig, relation);
+        Collection<Object> relatedEntities = entityUtils.getRelatedEntities(originalEntity, relation);
+        var relatedEntityIdToEntityMap = relatedEntities.stream().map(entity -> (BaseEntity) entity)
+                .collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
+
         Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
 
-        for (Object object : relatedId) {
-            Serializable identifier = getIdentifier(object, relatedIdType);
-            Object f = this.entityUtils.getEntityReference(relation, identifier);
-            if (!relatedEntities.contains(f)) {
-                relatedEntities.add(f);
-            }
+        for (var relatedId: relatedIds) {
+            var entityReference = (BaseEntity) this.entityUtils.getEntityReference(relation, getIdentifier(relatedId, relatedIdType));
+            if (!relatedEntityIdToEntityMap.containsKey(entityReference.getId()))  relatedEntities.add(entityReference);
         }
 
         try {
-            repository.saveAndFlush(orig);
+            repository.saveAndFlush(originalEntity);
             transactionManager.commit(transactionStatus);
         } catch (EntityNotFoundException ex){
             transactionManager.rollback(transactionStatus);
@@ -385,7 +388,9 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var builder = this.entityManager.getCriteriaBuilder();
         var query = builder.createQuery(Long.class);
         var relatedRoot = query.from(this.entityUtils.getRelatedType(relation));
-        var relatedIdPredicate = relatedRoot.get(this.entityUtils.getRelatedIdField(relation).getName()).in(relatedIds);
+        var serializedRelatedIds = Arrays.stream(relatedIds)
+                .map(relatedId -> getIdentifier(relatedId, entityUtils.getRelatedIdType(relation))).toList();
+        var relatedIdPredicate = relatedRoot.get(this.entityUtils.getRelatedIdField(relation).getName()).in(serializedRelatedIds);
         var relatedTenantPredicate = builder.equal(relatedRoot.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
         var relatedSelect = query.select(builder.count(relatedRoot)).where(builder.and(relatedIdPredicate, relatedTenantPredicate));
         var tenantIdMatchesRelatedResources = this.entityManager.createQuery(relatedSelect).getSingleResult() == relatedIds.length;

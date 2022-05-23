@@ -44,9 +44,13 @@ import static org.junit.jupiter.api.Named.named;
 @ContextConfiguration(locations = "/test-context.xml")
 class ResourceApiControllerTest {
 
-    public static final String SAMPLE_ID_100_S ="\"b7e813a2-bb28-11ec-8422-0242ac130001\"";
-    // public static final String sampleId100S ="\"b7e813a2-bb28-11ec-8422-0242ac130001\"";
+    @PersistenceContext
+    private EntityManager entityManager;
 
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+    
+    
     public static final UUID NON_EXISTENT_ID = UUID.randomUUID();
     public static final UUID NON_EXISTENT_ID_2 = UUID.randomUUID();
     public static final UUID NEW_RESOURCE_ID = UUID.randomUUID();
@@ -54,22 +58,12 @@ class ResourceApiControllerTest {
     public static final UUID DUMMY_A_ID_1 = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac110001");
     public static final UUID DUMMY_A_ID_2 = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac110002");
     public static final UUID DUMMY_A_ID_10 = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac110010");
-    public static final UUID SAMPLE_IDM_1 = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120011");
-    public static final UUID SAMPLE_TENANT_ID = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120001");
 
     public static final UUID DUMMY_B_ID_2 = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120002");
     public static final UUID DUMMY_B_ID_3 = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120003");
+    public static final UUID DUMMY_B_ID_4 = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120004");
 
     public static final UUID DUMMY_C_ID_1 = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac130001");
-
-
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    @Autowired
-    private PlatformTransactionManager transactionManager;
-
-    private static final String RESOURCE_NOT_FOUND_ERROR_FORMAT = "Resource with id: %s was not found";
 
     private static final UUID TENANT_ID = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120002");
     private static final UUID INVALID_TENANT_ID = UUID.randomUUID();
@@ -78,7 +72,11 @@ class ResourceApiControllerTest {
     private static final String TENANT_ID_FIELD_NAME = "tenantId";
     private static final String DESCRIPTION_FIELD_NAME = "description";
     private static final String INDEX_FIELD_NAME = "index";
+    private static final String PROFILE_ID_FIELD_NAME = "profileId";
+    private static final String DUMMY_B_SET_FIELD_NAME = "dummyEntityBSet";
     
+    private static final String RESOURCE_NOT_FOUND_ERROR_FORMAT = "Resource with id: %s was not found";
+
 
 
     // region list
@@ -176,21 +174,11 @@ class ResourceApiControllerTest {
     @ParameterizedTest
     @MethodSource("invalidIDSource")
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    void get_idCantBeConvertedToExpectedType_throwsTypeMismatchException(Class<?> clazz, Object id) {
-        ResourceApiController controller = getResourceApiController(DummyEntityA.class, clazz);
+    <U> void get_idCantBeConvertedToExpectedType_throwsTypeMismatchException(U clazz, U id) {
+        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
+        var controller = new ResourceApiController<DummyEntityA, U>(DummyEntityA.class, entityManager, transactionManager, entityUtils);
         assertThatExceptionOfType(TypeMismatchException.class).isThrownBy(() -> controller.get(id, TENANT_ID));
     }
-
-
-
-//    @ParameterizedTest //TODO: Make this one work so above can be removed along with getResourceApiController(x,y)
-//    @MethodSource("invalidIDSource")
-//    @SuppressWarnings({ "unchecked", "rawtypes" })
-//    <U> void get_idCantBeConvertedToExpectedType_throwsTypeMismatchException(U clazz, U id) {
-//        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-//        var controller = new ResourceApiController<DummyEntityA, U>(DummyEntityA.class, entityManager, transactionManager, entityUtils);
-//        assertThatExceptionOfType(TypeMismatchException.class).isThrownBy(() -> controller.get(id, TENANT_ID));
-//    }
 
 
     @Test
@@ -596,16 +584,16 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityA.class);
 
-        var getRelatedResponse = controller.getRelated(DUMMY_A_ID_10, "dummyEntityBSet", null, Pageable.ofSize(100), TENANT_ID);
+        var getRelatedResponse = controller.getRelated(DUMMY_A_ID_10, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100), TENANT_ID);
         assertThat(getRelatedResponse.getItems()).isEmpty();
 
         assertThatNoException()
-                .isThrownBy(() -> controller.addRelated(DUMMY_A_ID_10, "dummyEntityBSet", new Object[] {DUMMY_A_ID_1}, TENANT_ID));
+                .isThrownBy(() -> controller.addRelated(DUMMY_A_ID_10, DUMMY_B_SET_FIELD_NAME, new Object[] {DUMMY_B_ID_2}, TENANT_ID));
 
-        getRelatedResponse = controller.getRelated(DUMMY_A_ID_10, "dummyEntityBSet", null, Pageable.ofSize(100), TENANT_ID);
+        getRelatedResponse = controller.getRelated(DUMMY_A_ID_10, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100), TENANT_ID);
         assertThat(getRelatedResponse.getItems()).hasSize(1);
         var resource = (DummyEntityB) getRelatedResponse.getItems().get(0);
-        assertThat(resource.getId()).isEqualTo(DUMMY_A_ID_1);
+        assertThat(resource.getId()).isEqualTo(DUMMY_B_ID_2);
 
     }
 
@@ -616,7 +604,7 @@ class ResourceApiControllerTest {
         var controller = getResourceApiController(DummyEntityA.class);
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> controller.addRelated(NON_EXISTENT_ID, "dummyEntityBSet", new Object[] { DUMMY_A_ID_1 }, TENANT_ID))
+                .isThrownBy(() -> controller.addRelated(NON_EXISTENT_ID, DUMMY_B_SET_FIELD_NAME, new Object[] { DUMMY_B_ID_2 }, TENANT_ID))
                 .withMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, NON_EXISTENT_ID));
     }
 
@@ -628,8 +616,8 @@ class ResourceApiControllerTest {
         assertThatNoException().isThrownBy(() -> controller.get(DUMMY_A_ID_1, TENANT_ID));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() ->  controller.addRelated(DUMMY_A_ID_1, "dummyEntityBSet", new Object[] { NON_EXISTENT_ID }, TENANT_ID))
-                .withMessageContainingAll("related resources", DUMMY_A_ID_1.toString());
+                .isThrownBy(() ->  controller.addRelated(DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, new Object[] { NON_EXISTENT_ID }, TENANT_ID))
+                .withMessageContainingAll("related resources", NON_EXISTENT_ID.toString());
     }
 
     @Test
@@ -638,7 +626,7 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityA.class);
         assertThatNoException().isThrownBy(
-                () -> controller.addRelated(DUMMY_A_ID_10, "dummyEntityBSet", new Object[] { DUMMY_A_ID_1 }, TENANT_ID));
+                () -> controller.addRelated(DUMMY_A_ID_10, DUMMY_B_SET_FIELD_NAME, new Object[] { DUMMY_B_ID_2 }, TENANT_ID));
     }
 
     @Test
@@ -647,7 +635,7 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityA.class);
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> controller.addRelated(DUMMY_A_ID_10, "dummyEntityBSet", new Object[] { DUMMY_A_ID_1 }, INVALID_TENANT_ID))
+                .isThrownBy(() -> controller.addRelated(DUMMY_A_ID_10, DUMMY_B_SET_FIELD_NAME, new Object[] { DUMMY_A_ID_1 }, INVALID_TENANT_ID))
                 .withMessageContaining(DUMMY_A_ID_10.toString());
     }
 
@@ -657,7 +645,7 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityA.class);
         assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
-                controller.addRelated(DUMMY_A_ID_10, "dummyEntityBSet", new Object[] { NON_EXISTENT_ID, NON_EXISTENT_ID_2 }, TENANT_ID))
+                controller.addRelated(DUMMY_A_ID_10, DUMMY_B_SET_FIELD_NAME, new Object[] { NON_EXISTENT_ID, NON_EXISTENT_ID_2 }, TENANT_ID))
                 .withMessageContainingAll("related resources", NON_EXISTENT_ID.toString(), NON_EXISTENT_ID_2.toString());
     }
 
@@ -669,7 +657,7 @@ class ResourceApiControllerTest {
         assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
                 controller.addRelated(
                         DUMMY_A_ID_10,
-                        "dummyEntityBSet",
+                        DUMMY_B_SET_FIELD_NAME,
                         new Object[] { DUMMY_B_ID_3, NON_EXISTENT_ID, NON_EXISTENT_ID_2 }, TENANT_ID))
                 .withMessageContainingAll("related resources", NON_EXISTENT_ID.toString(), NON_EXISTENT_ID_2.toString());
     }
@@ -682,12 +670,13 @@ class ResourceApiControllerTest {
     @ParameterizedTest
     @MethodSource("relatedResourceFilters")
     @SuppressWarnings("unchecked")
-    void getRelated_filterExpressionProvided_returnsFilteredResources(UUID resourceId, SpelExpression expression,
+    void getRelated_filterExpressionProvided_returnsFilteredResources(UUID resourceId,
+                                                                      SpelExpression expression,
                                                                       int expectedItems) {
 
         var controller = getResourceApiController(DummyEntityA.class);
 
-        var apiResponse = controller.getRelated(resourceId, "dummyEntityBSet", expression, Pageable.ofSize(100), TENANT_ID);
+        var apiResponse = controller.getRelated(resourceId, DUMMY_B_SET_FIELD_NAME, expression, Pageable.ofSize(100), TENANT_ID);
 
         assertThat(apiResponse).isNotNull();
         assertThat(apiResponse.getItems()).hasSize(expectedItems);
@@ -699,14 +688,14 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityA.class);
         assertThatNoException().isThrownBy(() ->
-                controller.getRelated(1, "dummyEntityBSet", null, Pageable.ofSize(100), TENANT_ID));
+                controller.getRelated(DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100), TENANT_ID));
     }
 
     @Test
     void getRelated_requestTenantIdDoesNotMatchParentAndRelatedResourceTenantIds_noResourcesReturned() {
 
         var controller = getResourceApiController(DummyEntityA.class);
-        var apiResponse = controller.getRelated(1, "dummyEntityBSet", null, Pageable.ofSize(100), INVALID_TENANT_ID);
+        var apiResponse = controller.getRelated(DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100), INVALID_TENANT_ID);
 
         assertThat(apiResponse).isNotNull();
         assertThat(apiResponse.getItems()).isEmpty();
@@ -722,24 +711,24 @@ class ResourceApiControllerTest {
 
         var controllerA = getResourceApiController(DummyEntityA.class);
 
-        var getRelatedResponse = controllerA.getRelated(2, "dummyEntityBSet", null, Pageable.ofSize(100), TENANT_ID);
+        var getRelatedResponse = controllerA.getRelated(DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100), TENANT_ID);
         @SuppressWarnings("unchecked")
         var items = (List<DummyEntityB>) getRelatedResponse.getItems();
         assertThat(items).isNotEmpty()
-                .anyMatch((item) -> item.getId().equals(2L));
+                .anyMatch((item) -> item.getId().equals(DUMMY_B_ID_2));
 
 
         assertThatNoException().isThrownBy(
-                () -> controllerA.deleteRelated(2, "dummyEntityBSet", new Object[] { 2 }, TENANT_ID));
+                () -> controllerA.deleteRelated(DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, new Object[] { DUMMY_B_ID_2 }, TENANT_ID));
 
 
-        getRelatedResponse = controllerA.getRelated(2, "dummyEntityBSet", null, Pageable.ofSize(100), TENANT_ID);
+        getRelatedResponse = controllerA.getRelated(DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100), TENANT_ID);
         @SuppressWarnings("unchecked")
         var checkItems = (List<DummyEntityB>) getRelatedResponse.getItems();
-        assertThat(checkItems).noneMatch((item) -> item.getId().equals(2L));
+        assertThat(checkItems).noneMatch((item) -> item.getId().equals(DUMMY_B_ID_2));
 
         var controllerB = getResourceApiController(DummyEntityB.class);
-        assertThatNoException().isThrownBy(() -> controllerB.get(2, TENANT_ID));
+        assertThatNoException().isThrownBy(() -> controllerB.get(DUMMY_B_ID_2, TENANT_ID));
     }
 
     @Test
@@ -748,11 +737,11 @@ class ResourceApiControllerTest {
 
         var controllerA = getResourceApiController(DummyEntityA.class);
 
-        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controllerA.get(-1, TENANT_ID));
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controllerA.get(NON_EXISTENT_ID, TENANT_ID));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() ->  controllerA.deleteRelated(-1, "dummyEntityBSet", new Object[] { 2 }, TENANT_ID))
-                .withMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, -1));
+                .isThrownBy(() ->  controllerA.deleteRelated(NON_EXISTENT_ID, DUMMY_B_SET_FIELD_NAME, new Object[] { DUMMY_B_ID_2 }, TENANT_ID))
+                .withMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, NON_EXISTENT_ID));
 
     }
 
@@ -762,17 +751,17 @@ class ResourceApiControllerTest {
 
         var controllerA = getResourceApiController(DummyEntityA.class);
 
-        assertThatNoException().isThrownBy(() -> controllerA.get(1, TENANT_ID));
+        assertThatNoException().isThrownBy(() -> controllerA.get(DUMMY_A_ID_1, TENANT_ID));
 
 
-        var getRelatedResponse = controllerA.getRelated(1, "dummyEntityBSet", null, Pageable.ofSize(100), TENANT_ID);
+        var getRelatedResponse = controllerA.getRelated(DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100), TENANT_ID);
         @SuppressWarnings("unchecked")
         var checkItems = (List<DummyEntityB>) getRelatedResponse.getItems();
-        assertThat(checkItems).noneMatch((item) -> item.getId().equals(-1L));
+        assertThat(checkItems).noneMatch((item) -> item.getId().equals(NON_EXISTENT_ID));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { -1 }, TENANT_ID))
-                .withMessageContainingAll("related resources", "-1");
+                .isThrownBy(() -> controllerA.deleteRelated(DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, new Object[] { NON_EXISTENT_ID }, TENANT_ID))
+                .withMessageContainingAll("related resources", NON_EXISTENT_ID.toString());
 
     }
 
@@ -782,21 +771,21 @@ class ResourceApiControllerTest {
 
         var controllerA = getResourceApiController(DummyEntityA.class);
 
-        assertThatNoException().isThrownBy(() -> controllerA.get(1, TENANT_ID));
+        assertThatNoException().isThrownBy(() -> controllerA.get(DUMMY_A_ID_1, TENANT_ID));
 
 
-        var getRelatedResponse = controllerA.getRelated(1, "dummyEntityBSet", null, Pageable.ofSize(100), TENANT_ID);
+        var getRelatedResponse = controllerA.getRelated(DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100), TENANT_ID);
         @SuppressWarnings("unchecked")
         var checkItems = (List<DummyEntityB>) getRelatedResponse.getItems();
 
         assertThat(checkItems)
-                .noneMatch((item) -> item.getId().equals(3L))
-                .noneMatch((item) -> item.getId().equals(4L))
-                .isNotEmpty().anyMatch((item) -> item.getId().equals(2L));
+                .noneMatch((item) -> item.getId().equals(DUMMY_B_ID_3))
+                .noneMatch((item) -> item.getId().equals(DUMMY_B_ID_4))
+                .isNotEmpty().anyMatch((item) -> item.getId().equals(DUMMY_B_ID_2));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { 3, 4, 2 }, TENANT_ID))
-                .withMessageContainingAll(String.format("No related", "resources removed", DummyEntityB.class, "3, 4"));
+                .isThrownBy(() -> controllerA.deleteRelated(DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, new Object[] { DUMMY_B_ID_3, DUMMY_B_ID_4, DUMMY_B_ID_2 }, TENANT_ID))
+                .withMessageContainingAll(String.format("No related", "resources removed", DummyEntityB.class, String.format("%s, %s", DUMMY_B_ID_3, DUMMY_B_ID_4)));
     }
 
     @Test
@@ -805,14 +794,18 @@ class ResourceApiControllerTest {
 
         var controllerA = getResourceApiController(DummyEntityA.class);
 
-        var getRelatedResponse = controllerA.getRelated(2, "dummyEntityBSet", null, Pageable.ofSize(100), TENANT_ID);
+        var getRelatedResponse = controllerA.getRelated(DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100), TENANT_ID);
         @SuppressWarnings("unchecked")
         var items = (List<DummyEntityB>) getRelatedResponse.getItems();
         assertThat(items).isNotEmpty()
-                .anyMatch((item) -> item.getId().equals(2L));
+                .anyMatch((item) -> item.getId().equals(DUMMY_B_ID_2));
 
         assertThatNoException().isThrownBy(
-                () -> controllerA.deleteRelated(2, "dummyEntityBSet", new Object[] { 2 }, TENANT_ID));
+                () -> controllerA.deleteRelated(DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, new Object[] { DUMMY_B_ID_2 }, TENANT_ID));
+
+        getRelatedResponse = controllerA.getRelated(DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100), TENANT_ID);
+        items = (List<DummyEntityB>) getRelatedResponse.getItems();
+        assertThat(items).noneMatch((item) -> item.getId().equals(DUMMY_B_ID_2));
     }
 
     @Test
@@ -821,15 +814,15 @@ class ResourceApiControllerTest {
 
         var controllerA = getResourceApiController(DummyEntityA.class);
 
-        var getRelatedResponse = controllerA.getRelated(2, "dummyEntityBSet", null, Pageable.ofSize(100), TENANT_ID);
+        var getRelatedResponse = controllerA.getRelated(DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100), TENANT_ID);
         @SuppressWarnings("unchecked")
         var items = (List<DummyEntityB>) getRelatedResponse.getItems();
         assertThat(items).isNotEmpty()
-                .anyMatch((item) -> item.getId().equals(2L));
+                .anyMatch((item) -> item.getId().equals(DUMMY_B_ID_2));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> controllerA.deleteRelated(2, "dummyEntityBSet", new Object[] { 1 }, INVALID_TENANT_ID))
-                .withMessageContaining("2");
+                .isThrownBy(() -> controllerA.deleteRelated(DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, new Object[] { DUMMY_B_ID_2 }, INVALID_TENANT_ID))
+                .withMessageContaining(DUMMY_A_ID_2.toString());
     }
 
     @Test
@@ -839,8 +832,8 @@ class ResourceApiControllerTest {
         var controllerA = getResourceApiController(DummyEntityA.class);
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> controllerA.deleteRelated(2, "dummyEntityBSet", new Object[] { 11, 12 }, TENANT_ID))
-                .withMessageContainingAll("related resources", "11", "12");
+                .isThrownBy(() -> controllerA.deleteRelated(DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, new Object[] { NON_EXISTENT_ID, NON_EXISTENT_ID_2 }, TENANT_ID))
+                .withMessageContainingAll("related resources", NON_EXISTENT_ID.toString(), NON_EXISTENT_ID_2.toString());
     }
 
     @Test
@@ -849,15 +842,18 @@ class ResourceApiControllerTest {
 
         var controllerA = getResourceApiController(DummyEntityA.class);
 
-        var getRelatedResponse = controllerA.getRelated(2, "dummyEntityBSet", null, Pageable.ofSize(100), TENANT_ID);
+        var getRelatedResponse = controllerA.getRelated(DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100), TENANT_ID);
         @SuppressWarnings("unchecked")
         var items = (List<DummyEntityB>) getRelatedResponse.getItems();
         assertThat(items).isNotEmpty()
-                .anyMatch((item) -> item.getId().equals(2L));
+                .anyMatch((item) -> item.getId().equals(DUMMY_B_ID_2))
+                .noneMatch((item) -> item.getId().equals(NON_EXISTENT_ID))
+                .noneMatch((item) -> item.getId().equals(NON_EXISTENT_ID_2));
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> controllerA.deleteRelated(1, "dummyEntityBSet", new Object[] { 2, 11, 12 }, TENANT_ID))
-                .withMessageContainingAll("related resources", "11", "12");
+                .isThrownBy(() -> controllerA.deleteRelated(
+                        DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, new Object[] { DUMMY_B_ID_2, NON_EXISTENT_ID, NON_EXISTENT_ID_2 }, TENANT_ID))
+                .withMessageContainingAll("related resources", NON_EXISTENT_ID.toString(), NON_EXISTENT_ID_2.toString());
     }
 
     // endregion
@@ -869,8 +865,8 @@ class ResourceApiControllerTest {
         SpelExpressionParser expressionParser = new SpelExpressionParser();
 
         return Stream.of(
-                Arguments.of(expressionParser.parseRaw("id==2"), 1),
-                Arguments.of(expressionParser.parseRaw("id<0"), 0),
+                Arguments.of(expressionParser.parseRaw(String.format("%s=='%s'", ID_FIELD_NAME, DUMMY_A_ID_2)), 1),
+                Arguments.of(expressionParser.parseRaw(String.format("%s<%s", PROFILE_ID_FIELD_NAME, 0)), 0),
                 // Arguments.of(expressionParser.parseRaw("id==-1"), 0),
                 Arguments.of(null, 10));
     }
@@ -879,8 +875,8 @@ class ResourceApiControllerTest {
         SpelExpressionParser expressionParser = new SpelExpressionParser();
 
         return Stream.of(
-                Arguments.of(DUMMY_A_ID_1, expressionParser.parseRaw(String.format("id=='%s'", DUMMY_B_ID_2)), 1),
-                Arguments.of(DUMMY_A_ID_1, expressionParser.parseRaw(String.format("id=='%s'", NON_EXISTENT_ID)), 0),
+                Arguments.of(DUMMY_A_ID_1, expressionParser.parseRaw(String.format("%s=='%s'", ID_FIELD_NAME, DUMMY_B_ID_2)), 1),
+                Arguments.of(DUMMY_A_ID_1, expressionParser.parseRaw(String.format("%s=='%s'", ID_FIELD_NAME, NON_EXISTENT_ID)), 0),
                 Arguments.of(DUMMY_A_ID_1, null, 2));
     }
 
@@ -916,11 +912,5 @@ class ResourceApiControllerTest {
         return new ResourceApiController<>(clazz, entityManager, transactionManager, entityUtils);
     }
 
-
-
-    private <T extends BaseEntity, U> ResourceApiController<T, U> getResourceApiController(Class<T> clazz, Class<U> clazzU) {
-        var entityUtils = new EntityUtils<T>(clazz, entityManager);
-        return new ResourceApiController<T, U>(clazz, entityManager, transactionManager, entityUtils);
-    }
 
 }
