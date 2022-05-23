@@ -98,7 +98,7 @@ class ResourceOpenApiCustomiserTest {
         @ParameterizedTest
         @MethodSource("resources")
         void customise_resourceEndpointHasRelatedResources_openApiPathIsCustomised(Class<DummyEntityA> resource,
-                        String path, Class<Long> parentIdFieldType) {
+                        String path, Class<UUID> parentIdFieldType) {
 
                 var resourceEndpoint = new ResourceEndpoint();
                 resourceEndpoint.add(resource, path, parentIdFieldType);
@@ -109,7 +109,7 @@ class ResourceOpenApiCustomiserTest {
 
                 var secondRelationPath = path + "/{id}/dummyc";
                 var secondRelatedResourceType = DummyEntityC.class;
-                var secondRelatedIdType = Long.class;
+                var secondRelatedIdType = UUID.class;
 
                 resourceEndpoint.addRelated(resource, firstRelatedResourceType, firstRelationPath, firstRelatedIdType);
                 resourceEndpoint.addRelated(resource, secondRelatedResourceType, secondRelationPath,
@@ -318,7 +318,7 @@ class ResourceOpenApiCustomiserTest {
 
         private static Stream<Arguments> resources() {
                 return Stream.of(
-                                Arguments.of(DummyEntityA.class, "somepath", Long.class),
+                                Arguments.of(DummyEntityA.class, "somepath", UUID.class),
                                 Arguments.of(DummyEntityB.class, "somepath", UUID.class));
         }
 
