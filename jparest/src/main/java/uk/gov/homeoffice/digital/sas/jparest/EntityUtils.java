@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NonNull;
 
 import org.springframework.util.StringUtils;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
+import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
@@ -15,7 +17,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 /**
@@ -29,6 +33,7 @@ import static java.util.Collections.emptyList;
 public class EntityUtils<T> {
 
     private static final Logger LOGGER = Logger.getLogger(EntityUtils.class.getName());
+    public static final String MORE_THAN_ONE_ID_FIELD = "'%s' entity should not have more than one @Id field";
 
     @Getter
     private Class<T> entityType;
@@ -54,10 +59,9 @@ public class EntityUtils<T> {
         Set<String> tmpRelatedResources = new HashSet<>();
 
         // Iterate the declared fields to find the field annotated with Id
-        // and to find the fields markerd ManyToMany
+        // and to find the fields marked ManyToMany
         for (Field field : entityType.getDeclaredFields()) {
             // Only record relationships that aren't mapped by another class
-            // TODO need to do the error validation for more number of id field here in entity class
             if (field.isAnnotationPresent(ManyToMany.class)) {
                 ManyToMany m2m = field.getAnnotation(ManyToMany.class);
                 if (!StringUtils.hasText(m2m.mappedBy())) {
@@ -77,12 +81,22 @@ public class EntityUtils<T> {
 
         }
 
+        // Validate the number of ID fields in BaseEntity to have 1 & Entity to have 0
+        List<Field> baseClassIdFields = Arrays.stream(entityType.getSuperclass().getDeclaredFields())
+                .filter(f -> f.isAnnotationPresent(Id.class))
+                .collect(Collectors.toList());
+        if(baseClassIdFields.size()>1) throw new ResourceException(format(MORE_THAN_ONE_ID_FIELD, BaseEntity.class.getName()));
+        Arrays.stream(entityType.getDeclaredFields())
+                .filter(f -> f.isAnnotationPresent(Id.class))
+                .findAny()
+                .ifPresent( e -> {
+                    throw new ResourceException(format(MORE_THAN_ONE_ID_FIELD, entityType.getName()));
+                });
+
         this.entityType = entityType;
         this.relatedResources = tmpRelatedResources;
-        // TODO need to do the error validation for more number of id field here in BaseEntity class
-        Field idField = Arrays.stream(entityType.getSuperclass().getDeclaredFields()).filter(f -> f.isAnnotationPresent(Id.class)).findAny().get();
+        this.idField = baseClassIdFields.get(0);
         idField.setAccessible(true);
-        this.idField = idField;
         this.idFieldType = idField.getType();
         this.idFieldName = idField.getName();
     }
