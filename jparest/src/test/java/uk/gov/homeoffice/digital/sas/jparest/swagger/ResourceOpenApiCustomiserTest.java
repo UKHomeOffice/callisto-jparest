@@ -207,7 +207,7 @@ class ResourceOpenApiCustomiserTest {
 
         private void validateRelatedModify(HttpMethod method, Paths paths, String path, Class<?> parentIdFieldType,
                         Class<?> resource, Class<?> idFieldType) {
-                var pathItem = paths.get(path + "/{relatedId}");
+                var pathItem = paths.get(path + "/{relatedIds}");
                 assertThat(pathItem).isNotNull();
                 var operation = pathItem.readOperationsMap().get(method);
                 assertThat(operation).isNotNull();
@@ -232,7 +232,7 @@ class ResourceOpenApiCustomiserTest {
 
         private void validateRelatedIdParameter(List<Parameter> parameters, Class<?> clazz) {
                 var idSchema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
-                assertThat(parameters).filteredOn(p -> p.getName().equals("relatedId")).first().extracting(
+                assertThat(parameters).filteredOn(p -> p.getName().equals("relatedIds")).first().extracting(
                                 p -> p.getIn(),
                                 p -> ((ArraySchema) p.getSchema()).getItems())
                                 .containsExactly(
