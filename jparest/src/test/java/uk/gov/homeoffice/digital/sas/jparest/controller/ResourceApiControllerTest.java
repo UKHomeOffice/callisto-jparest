@@ -201,6 +201,23 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
+    void create_resourceIsValidAndNoIdPresentWithinPayload_resourceIsPersisted() throws JsonProcessingException {
+
+        var controller = getResourceApiController(DummyEntityA.class);
+        var apiResponse = controller.create("{}", TENANT_ID);
+
+        assertThat(apiResponse.getItems()).hasSize(1);
+        var dummy = apiResponse.getItems().get(0);
+        assertThat(dummy).isNotNull();
+        assertThat(dummy.getId()).isNotNull();
+
+        var getResponse = controller.get(dummy.getId(), TENANT_ID);
+        assertThat(getResponse.getItems().get(0)).isEqualTo(dummy);
+    }
+
+
+    @Test
+    @Transactional
     void create_resourceIsValid_resourceIsPersisted() throws JsonProcessingException {
         String payload = "{\n" +
                 "            \"" + ID_FIELD_NAME + "\": \"" + NON_EXISTENT_ID + "\"\n" +

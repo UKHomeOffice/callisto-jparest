@@ -1,22 +1,17 @@
 package uk.gov.homeoffice.digital.sas.jparest.models;
 
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
-import org.hibernate.proxy.HibernateProxy;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
 
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -32,6 +27,11 @@ public abstract class BaseEntity {
     @Getter
     @Setter
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator",
+            parameters = @Parameter(name = "uuid_gen_strategy_class", value = "org.hibernate.id.uuid.CustomVersionOneStrategy"))
     @Type(type="uuid-char")
     private UUID id;
 
