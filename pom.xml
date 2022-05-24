@@ -16,9 +16,9 @@
         <!-- JaCoCo Properties -->
         <jacoco.version>0.8.7</jacoco.version>
         <!-- Sonar Properties -->
-        <sonar.projectKey>JpaRest</sonar.projectKey>
+        <sonar.projectKey>callisto-JpaRest${projectKeySuffix}</sonar.projectKey>
         <sonar.moduleKey>${project.artifactId}</sonar.moduleKey> 
-        <sonar.projectName>JpaRest</sonar.projectName>
+        <sonar.projectName>callisto-JpaRest${projectKeySuffix}</sonar.projectName>
         <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     </properties>
