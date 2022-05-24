@@ -7,7 +7,11 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -195,7 +199,7 @@ public class PathItemCreator {
      * @param clazz The type of items to describe in the schema
      * @return
      */
-    private ApiResponse getResourceResponse(Class<?> clazz) {
+    private static ApiResponse getResourceResponse(Class<?> clazz) {
         var response = new ApiResponse();
 
         var c = new Content();
@@ -216,7 +220,7 @@ public class PathItemCreator {
      * @param clazz The type to generate a schema for
      * @return Schema for the ApiResponse
      */
-    private Schema<?> getTypedApiResponseSchema(Class<?> clazz) {
+    private static Schema<?> getTypedApiResponseSchema(Class<?> clazz) {
 
         // Generate a schema for the ApiResponse
         Schema<?> schema = ModelConverters.getInstance()
@@ -245,7 +249,7 @@ public class PathItemCreator {
      * @param name  The name of the parameter
      * @return A Parameter with a schema for the given class
      */
-    private Parameter getParameter(Class<?> clazz, String setIn, String name) {
+    private static Parameter getParameter(Class<?> clazz, String setIn, String name) {
         var parameter = new Parameter();
 
         Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
@@ -267,7 +271,7 @@ public class PathItemCreator {
      * @param name  The name of the parameter
      * @return A Parameter with an array schema for items of the given class
      */
-    private Parameter getArrayParameter(Class<?> clazz, String setIn, String name) {
+    private static Parameter getArrayParameter(Class<?> clazz, String setIn, String name) {
         var parameter = new Parameter();
         Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
         var as = new ArraySchema();
@@ -287,7 +291,7 @@ public class PathItemCreator {
      * @param clazz The type of item to describe in the schema
      * @return
      */
-    private RequestBody getRequestBody(Class<?> clazz) {
+    private static RequestBody getRequestBody(Class<?> clazz) {
 
         var c = new Content();
         var mt = new MediaType();
@@ -308,7 +312,7 @@ public class PathItemCreator {
      * @return An empty ApiResponse
      */
     private static ApiResponse emptyResponse() {
-        var deleteResponse = new io.swagger.v3.oas.models.responses.ApiResponse();
+        var deleteResponse = new ApiResponse();
         var deleteContent = new Content();
         var deleteMediaType = new MediaType();
         deleteMediaType.schema(new StringSchema());
@@ -352,8 +356,9 @@ public class PathItemCreator {
         for(ExampleObject exampleObj : annotation.filterExamples()) {
 
             var exampleOpt = AnnotationsUtils.getExample(exampleObj);
-            if (exampleOpt.isPresent()) parameter.addExample(exampleObj.name(), exampleOpt.get());
-            else {
+            if (exampleOpt.isPresent()) {
+                parameter.addExample(exampleObj.name(), exampleOpt.get());
+            } else {
                 LOGGER.error("Example could not be found in ExampleObject from resource: {} ", clazz.getSimpleName());
             }
         }
