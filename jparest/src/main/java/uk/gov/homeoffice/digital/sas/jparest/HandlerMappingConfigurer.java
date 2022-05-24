@@ -146,7 +146,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
         builderOptions.setPatternParser(requestMappingHandlerMapping.getPatternParser());
     }
 
-    private String createIdAndRelationParams(String relation) {
+    private static String createIdAndRelationParams(String relation) {
         return URL_ID_PATH_PARAM + "/{relation:" + Pattern.quote(relation) + "}";
     }
 

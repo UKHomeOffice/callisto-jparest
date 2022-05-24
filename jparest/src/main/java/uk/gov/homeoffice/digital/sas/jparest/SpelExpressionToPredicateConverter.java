@@ -82,7 +82,6 @@ public class SpelExpressionToPredicateConverter {
 
         PropertyOrFieldReference fieldReference = (PropertyOrFieldReference) leftNode;
         Path<Comparable<Object>> field = root.get(fieldReference.getName());
-        Class<?> clazz = field.getJavaType();
 
         // Get the right side
         SpelNode rightNode = node.getChild(1);
@@ -101,6 +100,7 @@ public class SpelExpressionToPredicateConverter {
         
         // handle literal comparison
         if (Literal.class.isAssignableFrom(rightNode.getClass())) {
+            Class<?> clazz = field.getJavaType();
             Object rightValue = convertTo(((Literal) rightNode).getLiteralValue().getValue(), clazz);
             @SuppressWarnings("unchecked")
             Comparable<Object> comparableValue = (Comparable<Object>) rightValue;

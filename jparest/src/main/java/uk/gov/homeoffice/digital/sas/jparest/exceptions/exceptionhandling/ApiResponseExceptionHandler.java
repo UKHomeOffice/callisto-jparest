@@ -16,7 +16,6 @@ public class ApiResponseExceptionHandler {
 
     private static final Logger LOGGER = Logger.getLogger(ApiResponseExceptionHandler.class.getName());
 
-
     @ExceptionHandler({
             IllegalArgumentException.class,
             JsonProcessingException.class,
@@ -25,6 +24,7 @@ public class ApiResponseExceptionHandler {
             UnknownResourcePropertyException.class,
             TenantIdMismatchException.class,
     })
+
     public ResponseEntity<ApiErrorResponse> handleException(Exception ex) {
         return createResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
@@ -36,20 +36,14 @@ public class ApiResponseExceptionHandler {
         return createResponseEntity(msg, HttpStatus.BAD_REQUEST);
     }
 
-
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
         return createResponseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-
-    private ResponseEntity<ApiErrorResponse> createResponseEntity(String message, HttpStatus httpStatus) {
-
+    private static ResponseEntity<ApiErrorResponse> createResponseEntity(String message, HttpStatus httpStatus) {
         var apiErrorResponse = new ApiErrorResponse(message);
         return new ResponseEntity<>(apiErrorResponse, httpStatus);
     }
-
-
-
 
 }
