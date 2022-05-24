@@ -15,7 +15,13 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -62,21 +68,19 @@ public class EntityUtils<T> {
         // and to find the fields marked ManyToMany
         for (Field field : entityType.getDeclaredFields()) {
             // Only record relationships that aren't mapped by another class
-            if (field.isAnnotationPresent(ManyToMany.class)) {
-                ManyToMany m2m = field.getAnnotation(ManyToMany.class);
-                if (!StringUtils.hasText(m2m.mappedBy())) {
-                    var relatedEntityType = field.getGenericType();
-                    if (relatedEntityType instanceof ParameterizedType parameterizedType) {
-                        relatedEntityType = parameterizedType.getActualTypeArguments()[0];
-                    }
-
-                    EntityType<?> ret = entityManager.getMetamodel().entity((Class<?>) relatedEntityType);
-                    Class<?> relatedIdType = ret.getIdType().getJavaType();
-                    var relatedIdField = (Field) ret.getId((Class<?>) relatedIdType).getJavaMember();
-                    field.setAccessible(true);
-                    relations.putIfAbsent(field.getName(), new RelatedEntity(field, (Class<?>) relatedEntityType, relatedIdType, relatedIdField));
-                    tmpRelatedResources.add(field.getName());
+            if (field.isAnnotationPresent(ManyToMany.class) &&
+                    !StringUtils.hasText(field.getAnnotation(ManyToMany.class).mappedBy())) {
+                var relatedEntityType = field.getGenericType();
+                if (relatedEntityType instanceof ParameterizedType parameterizedType) {
+                    relatedEntityType = parameterizedType.getActualTypeArguments()[0];
                 }
+
+                EntityType<?> ret = entityManager.getMetamodel().entity((Class<?>) relatedEntityType);
+                Class<?> relatedIdType = ret.getIdType().getJavaType();
+                var relatedIdField = (Field) ret.getId((Class<?>) relatedIdType).getJavaMember();
+                field.setAccessible(true);
+                relations.putIfAbsent(field.getName(), new RelatedEntity(field, (Class<?>) relatedEntityType, relatedIdType, relatedIdField));
+                tmpRelatedResources.add(field.getName());
             }
 
         }
@@ -85,11 +89,13 @@ public class EntityUtils<T> {
         List<Field> baseClassIdFields = Arrays.stream(entityType.getSuperclass().getDeclaredFields())
                 .filter(f -> f.isAnnotationPresent(Id.class))
                 .collect(Collectors.toList());
-        if(baseClassIdFields.size()>1) throw new ResourceException(format(MORE_THAN_ONE_ID_FIELD, BaseEntity.class.getName()));
+        if(baseClassIdFields.size() > 1) {
+            throw new ResourceException(format(MORE_THAN_ONE_ID_FIELD, BaseEntity.class.getName()));
+        }
         Arrays.stream(entityType.getDeclaredFields())
                 .filter(f -> f.isAnnotationPresent(Id.class))
                 .findAny()
-                .ifPresent( e -> {
+                .ifPresent( (Field e) -> {
                     throw new ResourceException(format(MORE_THAN_ONE_ID_FIELD, entityType.getName()));
                 });
 
@@ -140,7 +146,7 @@ public class EntityUtils<T> {
      */
     @SuppressWarnings("squid:S3011") // Need to set accessibility of field to create instances with id set without
                                      // touching the database
-    private <Y> Y getEntityReference(Class<Y> entityType, Field idField, Serializable identifier) throws IllegalArgumentException {
+    private static <Y> Y getEntityReference(Class<Y> entityType, Field idField, Serializable identifier) throws IllegalArgumentException {
         Y reference = null;
         try {
             reference = entityType.getConstructor().newInstance();
