@@ -389,7 +389,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var query = builder.createQuery(Long.class);
         var relatedRoot = query.from(this.entityUtils.getRelatedType(relation));
         var serializedRelatedIds = Arrays.stream(relatedIds)
-                .map(relatedId -> getIdentifier(relatedId, entityUtils.getRelatedIdType(relation))).collect(Collectors.toList());
+                .map(relatedId -> getIdentifier(relatedId, entityUtils.getRelatedIdType(relation))).toList();
         var relatedIdPredicate = relatedRoot.get(this.entityUtils.getRelatedIdField(relation).getName()).in(serializedRelatedIds);
         var relatedTenantPredicate = builder.equal(relatedRoot.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
         var relatedSelect = query.select(builder.count(relatedRoot)).where(builder.and(relatedIdPredicate, relatedTenantPredicate));
