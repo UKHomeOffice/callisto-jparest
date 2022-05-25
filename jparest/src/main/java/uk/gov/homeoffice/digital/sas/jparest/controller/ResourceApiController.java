@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -174,7 +175,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
     public void delete(@PathVariable U id, @RequestParam UUID tenantId) {
 
-        var identifier = getIdentifier(id);
+        Serializable identifier = getIdentifier(id);
 
         T resource = repository.findById(identifier).orElseThrow(() -> new ResourceNotFoundException(id));
         validateResourceTenantId(tenantId, resource, id);
@@ -211,7 +212,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         this.validatorUtils.validateAndThrowIfErrorsExist(r2);
 
         var transactionDefinition = new DefaultTransactionDefinition();
-        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
+        TransactionStatus transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
         T orig = repository.findById(identifier).orElseThrow(() ->
                 new ResourceNotFoundException(id));
@@ -282,7 +283,8 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
         var relatedEntities = entityUtils.getRelatedEntities(originalEntity, relation);
-        var relatedEntityIdToEntityMap = relatedEntities.stream().map(entity -> (BaseEntity) entity)
+        Map<UUID, BaseEntity> relatedEntityIdToEntityMap = relatedEntities.stream()
+                .map(BaseEntity.class::cast)
                 .collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
 
         Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
@@ -320,7 +322,8 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
         Collection<Object> relatedEntities = entityUtils.getRelatedEntities(originalEntity, relation);
-        var relatedEntityIdToEntityMap = relatedEntities.stream().map(entity -> (BaseEntity) entity)
+        var relatedEntityIdToEntityMap = relatedEntities.stream()
+                .map(BaseEntity.class::cast)
                 .collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
 
         Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);

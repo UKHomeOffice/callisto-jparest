@@ -11,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 /**
  * Provides an implementation of equals and hashCode that
@@ -19,9 +18,6 @@ import java.util.logging.Logger;
  */
 @MappedSuperclass
 public abstract class BaseEntity {
-
-    private static final Logger LOGGER = Logger.getLogger(BaseEntity.class.getName());
-    public static final String ID_ERROR_MESSAGE = "%s should not be extended by a subclass  %s with %s number of @Id annotations";
 
     @Getter
     @Setter
