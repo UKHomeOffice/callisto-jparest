@@ -1,30 +1,25 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import lombok.Getter;
-import lombok.Setter;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import javax.persistence.Id;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.junit.jupiter.api.Named.named;
-
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.junit.jupiter.api.Named.named;
+
 class BaseEntityTest {
 
-    public static final String SHOULD_NOT_BE_EXTENDED_BY_A_SUBCLASS = "uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity should not be extended by a subclass";
     public static final UUID sampleId = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120000");
     public static final UUID sampleTenantId = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120001");
 
@@ -33,18 +28,6 @@ class BaseEntityTest {
         assertThatNoException().isThrownBy(DummyEntityA::new);
     }
 
-
-   /*
-   * Disabling this more than one Id field validation as it is done now in Entityutils as part of EAHW-1851,
-   * TODO: remove the commented code after the discussion with team
-   @Test
-    void getIdField_multipleIdAnnotatedFieldExists_exceptionThrown() {
-        assertThatExceptionOfType(ResourceException.class)
-                .isThrownBy(BadEntityC::new)
-                .withMessageContaining(SHOULD_NOT_BE_EXTENDED_BY_A_SUBCLASS)
-                .withMessageContaining("with 2 number of @Id annotations");
-    }
-*/
     @Test
     void hashCode_calledOnEqualObjects_returnTheSameValue() {
         var obj1 = new DummyEntityC();

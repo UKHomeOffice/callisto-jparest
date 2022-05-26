@@ -38,10 +38,10 @@ public abstract class BaseEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof BaseEntity)) return false;
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
+        if (!(o instanceof BaseEntity)) return false;
         BaseEntity that = (BaseEntity) o;
         return (null!=getId() && null!=that.getId() && getId().equals(that.getId())) &&
                 (null!=getTenantId() && null!=that.getTenantId() && getTenantId().equals(that.getTenantId()));

@@ -414,17 +414,18 @@ class ResourceApiControllerTest {
                 "        }";
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
+        UUID id = resource.getId();
 
         String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": \"" + resource.getId() + "\"," +
+                "            \"" + ID_FIELD_NAME + "\": \"" + id + "\"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 2" +
                 "        }";
 
 
         assertThatNoException().isThrownBy(() -> controller.create(payload, TENANT_ID));
-        assertThatNoException().isThrownBy(() -> controller.get(resource.getId(), TENANT_ID));
-        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.update(resource.getId(), updatedPayload, INVALID_TENANT_ID));
+        assertThatNoException().isThrownBy(() -> controller.get(id, TENANT_ID));
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.update(id, updatedPayload, INVALID_TENANT_ID));
     }
 
     @Test
@@ -517,9 +518,10 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
-        assertThatNoException().isThrownBy(() -> controller.get(resource.getId(), TENANT_ID));
-        assertThatNoException().isThrownBy(() -> controller.delete(resource.getId(), TENANT_ID));
-        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.get(resource.getId(), TENANT_ID));
+        UUID id = resource.getId();
+        assertThatNoException().isThrownBy(() -> controller.get(id, TENANT_ID));
+        assertThatNoException().isThrownBy(() -> controller.delete(id, TENANT_ID));
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.get(id, TENANT_ID));
     }
 
     @Test
@@ -555,10 +557,11 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
+        UUID id = resource.getId();
 
         assertThatNoException().isThrownBy(() -> controller.create(payload, TENANT_ID));
-        assertThatNoException().isThrownBy(() -> controller.get(resource.getId(), TENANT_ID));
-        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.delete(resource.getId(), INVALID_TENANT_ID));
+        assertThatNoException().isThrownBy(() -> controller.get(id, TENANT_ID));
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.delete(id, INVALID_TENANT_ID));
     }
 
     // endregion
