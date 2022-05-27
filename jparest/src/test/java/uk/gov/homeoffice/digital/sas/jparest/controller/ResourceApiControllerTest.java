@@ -19,10 +19,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.*;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
@@ -31,6 +28,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
@@ -222,6 +220,12 @@ class ResourceApiControllerTest {
     void create_emptyPayload_jsonExceptionThrown() {
         var controller = getResourceApiController(DummyEntityA.class);
         assertThatExceptionOfType(JsonProcessingException.class).isThrownBy(() -> controller.create("", TENANT_ID));
+    }
+
+    @Test
+    void create_invalidPayload_persistenceExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityF.class);
+        assertThatExceptionOfType(PersistenceException.class).isThrownBy(() -> controller.create("{}", TENANT_ID));
     }
 
 

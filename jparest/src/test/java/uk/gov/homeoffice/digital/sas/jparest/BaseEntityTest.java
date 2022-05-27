@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Named.named;
 
 class BaseEntityTest {
 
-    public static final UUID sampleId = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120000");
-    public static final UUID sampleTenantId = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120001");
+    public static final UUID SAMPLE_ID = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120000");
+    public static final UUID SAMPLE_TENANT_ID = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120001");
 
     @Test
     void getIdField_classContainsSingleIdAnnotatedField_noExceptionThrown() {
@@ -31,13 +31,13 @@ class BaseEntityTest {
     @Test
     void hashCode_calledOnEqualObjects_returnTheSameValue() {
         var obj1 = new DummyEntityC();
-        obj1.setId(sampleId);
-        obj1.setTenantId(sampleTenantId);
+        obj1.setId(SAMPLE_ID);
+        obj1.setTenantId(SAMPLE_TENANT_ID);
         obj1.setDescription("something");
 
         var obj2 = new DummyEntityC();
-        obj2.setId(sampleId);
-        obj2.setTenantId(sampleTenantId);
+        obj2.setId(SAMPLE_ID);
+        obj2.setTenantId(SAMPLE_TENANT_ID);
         obj2.setDescription("different");
 
         assertThat(obj1).isEqualTo(obj2).hasSameHashCodeAs(obj2);
@@ -81,19 +81,19 @@ class BaseEntityTest {
         // Objects the the same ID annotated field
         var g1 = new GuidIdEntity();
         g1.setId(UUID.randomUUID());
-        g1.setTenantId(sampleTenantId);
+        g1.setTenantId(SAMPLE_TENANT_ID);
 
         var g2 = new GuidIdEntity();
-        g2.setTenantId(sampleTenantId);
+        g2.setTenantId(SAMPLE_TENANT_ID);
         g2.setId(g1.getId());
         
         // Objects the same ID annotated field
         var a1 = new DummyEntityA();
-        a1.setId(sampleId);
-        a1.setTenantId(sampleTenantId);
+        a1.setId(SAMPLE_ID);
+        a1.setTenantId(SAMPLE_TENANT_ID);
         var a2 = new DummyEntityA();
-        a2.setTenantId(sampleTenantId);
-        a2.setId(sampleId);
+        a2.setTenantId(SAMPLE_TENANT_ID);
+        a2.setId(SAMPLE_ID);
 
         return Stream.of(
             Arguments.of(named("same id annotated field value", g1), g2),
@@ -109,24 +109,24 @@ class BaseEntityTest {
         // Different values in id annotated field
         var g1 = new GuidIdEntity();
         g1.setId(UUID.randomUUID());
-        g1.setTenantId(sampleTenantId);
+        g1.setTenantId(SAMPLE_TENANT_ID);
         var g2 = new GuidIdEntity();
         g2.setId(UUID.randomUUID());
-        g2.setTenantId(sampleTenantId);
+        g2.setTenantId(SAMPLE_TENANT_ID);
 
         // Same value in id field with null ID annotated field
         var g3 = new GuidIdEntity();
-        g3.setIdentifier(sampleId);
-        g3.setTenantId(sampleTenantId);
+        g3.setIdentifier(SAMPLE_ID);
+        g3.setTenantId(SAMPLE_TENANT_ID);
         var g4 = new GuidIdEntity();
-        g4.setIdentifier(sampleId);
-        g4.setTenantId(sampleTenantId);
+        g4.setIdentifier(SAMPLE_ID);
+        g4.setTenantId(SAMPLE_TENANT_ID);
 
         // Same value in id field with non null ID annotated field
         var g5 = new GuidIdEntity();
         g5.setIdentifier(UUID.randomUUID());
-        g5.setId(sampleId);
-        g5.setTenantId(sampleTenantId);
+        g5.setId(SAMPLE_ID);
+        g5.setTenantId(SAMPLE_TENANT_ID);
         
         // Same value in description field but null ID annotated field
         var c1 = new DummyEntityC();
@@ -136,11 +136,11 @@ class BaseEntityTest {
 
         // Same ID annotated field value but different types
         var c3 = new DummyEntityC();
-        c3.setId(sampleId);
-        c3.setTenantId(sampleTenantId);
+        c3.setId(SAMPLE_ID);
+        c3.setTenantId(SAMPLE_TENANT_ID);
         var a1 = new DummyEntityA();
-        a1.setId(sampleId);
-        a1.setTenantId(sampleTenantId);
+        a1.setId(SAMPLE_ID);
+        a1.setTenantId(SAMPLE_TENANT_ID);
 
         return Stream.of(
             Arguments.of(named("different ids", g1), g2),

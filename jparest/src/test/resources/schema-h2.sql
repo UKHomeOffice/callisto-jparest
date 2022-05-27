@@ -26,6 +26,13 @@ CREATE TABLE dummy_EntityD
     description  varchar(800) NULL
 );
 
+CREATE TABLE dummy_EntityF
+(
+    id                  varchar(36) PRIMARY KEY,
+    tenant_id           varchar(36) NOT NULL,
+    dummy_entityC_id    varchar(36) NOT NULL REFERENCES dummy_EntityC (id)
+);
+
 CREATE TABLE dummy_EntityA_dummy_EntityB
 (
     dummy_EntityA  varchar(36) NOT NULL REFERENCES dummy_EntityA (id),
