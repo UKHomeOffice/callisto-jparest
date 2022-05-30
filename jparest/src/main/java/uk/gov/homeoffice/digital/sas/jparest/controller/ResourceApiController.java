@@ -32,10 +32,26 @@ import uk.gov.homeoffice.digital.sas.jparest.utils.ValidatorUtils;
 import uk.gov.homeoffice.digital.sas.jparest.utils.WebDataBinderFactory;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
-import javax.persistence.*;
-import javax.persistence.criteria.*;
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.PersistenceUnitUtil;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Root;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -142,7 +158,9 @@ public class ResourceApiController<T extends BaseEntity, U> {
         typedQuery.setHint(QUERY_HINT, entityGraph);
         List<T> result2 = typedQuery.getResultList();
 
-        if (result2.isEmpty()) throw new ResourceNotFoundException(id);
+        if (result2.isEmpty()) {
+            throw new ResourceNotFoundException(id);
+        }
         return result2.get(0);
     }
 
@@ -279,9 +297,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var originalEntity = getById(id, relation, tenantId);
         validateRelatedResourcesTenantIds(relation, relatedIds, tenantId);
 
-        var transactionDefinition = new DefaultTransactionDefinition();
-        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
-
         var relatedEntities = entityUtils.getRelatedEntities(originalEntity, relation);
         Map<UUID, BaseEntity> relatedEntityIdToEntityMap = relatedEntities.stream()
                 .map(BaseEntity.class::cast)
@@ -292,13 +307,17 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var notDeletableRelatedIds = new HashSet<>();
         for (var relatedId: relatedIds) {
             var entityReference = (BaseEntity) this.entityUtils.getEntityReference(relation, getIdentifier(relatedId, relatedIdType));
-            if (!relatedEntities.remove(relatedEntityIdToEntityMap.get(entityReference.getId()))) notDeletableRelatedIds.add(relatedId);
+            if (!relatedEntities.remove(relatedEntityIdToEntityMap.get(entityReference.getId()))) {
+                notDeletableRelatedIds.add(relatedId);
+            }
         }
         if (!notDeletableRelatedIds.isEmpty()) {
             Class<?> relatedType = entityUtils.getRelatedType(relation);
             throw new ResourceNotFoundException(deletableRelatedResourcesMessage(relatedType, notDeletableRelatedIds));
         }
 
+        var transactionDefinition = new DefaultTransactionDefinition();
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
         try {
             repository.saveAndFlush(originalEntity);
             transactionManager.commit(transactionStatus);
@@ -330,7 +349,9 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
         for (var relatedId: relatedIds) {
             var entityReference = (BaseEntity) this.entityUtils.getEntityReference(relation, getIdentifier(relatedId, relatedIdType));
-            if (!relatedEntityIdToEntityMap.containsKey(entityReference.getId()))  relatedEntities.add(entityReference);
+            if (!relatedEntityIdToEntityMap.containsKey(entityReference.getId()))  {
+                relatedEntities.add(entityReference);
+            }
         }
 
         try {
@@ -355,9 +376,9 @@ public class ResourceApiController<T extends BaseEntity, U> {
         Assert.notNull(path, "Path must not be null!");
         Assert.notNull(builder, "CriteriaBuilder must not be null!");
 
-        List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+        List<Order> orders = new ArrayList<>();
 
-        for (org.springframework.data.domain.Sort.Order sortOrder : sort) {
+        for (Sort.Order sortOrder : sort) {
             Order order;
             if (sortOrder.isAscending()) {
                 order = builder.asc(path.get(sortOrder.getProperty()));
@@ -382,8 +403,9 @@ public class ResourceApiController<T extends BaseEntity, U> {
     }
 
     private void validateResourceTenantId(UUID requestTenantId, T resource, U resourceId) {
-        if (!requestTenantId.equals(resource.getTenantId()))
+        if (!requestTenantId.equals(resource.getTenantId())) {
             throw new ResourceNotFoundException(resourceId);
+        }
     }
 
     private void validateRelatedResourcesTenantIds(String relation, Object[] relatedIds, UUID tenantId) {
@@ -398,8 +420,10 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var relatedSelect = query.select(builder.count(relatedRoot)).where(builder.and(relatedIdPredicate, relatedTenantPredicate));
         var tenantIdMatchesRelatedResources = this.entityManager.createQuery(relatedSelect).getSingleResult() == relatedIds.length;
 
-        if (!tenantIdMatchesRelatedResources) throw new ResourceNotFoundException(
+        if (!tenantIdMatchesRelatedResources) {
+            throw new ResourceNotFoundException(
                     relatedResourcesMessage(Arrays.stream(relatedIds).collect(Collectors.toSet())));
+        }
     }
 
     private void validateTenantIdPayloadMatch(UUID requestTenantId, T payload) {

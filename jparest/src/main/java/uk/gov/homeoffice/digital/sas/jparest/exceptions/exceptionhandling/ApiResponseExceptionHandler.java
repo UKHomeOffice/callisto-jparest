@@ -6,7 +6,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.*;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 
 import javax.persistence.PersistenceException;
 import java.util.logging.Logger;

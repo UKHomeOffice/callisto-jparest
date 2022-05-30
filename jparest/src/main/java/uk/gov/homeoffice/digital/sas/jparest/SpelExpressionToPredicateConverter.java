@@ -1,7 +1,19 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
 import org.springframework.expression.spel.SpelNode;
-import org.springframework.expression.spel.ast.*;
+import org.springframework.expression.spel.ast.Literal;
+import org.springframework.expression.spel.ast.MethodReference;
+import org.springframework.expression.spel.ast.OpAnd;
+import org.springframework.expression.spel.ast.OpEQ;
+import org.springframework.expression.spel.ast.OpGE;
+import org.springframework.expression.spel.ast.OpGT;
+import org.springframework.expression.spel.ast.OpLE;
+import org.springframework.expression.spel.ast.OpLT;
+import org.springframework.expression.spel.ast.OpNE;
+import org.springframework.expression.spel.ast.OpOr;
+import org.springframework.expression.spel.ast.OperatorMatches;
+import org.springframework.expression.spel.ast.OperatorNot;
+import org.springframework.expression.spel.ast.PropertyOrFieldReference;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.WebDataBinder;
@@ -19,6 +31,8 @@ import java.util.logging.Logger;
  * Used to convert SpelExpression into a JPA predicate
  */
 public class SpelExpressionToPredicateConverter {
+
+    public static final int ALLOWED_CHILD_COUNT = 2;
 
     private SpelExpressionToPredicateConverter(){
     }
@@ -69,7 +83,7 @@ public class SpelExpressionToPredicateConverter {
         // At this point we are looking for "property {operator} property/literal"
         // so we can only handle 2 children the left side and the right side
         // of the expression. Throw if there are not only 2 children
-        if (node.getChildCount() != 2) {
+        if (node.getChildCount() != ALLOWED_CHILD_COUNT) {
             throw new InvalidFilterException("Unknown expression");
         }
 

@@ -4,12 +4,14 @@ import java.net.URL;
 import java.util.List;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * Used to return responses from the {@link ResourceApiController}
  */
 public class ApiResponse<T> {
 
+    @NoArgsConstructor
     public class Metadata {
         private URL next;
 
