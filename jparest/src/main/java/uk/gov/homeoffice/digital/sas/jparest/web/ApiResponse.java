@@ -35,5 +35,9 @@ public class ApiResponse<T> {
         this.items = items;
     }
 
+    public ApiResponse(T item) {
+        this.items = List.of(item);
+    }
+
 
 }

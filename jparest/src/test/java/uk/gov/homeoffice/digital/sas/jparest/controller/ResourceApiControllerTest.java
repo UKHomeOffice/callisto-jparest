@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,12 +20,16 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
+import uk.gov.homeoffice.digital.sas.jparest.JpaRestRepositoryImpl;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.*;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
+import uk.gov.homeoffice.digital.sas.jparest.validators.CrudResourceValidator;
+import uk.gov.homeoffice.digital.sas.jparest.validators.EntityConstraintValidator;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -49,6 +54,9 @@ class ResourceApiControllerTest {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+
+    private EntityConstraintValidator entityConstraintValidator;
+    private CrudResourceValidator crudResourceValidator;
     
     
     public static final UUID NON_EXISTENT_ID = UUID.randomUUID();
@@ -77,6 +85,12 @@ class ResourceApiControllerTest {
     
     private static final String RESOURCE_NOT_FOUND_ERROR_FORMAT = "Resource with id: %s was not found";
 
+
+    @BeforeEach
+    public void setUp() {
+        entityConstraintValidator = new EntityConstraintValidator();
+        crudResourceValidator = new CrudResourceValidator();
+    }
 
 
     // region list
@@ -175,8 +189,13 @@ class ResourceApiControllerTest {
     @MethodSource("invalidIDSource")
     @SuppressWarnings({ "unchecked", "rawtypes" })
     <U> void get_idCantBeConvertedToExpectedType_throwsTypeMismatchException(U clazz, U id) {
+
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        var controller = new ResourceApiController<DummyEntityA, U>(DummyEntityA.class, entityManager, transactionManager, entityUtils);
+        ResourceApiService<DummyEntityA> service = new ResourceApiService(
+                entityUtils, new JpaRestRepositoryImpl<>(DummyEntityA.class, entityManager), transactionManager);
+        var controller = new ResourceApiController<DummyEntityA, U>(
+                DummyEntityA.class, service, entityConstraintValidator, crudResourceValidator);
+
         assertThatExceptionOfType(TypeMismatchException.class).isThrownBy(() -> controller.get(id, TENANT_ID));
     }
 
@@ -904,7 +923,9 @@ class ResourceApiControllerTest {
 
     private <T extends BaseEntity, U> ResourceApiController<T, U> getResourceApiController(Class<T> clazz) {
         var entityUtils = new EntityUtils<>(clazz, entityManager);
-        return new ResourceApiController<>(clazz, entityManager, transactionManager, entityUtils);
+        ResourceApiService<? extends BaseEntity> service = new ResourceApiService(
+                entityUtils, new JpaRestRepositoryImpl<>(clazz, entityManager), transactionManager);
+        return new ResourceApiController(clazz, service, entityConstraintValidator, crudResourceValidator);
     }
 
     private <T extends BaseEntity, U> T createResource(ResourceApiController<T, U> controller,

@@ -5,13 +5,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
+import uk.gov.homeoffice.digital.sas.jparest.validators.EntityConstraintValidator;
 
 import javax.validation.Validation;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
-class ValidatorUtilsTest {
+class EntityConstraintValidatorTest {
 
     @AfterAll
     static void clearInlineMocks() {
@@ -24,8 +25,8 @@ class ValidatorUtilsTest {
         var validationMockedStatic = Mockito.mockStatic(Validation.class);
         validationMockedStatic.when(Validation::buildDefaultValidatorFactory).thenReturn(null);
 
-        var validatorUtils =  new ValidatorUtils();
-        assertThatNoException().isThrownBy(() -> validatorUtils.validateAndThrowIfErrorsExist(entity));
+        var validator =  new EntityConstraintValidator();
+        assertThatNoException().isThrownBy(() -> validator.validate(entity));
         validationMockedStatic.close();
     }
 
@@ -33,9 +34,9 @@ class ValidatorUtilsTest {
     void validateAndThrowIfErrorsExist_constraintViolationsExists_resourceConstraintViolationExceptionThrown() {
         var entity = new DummyEntityD();
 
-        var validatorUtils =  new ValidatorUtils();
+        var validator =  new EntityConstraintValidator();
         assertThatExceptionOfType(ResourceConstraintViolationException.class)
-            .isThrownBy(() -> validatorUtils.validateAndThrowIfErrorsExist(entity));
+            .isThrownBy(() -> validator.validate(entity));
     }
 
     @Test
@@ -44,10 +45,10 @@ class ValidatorUtilsTest {
         var entity = new DummyEntityD();
         entity.setTelephone("-123456");
 
-        var validatorUtils = new ValidatorUtils();
+        var validator = new EntityConstraintValidator();
 
         assertThatExceptionOfType(ResourceConstraintViolationException.class)
-            .isThrownBy(() -> validatorUtils.validateAndThrowIfErrorsExist(entity))
+            .isThrownBy(() -> validator.validate(entity))
             .withMessageContainingAll(
                 "description has the following error(s): must not be empty",
                 "telephone has the following error(s): ",

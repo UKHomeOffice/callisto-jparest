@@ -13,5 +13,6 @@ public class ConstantHelper {
     public static final String URL_RELATED_ID_PATH_PARAM =  "/{" + RELATED_PARAM_NAME + "}";
     public static final String API_ROOT_PATH = "/resources";
     public static final String PATH_DELIMITER = "/";
+    public static final String ENTITY_TENANT_ID_FIELD_NAME = "tenantId";
 
 }

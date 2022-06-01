@@ -9,6 +9,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.PathItemCreator;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.ResourceOpenApiCustomiser;
+import uk.gov.homeoffice.digital.sas.jparest.validators.CrudResourceValidator;
+import uk.gov.homeoffice.digital.sas.jparest.validators.EntityConstraintValidator;
 
 import javax.persistence.EntityManager;
 import java.util.logging.Logger;
@@ -31,8 +33,15 @@ public class Config {
                                                       PlatformTransactionManager transactionManager,
                                                       ApplicationContext context,
                                                       ResourceEndpoint resourceEndpoint) {
+
         LOGGER.info(("auto configure handler mapping"));
-        return new HandlerMappingConfigurer(entityManager, transactionManager, context, resourceEndpoint);
+        return new HandlerMappingConfigurer(
+                entityManager,
+                transactionManager,
+                context,
+                resourceEndpoint,
+                crudResourceValidator(),
+                entityConstraintValidator());
     }
 
     @Bean
@@ -46,7 +55,7 @@ public class Config {
     }
 
     @Bean
-    public ResourceEndpoint singletonBean() {
+    public ResourceEndpoint resourceEndpoint() {
         return new ResourceEndpoint();
     }
 
@@ -54,5 +63,17 @@ public class Config {
     public ApiResponseExceptionHandler apiResponseExceptionHandler() {
         return new ApiResponseExceptionHandler();
     }
+
+    @Bean
+    public CrudResourceValidator crudResourceValidator() {
+        return new CrudResourceValidator();
+    }
+
+    @Bean
+    public EntityConstraintValidator entityConstraintValidator() {
+        return new EntityConstraintValidator();
+    }
+
+
 
 }

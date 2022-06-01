@@ -19,6 +19,8 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
+import uk.gov.homeoffice.digital.sas.jparest.validators.CrudResourceValidator;
+import uk.gov.homeoffice.digital.sas.jparest.validators.EntityConstraintValidator;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -51,6 +53,12 @@ class HandlerMappingConfigurerTest {
     @MockBean
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
+    @MockBean
+    private EntityConstraintValidator entityConstraintValidator;
+
+    @MockBean
+    private CrudResourceValidator crudResourceValidator;
+
     private HandlerMappingConfigurer handlerMappingConfigurer;
 
     private static Stream<Arguments> resources() {
@@ -64,8 +72,13 @@ class HandlerMappingConfigurerTest {
     @BeforeEach
     public void setup() {
         when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
-        handlerMappingConfigurer = new HandlerMappingConfigurer(entityManager, transactionManager, context,
-                resourceEndpoint);
+        handlerMappingConfigurer = new HandlerMappingConfigurer(
+                entityManager,
+                transactionManager,
+                context,
+                resourceEndpoint,
+                crudResourceValidator,
+                entityConstraintValidator);
     }
 
     @ParameterizedTest
