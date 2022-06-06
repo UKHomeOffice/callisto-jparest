@@ -28,6 +28,7 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceTestUtil;
 import uk.gov.homeoffice.digital.sas.jparest.validators.CrudResourceValidator;
 import uk.gov.homeoffice.digital.sas.jparest.validators.EntityConstraintValidator;
 
@@ -76,7 +77,7 @@ class ResourceApiControllerTest {
     private static final UUID TENANT_ID = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120002");
     private static final UUID INVALID_TENANT_ID = UUID.randomUUID();
     
-    private static final String ID_FIELD_NAME = "id";
+    private static final String ID_FIELD_NAME = ResourceTestUtil.ID_FIELD_NAME;
     private static final String TENANT_ID_FIELD_NAME = "tenantId";
     private static final String DESCRIPTION_FIELD_NAME = "description";
     private static final String INDEX_FIELD_NAME = "index";
@@ -923,9 +924,9 @@ class ResourceApiControllerTest {
 
     private <T extends BaseEntity, U> ResourceApiController<T, U> getResourceApiController(Class<T> clazz) {
         var entityUtils = new EntityUtils<>(clazz, entityManager);
-        ResourceApiService<? extends BaseEntity> service = new ResourceApiService(
+        ResourceApiService<T> service = new ResourceApiService<>(
                 entityUtils, new JpaRestRepositoryImpl<>(clazz, entityManager), transactionManager);
-        return new ResourceApiController(clazz, service, entityConstraintValidator, crudResourceValidator);
+        return new ResourceApiController<>(clazz, service, entityConstraintValidator, crudResourceValidator);
     }
 
     private <T extends BaseEntity, U> T createResource(ResourceApiController<T, U> controller,
