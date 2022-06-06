@@ -22,7 +22,7 @@ import java.util.Set;
 public class Concert extends BaseEntity {
 
     @NotEmpty
-    private String concert_name;
+    private String concertName;
  
     @ManyToMany
     @JoinTable(

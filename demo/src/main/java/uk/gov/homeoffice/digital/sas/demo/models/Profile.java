@@ -27,13 +27,13 @@ public class Profile extends BaseEntity {
     private String bio;
 
     @NotEmpty
-    private String phone_number;
+    private String phoneNumber;
 
     @NotNull
     private Date dob;
 
     @NotNull
-    private Date first_release;
+    private Date firstRelease;
 
 
 }

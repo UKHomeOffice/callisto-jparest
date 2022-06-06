@@ -29,7 +29,7 @@ public class Record extends BaseEntity {
     private UUID artistId;
 
     @NotEmpty
-    private String record_name;
+    private String recordName;
 
     @ManyToOne
     @JoinColumn(name="artist_id", nullable=false, insertable=false, updatable=false)

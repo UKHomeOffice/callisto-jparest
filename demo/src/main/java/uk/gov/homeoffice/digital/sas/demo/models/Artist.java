@@ -30,7 +30,7 @@ public class Artist extends BaseEntity {
     private UUID profileId;
 
     @NotEmpty
-    private String performance_name;
+    private String performanceName;
 
     @OneToOne(optional=false)
     @JoinColumn(name="profile_id", unique=true, nullable=false, insertable=false, updatable=false)
