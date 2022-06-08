@@ -96,10 +96,10 @@ class BaseEntityTest {
         a2.setId(SAMPLE_ID);
 
         return Stream.of(
-            Arguments.of(named("same id annotated field value", g1), g2),
+            Arguments.of(named("same id field value", g1), g2),
             Arguments.of(named("same instance", g1), g1),
             Arguments.of(named("same instance", g2), g2),
-            Arguments.of(named("same id annotated field value", a1), a2),
+            Arguments.of(named("same id field value", a1), a2),
             Arguments.of(named("same instance", a1), a1),
             Arguments.of(named("same instance", a2), a2)
         );

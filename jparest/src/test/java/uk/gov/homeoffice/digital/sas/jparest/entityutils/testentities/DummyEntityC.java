@@ -8,7 +8,7 @@ import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 @Resource
-@Entity(name = "dummyEntityC" )
+@Entity(name = "dummyEntityC")
 public class DummyEntityC extends BaseEntity {
 
     @Getter
