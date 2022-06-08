@@ -38,6 +38,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceUnitUtil;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Order;
@@ -108,7 +109,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
     }
 
-    public ApiResponse<T> list(SpelExpression filter, Pageable pageable, @RequestParam UUID tenantId) {
+    public ApiResponse<T> list(@RequestParam UUID tenantId, SpelExpression filter, Pageable pageable) {
 
         var builder = this.entityManager.getCriteriaBuilder();
         CriteriaQuery<T> query = builder.createQuery(this.entityUtils.getEntityType());
@@ -164,17 +165,17 @@ public class ResourceApiController<T extends BaseEntity, U> {
         return result2.get(0);
     }
 
-    public ApiResponse<T> get(@PathVariable U id, @RequestParam UUID tenantId) {
+    public ApiResponse<T> get(@RequestParam UUID tenantId, @PathVariable U id) {
         var result = getById(id, null, tenantId);
         return new ApiResponse<>(Arrays.asList(result));
     }
 
 
 
-    public ApiResponse<T> create(@RequestBody String body, @RequestParam UUID tenantId) throws JsonProcessingException {
+    public ApiResponse<T> create(@RequestParam UUID tenantId, @RequestBody String body) throws JsonProcessingException {
 
         T r2 = readPayload(body);
-        validateTenantIdPayloadMatch(tenantId, r2);
+        validateAndSetTenantIdPayloadMatch(tenantId, r2);
 
         this.validatorUtils.validateAndThrowIfErrorsExist(r2);
 
@@ -191,18 +192,25 @@ public class ResourceApiController<T extends BaseEntity, U> {
         return new ApiResponse<>(Arrays.asList(result));
     }
 
-    public void delete(@PathVariable U id, @RequestParam UUID tenantId) {
+    public void delete(@RequestParam UUID tenantId, @PathVariable U id) {
 
         Serializable identifier = getIdentifier(id);
-
-        T resource = repository.findById(identifier).orElseThrow(() -> new ResourceNotFoundException(id));
-        validateResourceTenantId(tenantId, resource, id);
 
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
         try {
-            repository.deleteById(identifier);
+            var builder = this.entityManager.getCriteriaBuilder();
+            CriteriaDelete<T> query = builder.createCriteriaDelete(this.entityUtils.getEntityType());
+            Root<T> root = query.from(this.entityUtils.getEntityType());
+
+            var tenantPredicate = builder.equal(root.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
+            var idPredicate = builder.equal(root.get(ENTITY_ID_FIELD_NAME), identifier);
+            query.where(builder.and(tenantPredicate, idPredicate));
+
+            var updatedItems = this.entityManager.createQuery(query).executeUpdate();
+            if (updatedItems != 1) throw new EmptyResultDataAccessException(1);
+
             transactionManager.commit(transactionStatus);
         } catch (EmptyResultDataAccessException ex) {
             transactionManager.rollback(transactionStatus);
@@ -214,13 +222,13 @@ public class ResourceApiController<T extends BaseEntity, U> {
         }
     }
 
-    public ApiResponse<T> update(@PathVariable U id,
-                                 @RequestBody String body,
-                                 @RequestParam UUID tenantId) throws JsonProcessingException {
+    public ApiResponse<T> update(@RequestParam UUID tenantId,
+                                 @PathVariable U id,
+                                 @RequestBody String body) throws JsonProcessingException {
 
         var identifier = getIdentifier(id);
         T r2 = readPayload(body);
-        validateTenantIdPayloadMatch(tenantId, r2);
+        validateAndSetTenantIdPayloadMatch(tenantId, r2);
 
         var payloadEntityId = this.persistenceUnitUtil.getIdentifier(r2);
         if (payloadEntityId != null && !identifier.equals(getIdentifier(payloadEntityId))) {
@@ -251,10 +259,10 @@ public class ResourceApiController<T extends BaseEntity, U> {
     }
 
     @SuppressWarnings("rawtypes")
-    public ApiResponse getRelated(@PathVariable U id,
+    public ApiResponse getRelated(@RequestParam UUID tenantId,
+                                  @PathVariable U id,
                                   @PathVariable String relation,
-                                  SpelExpression filter, Pageable pageable,
-                                  @RequestParam UUID tenantId) {
+                                  SpelExpression filter, Pageable pageable) {
 
         Serializable identifier = getIdentifier(id);
         var builder = this.entityManager.getCriteriaBuilder();
@@ -289,13 +297,15 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
 
 
-    public void deleteRelated(@PathVariable U id,
+    public void deleteRelated(@RequestParam UUID tenantId,
+                              @PathVariable U id,
                               @PathVariable String relation,
-                              @PathVariable Object[] relatedIds,
-                              @RequestParam UUID tenantId) throws IllegalArgumentException {
+                              @PathVariable Object[] relatedIds) throws IllegalArgumentException {
+
+        var transactionDefinition = new DefaultTransactionDefinition();
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
         var originalEntity = getById(id, relation, tenantId);
-        validateRelatedResourcesTenantIds(relation, relatedIds, tenantId);
 
         var relatedEntities = entityUtils.getRelatedEntities(originalEntity, relation);
         Map<UUID, BaseEntity> relatedEntityIdToEntityMap = relatedEntities.stream()
@@ -316,8 +326,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
             throw new ResourceNotFoundException(deletableRelatedResourcesMessage(relatedType, notDeletableRelatedIds));
         }
 
-        var transactionDefinition = new DefaultTransactionDefinition();
-        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
         try {
             repository.saveAndFlush(originalEntity);
             transactionManager.commit(transactionStatus);
@@ -328,10 +336,10 @@ public class ResourceApiController<T extends BaseEntity, U> {
     }
 
 
-    public void addRelated(@PathVariable U id,
+    public void addRelated(@RequestParam UUID tenantId,
+                           @PathVariable U id,
                            @PathVariable String relation,
-                           @PathVariable Object[] relatedIds,
-                           @RequestParam UUID tenantId) throws IllegalArgumentException {
+                           @PathVariable Object[] relatedIds) throws IllegalArgumentException {
 
 
         var originalEntity = getById(id, relation, tenantId);
@@ -426,12 +434,13 @@ public class ResourceApiController<T extends BaseEntity, U> {
         }
     }
 
-    private void validateTenantIdPayloadMatch(UUID requestTenantId, T payload) {
+    private void validateAndSetTenantIdPayloadMatch(UUID requestTenantId, T payload) {
 
-        if (payload.getTenantId() != null && !requestTenantId.equals(payload.getTenantId())) {
-            throw new TenantIdMismatchException("The supplied payload tenant id value must match the url tenant id query parameter value");
+        var payloadTenantId = payload.getTenantId();
+        if (payloadTenantId != null && !requestTenantId.equals(payloadTenantId)) {
+            throw new TenantIdMismatchException();
 
-        } else if (payload.getTenantId() == null) {
+        } else if (payloadTenantId == null) {
             payload.setTenantId(requestTenantId);
         }
     }

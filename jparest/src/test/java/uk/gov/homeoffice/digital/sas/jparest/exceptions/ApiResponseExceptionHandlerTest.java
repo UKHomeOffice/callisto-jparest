@@ -65,7 +65,7 @@ class ApiResponseExceptionHandlerTest {
                 Arguments.of(new InvalidFilterException(ERROR_MESSAGE)),
                 Arguments.of(new ResourceConstraintViolationException(ERROR_MESSAGE)),
                 Arguments.of(new UnknownResourcePropertyException("unknownProperty", "resourceName")),
-                Arguments.of(new TenantIdMismatchException(ERROR_MESSAGE))
+                Arguments.of(new TenantIdMismatchException())
         );
     }
 }

@@ -4,7 +4,7 @@ public class TenantIdMismatchException extends IllegalArgumentException {
 
 
     public TenantIdMismatchException() {
-        super();
+        super("The supplied payload tenant id value must match the url tenant id query parameter value");
     }
 
     public TenantIdMismatchException(String s) {

@@ -107,15 +107,15 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
             Class<?> resource, String path, EntityUtils<?> entityUtils,
             ResourceApiController<?, ?> controller) throws NoSuchMethodException {
         LOGGER.fine("Registering common paths");
-        register(controller, "list", new Class<?>[]{SpelExpression.class, Pageable.class, UUID.class},
+        register(controller, "list", new Class<?>[]{UUID.class, SpelExpression.class, Pageable.class},
                 path, RequestMethod.GET);
-        register(controller, "get", new Class<?>[]{Object.class, UUID.class},
+        register(controller, "get", new Class<?>[]{UUID.class, Object.class},
                 path + URL_ID_PATH_PARAM, RequestMethod.GET);
-        register(controller, "create", new Class<?>[]{String.class, UUID.class},
+        register(controller, "create", new Class<?>[]{UUID.class, String.class},
                 path, RequestMethod.POST);
-        register(controller, "delete", new Class<?>[]{Object.class, UUID.class},
+        register(controller, "delete", new Class<?>[]{UUID.class, Object.class},
                 path + URL_ID_PATH_PARAM, RequestMethod.DELETE);
-        register(controller, "update", new Class<?>[]{Object.class, String.class, UUID.class},
+        register(controller, "update", new Class<?>[]{UUID.class, Object.class, String.class},
                 path + URL_ID_PATH_PARAM, RequestMethod.PUT);
         resourceEndpoint.add(resource, path, entityUtils.getIdFieldType());
     }
@@ -130,12 +130,12 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
                     path + URL_ID_PATH_PARAM + "/" + relation, relatedIdType);
             LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
             register(controller, "getRelated",
-                    new Class<?>[]{Object.class, String.class, SpelExpression.class, Pageable.class, UUID.class},
+                    new Class<?>[]{UUID.class, Object.class, String.class, SpelExpression.class, Pageable.class},
                     path + createIdAndRelationParams(relation), RequestMethod.GET);
-            register(controller, "deleteRelated", new Class<?>[]{Object.class, String.class, Object[].class, UUID.class},
+            register(controller, "deleteRelated", new Class<?>[]{UUID.class, Object.class, String.class, Object[].class},
                     path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM,
                     RequestMethod.DELETE);
-            register(controller, "addRelated", new Class<?>[]{Object.class, String.class, Object[].class, UUID.class},
+            register(controller, "addRelated", new Class<?>[]{UUID.class, Object.class, String.class, Object[].class},
                     path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM, RequestMethod.PUT);
         }
     }
