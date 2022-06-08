@@ -28,7 +28,7 @@ import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_REL
 public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
 
-    public static final int TEN = 10;
+    public static final int DEFAULT_PAGE_SIZE = 10;
     private final ResourceEndpoint endpoint;
     private final PathItemCreator pathItemCreator;
 
@@ -84,7 +84,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
         var apiResponseSchema = ensureSchema(components, "ApiResponse", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
         ensureSchema(components, "Metadata", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
         var pageableSchema = ensureSchema(components, "Pageable", Pageable.class);
-        var value = new Pageable(0, TEN, null);
+        var value = new Pageable(0, DEFAULT_PAGE_SIZE, null);
         pageableSchema.setExample(value);
         return apiResponseSchema;
     }
