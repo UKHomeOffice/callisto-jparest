@@ -33,10 +33,12 @@ public class PathItemCreator {
 
     private static final ApiResponse EMPTY_RESPONSE = emptyResponse();
     public static final String PAGEABLE = "pageable";
-    private static final Parameter PAGEABLE_PARAMETER = getQueryParameter(PAGEABLE, Pageable.class);
+    public static final String QUERY_PARAMETER_NAME = "query";
+    private static final Parameter PAGEABLE_PARAMETER = getParameter(Pageable.class, QUERY_PARAMETER_NAME, PAGEABLE);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PathItemCreator.class);
     private static final String TENANT_ID = "tenantId";
+    public static final Parameter TENANT_ID_PARAMETER = getParameter(UUID.class, QUERY_PARAMETER_NAME, TENANT_ID);
     public static final String PATH = "path";
 
 
@@ -58,7 +60,7 @@ public class PathItemCreator {
 
 
         var get = new Operation();
-        get.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
+        get.addParametersItem(TENANT_ID_PARAMETER);
         get.addParametersItem(PAGEABLE_PARAMETER);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
@@ -67,7 +69,7 @@ public class PathItemCreator {
 
         var post = new Operation();
         post.setResponses(responses);
-        post.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
+        post.addParametersItem(TENANT_ID_PARAMETER);
         post.addTagsItem(tag);
         var requestBody = getRequestBody(clazz);
         post.setRequestBody(requestBody);
@@ -100,20 +102,20 @@ public class PathItemCreator {
 
         var idParameter = getParameter(idClazz, PATH, ID_PARAM_NAME);
         get.addParametersItem(idParameter);
-        get.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
+        get.addParametersItem(TENANT_ID_PARAMETER);
         var put = new Operation();
         put.addParametersItem(idParameter);
         var requestBody = getRequestBody(clazz);
         put.setRequestBody(requestBody);
         put.setResponses(responses);
-        put.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
+        put.addParametersItem(TENANT_ID_PARAMETER);
         put.addTagsItem(tag);
         pi.put(put);
         var delete = new Operation();
 
         ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
         delete.addParametersItem(idParameter);
-        delete.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
+        delete.addParametersItem(TENANT_ID_PARAMETER);
         delete.setResponses(deleteResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
@@ -141,7 +143,7 @@ public class PathItemCreator {
 
         var get = new Operation();
         get.addParametersItem(idParameter);
-        get.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
+        get.addParametersItem(TENANT_ID_PARAMETER);
         get.addParametersItem(PAGEABLE_PARAMETER);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
@@ -172,14 +174,14 @@ public class PathItemCreator {
         var delete = new Operation();
         delete.addParametersItem(idParameter);
         delete.addParametersItem(relatedIdParameter);
-        delete.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
+        delete.addParametersItem(TENANT_ID_PARAMETER);
         delete.setResponses(defaultResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
 
         var put = new Operation();
         put.addParametersItem(idParameter);
-        put.addParametersItem(getQueryParameter(TENANT_ID, UUID.class));
+        put.addParametersItem(TENANT_ID_PARAMETER);
         put.addParametersItem(relatedIdParameter);
         put.setResponses(defaultResponses);
         put.addTagsItem(tag);
@@ -323,22 +325,6 @@ public class PathItemCreator {
     }
 
     /**
-     * @return Parameter representing the passed in paramType class
-     */
-    private static Parameter getQueryParameter(String paramName, Class<?> paramType) {
-        var parameter = new Parameter();
-        var newComponents = new Components();
-
-        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(newComponents, paramType, null, null);
-
-        parameter.schema(schema);
-        parameter.required(true);
-        parameter.setIn("query");
-        parameter.name(paramName);
-        return parameter;
-    }
-
-    /**
      * @return Parameter representing SpelExpression
      */
     private static Parameter getFilterParameter(Class<?> clazz) {
@@ -349,7 +335,7 @@ public class PathItemCreator {
 
         parameter.schema(schema);
         parameter.required(false);
-        parameter.setIn("query");
+        parameter.setIn(QUERY_PARAMETER_NAME);
         parameter.name("filter");
 
         Resource annotation = clazz.getAnnotation(Resource.class);
