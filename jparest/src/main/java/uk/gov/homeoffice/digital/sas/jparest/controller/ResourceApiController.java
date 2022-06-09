@@ -238,9 +238,9 @@ public class ResourceApiController<T extends BaseEntity, U> {
         this.validatorUtils.validateAndThrowIfErrorsExist(r2);
 
         var transactionDefinition = new DefaultTransactionDefinition();
-        TransactionStatus transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
-        T orig = repository.findById(identifier).orElseThrow(() ->
+        var orig = repository.findById(identifier).orElseThrow(() ->
                 new ResourceNotFoundException(id));
 
         validateResourceTenantId(tenantId, orig, id);
