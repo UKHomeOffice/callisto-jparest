@@ -22,6 +22,7 @@ class BaseEntityTest {
 
     public static final UUID SAMPLE_ID = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120000");
     public static final UUID SAMPLE_TENANT_ID = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120001");
+    public static final UUID SAMPLE2_TENANT_ID = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120002");
 
     @Test
     void getIdField_classContainsSingleIdAnnotatedField_noExceptionThrown() {
@@ -42,6 +43,24 @@ class BaseEntityTest {
 
         assertThat(obj1).isEqualTo(obj2).hasSameHashCodeAs(obj2);
     }
+
+
+    @Test
+    void hashCode_withSameIdAndDifferentTenantId_returnTheSameValue() {
+        var obj1 = new DummyEntityC();
+        obj1.setId(SAMPLE_ID);
+        obj1.setTenantId(SAMPLE_TENANT_ID);
+        obj1.setDescription("something");
+
+        var obj2 = new DummyEntityC();
+        obj2.setId(SAMPLE_ID);
+        obj2.setTenantId(SAMPLE2_TENANT_ID);
+        obj2.setDescription("something");
+
+        assertThat(obj1).isEqualTo(obj2).hasSameHashCodeAs(obj2);
+    }
+
+
 
     @ParameterizedTest(name="{0}")
     @MethodSource("equalObjects")
@@ -78,7 +97,7 @@ class BaseEntityTest {
     }
 
     static Stream<Arguments> equalObjects() {
-        // Objects the the same ID annotated field
+        // Objects with the same ID field
         var g1 = new GuidIdEntity();
         g1.setId(UUID.randomUUID());
         g1.setTenantId(SAMPLE_TENANT_ID);
@@ -87,7 +106,7 @@ class BaseEntityTest {
         g2.setTenantId(SAMPLE_TENANT_ID);
         g2.setId(g1.getId());
         
-        // Objects the same ID annotated field
+        // Objects the same ID field
         var a1 = new DummyEntityA();
         a1.setId(SAMPLE_ID);
         a1.setTenantId(SAMPLE_TENANT_ID);
@@ -106,7 +125,7 @@ class BaseEntityTest {
     }
 
     static Stream<Arguments> unequalObjects() {
-        // Different values in id annotated field
+        // Different values in id field
         var g1 = new GuidIdEntity();
         g1.setId(UUID.randomUUID());
         g1.setTenantId(SAMPLE_TENANT_ID);
@@ -114,7 +133,7 @@ class BaseEntityTest {
         g2.setId(UUID.randomUUID());
         g2.setTenantId(SAMPLE_TENANT_ID);
 
-        // Same value in id field with null ID annotated field
+        // Same value in id field with null ID field
         var g3 = new GuidIdEntity();
         g3.setIdentifier(SAMPLE_ID);
         g3.setTenantId(SAMPLE_TENANT_ID);
@@ -122,13 +141,13 @@ class BaseEntityTest {
         g4.setIdentifier(SAMPLE_ID);
         g4.setTenantId(SAMPLE_TENANT_ID);
 
-        // Same value in id field with non null ID annotated field
+        // Same value in id field with non-null ID field
         var g5 = new GuidIdEntity();
         g5.setIdentifier(UUID.randomUUID());
         g5.setId(SAMPLE_ID);
         g5.setTenantId(SAMPLE_TENANT_ID);
         
-        // Same value in description field but null ID annotated field
+        // Same value in description field but null ID field
         var c1 = new DummyEntityC();
         c1.setDescription("something");
         var c2 = new DummyEntityC();
@@ -144,11 +163,11 @@ class BaseEntityTest {
 
         return Stream.of(
             Arguments.of(named("different ids", g1), g2),
-            Arguments.of(named("null id annotated field", g3), g4),
-            Arguments.of(named("null id annotated field != non null id annotated field", g4), g5),
-            Arguments.of(named("non null id annotated field != null id annotated field", g4), g5),
-            Arguments.of(named("null id annotated field", c1), c2),
-            Arguments.of(named("same id annotated field but different types", c3), a1),
+            Arguments.of(named("null id field", g3), g4),
+            Arguments.of(named("null id  field != non null id  field", g4), g5),
+            Arguments.of(named("non null id  field != null id  field", g4), g5),
+            Arguments.of(named("null id field", c1), c2),
+            Arguments.of(named("same id field but different types", c3), a1),
             Arguments.of(named("right side null object", c3), null),
             Arguments.of(named("left side null object", null), c3)
         );
