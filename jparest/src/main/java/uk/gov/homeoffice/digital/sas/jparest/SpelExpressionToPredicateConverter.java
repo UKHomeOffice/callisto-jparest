@@ -32,8 +32,6 @@ import java.util.logging.Logger;
  */
 public class SpelExpressionToPredicateConverter {
 
-    public static final int ALLOWED_CHILD_COUNT = 2;
-
     private SpelExpressionToPredicateConverter(){
     }
 
@@ -83,7 +81,7 @@ public class SpelExpressionToPredicateConverter {
         // At this point we are looking for "property {operator} property/literal"
         // so we can only handle 2 children the left side and the right side
         // of the expression. Throw if there are not only 2 children
-        if (node.getChildCount() != ALLOWED_CHILD_COUNT) {
+        if (node.getChildCount() != 2) {
             throw new InvalidFilterException("Unknown expression");
         }
 
