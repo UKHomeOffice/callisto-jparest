@@ -43,12 +43,11 @@ public abstract class BaseEntity {
         }
         if (!(o instanceof BaseEntity)) return false;
         BaseEntity that = (BaseEntity) o;
-        return (null!=getId() && null!=that.getId() && getId().equals(that.getId())) &&
-                (null!=getTenantId() && null!=that.getTenantId() && getTenantId().equals(that.getTenantId()));
+        return (null!=getId() && null!=that.getId() && getId().equals(that.getId()));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getTenantId());
+        return Objects.hash(getId());
     }
 }
