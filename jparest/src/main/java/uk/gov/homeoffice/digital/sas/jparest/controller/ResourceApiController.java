@@ -13,7 +13,6 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -209,7 +208,9 @@ public class ResourceApiController<T extends BaseEntity, U> {
             query.where(builder.and(tenantPredicate, idPredicate));
 
             var updatedItems = this.entityManager.createQuery(query).executeUpdate();
-            if (updatedItems != 1) throw new EmptyResultDataAccessException(1);
+            if (updatedItems != 1) {
+                throw new EmptyResultDataAccessException(1);
+            }
 
             transactionManager.commit(transactionStatus);
         } catch (EmptyResultDataAccessException ex) {
@@ -302,9 +303,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
                               @PathVariable String relation,
                               @PathVariable Object[] relatedIds) throws IllegalArgumentException {
 
-        var transactionDefinition = new DefaultTransactionDefinition();
-        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
-
         var originalEntity = getById(id, relation, tenantId);
 
         var relatedEntities = entityUtils.getRelatedEntities(originalEntity, relation);
@@ -326,6 +324,8 @@ public class ResourceApiController<T extends BaseEntity, U> {
             throw new ResourceNotFoundException(deletableRelatedResourcesMessage(relatedType, notDeletableRelatedIds));
         }
 
+        var transactionDefinition = new DefaultTransactionDefinition();
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
         try {
             repository.saveAndFlush(originalEntity);
             transactionManager.commit(transactionStatus);
