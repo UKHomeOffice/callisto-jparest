@@ -23,6 +23,10 @@ class BaseEntityTest {
     public static final UUID SAMPLE_ID = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120000");
     public static final UUID SAMPLE_TENANT_ID = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120001");
     public static final UUID SAMPLE2_TENANT_ID = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120002");
+    public static final UUID UUID1 = UUID.fromString("7a7c7da4-bb29-11ec-1000-0242ac120001");
+    public static final UUID UUID2 = UUID.fromString("7a7c7da4-bb29-11ec-1001-0242ac120002");
+    public static final UUID UUID3 = UUID.fromString("7a7c7da4-bb29-11ec-1002-0242ac120003");
+
 
     @Test
     void getIdField_classContainsSingleIdField_noExceptionThrown() {
@@ -133,10 +137,10 @@ class BaseEntityTest {
     static Stream<Arguments> unequalObjects() {
         // Different values in id field
         var g1 = new GuidIdEntity();
-        g1.setId(UUID.randomUUID());
+        g1.setId(UUID1);
         g1.setTenantId(SAMPLE_TENANT_ID);
         var g2 = new GuidIdEntity();
-        g2.setId(UUID.randomUUID());
+        g2.setId(UUID2);
         g2.setTenantId(SAMPLE_TENANT_ID);
 
         // with null id field
@@ -151,7 +155,7 @@ class BaseEntityTest {
         var g5 = new GuidIdEntity();
         g5.setId(SAMPLE_ID);
         g5.setTenantId(SAMPLE_TENANT_ID);
-        g5.setIdentifier(UUID.randomUUID());
+        g5.setIdentifier(UUID3);
 
         // Same value in description field but null ID field
         var c1 = new DummyEntityC();

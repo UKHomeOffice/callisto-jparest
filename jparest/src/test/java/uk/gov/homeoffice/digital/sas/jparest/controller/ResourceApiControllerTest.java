@@ -59,9 +59,9 @@ class ResourceApiControllerTest {
     private PlatformTransactionManager transactionManager;
     
     
-    public static final UUID NON_EXISTENT_ID = UUID.randomUUID();
-    public static final UUID NON_EXISTENT_ID_2 = UUID.randomUUID();
-    public static final UUID NEW_RESOURCE_ID = UUID.randomUUID();
+    public static final UUID NON_EXISTENT_ID = UUID.fromString("7a7c7da4-bb29-11ec-1000-0242ac120001");
+    public static final UUID NON_EXISTENT_ID_2 = UUID.fromString("7a7c7da4-bb29-11ec-1001-0242ac120002");
+    public static final UUID NEW_RESOURCE_ID = UUID.fromString("7a7c7da4-bb29-11ec-1002-0242ac120003");
 
     public static final UUID DUMMY_A_ID_1 = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac110001");
     public static final UUID DUMMY_A_ID_2 = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac110002");
@@ -74,7 +74,7 @@ class ResourceApiControllerTest {
     public static final UUID DUMMY_C_ID_1 = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac130001");
 
     private static final UUID TENANT_ID = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120002");
-    private static final UUID INVALID_TENANT_ID = UUID.randomUUID();
+    private static final UUID INVALID_TENANT_ID = UUID.fromString("7a7c7da4-bb29-11ec-1003-0242ac120004");
     
     private static final String ID_FIELD_NAME = "id";
     private static final String TENANT_ID_FIELD_NAME = "tenantId";
