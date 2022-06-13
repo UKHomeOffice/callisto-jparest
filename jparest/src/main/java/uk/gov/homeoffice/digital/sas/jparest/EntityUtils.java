@@ -2,7 +2,6 @@ package uk.gov.homeoffice.digital.sas.jparest;
 
 import lombok.Getter;
 import lombok.NonNull;
-
 import org.springframework.util.StringUtils;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
@@ -15,17 +14,10 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.Type;
+import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 /**
@@ -39,18 +31,19 @@ import static java.util.Collections.emptyList;
 public class EntityUtils<T> {
 
     private static final Logger LOGGER = Logger.getLogger(EntityUtils.class.getName());
-    public static final String MORE_THAN_ONE_ID_FIELD = "'%s' entity should not have more than one @Id field";
+    public static final String ID_FIELD_NAME = "id";
 
     @Getter
     private Class<T> entityType;
     @Getter
     private Set<String> relatedResources = new HashSet<>();
-    private Field idField;
+    private Field idField = getBaseEntityIdField1();
     @Getter
-    private Class<?> idFieldType;
+    private Class<?> idFieldType= UUID.class;
     @Getter
-    private String idFieldName;
+    private String idFieldName = ID_FIELD_NAME;
     private Map<String, RelatedEntity> relations = new HashMap<>();
+    private EntityManager entityManager;
 
     /**
      * Creates a utility class for the specified entityType
@@ -62,49 +55,18 @@ public class EntityUtils<T> {
                                      // touching the database
     public EntityUtils(@NonNull Class<T> entityType, @NonNull EntityManager entityManager) {
 
-        Set<String> tmpRelatedResources = new HashSet<>();
-
-        // Iterate the declared fields to find the field annotated with Id
-        // and to find the fields marked ManyToMany
-        for (Field field : entityType.getDeclaredFields()) {
-            // Only record relationships that aren't mapped by another class
-            if (field.isAnnotationPresent(ManyToMany.class) &&
-                    !StringUtils.hasText(field.getAnnotation(ManyToMany.class).mappedBy())) {
-                var relatedEntityType = field.getGenericType();
-                if (relatedEntityType instanceof ParameterizedType parameterizedType) {
-                    relatedEntityType = parameterizedType.getActualTypeArguments()[0];
-                }
-
-                EntityType<?> ret = entityManager.getMetamodel().entity((Class<?>) relatedEntityType);
-                Class<?> relatedIdType = ret.getIdType().getJavaType();
-                var relatedIdField = (Field) ret.getId((Class<?>) relatedIdType).getJavaMember();
-                field.setAccessible(true);
-                relations.putIfAbsent(field.getName(), new RelatedEntity(field, (Class<?>) relatedEntityType, relatedIdType, relatedIdField));
-                tmpRelatedResources.add(field.getName());
-            }
-
-        }
-
-        // Validate the number of ID fields in BaseEntity to have 1 & Entity to have 0
-        List<Field> baseClassIdFields = Arrays.stream(entityType.getSuperclass().getDeclaredFields())
-                .filter(f -> f.isAnnotationPresent(Id.class))
-                .collect(Collectors.toList());
-        if(baseClassIdFields.size() > 1) {
-            throw new ResourceException(format(MORE_THAN_ONE_ID_FIELD, BaseEntity.class.getName()));
-        }
-        Arrays.stream(entityType.getDeclaredFields())
-                .filter(f -> f.isAnnotationPresent(Id.class))
-                .findAny()
-                .ifPresent( (Field e) -> {
-                    throw new ResourceException(format(MORE_THAN_ONE_ID_FIELD, entityType.getName()));
-                });
-
+        this.entityManager = entityManager;
         this.entityType = entityType;
-        this.relatedResources = tmpRelatedResources;
-        this.idField = baseClassIdFields.get(0);
-        idField.setAccessible(true);
-        this.idFieldType = idField.getType();
-        this.idFieldName = idField.getName();
+
+        // Iterate the declared fields to find the fields marked ManyToMany
+        // Only record relationships that aren't mapped by another class
+        for (Field field : entityType.getDeclaredFields()) {
+            if (field.isAnnotationPresent(ManyToMany.class) && !StringUtils.hasText(field.getAnnotation(ManyToMany.class).mappedBy())) {
+                field.setAccessible(true);
+                relations.putIfAbsent(field.getName(), getRelatedEntity(field));
+                relatedResources.add(field.getName());
+            }
+        }
     }
 
     /**
@@ -212,5 +174,55 @@ public class EntityUtils<T> {
         Class<?> entityType;
         Class<?> idFieldType;
         Field idField;
+    }
+
+    public RelatedEntity getRelatedEntity(Field declaredField) {
+        // Validate the related Entity is of BaseEntity type
+        validateEntityIsOfBaseEntityType((Class<?>) getRelatedEntityType(declaredField));
+        var relatedEntityType = (Class<?>) getRelatedEntityType(declaredField);
+        Class<?> idFieldType1 = UUID.class;
+        var idField = getBaseEntityIdField(declaredField);
+        // TODO need to replace it with direct access method later
+        //var idField = getBaseEntityIdField1();
+        return new RelatedEntity(declaredField, relatedEntityType, idFieldType1, idField);
+    }
+
+    // TODO This method should be replaced with the getBaseEntityIdField1() after fixing the Reference
+    private Field getBaseEntityIdField(Field declaredField) {
+        Class<?> relatedEntityType = (Class<?>) getRelatedEntityType(declaredField);
+        EntityType<?> ret = entityManager.getMetamodel().entity((Class<?>) relatedEntityType);
+        Class<?> relatedIdType = ret.getIdType().getJavaType();
+        var idField = (Field) ret.getId((Class<?>)  UUID.class).getJavaMember();
+        idField.setAccessible(true);
+        return idField;
+    }
+
+    private Field getBaseEntityIdField1() {
+        Field idField;
+        try {
+            idField = BaseEntity.class.getDeclaredField(ID_FIELD_NAME);
+        } catch (NoSuchFieldException e) {
+            LOGGER.severe(ID_FIELD_NAME + " not declared in this Entity " + BaseEntity.class.getName());
+            throw new ResourceException(ID_FIELD_NAME + " not declared in this Entity " + BaseEntity.class.getName());
+        }
+        // TODO This need to be removed after enabling direct access to id field
+        idField.setAccessible(true);
+        return idField;
+    }
+
+    // Validate the Related entity also inherits from the BaseEntity
+    public boolean validateEntityIsOfBaseEntityType(Class<?> entityType){
+        return (entityType.getClass().isInstance(BaseEntity.class));
+        /*if ( !(entityType.getClass().isInstance(BaseEntity.class))) {
+            throw new ResourceException( entityType + " is not inheriting from the BaseEntity");
+        }*/
+    }
+
+    private Type getRelatedEntityType(Field field) {
+        var relatedEntityType = field.getGenericType();
+        if (relatedEntityType instanceof ParameterizedType parameterizedType) {
+            relatedEntityType = parameterizedType.getActualTypeArguments()[0];
+        }
+        return relatedEntityType;
     }
 }

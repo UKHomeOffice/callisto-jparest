@@ -16,7 +16,6 @@ import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityE;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
 
 import javax.persistence.EntityManager;
@@ -77,12 +76,6 @@ class EntityUtilsTest {
 
         var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
         assertThat(entityUtils.getRelatedResources()).contains("dummyEntityBSet");
-    }
-
-    @Test
-    void entityUtils_moreThanOneIdField_throwsResourceException(){
-        assertThatExceptionOfType(ResourceException.class)
-                .isThrownBy(() -> new EntityUtils<>(DummyEntityE.class, entityManager));
     }
 
     @Test
