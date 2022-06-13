@@ -101,21 +101,21 @@ public class PathItemCreator {
         pi.get(get);
 
         var idParameter = getParameter(idClazz, PATH, ID_PARAM_NAME);
-        get.addParametersItem(idParameter);
         get.addParametersItem(TENANT_ID_PARAMETER);
+        get.addParametersItem(idParameter);
         var put = new Operation();
+        put.addParametersItem(TENANT_ID_PARAMETER);
         put.addParametersItem(idParameter);
         var requestBody = getRequestBody(clazz);
         put.setRequestBody(requestBody);
         put.setResponses(responses);
-        put.addParametersItem(TENANT_ID_PARAMETER);
         put.addTagsItem(tag);
         pi.put(put);
         var delete = new Operation();
 
         ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
-        delete.addParametersItem(idParameter);
         delete.addParametersItem(TENANT_ID_PARAMETER);
+        delete.addParametersItem(idParameter);
         delete.setResponses(deleteResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
@@ -142,8 +142,8 @@ public class PathItemCreator {
         var idParameter = getParameter(idClazz, PATH, ID_PARAM_NAME);
 
         var get = new Operation();
-        get.addParametersItem(idParameter);
         get.addParametersItem(TENANT_ID_PARAMETER);
+        get.addParametersItem(idParameter);
         get.addParametersItem(PAGEABLE_PARAMETER);
         get.addParametersItem(getFilterParameter(clazz));
         get.setResponses(responses);
@@ -172,16 +172,16 @@ public class PathItemCreator {
         var idParameter = getParameter(idClazz, PATH, ID_PARAM_NAME);
         var relatedIdParameter = getArrayParameter(relatedIdClazz, PATH, RELATED_PARAM_NAME);
         var delete = new Operation();
+        delete.addParametersItem(TENANT_ID_PARAMETER);
         delete.addParametersItem(idParameter);
         delete.addParametersItem(relatedIdParameter);
-        delete.addParametersItem(TENANT_ID_PARAMETER);
         delete.setResponses(defaultResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
 
         var put = new Operation();
-        put.addParametersItem(idParameter);
         put.addParametersItem(TENANT_ID_PARAMETER);
+        put.addParametersItem(idParameter);
         put.addParametersItem(relatedIdParameter);
         put.setResponses(defaultResponses);
         put.addTagsItem(tag);
