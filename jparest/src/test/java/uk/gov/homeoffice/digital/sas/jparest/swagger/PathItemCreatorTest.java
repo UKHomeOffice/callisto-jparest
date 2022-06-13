@@ -9,16 +9,16 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
-
+import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.testutils.logging.LoggerMemoryAppender;
 import uk.gov.homeoffice.digital.sas.jparest.testutils.logging.LoggingUtils;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.ID_PARAM_NAME;
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.RELATED_PARAM_NAME;
 
 
 class PathItemCreatorTest {
@@ -42,10 +42,8 @@ class PathItemCreatorTest {
         assertThat(actualGetOperation.getTags()).containsExactly(TAG);
 
         //params
-        assertThat(actualGetOperation.getParameters()).hasSize(3);
-        assertTenantIdParameterValues(actualGetOperation.getParameters().get(0));
-        assertPageableParameterValues(actualGetOperation.getParameters().get(1));
-        assertFilterParameterValues(actualGetOperation.getParameters().get(2));
+        assertParameterValues(
+                actualGetOperation.getParameters(), RequestParameter.TENANT_ID, RequestParameter.PAGEABLE, RequestParameter.FILTER);
 
         //responses
         assertThat(actualGetOperation.getResponses()).containsKey(HTTP_200_KEY);
@@ -81,11 +79,9 @@ class PathItemCreatorTest {
         assertThat(actualGetOperation.getTags()).containsExactly(TAG);
 
         //params
-        assertThat(actualGetOperation.getParameters()).hasSize(4);
-        assertIdParameterValues(actualGetOperation.getParameters().get(0));
-        assertTenantIdParameterValues(actualGetOperation.getParameters().get(1));
-        assertPageableParameterValues(actualGetOperation.getParameters().get(2));
-        assertFilterParameterValues(actualGetOperation.getParameters().get(3));
+        assertParameterValues(
+                actualGetOperation.getParameters(),
+                RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.PAGEABLE, RequestParameter.FILTER);
 
         //responses
         assertThat(actualGetOperation.getResponses()).containsKey(HTTP_200_KEY);
@@ -105,9 +101,8 @@ class PathItemCreatorTest {
         assertThat(actualGetOperation.getTags()).containsExactly(TAG);
 
         //params
-        assertThat(actualGetOperation.getParameters()).hasSize(2);
-        assertIdParameterValues(actualGetOperation.getParameters().get(0));
-        assertTenantIdParameterValues(actualGetOperation.getParameters().get(1));
+        assertParameterValues(
+                actualGetOperation.getParameters(), RequestParameter.TENANT_ID, RequestParameter.ID);
 
         //responses
         assertThat(actualGetOperation.getResponses()).containsKey(HTTP_200_KEY);
@@ -131,9 +126,7 @@ class PathItemCreatorTest {
         assertResourceResponse(actualPutOperation.getResponses().get(HTTP_200_KEY));
 
         //params
-        assertThat(actualPutOperation.getParameters()).hasSize(2);
-        assertIdParameterValues(actualPutOperation.getParameters().get(0));
-        assertTenantIdParameterValues(actualPutOperation.getParameters().get(1));
+        assertParameterValues(actualPutOperation.getParameters(), RequestParameter.TENANT_ID, RequestParameter.ID);
     }
 
     @Test
@@ -148,9 +141,7 @@ class PathItemCreatorTest {
         assertThat(actualDeleteOperation.getTags()).containsExactly(TAG);
 
         //params
-        assertThat(actualDeleteOperation.getParameters()).hasSize(2);
-        assertIdParameterValues(actualDeleteOperation.getParameters().get(0));
-        assertTenantIdParameterValues(actualDeleteOperation.getParameters().get(1));
+        assertParameterValues(actualDeleteOperation.getParameters(), RequestParameter.TENANT_ID, RequestParameter.ID);
 
         //responses
         assertThat(actualDeleteOperation.getResponses()).containsKey(HTTP_200_KEY);
@@ -169,10 +160,9 @@ class PathItemCreatorTest {
         assertThat(actualDeleteOperation.getTags()).containsExactly(TAG);
 
         //params
-        assertThat(actualDeleteOperation.getParameters()).hasSize(3);
-        assertIdParameterValues(actualDeleteOperation.getParameters().get(0));
-        assertArrayParameterValues(actualDeleteOperation.getParameters().get(1));
-        assertTenantIdParameterValues(actualDeleteOperation.getParameters().get(2));
+        assertParameterValues(
+                actualDeleteOperation.getParameters(),
+                RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATED_IDS);
 
         //responses
         assertThat(actualDeleteOperation.getResponses()).containsKey(HTTP_200_KEY);
@@ -191,10 +181,9 @@ class PathItemCreatorTest {
         assertThat(actualPutOperation.getTags()).containsExactly(TAG);
 
         //params
-        assertThat(actualPutOperation.getParameters()).hasSize(3);
-        assertIdParameterValues(actualPutOperation.getParameters().get(0));
-        assertTenantIdParameterValues(actualPutOperation.getParameters().get(1));
-        assertArrayParameterValues(actualPutOperation.getParameters().get(2));
+        assertParameterValues(
+                actualPutOperation.getParameters(),
+                RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATED_IDS);
 
         //responses
         assertThat(actualPutOperation.getResponses()).containsKey(HTTP_200_KEY);
@@ -221,31 +210,19 @@ class PathItemCreatorTest {
 
 
 
-    private void assertParameterValues(Parameter actualParam, boolean expectedRequired, String expectedIn, String expectedName) {
-        assertThat(actualParam.getSchema()).isNotNull();
-        assertThat(actualParam.getRequired()).isEqualTo(expectedRequired);
-        assertThat(actualParam.getIn()).isEqualTo(expectedIn);
-        assertThat(actualParam.getName()).isEqualTo(expectedName);
-    }
+    private void assertParameterValues(List<Parameter> actualParameters, RequestParameter... expectedRequestParameters) {
 
-    private void assertIdParameterValues(Parameter actualParam) {
-        assertParameterValues(actualParam, true, "path", ID_PARAM_NAME);
-    }
+        assertThat(actualParameters).hasSize(expectedRequestParameters.length);
+        var sortedExpectedRequestParams = RequestParameter.getSortedParams(expectedRequestParameters);
 
-    private void assertTenantIdParameterValues(Parameter actualParam) {
-        assertParameterValues(actualParam, true, "query", "tenantId");
-    }
-
-    private void assertArrayParameterValues(Parameter actualParam) {
-        assertParameterValues(actualParam, true, "path", RELATED_PARAM_NAME);
-    }
-
-    private void assertPageableParameterValues(Parameter actualPageableParam) {
-        assertParameterValues(actualPageableParam, true, "query", "pageable");
-    }
-
-    private void assertFilterParameterValues(Parameter actualFilterParam) {
-        assertParameterValues(actualFilterParam, false, "query", "filter");
+        for (var x = 0; x < sortedExpectedRequestParams.size(); x++) {
+            var actualParam = actualParameters.get(x);
+            var expectedParam = sortedExpectedRequestParams.get(x);
+            assertThat(actualParam.getSchema()).isNotNull();
+            assertThat(actualParam.getRequired()).isEqualTo(expectedParam.isRequired());
+            assertThat(actualParam.getIn()).isEqualTo(expectedParam.getParamType());
+            assertThat(actualParam.getName()).isEqualTo(expectedParam.getParamName());
+        }
     }
 
     private void assertResourceResponse(ApiResponse actualResponse) {

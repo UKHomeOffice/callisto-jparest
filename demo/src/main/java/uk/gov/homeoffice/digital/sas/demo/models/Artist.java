@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Resource(path = "artists", filterExamples = {
-    @ExampleObject(name = "performance_name match", value = "performance_name matches '%the%'"),
+    @ExampleObject(name = "performanceName match", value = "performanceName matches '%the%'"),
     @ExampleObject(name = "artist_id less than", value = "artisit_id < 5"),
     @ExampleObject(name = "artist_id less than or eaqual to", value = "artisit_id <= 10")
 })

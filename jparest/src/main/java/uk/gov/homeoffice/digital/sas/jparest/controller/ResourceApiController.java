@@ -55,6 +55,8 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.TENANT_ID;
+import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.ID;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage;
 
@@ -78,8 +80,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
     private final ValidatorUtils validatorUtils = new ValidatorUtils();
 
     private static WebDataBinder binder = WebDataBinderFactory.getWebDataBinder();
-    private static final String ENTITY_TENANT_ID_FIELD_NAME = "tenantId";
-    private static final String ENTITY_ID_FIELD_NAME = "id";
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
 
 
@@ -114,7 +114,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         CriteriaQuery<T> query = builder.createQuery(this.entityUtils.getEntityType());
         Root<T> root = query.from(this.entityUtils.getEntityType());
 
-        var tenantPredicate = builder.equal(root.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
+        var tenantPredicate = builder.equal(root.get(TENANT_ID.getParamName()), tenantId);
         var filterPredicate = SpelExpressionToPredicateConverter.convert(filter, builder, root);
         var finalPredicate = filter != null
                 ? builder.and(tenantPredicate, filterPredicate) : tenantPredicate;
@@ -143,8 +143,8 @@ public class ResourceApiController<T extends BaseEntity, U> {
         Root<T> root = query.from(this.entityUtils.getEntityType());
 
 
-        var tenantPredicate = builder.equal(root.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
-        var filterPredicate = builder.equal(root.get(ENTITY_ID_FIELD_NAME), identifier);
+        var tenantPredicate = builder.equal(root.get(TENANT_ID.getParamName()), tenantId);
+        var filterPredicate = builder.equal(root.get(ID.getParamName()), identifier);
         var finalPredicate = builder.and(tenantPredicate, filterPredicate);
         query.where(finalPredicate);
 
@@ -203,8 +203,8 @@ public class ResourceApiController<T extends BaseEntity, U> {
             CriteriaDelete<T> query = builder.createCriteriaDelete(this.entityUtils.getEntityType());
             Root<T> root = query.from(this.entityUtils.getEntityType());
 
-            var tenantPredicate = builder.equal(root.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
-            var idPredicate = builder.equal(root.get(ENTITY_ID_FIELD_NAME), identifier);
+            var tenantPredicate = builder.equal(root.get(TENANT_ID.getParamName()), tenantId);
+            var idPredicate = builder.equal(root.get(ID.getParamName()), identifier);
             query.where(builder.and(tenantPredicate, idPredicate));
 
             var updatedItems = this.entityManager.createQuery(query).executeUpdate();
@@ -273,13 +273,13 @@ public class ResourceApiController<T extends BaseEntity, U> {
         CriteriaQuery<?> select = query.select(root.join(relation));
         Join<?, ?> relatedJoin = root.getJoins().iterator().next();
 
-        var predicate = builder.equal(root.get(ENTITY_ID_FIELD_NAME), identifier);
+        var predicate = builder.equal(root.get(ID.getParamName()), identifier);
         var filterPredicate = SpelExpressionToPredicateConverter.convert(filter, builder, relatedJoin);
         if (filterPredicate != null) {
             predicate = builder.and(predicate, filterPredicate);
         }
-        var parentTenantPredicate = builder.equal(root.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
-        var relatedTenantPredicate = builder.equal(relatedJoin.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
+        var parentTenantPredicate = builder.equal(root.get(TENANT_ID.getParamName()), tenantId);
+        var relatedTenantPredicate = builder.equal(relatedJoin.get(TENANT_ID.getParamName()), tenantId);
         var finalPredicate = builder.and(parentTenantPredicate, relatedTenantPredicate, predicate);
         select.where(finalPredicate);
 
@@ -424,7 +424,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var serializedRelatedIds = Arrays.stream(relatedIds)
                 .map(relatedId -> getIdentifier(relatedId, entityUtils.getRelatedIdType(relation))).collect(Collectors.toList());
         var relatedIdPredicate = relatedRoot.get(this.entityUtils.getRelatedIdField(relation).getName()).in(serializedRelatedIds);
-        var relatedTenantPredicate = builder.equal(relatedRoot.get(ENTITY_TENANT_ID_FIELD_NAME), tenantId);
+        var relatedTenantPredicate = builder.equal(relatedRoot.get(TENANT_ID.getParamName()), tenantId);
         var relatedSelect = query.select(builder.count(relatedRoot)).where(builder.and(relatedIdPredicate, relatedTenantPredicate));
         var tenantIdMatchesRelatedResources = this.entityManager.createQuery(relatedSelect).getSingleResult() == relatedIds.length;
 

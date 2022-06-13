@@ -22,24 +22,20 @@ import org.springdoc.core.SpringDocAnnotationsUtils;
 import org.springdoc.core.converters.models.Pageable;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
+import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.UUID;
-
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.ID_PARAM_NAME;
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.RELATED_PARAM_NAME;
 
 @Component
 public class PathItemCreator {
 
     private static final ApiResponse EMPTY_RESPONSE = emptyResponse();
-    public static final String PAGEABLE = "pageable";
-    public static final String QUERY_PARAMETER_NAME = "query";
-    private static final Parameter PAGEABLE_PARAMETER = getParameter(Pageable.class, QUERY_PARAMETER_NAME, PAGEABLE);
+    private static final Parameter PAGEABLE_PARAMETER = getParameter(Pageable.class, RequestParameter.PAGEABLE);
+    private static final Parameter TENANT_ID_PARAMETER = getParameter(UUID.class, RequestParameter.TENANT_ID);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PathItemCreator.class);
-    private static final String TENANT_ID = "tenantId";
-    public static final Parameter TENANT_ID_PARAMETER = getParameter(UUID.class, QUERY_PARAMETER_NAME, TENANT_ID);
-    public static final String PATH = "path";
 
 
     /**
@@ -60,16 +56,14 @@ public class PathItemCreator {
 
 
         var get = new Operation();
-        get.addParametersItem(TENANT_ID_PARAMETER);
-        get.addParametersItem(PAGEABLE_PARAMETER);
-        get.addParametersItem(getFilterParameter(clazz));
+        addParametersToOperation(get, TENANT_ID_PARAMETER, PAGEABLE_PARAMETER, getFilterParameter(clazz));
         get.setResponses(responses);
         get.addTagsItem(tag);
         pi.get(get);
 
         var post = new Operation();
         post.setResponses(responses);
-        post.addParametersItem(TENANT_ID_PARAMETER);
+        addParametersToOperation(post, TENANT_ID_PARAMETER);
         post.addTagsItem(tag);
         var requestBody = getRequestBody(clazz);
         post.setRequestBody(requestBody);
@@ -100,22 +94,20 @@ public class PathItemCreator {
         get.addTagsItem(tag);
         pi.get(get);
 
-        var idParameter = getParameter(idClazz, PATH, ID_PARAM_NAME);
-        get.addParametersItem(TENANT_ID_PARAMETER);
-        get.addParametersItem(idParameter);
+        var idParameter = getParameter(idClazz, RequestParameter.ID);
+        addParametersToOperation(get, TENANT_ID_PARAMETER, idParameter);
+
         var put = new Operation();
-        put.addParametersItem(TENANT_ID_PARAMETER);
-        put.addParametersItem(idParameter);
+        addParametersToOperation(put, TENANT_ID_PARAMETER, idParameter);
         var requestBody = getRequestBody(clazz);
         put.setRequestBody(requestBody);
         put.setResponses(responses);
         put.addTagsItem(tag);
         pi.put(put);
-        var delete = new Operation();
 
+        var delete = new Operation();
         ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
-        delete.addParametersItem(TENANT_ID_PARAMETER);
-        delete.addParametersItem(idParameter);
+        addParametersToOperation(delete, TENANT_ID_PARAMETER, idParameter);
         delete.setResponses(deleteResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
@@ -139,13 +131,10 @@ public class PathItemCreator {
         var pi = new PathItem();
         ApiResponse response = getResourceResponse(clazz);
         ApiResponses responses = new ApiResponses().addApiResponse("200", response);
-        var idParameter = getParameter(idClazz, PATH, ID_PARAM_NAME);
+        var idParameter = getParameter(idClazz, RequestParameter.ID);
 
         var get = new Operation();
-        get.addParametersItem(TENANT_ID_PARAMETER);
-        get.addParametersItem(idParameter);
-        get.addParametersItem(PAGEABLE_PARAMETER);
-        get.addParametersItem(getFilterParameter(clazz));
+        addParametersToOperation(get, TENANT_ID_PARAMETER, idParameter, PAGEABLE_PARAMETER, getFilterParameter(clazz));
         get.setResponses(responses);
         get.addTagsItem(tag);
         pi.get(get);
@@ -169,20 +158,16 @@ public class PathItemCreator {
 
         ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
 
-        var idParameter = getParameter(idClazz, PATH, ID_PARAM_NAME);
-        var relatedIdParameter = getArrayParameter(relatedIdClazz, PATH, RELATED_PARAM_NAME);
+        var idParameter = getParameter(idClazz, RequestParameter.ID);
+        var relatedIdParameter = getArrayParameter(relatedIdClazz, RequestParameter.RELATED_IDS);
         var delete = new Operation();
-        delete.addParametersItem(TENANT_ID_PARAMETER);
-        delete.addParametersItem(idParameter);
-        delete.addParametersItem(relatedIdParameter);
+        addParametersToOperation(delete, TENANT_ID_PARAMETER, idParameter, relatedIdParameter);
         delete.setResponses(defaultResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
 
         var put = new Operation();
-        put.addParametersItem(TENANT_ID_PARAMETER);
-        put.addParametersItem(idParameter);
-        put.addParametersItem(relatedIdParameter);
+        addParametersToOperation(put, TENANT_ID_PARAMETER, idParameter, relatedIdParameter);
         put.setResponses(defaultResponses);
         put.addTagsItem(tag);
         pi.put(put);
@@ -244,45 +229,43 @@ public class PathItemCreator {
 
     /**
      * Generates a parameter for the specified class
-     * with the given name
+     * based on the given RequestParameter type
      *
      * @param clazz The parameter type
-     * @param setIn Where the parameter is set
-     * @param name  The name of the parameter
+     * @param requestParameter the parameter information used to create the Swagger Parameter
      * @return A Parameter with a schema for the given class
      */
-    private static Parameter getParameter(Class<?> clazz, String setIn, String name) {
+    private static Parameter getParameter(Class<?> clazz, RequestParameter requestParameter) {
         var parameter = new Parameter();
 
         Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
 
         parameter.schema(schema);
-        parameter.setIn(setIn);
-        parameter.required(true);
-        parameter.name(name);
+        parameter.setIn(requestParameter.getParamType());
+        parameter.required(requestParameter.isRequired());
+        parameter.name(requestParameter.getParamName());
 
         return parameter;
     }
 
     /**
      * Generates a parameter for an array of the specified class
-     * with the given name
+     * based on the given RequestParameter type
      *
      * @param clazz The parameter type
-     * @param setIn Where the parameter is set
-     * @param name  The name of the parameter
+     * @param requestParameter the parameter information used to create the Swagger Parameter
      * @return A Parameter with an array schema for items of the given class
      */
-    private static Parameter getArrayParameter(Class<?> clazz, String setIn, String name) {
+    private static Parameter getArrayParameter(Class<?> clazz, RequestParameter requestParameter) {
         var parameter = new Parameter();
         Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
         var as = new ArraySchema();
         as.setItems(schema);
 
         parameter.schema(as);
-        parameter.setIn(setIn);
-        parameter.required(true);
-        parameter.name(name);
+        parameter.setIn(requestParameter.getParamType());
+        parameter.required(requestParameter.isRequired());
+        parameter.name(requestParameter.getParamName());
 
         return parameter;
     }
@@ -334,9 +317,9 @@ public class PathItemCreator {
         Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(newComponents, String.class, null, null);
 
         parameter.schema(schema);
-        parameter.required(false);
-        parameter.setIn(QUERY_PARAMETER_NAME);
-        parameter.name("filter");
+        parameter.required(RequestParameter.FILTER.isRequired());
+        parameter.setIn(RequestParameter.FILTER.getParamType());
+        parameter.name(RequestParameter.FILTER.getParamName());
 
         Resource annotation = clazz.getAnnotation(Resource.class);
         for(ExampleObject exampleObj : annotation.filterExamples()) {
@@ -350,6 +333,13 @@ public class PathItemCreator {
         }
         return parameter;
 
+    }
+
+
+    private void addParametersToOperation(Operation operation, Parameter... parameters) {
+        Arrays.stream(parameters)
+                .sorted(Comparator.comparing(param -> RequestParameter.getEnumByParamName(param.getName()).getOrder()))
+                .forEach(operation::addParametersItem);
     }
 
 
