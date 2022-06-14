@@ -10,7 +10,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.metamodel.EntityType;
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -32,6 +31,7 @@ public class EntityUtils<T extends BaseEntity> {
 
     private static final Logger LOGGER = Logger.getLogger(EntityUtils.class.getName());
     public static final String ID_FIELD_NAME = "id";
+    public static final Class<UUID> ID_FIELD_TYPE = UUID.class;
 
     @Getter
     private Class<T> entityType;
@@ -39,7 +39,7 @@ public class EntityUtils<T extends BaseEntity> {
     private Set<String> relatedResources = new HashSet<>();
     private Field idField = getBaseEntityIdField1();
     @Getter
-    private Class<?> idFieldType= UUID.class;
+    private Class<?> idFieldType= ID_FIELD_TYPE;
     @Getter
     private String idFieldName = ID_FIELD_NAME;
     private Map<String, RelatedEntity> relations = new HashMap<>();
@@ -63,8 +63,7 @@ public class EntityUtils<T extends BaseEntity> {
         for (Field field : entityType.getDeclaredFields()) {
             if (field.isAnnotationPresent(ManyToMany.class)
                     && !StringUtils.hasText(field.getAnnotation(ManyToMany.class).mappedBy())
-                    // and make sure derives from BaseEntity
-                    && isBaseEntityType(field)
+                    && isBaseEntityType(field) // and make sure derives from BaseEntity
             ) {
                 field.setAccessible(true);
                 relations.putIfAbsent(field.getName(), getRelatedEntity(field));
@@ -156,50 +155,22 @@ public class EntityUtils<T extends BaseEntity> {
     /**
      * Provides the type of the Id field for the entity accessed by the specified relation
      */
-    public Class<?> getRelatedIdType(String relation) {
-        return this.relations.get(relation).idFieldType;
-    }
-
-    /**
-     * Provides the Id field for the entity accessed by the specified relation
-     */
-    public Field getRelatedIdField(String relation) {
-        return this.relations.get(relation).idField;
+    public Class<UUID> getRelatedIdType(String relation) {
+        return ID_FIELD_TYPE;
     }
 
     class RelatedEntity {
-        RelatedEntity(Field declaredField, Class<T> entityType, Class<?> idFieldType, Field idField) {
+        RelatedEntity(Field declaredField, Class<T> entityType) {
             this.declaredField = declaredField;
             this.entityType = entityType;
-            this.idFieldType = idFieldType;
-            this.idField = idField;
         }
-
         Field declaredField;
         Class<T> entityType;
-        Class<?> idFieldType;
-        Field idField;
     }
 
     private RelatedEntity getRelatedEntity(Field declaredField) {
-        // Validate the related Entity is of BaseEntity type
-        boolean isBaseEntity = isBaseEntityType(declaredField);
         var relatedEntityType = (Class<T>) getRelatedEntityType(declaredField);
-        Class<UUID> idFieldType = UUID.class;
-        var idField = getBaseEntityIdField(declaredField);
-        // TODO need to replace it with direct access method later
-        //var idField = getBaseEntityIdField1();
-        return new RelatedEntity(declaredField, relatedEntityType, idFieldType, idField);
-    }
-
-    // TODO This method should be replaced with the getBaseEntityIdField1() after fixing the Reference
-    private Field getBaseEntityIdField(Field declaredField) {
-        Class<?> relatedEntityType = (Class<?>) getRelatedEntityType(declaredField);
-        EntityType<?> ret = entityManager.getMetamodel().entity((Class<?>) relatedEntityType);
-        Class<?> relatedIdType = ret.getIdType().getJavaType();
-        var idField = (Field) ret.getId((Class<?>)  UUID.class).getJavaMember();
-        idField.setAccessible(true);
-        return idField;
+        return new RelatedEntity(declaredField, relatedEntityType);
     }
 
     private Field getBaseEntityIdField1() {
@@ -214,14 +185,6 @@ public class EntityUtils<T extends BaseEntity> {
         idField.setAccessible(true);
         return idField;
     }
-
-    /*// Validate the Related entity also inherits from the BaseEntity
-    public boolean validateEntityIsOfBaseEntityType(Class<?> entityType){
-        return (entityType.getClass().isInstance(BaseEntity.class));
-        *//*if ( !(entityType.getClass().isInstance(BaseEntity.class))) {
-            throw new ResourceException( entityType + " is not inheriting from the BaseEntity");
-        }*//*
-    }*/
 
     // Validate the Related entity also inherits from the BaseEntity
     public boolean isBaseEntityType(Field declaredField){

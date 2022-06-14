@@ -417,7 +417,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var builder = this.entityManager.getCriteriaBuilder();
         var query = builder.createQuery(Long.class);
         var relatedRoot = query.from(this.entityUtils.getRelatedType(relation));
-        var relatedIdPredicate = relatedRoot.get(this.entityUtils.getRelatedIdField(relation).getName()).in(relatedIds);
+        var relatedIdPredicate = relatedRoot.get(this.entityUtils.ID_FIELD_NAME).in(relatedIds);
         var relatedTenantPredicate = builder.equal(relatedRoot.get(TENANT_ID.getParamName()), tenantId);
         var relatedSelect = query.select(builder.count(relatedRoot)).where(builder.and(relatedIdPredicate, relatedTenantPredicate));
         var tenantIdMatchesRelatedResources = this.entityManager.createQuery(relatedSelect).getSingleResult() == relatedIds.size();
