@@ -7,13 +7,16 @@ import stepLib.ApiActions;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-public class ApiStepDefinitions {
+public class ApiStepDefinitionsStepDefs {
 
     @Steps
     private static ApiActions apiActions;
 
     @Then("^I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" and parameter \"([^\"]*)\"$")
     public void request(String requestType, String endpoint, String bearerToken, String param) throws InterruptedException {
+
+
+
         apiActions.restEndpointIsAvailable(endpoint);
         apiActions.setEndpoint();
 

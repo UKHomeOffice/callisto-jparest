@@ -8,9 +8,9 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
         tags = "@JpaRestApi",
         plugin = {"pretty"},
-        features = "classpath:features",
+        features = "src/test/java/features",
         glue = "steps"
 )
-public class JpaTestSuiteApi {
+public class RunTest {
 
 }
