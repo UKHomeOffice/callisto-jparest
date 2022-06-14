@@ -16,6 +16,8 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.testutils.logging.LoggerMemoryAppender;
 import uk.gov.homeoffice.digital.sas.jparest.testutils.logging.LoggingUtils;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -213,11 +215,11 @@ class PathItemCreatorTest {
     private void assertParameterValues(List<Parameter> actualParameters, RequestParameter... expectedRequestParameters) {
 
         assertThat(actualParameters).hasSize(expectedRequestParameters.length);
-        var sortedExpectedRequestParams = RequestParameter.getSortedParams(expectedRequestParameters);
+        Arrays.sort(expectedRequestParameters, Comparator.comparing(RequestParameter::getOrder));
 
-        for (var x = 0; x < sortedExpectedRequestParams.size(); x++) {
+        for (var x = 0; x < expectedRequestParameters.length; x++) {
             var actualParam = actualParameters.get(x);
-            var expectedParam = sortedExpectedRequestParams.get(x);
+            var expectedParam = expectedRequestParameters[x];
             assertThat(actualParam.getSchema()).isNotNull();
             assertThat(actualParam.getRequired()).isEqualTo(expectedParam.isRequired());
             assertThat(actualParam.getIn()).isEqualTo(expectedParam.getParamType());

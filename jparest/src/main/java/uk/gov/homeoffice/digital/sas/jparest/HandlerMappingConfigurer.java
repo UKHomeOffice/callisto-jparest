@@ -2,8 +2,6 @@ package uk.gov.homeoffice.digital.sas.jparest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.domain.Pageable;
-import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -14,20 +12,25 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo.BuilderConf
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
+import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.EntityType;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.*;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.API_ROOT_PATH;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.PATH_DELIMITER;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_ID_PATH_PARAM;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_RELATED_ID_PATH_PARAM;
 
 /**
  * Discovers JPA entities annotated with {@link Resource}
@@ -103,41 +106,68 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
         }
     }
 
-    private void mapRestOperationsToController(
-            Class<?> resource, String path, EntityUtils<?> entityUtils,
-            ResourceApiController<?, ?> controller) throws NoSuchMethodException {
+    private void mapRestOperationsToController(Class<?> resource,
+                                               String path,
+                                               EntityUtils<?> entityUtils,
+                                               ResourceApiController<?, ?> controller) throws NoSuchMethodException {
+
         LOGGER.fine("Registering common paths");
-        register(controller, "list", new Class<?>[]{UUID.class, SpelExpression.class, Pageable.class},
+
+        register(controller, "list",
+                getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.PAGEABLE, RequestParameter.FILTER),
                 path, RequestMethod.GET);
-        register(controller, "get", new Class<?>[]{UUID.class, Object.class},
+        register(controller, "get",
+                getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.ID),
                 path + URL_ID_PATH_PARAM, RequestMethod.GET);
-        register(controller, "create", new Class<?>[]{UUID.class, String.class},
+        register(controller, "create",
+                getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.BODY),
                 path, RequestMethod.POST);
-        register(controller, "delete", new Class<?>[]{UUID.class, Object.class},
+        register(controller, "delete",
+                getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.ID),
                 path + URL_ID_PATH_PARAM, RequestMethod.DELETE);
-        register(controller, "update", new Class<?>[]{UUID.class, Object.class, String.class},
+        register(controller, "update",
+                getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.BODY),
                 path + URL_ID_PATH_PARAM, RequestMethod.PUT);
         resourceEndpoint.add(resource, path, entityUtils.getIdFieldType());
     }
 
-    private void registerRelatedPaths(
-            Class<?> resource, String path, EntityUtils<?> entityUtils,
-            ResourceApiController<?, ?> controller) throws NoSuchMethodException {
+    private void registerRelatedPaths(Class<?> resource,
+                                      String path,
+                                      EntityUtils<?> entityUtils,
+                                      ResourceApiController<?, ?> controller) throws NoSuchMethodException {
+
         for (String relation : entityUtils.getRelatedResources()) {
+
             Class<?> relatedType = entityUtils.getRelatedType(relation);
             Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
             resourceEndpoint.addRelated(resource, relatedType,
                     path + URL_ID_PATH_PARAM + "/" + relation, relatedIdType);
             LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
+
             register(controller, "getRelated",
-                    new Class<?>[]{UUID.class, Object.class, String.class, SpelExpression.class, Pageable.class},
+                    getControllerMethodArgs(
+                            RequestParameter.TENANT_ID,
+                            RequestParameter.ID,
+                            RequestParameter.RELATION,
+                            RequestParameter.FILTER,
+                            RequestParameter.PAGEABLE),
                     path + createIdAndRelationParams(relation), RequestMethod.GET);
-            register(controller, "deleteRelated", new Class<?>[]{UUID.class, Object.class, String.class, Object[].class},
+
+            register(controller, "deleteRelated", getControllerMethodArgs(
+                    RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION, RequestParameter.RELATED_IDS),
                     path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM,
                     RequestMethod.DELETE);
-            register(controller, "addRelated", new Class<?>[]{UUID.class, Object.class, String.class, Object[].class},
+
+            register(controller, "addRelated", getControllerMethodArgs(
+                    RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION, RequestParameter.RELATED_IDS),
                     path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM, RequestMethod.PUT);
         }
+    }
+
+    private Class<?>[] getControllerMethodArgs(RequestParameter... requestParameters) {
+        return Stream.of(requestParameters)
+                .sorted(Comparator.comparing(RequestParameter::getOrder))
+                .map(RequestParameter::getParamDataType).toArray(Class<?>[]::new);
     }
 
     private void createBuilderOptions() {
@@ -147,7 +177,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
     }
 
     private static String createIdAndRelationParams(String relation) {
-        return URL_ID_PATH_PARAM + "/{relation:" + Pattern.quote(relation) + "}";
+        return URL_ID_PATH_PARAM + "/{" + RequestParameter.RELATION.getParamName() + ":" + Pattern.quote(relation) + "}";
     }
 
     /**

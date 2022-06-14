@@ -108,7 +108,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
     }
 
-    public ApiResponse<T> list(@RequestParam UUID tenantId, SpelExpression filter, Pageable pageable) {
+    public ApiResponse<T> list(@RequestParam UUID tenantId, Pageable pageable, SpelExpression filter) {
 
         var builder = this.entityManager.getCriteriaBuilder();
         CriteriaQuery<T> query = builder.createQuery(this.entityUtils.getEntityType());
@@ -263,7 +263,8 @@ public class ResourceApiController<T extends BaseEntity, U> {
     public ApiResponse getRelated(@RequestParam UUID tenantId,
                                   @PathVariable U id,
                                   @PathVariable String relation,
-                                  SpelExpression filter, Pageable pageable) {
+                                  Pageable pageable,
+                                  SpelExpression filter) {
 
         Serializable identifier = getIdentifier(id);
         var builder = this.entityManager.getCriteriaBuilder();

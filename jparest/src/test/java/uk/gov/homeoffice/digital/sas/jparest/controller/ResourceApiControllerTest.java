@@ -93,7 +93,7 @@ class ResourceApiControllerTest {
     void list_withoutFilter_returnsAllEntities() {
 
         var controller = getResourceApiController(DummyEntityA.class);
-        var response = controller.list(TENANT_ID, null, Pageable.ofSize(100));
+        var response = controller.list(TENANT_ID, Pageable.ofSize(100), null);
 
         assertThat(response).isNotNull();
         assertThat(response.getItems()).hasSize(10);
@@ -104,7 +104,7 @@ class ResourceApiControllerTest {
     void list_withFilter_returnsFilteredEntities(SpelExpression expression, int expectedItems) {
 
         var controller = getResourceApiController(DummyEntityA.class);
-        var response = controller.list(TENANT_ID, expression, Pageable.ofSize(100));
+        var response = controller.list(TENANT_ID, Pageable.ofSize(100), expression);
 
         assertThat(response).isNotNull();
         assertThat(response.getItems()).hasSize(expectedItems);
@@ -118,7 +118,7 @@ class ResourceApiControllerTest {
         var sort = Sort.by(Direction.ASC, "id");
         var pageable = PageRequest.ofSize(100).withSort(sort);
 
-        var response = controller.list(TENANT_ID, null, pageable);
+        var response = controller.list(TENANT_ID, pageable, null);
         final var items = response.getItems().toArray(new DummyEntityA[0]);
 
         assertThat(items).hasSizeGreaterThanOrEqualTo(2);
@@ -129,7 +129,7 @@ class ResourceApiControllerTest {
         pageable = PageRequest.ofSize(100).withSort(sort);
 
 
-        response = controller.list(TENANT_ID, null, pageable);
+        response = controller.list(TENANT_ID, pageable, null);
         final var items2 = response.getItems().toArray(new DummyEntityA[0]);
 
         assertThat(items2).hasSizeGreaterThanOrEqualTo(2);
@@ -141,7 +141,7 @@ class ResourceApiControllerTest {
     void list_requestTenantIdMatchesResourceTenantIds_noExceptionThrown() {
 
         var controller = getResourceApiController(DummyEntityA.class);
-        assertThatNoException().isThrownBy(() -> controller.list(TENANT_ID, null, Pageable.ofSize(100)));
+        assertThatNoException().isThrownBy(() -> controller.list(TENANT_ID, Pageable.ofSize(100), null));
     }
 
     @Test
@@ -149,7 +149,7 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityA.class);
 
-        var response = controller.list(INVALID_TENANT_ID, null, Pageable.ofSize(100));
+        var response = controller.list(INVALID_TENANT_ID, Pageable.ofSize(100), null);
         assertThat(response.getItems().toArray(new DummyEntityA[0])).isEmpty();
     }
 
@@ -587,13 +587,13 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityA.class);
 
-        var getRelatedResponse = controller.getRelated(TENANT_ID, DUMMY_A_ID_10, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100));
+        var getRelatedResponse = controller.getRelated(TENANT_ID, DUMMY_A_ID_10, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null);
         assertThat(getRelatedResponse.getItems()).isEmpty();
 
         assertThatNoException()
                 .isThrownBy(() -> controller.addRelated(TENANT_ID, DUMMY_A_ID_10, DUMMY_B_SET_FIELD_NAME, new Object[] {DUMMY_B_ID_2}));
 
-        getRelatedResponse = controller.getRelated(TENANT_ID, DUMMY_A_ID_10, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100));
+        getRelatedResponse = controller.getRelated(TENANT_ID, DUMMY_A_ID_10, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null);
         assertThat(getRelatedResponse.getItems()).hasSize(1);
         var resource = (DummyEntityB) getRelatedResponse.getItems().get(0);
         assertThat(resource.getId()).isEqualTo(DUMMY_B_ID_2);
@@ -679,7 +679,7 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityA.class);
 
-        var apiResponse = controller.getRelated(TENANT_ID, resourceId, DUMMY_B_SET_FIELD_NAME, expression, Pageable.ofSize(100));
+        var apiResponse = controller.getRelated(TENANT_ID, resourceId, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), expression);
 
         assertThat(apiResponse).isNotNull();
         assertThat(apiResponse.getItems()).hasSize(expectedItems);
@@ -691,14 +691,14 @@ class ResourceApiControllerTest {
 
         var controller = getResourceApiController(DummyEntityA.class);
         assertThatNoException().isThrownBy(() ->
-                controller.getRelated(TENANT_ID, DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100)));
+                controller.getRelated(TENANT_ID, DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null));
     }
 
     @Test
     void getRelated_requestTenantIdDoesNotMatchParentAndRelatedResourceTenantIds_noResourcesReturned() {
 
         var controller = getResourceApiController(DummyEntityA.class);
-        var apiResponse = controller.getRelated(INVALID_TENANT_ID, DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100));
+        var apiResponse = controller.getRelated(INVALID_TENANT_ID, DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null);
 
         assertThat(apiResponse).isNotNull();
         assertThat(apiResponse.getItems()).isEmpty();
@@ -714,7 +714,7 @@ class ResourceApiControllerTest {
 
         var controllerA = getResourceApiController(DummyEntityA.class);
 
-        var getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100));
+        var getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null);
         @SuppressWarnings("unchecked")
         var items = (List<DummyEntityB>) getRelatedResponse.getItems();
         assertThat(items).isNotEmpty()
@@ -725,7 +725,7 @@ class ResourceApiControllerTest {
                 () -> controllerA.deleteRelated(TENANT_ID, DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, new Object[] { DUMMY_B_ID_2 }));
 
 
-        getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100));
+        getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null);
         @SuppressWarnings("unchecked")
         var checkItems = (List<DummyEntityB>) getRelatedResponse.getItems();
         assertThat(checkItems).noneMatch((item) -> item.getId().equals(DUMMY_B_ID_2));
@@ -757,7 +757,7 @@ class ResourceApiControllerTest {
         assertThatNoException().isThrownBy(() -> controllerA.get(TENANT_ID, DUMMY_A_ID_1));
 
 
-        var getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100));
+        var getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null);
         @SuppressWarnings("unchecked")
         var checkItems = (List<DummyEntityB>) getRelatedResponse.getItems();
         assertThat(checkItems).noneMatch((item) -> item.getId().equals(NON_EXISTENT_ID));
@@ -777,7 +777,7 @@ class ResourceApiControllerTest {
         assertThatNoException().isThrownBy(() -> controllerA.get(TENANT_ID, DUMMY_A_ID_1));
 
 
-        var getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100));
+        var getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null);
         @SuppressWarnings("unchecked")
         var checkItems = (List<DummyEntityB>) getRelatedResponse.getItems();
 
@@ -802,7 +802,7 @@ class ResourceApiControllerTest {
 
         var controllerA = getResourceApiController(DummyEntityA.class);
 
-        var getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100));
+        var getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null);
         @SuppressWarnings("unchecked")
         var items = (List<DummyEntityB>) getRelatedResponse.getItems();
         assertThat(items).isNotEmpty()
@@ -811,7 +811,7 @@ class ResourceApiControllerTest {
         assertThatNoException().isThrownBy(
                 () -> controllerA.deleteRelated(TENANT_ID, DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, new Object[] { DUMMY_B_ID_2 }));
 
-        getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100));
+        getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null);
         items = (List<DummyEntityB>) getRelatedResponse.getItems();
         assertThat(items).noneMatch((item) -> item.getId().equals(DUMMY_B_ID_2));
     }
@@ -822,7 +822,7 @@ class ResourceApiControllerTest {
 
         var controllerA = getResourceApiController(DummyEntityA.class);
 
-        var getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, null, Pageable.ofSize(100));
+        var getRelatedResponse = controllerA.getRelated(TENANT_ID, DUMMY_A_ID_2, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null);
         @SuppressWarnings("unchecked")
         var items = (List<DummyEntityB>) getRelatedResponse.getItems();
         assertThat(items).isNotEmpty()

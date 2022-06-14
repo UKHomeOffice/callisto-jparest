@@ -1,27 +1,31 @@
 package uk.gov.homeoffice.digital.sas.jparest.controller.enums;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.springframework.data.domain.Pageable;
+import org.springframework.expression.spel.standard.SpelExpression;
+
+import java.util.UUID;
 
 public enum RequestParameter {
 
-    TENANT_ID("tenantId", ParameterType.QUERY, true, 10),
-    ID("id", ParameterType.PATH, true, 20),
-    RELATED_IDS("relatedIds", ParameterType.PATH, true, 30),
-    PAGEABLE("pageable", ParameterType.QUERY, true, 40),
-    FILTER("filter", ParameterType.QUERY, false, 50);
+    TENANT_ID("tenantId", ParameterType.QUERY, UUID.class, true, 10),
+    ID("id", ParameterType.PATH, Object.class, true, 20),
+    RELATION("relation", ParameterType.PATH, String.class, true, 30),
+    RELATED_IDS("relatedIds", ParameterType.PATH, Object[].class, true, 40),
+    PAGEABLE("pageable", ParameterType.QUERY, Pageable.class, true, 50),
+    FILTER("filter", ParameterType.QUERY, SpelExpression.class, false, 60),
+    BODY("body", ParameterType.BODY, String.class, true, 200);
 
     private final String paramName;
     private final ParameterType paramType;
+    private final Class<?> paramDataType;
     private final boolean isRequired;
     private final int order;
 
 
-    RequestParameter(String paramName, ParameterType paramType, boolean isRequired, int order) {
+    RequestParameter(String paramName, ParameterType paramType, Class<?> paramDataType, boolean isRequired, int order) {
         this.paramName = paramName;
         this.paramType = paramType;
+        this.paramDataType = paramDataType;
         this.isRequired = isRequired;
         this.order = order;
     }
@@ -35,6 +39,10 @@ public enum RequestParameter {
         return paramType.getType();
     }
 
+    public Class<?> getParamDataType() {
+        return paramDataType;
+    }
+
     public boolean isRequired() {
         return isRequired;
     }
@@ -44,26 +52,20 @@ public enum RequestParameter {
     }
 
 
-    public static RequestParameter getEnumByParamName(String queryParamName) {
+    public static RequestParameter getEnumByParamName(String requestParamName) {
         for (RequestParameter requestParameter : values())
-            if(requestParameter.getParamName().equals(queryParamName)) return requestParameter;
+            if(requestParameter.getParamName().equals(requestParamName)) return requestParameter;
 
         throw new IllegalArgumentException(String.format(
-                "No %s enum constant found for parameter name: %s ",  RequestParameter.class.getCanonicalName(), queryParamName));
+                "No %s enum constant found for parameter name: %s ",  RequestParameter.class.getCanonicalName(), requestParamName));
     }
-
-    public static List<RequestParameter> getSortedParams(RequestParameter... requestParameters) {
-        return Stream.of(requestParameters)
-                .sorted(Comparator.comparing(RequestParameter::getOrder))
-                .collect(Collectors.toList());
-    }
-
 
 
     enum ParameterType {
 
         QUERY("query"),
-        PATH("path");
+        PATH("path"),
+        BODY("body");
 
         private final String type;
 
