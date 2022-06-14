@@ -3,17 +3,14 @@ package uk.gov.homeoffice.digital.sas.jparest;
 import lombok.Getter;
 import lombok.NonNull;
 import org.springframework.util.StringUtils;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.metamodel.EntityType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -61,7 +58,7 @@ public class EntityUtils<T extends BaseEntity> {
                     && isBaseEntityType(field) // and make sure derives from BaseEntity
             ) {
                 field.setAccessible(true);
-                relations.putIfAbsent(field.getName(), getRelatedEntity(field));
+                relations.putIfAbsent(field.getName(), new RelatedEntity(field, getRelatedEntityType(field)));
                 relatedResources.add(field.getName());
             }
         }
@@ -163,22 +160,17 @@ public class EntityUtils<T extends BaseEntity> {
         Class<T> entityType;
     }
 
-    private RelatedEntity getRelatedEntity(Field declaredField) {
-        var relatedEntityType = (Class<T>) getRelatedEntityType(declaredField);
-        return new RelatedEntity(declaredField, relatedEntityType);
-    }
-
     // Validate the Related entity also inherits from the BaseEntity
     public boolean isBaseEntityType(Field declaredField){
-        Type relatedEntityType = getRelatedEntityType(declaredField);
+        Class<T> relatedEntityType = getRelatedEntityType(declaredField);
         return (relatedEntityType.getClass().isInstance(BaseEntity.class));
     }
 
-    private Type getRelatedEntityType(Field field) {
+    private Class<T> getRelatedEntityType(Field field) {
         var relatedEntityType = field.getGenericType();
         if (relatedEntityType instanceof ParameterizedType parameterizedType) {
             relatedEntityType = parameterizedType.getActualTypeArguments()[0];
         }
-        return relatedEntityType;
+        return (Class<T>) relatedEntityType;
     }
 }

@@ -139,7 +139,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
         for (String relation : entityUtils.getRelatedResources()) {
 
             Class<?> relatedType = entityUtils.getRelatedType(relation);
-            Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
+            Class<?> relatedIdType = EntityUtils.ID_FIELD_TYPE;
             resourceEndpoint.addRelated(resource, relatedType,
                     path + URL_ID_PATH_PARAM + "/" + relation, relatedIdType);
             LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
