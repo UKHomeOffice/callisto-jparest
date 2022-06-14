@@ -37,13 +37,11 @@ public class EntityUtils<T extends BaseEntity> {
     private Class<T> entityType;
     @Getter
     private Set<String> relatedResources = new HashSet<>();
-    private Field idField = getBaseEntityIdField1();
     @Getter
     private Class<?> idFieldType= ID_FIELD_TYPE;
     @Getter
     private String idFieldName = ID_FIELD_NAME;
     private Map<String, RelatedEntity> relations = new HashMap<>();
-    private EntityManager entityManager;
 
     /**
      * Creates a utility class for the specified entityType
@@ -54,10 +52,7 @@ public class EntityUtils<T extends BaseEntity> {
     @SuppressWarnings("squid:S3011") // Need to set accessibility of field to create instances with id set without
                                      // touching the database
     public EntityUtils(@NonNull Class<T> entityType, @NonNull EntityManager entityManager) {
-
-        this.entityManager = entityManager;
         this.entityType = entityType;
-
         // Iterate the declared fields to find the fields marked ManyToMany
         // Only record relationships that aren't mapped by another class
         for (Field field : entityType.getDeclaredFields()) {
@@ -171,19 +166,6 @@ public class EntityUtils<T extends BaseEntity> {
     private RelatedEntity getRelatedEntity(Field declaredField) {
         var relatedEntityType = (Class<T>) getRelatedEntityType(declaredField);
         return new RelatedEntity(declaredField, relatedEntityType);
-    }
-
-    private Field getBaseEntityIdField1() {
-        Field idField;
-        try {
-            idField = BaseEntity.class.getDeclaredField(ID_FIELD_NAME);
-        } catch (NoSuchFieldException e) {
-            LOGGER.severe(ID_FIELD_NAME + " not declared in this Entity " + BaseEntity.class.getName());
-            throw new ResourceException(ID_FIELD_NAME + " not declared in this Entity " + BaseEntity.class.getName());
-        }
-        // TODO This need to be removed after enabling direct access to id field
-        idField.setAccessible(true);
-        return idField;
     }
 
     // Validate the Related entity also inherits from the BaseEntity
