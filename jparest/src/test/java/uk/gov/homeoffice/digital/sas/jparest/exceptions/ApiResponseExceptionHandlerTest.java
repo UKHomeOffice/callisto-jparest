@@ -6,12 +6,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiErrorResponse;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
 
 import javax.persistence.PersistenceException;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,6 +47,16 @@ class ApiResponseExceptionHandlerTest {
         var exception = new PersistenceException(ERROR_MESSAGE);
         var response = apiResponseExceptionHandler.handlePersistenceException(exception);
         var msg = "There was an error persisting data.";
+        assertResponseData(response, msg, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void handleTypeMismatchException_badRequestWithErrorDataIsReturned() {
+
+        var apiResponseExceptionHandler = new ApiResponseExceptionHandler();
+        var exception = new TypeMismatchException(1, UUID.class);
+        var response = apiResponseExceptionHandler.handleTypeMismatchException(exception);
+        var msg = "Parameters must be of the relevant types specified by the API";
         assertResponseData(response, msg, HttpStatus.BAD_REQUEST);
     }
 

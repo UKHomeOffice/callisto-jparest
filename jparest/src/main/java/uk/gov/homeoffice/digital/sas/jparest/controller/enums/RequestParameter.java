@@ -9,7 +9,7 @@ import java.util.UUID;
 public enum RequestParameter {
 
     TENANT_ID("tenantId", ParameterType.QUERY, UUID.class, true, 10),
-    ID("id", ParameterType.PATH, Object.class, true, 20),
+    ID("id", ParameterType.PATH, UUID.class, true, 20),
     RELATION("relation", ParameterType.PATH, String.class, true, 30),
     RELATED_IDS("relatedIds", ParameterType.PATH, List.class, true, 40),
     PAGEABLE("pageable", ParameterType.QUERY, Pageable.class, true, 50),

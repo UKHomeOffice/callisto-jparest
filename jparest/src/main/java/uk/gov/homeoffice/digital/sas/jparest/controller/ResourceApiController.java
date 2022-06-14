@@ -11,7 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.expression.spel.standard.SpelExpression;
-import org.springframework.lang.NonNull;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
@@ -55,8 +54,8 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.TENANT_ID;
 import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.ID;
+import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.TENANT_ID;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage;
 
@@ -81,19 +80,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
     private static WebDataBinder binder = WebDataBinderFactory.getWebDataBinder();
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
-
-
-    private @NonNull Serializable getIdentifier(Object identifier) {
-        return getIdentifier(identifier, this.entityUtils.getIdFieldType());
-    }
-
-    private static @NonNull Serializable getIdentifier(Object identifier, Class<?> fieldType) {
-        Serializable result = (Serializable) binder.convertIfNecessary(identifier, fieldType);
-        if (result == null) {
-            throw new IllegalArgumentException("identifier must not be null");
-        }
-        return result;
-    }
 
 
 
@@ -134,9 +120,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         return new ApiResponse<>(result);
     }
 
-    private T getById(U id, String include, UUID tenantId) {
-
-        Serializable identifier = getIdentifier(id);
+    private T getById(UUID id, String include, UUID tenantId) {
 
         var builder = this.entityManager.getCriteriaBuilder();
         CriteriaQuery<T> query = builder.createQuery(this.entityUtils.getEntityType());
@@ -144,7 +128,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
 
         var tenantPredicate = builder.equal(root.get(TENANT_ID.getParamName()), tenantId);
-        var filterPredicate = builder.equal(root.get(ID.getParamName()), identifier);
+        var filterPredicate = builder.equal(root.get(ID.getParamName()), id);
         var finalPredicate = builder.and(tenantPredicate, filterPredicate);
         query.where(finalPredicate);
 
@@ -164,7 +148,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         return result2.get(0);
     }
 
-    public ApiResponse<T> get(@RequestParam UUID tenantId, @PathVariable U id) {
+    public ApiResponse<T> get(@RequestParam UUID tenantId, @PathVariable UUID id) {
         var result = getById(id, null, tenantId);
         return new ApiResponse<>(Arrays.asList(result));
     }
@@ -191,9 +175,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         return new ApiResponse<>(Arrays.asList(result));
     }
 
-    public void delete(@RequestParam UUID tenantId, @PathVariable U id) {
-
-        Serializable identifier = getIdentifier(id);
+    public void delete(@RequestParam UUID tenantId, @PathVariable UUID id) {
 
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
@@ -204,7 +186,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
             Root<T> root = query.from(this.entityUtils.getEntityType());
 
             var tenantPredicate = builder.equal(root.get(TENANT_ID.getParamName()), tenantId);
-            var idPredicate = builder.equal(root.get(ID.getParamName()), identifier);
+            var idPredicate = builder.equal(root.get(ID.getParamName()), id);
             query.where(builder.and(tenantPredicate, idPredicate));
 
             var updatedItems = this.entityManager.createQuery(query).executeUpdate();
@@ -224,15 +206,14 @@ public class ResourceApiController<T extends BaseEntity, U> {
     }
 
     public ApiResponse<T> update(@RequestParam UUID tenantId,
-                                 @PathVariable U id,
+                                 @PathVariable UUID id,
                                  @RequestBody String body) throws JsonProcessingException {
 
-        var identifier = getIdentifier(id);
         T r2 = readPayload(body);
         validateAndSetTenantIdPayloadMatch(tenantId, r2);
 
-        var payloadEntityId = this.persistenceUnitUtil.getIdentifier(r2);
-        if (payloadEntityId != null && !identifier.equals(getIdentifier(payloadEntityId))) {
+        var payloadEntityId = (UUID) this.persistenceUnitUtil.getIdentifier(r2);
+        if (payloadEntityId != null && !id.equals(payloadEntityId)) {
             throw new IllegalArgumentException("The supplied payload resource id value must match the url id path parameter value");
         }
 
@@ -241,7 +222,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
-        var orig = repository.findById(identifier).orElseThrow(() ->
+        var orig = repository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException(id));
 
         validateResourceTenantId(tenantId, orig, id);
@@ -261,12 +242,11 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
     @SuppressWarnings("rawtypes")
     public ApiResponse getRelated(@RequestParam UUID tenantId,
-                                  @PathVariable U id,
+                                  @PathVariable UUID id,
                                   @PathVariable String relation,
                                   Pageable pageable,
                                   SpelExpression filter) {
 
-        Serializable identifier = getIdentifier(id);
         var builder = this.entityManager.getCriteriaBuilder();
         Class<?> relatedEntityType = this.entityUtils.getRelatedType(relation);
         CriteriaQuery<?> query = builder.createQuery(relatedEntityType);
@@ -274,7 +254,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         CriteriaQuery<?> select = query.select(root.join(relation));
         Join<?, ?> relatedJoin = root.getJoins().iterator().next();
 
-        var predicate = builder.equal(root.get(ID.getParamName()), identifier);
+        var predicate = builder.equal(root.get(ID.getParamName()), id);
         var filterPredicate = SpelExpressionToPredicateConverter.convert(filter, builder, relatedJoin);
         if (filterPredicate != null) {
             predicate = builder.and(predicate, filterPredicate);
@@ -300,7 +280,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
 
     public void deleteRelated(@RequestParam UUID tenantId,
-                              @PathVariable U id,
+                              @PathVariable UUID id,
                               @PathVariable String relation,
                               @PathVariable List<UUID> relatedIds) throws IllegalArgumentException {
 
@@ -336,7 +316,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
 
     public void addRelated(@RequestParam UUID tenantId,
-                           @PathVariable U id,
+                           @PathVariable UUID id,
                            @PathVariable String relation,
                            @PathVariable List<UUID> relatedIds) throws IllegalArgumentException {
 
@@ -407,7 +387,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         }
     }
 
-    private void validateResourceTenantId(UUID requestTenantId, T resource, U resourceId) {
+    private void validateResourceTenantId(UUID requestTenantId, T resource, UUID resourceId) {
         if (!requestTenantId.equals(resource.getTenantId())) {
             throw new ResourceNotFoundException(resourceId);
         }

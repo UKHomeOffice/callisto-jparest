@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -26,11 +27,16 @@ public class ApiResponseExceptionHandler {
             InvalidFilterException.class,
             ResourceConstraintViolationException.class,
             UnknownResourcePropertyException.class,
-            TenantIdMismatchException.class,
+            TenantIdMismatchException.class
     })
-
     public ResponseEntity<ApiErrorResponse> handleException(Exception ex) {
         return createResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleTypeMismatchException(TypeMismatchException ex) {
+        var msg = "Parameters must be of the relevant types specified by the API";
+        return createResponseEntity(msg, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PersistenceException.class)

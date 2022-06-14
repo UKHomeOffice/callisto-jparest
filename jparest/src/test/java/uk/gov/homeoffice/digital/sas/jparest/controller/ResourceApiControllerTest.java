@@ -7,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
@@ -174,20 +173,9 @@ class ResourceApiControllerTest {
     void get_idIsNull_throwsIllegalArgumentException() {
         var controller = getResourceApiController(DummyEntityA.class);
 
-        assertThatIllegalArgumentException().isThrownBy(
-                        () -> controller.get(TENANT_ID, null))
-                .withMessage("identifier must not be null");
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
+                        controller.get(TENANT_ID, null));
     }
-
-    @ParameterizedTest
-    @MethodSource("invalidIDSource")
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    <U> void get_idCantBeConvertedToExpectedType_throwsTypeMismatchException(U clazz, U id) {
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        var controller = new ResourceApiController<DummyEntityA, U>(DummyEntityA.class, entityManager, transactionManager, entityUtils);
-        assertThatExceptionOfType(TypeMismatchException.class).isThrownBy(() -> controller.get(TENANT_ID, id));
-    }
-
 
     @Test
     void get_requestTenantIdMatchesResourceTenantId_noExceptionThrown() {
@@ -855,12 +843,6 @@ class ResourceApiControllerTest {
                 Arguments.of(DUMMY_A_ID_1, expressionParser.parseRaw(String.format("%s=='%s'", ID_FIELD_NAME, DUMMY_B_ID_2)), 1),
                 Arguments.of(DUMMY_A_ID_1, expressionParser.parseRaw(String.format("%s=='%s'", ID_FIELD_NAME, NON_EXISTENT_ID)), 0),
                 Arguments.of(DUMMY_A_ID_1, null, 2));
-    }
-
-    private static Stream<Arguments> invalidIDSource() {
-        return Stream.of(
-                Arguments.of(Integer.class, "blah"),
-                Arguments.of(Long.class, "blah"));
     }
 
     private static Stream<Arguments> invalidPayloads() {
