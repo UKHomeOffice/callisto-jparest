@@ -1,6 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest.exceptions;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class ResourceNotFoundExceptionMessageUtil {
@@ -13,17 +15,17 @@ public final class ResourceNotFoundExceptionMessageUtil {
     private ResourceNotFoundExceptionMessageUtil() {}
 
 
-    public static String relatedResourcesMessage(Collection<Object> ids) {
+    public static String relatedResourcesMessage(Collection<UUID> ids) {
         return String.format(RESOURCES_NOT_FOUND_ERROR_FORMAT, formatIdsToCsv(ids));
     }
 
 
-    public static String deletableRelatedResourcesMessage(Class<?> resourceType, Collection<Object> ids) {
+    public static String deletableRelatedResourcesMessage(Class<?> resourceType, Collection<UUID> ids) {
         return String.format(DELETABLE_RELATED_RESOURCES_NOT_FOUND_ERROR_FORMAT, resourceType.getSimpleName(), formatIdsToCsv(ids));
     }
 
 
-    private static String formatIdsToCsv(Collection<Object> ids) {
+    private static String formatIdsToCsv(Collection<UUID> ids) {
         return ids.stream().map(String::valueOf).collect(Collectors.joining(", "));
     }
 

@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.jparest.controller.enums;
 import org.springframework.data.domain.Pageable;
 import org.springframework.expression.spel.standard.SpelExpression;
 
+import java.util.List;
 import java.util.UUID;
 
 public enum RequestParameter {
@@ -10,7 +11,7 @@ public enum RequestParameter {
     TENANT_ID("tenantId", ParameterType.QUERY, UUID.class, true, 10),
     ID("id", ParameterType.PATH, Object.class, true, 20),
     RELATION("relation", ParameterType.PATH, String.class, true, 30),
-    RELATED_IDS("relatedIds", ParameterType.PATH, Object[].class, true, 40),
+    RELATED_IDS("relatedIds", ParameterType.PATH, List.class, true, 40),
     PAGEABLE("pageable", ParameterType.QUERY, Pageable.class, true, 50),
     FILTER("filter", ParameterType.QUERY, SpelExpression.class, false, 60),
     BODY("body", ParameterType.BODY, String.class, true, 200);

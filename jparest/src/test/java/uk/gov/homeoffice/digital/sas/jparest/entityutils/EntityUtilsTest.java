@@ -17,6 +17,7 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
+import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -48,7 +49,7 @@ class EntityUtilsTest {
     @ParameterizedTest
     @MethodSource("nullConstructorArgs")
     void entityUtils_nullArgs_throwsNullPointerException(Class<?> clazz, EntityManager manager) {
-        assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> new EntityUtils<>(clazz, manager));
+        assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> new EntityUtils(clazz, manager));
     } 
 
     //endregion
@@ -124,18 +125,6 @@ class EntityUtilsTest {
         assertThat(typedActual.getId()).isEqualTo(relatedEntityReference);
     }
 
-
-    
-    @ParameterizedTest
-    @MethodSource("invalidReferenceValues")
-    void getEntityReference_relatedEntityExist_referenceTypeIsInvalid_throws_illegalArgumentException(Serializable reference) {
-
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-
-        assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> entityUtils.getEntityReference("dummyEntityBSet", reference));
-    }
-
     @Test
     void getEntityReference_entityReferenceReturned() {
         var entityUtils = new EntityUtils<DummyEntityC>(DummyEntityC.class, entityManager);
@@ -144,25 +133,12 @@ class EntityUtilsTest {
 
     }
 
-    @ParameterizedTest
-    @MethodSource("invalidReferenceValues")
-    void getEntityReference_referenceTypeIsInvalid_throwsIllegalArgumentException(Serializable reference) {
-        var entityUtils = new EntityUtils<>(DummyEntityC.class, entityManager);
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> entityUtils.getEntityReference(reference));
-
-    }
 
     //endregion
 
     //region Method sources
     
-    private static Stream<Arguments> invalidReferenceValues() {
-        return Stream.of(
-          Arguments.of(1),
-          Arguments.of("123"),
-          Arguments.of("invalid")
-        );
-    }
+
 
     private Stream<Arguments> nullConstructorArgs() {
         return Stream.of(

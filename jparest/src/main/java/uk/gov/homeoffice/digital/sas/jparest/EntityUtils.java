@@ -28,7 +28,7 @@ import static java.util.Collections.emptyList;
  * i.e. it excludes {@link ManyToMany} with the
  * mappedBy property set.
  */
-public class EntityUtils<T> {
+public class EntityUtils<T extends BaseEntity> {
 
     private static final Logger LOGGER = Logger.getLogger(EntityUtils.class.getName());
     public static final String ID_FIELD_NAME = "id";
@@ -61,7 +61,11 @@ public class EntityUtils<T> {
         // Iterate the declared fields to find the fields marked ManyToMany
         // Only record relationships that aren't mapped by another class
         for (Field field : entityType.getDeclaredFields()) {
-            if (field.isAnnotationPresent(ManyToMany.class) && !StringUtils.hasText(field.getAnnotation(ManyToMany.class).mappedBy())) {
+            if (field.isAnnotationPresent(ManyToMany.class)
+                    && !StringUtils.hasText(field.getAnnotation(ManyToMany.class).mappedBy())
+                    // and make sure derives from BaseEntity
+                    && isBaseEntityType(field)
+            ) {
                 field.setAccessible(true);
                 relations.putIfAbsent(field.getName(), getRelatedEntity(field));
                 relatedResources.add(field.getName());
@@ -102,17 +106,18 @@ public class EntityUtils<T> {
      * adding and removing related entities in a ManyToMany relationship.
      *
      * @param entityType The type of entity to create a reference of
-     * @param idField    The field of the entity type that is attributed with {@link Id}
      * @param identifier The value of the Id.
      * @return An instance of entityType with the idField set to the identifier
      */
     @SuppressWarnings("squid:S3011") // Need to set accessibility of field to create instances with id set without
                                      // touching the database
-    private static <Y> Y getEntityReference(Class<Y> entityType, Field idField, Serializable identifier) throws IllegalArgumentException {
+    private static <Y extends BaseEntity> Y getEntityReference(
+            Class<? extends BaseEntity> entityType,
+            UUID identifier) throws IllegalArgumentException {
         Y reference = null;
         try {
-            reference = entityType.getConstructor().newInstance();
-            idField.set(reference, identifier);
+            reference = (Y) entityType.getConstructor().newInstance();
+            reference.setId(identifier);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             LOGGER.severe("Unable to create reference for entity " + entityType.getName());
@@ -128,17 +133,17 @@ public class EntityUtils<T> {
      * @return An instance of the entityType represented by the utility class
      * with its identifier set to the given value
      */
-    public T getEntityReference(Serializable identifier) {
-        return getEntityReference(this.entityType, this.idField, identifier);
+    public T getEntityReference(UUID identifier) {
+        return getEntityReference(this.entityType,identifier);
     }
 
     /**
      * Creates an reference entity for the entityType exposed by the specified
      * relation.
      */
-    public Object getEntityReference(String relation, Serializable identifier) {
+    public Object getEntityReference(String relation, UUID identifier) {
         var relatedEntity = this.relations.get(relation);
-        return getEntityReference(relatedEntity.entityType, relatedEntity.idField, identifier);
+        return getEntityReference(relatedEntity.entityType, identifier);
     }
 
     /**
@@ -163,7 +168,7 @@ public class EntityUtils<T> {
     }
 
     class RelatedEntity {
-        RelatedEntity(Field declaredField, Class<?> entityType, Class<?> idFieldType, Field idField) {
+        RelatedEntity(Field declaredField, Class<T> entityType, Class<?> idFieldType, Field idField) {
             this.declaredField = declaredField;
             this.entityType = entityType;
             this.idFieldType = idFieldType;
@@ -171,20 +176,20 @@ public class EntityUtils<T> {
         }
 
         Field declaredField;
-        Class<?> entityType;
+        Class<T> entityType;
         Class<?> idFieldType;
         Field idField;
     }
 
-    public RelatedEntity getRelatedEntity(Field declaredField) {
+    private RelatedEntity getRelatedEntity(Field declaredField) {
         // Validate the related Entity is of BaseEntity type
-        validateEntityIsOfBaseEntityType((Class<?>) getRelatedEntityType(declaredField));
-        var relatedEntityType = (Class<?>) getRelatedEntityType(declaredField);
-        Class<?> idFieldType1 = UUID.class;
+        boolean isBaseEntity = isBaseEntityType(declaredField);
+        var relatedEntityType = (Class<T>) getRelatedEntityType(declaredField);
+        Class<UUID> idFieldType = UUID.class;
         var idField = getBaseEntityIdField(declaredField);
         // TODO need to replace it with direct access method later
         //var idField = getBaseEntityIdField1();
-        return new RelatedEntity(declaredField, relatedEntityType, idFieldType1, idField);
+        return new RelatedEntity(declaredField, relatedEntityType, idFieldType, idField);
     }
 
     // TODO This method should be replaced with the getBaseEntityIdField1() after fixing the Reference
@@ -210,12 +215,18 @@ public class EntityUtils<T> {
         return idField;
     }
 
-    // Validate the Related entity also inherits from the BaseEntity
+    /*// Validate the Related entity also inherits from the BaseEntity
     public boolean validateEntityIsOfBaseEntityType(Class<?> entityType){
         return (entityType.getClass().isInstance(BaseEntity.class));
-        /*if ( !(entityType.getClass().isInstance(BaseEntity.class))) {
+        *//*if ( !(entityType.getClass().isInstance(BaseEntity.class))) {
             throw new ResourceException( entityType + " is not inheriting from the BaseEntity");
-        }*/
+        }*//*
+    }*/
+
+    // Validate the Related entity also inherits from the BaseEntity
+    public boolean isBaseEntityType(Field declaredField){
+        Type relatedEntityType = getRelatedEntityType(declaredField);
+        return (relatedEntityType.getClass().isInstance(BaseEntity.class));
     }
 
     private Type getRelatedEntityType(Field field) {

@@ -302,7 +302,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
     public void deleteRelated(@RequestParam UUID tenantId,
                               @PathVariable U id,
                               @PathVariable String relation,
-                              @PathVariable Object[] relatedIds) throws IllegalArgumentException {
+                              @PathVariable List<UUID> relatedIds) throws IllegalArgumentException {
 
         var originalEntity = getById(id, relation, tenantId);
 
@@ -311,11 +311,9 @@ public class ResourceApiController<T extends BaseEntity, U> {
                 .map(BaseEntity.class::cast)
                 .collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
 
-        Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
-
-        var notDeletableRelatedIds = new HashSet<>();
+        var notDeletableRelatedIds = new HashSet<UUID>();
         for (var relatedId: relatedIds) {
-            var entityReference = (BaseEntity) this.entityUtils.getEntityReference(relation, getIdentifier(relatedId, relatedIdType));
+            var entityReference = (BaseEntity) this.entityUtils.getEntityReference(relation, relatedId);
             if (!relatedEntities.remove(relatedEntityIdToEntityMap.get(entityReference.getId()))) {
                 notDeletableRelatedIds.add(relatedId);
             }
@@ -340,7 +338,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
     public void addRelated(@RequestParam UUID tenantId,
                            @PathVariable U id,
                            @PathVariable String relation,
-                           @PathVariable Object[] relatedIds) throws IllegalArgumentException {
+                           @PathVariable List<UUID> relatedIds) throws IllegalArgumentException {
 
 
         var originalEntity = getById(id, relation, tenantId);
@@ -354,10 +352,8 @@ public class ResourceApiController<T extends BaseEntity, U> {
                 .map(BaseEntity.class::cast)
                 .collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
 
-        Class<?> relatedIdType = entityUtils.getRelatedIdType(relation);
-
         for (var relatedId: relatedIds) {
-            var entityReference = (BaseEntity) this.entityUtils.getEntityReference(relation, getIdentifier(relatedId, relatedIdType));
+            var entityReference = (BaseEntity) this.entityUtils.getEntityReference(relation, relatedId);
             if (!relatedEntityIdToEntityMap.containsKey(entityReference.getId()))  {
                 relatedEntities.add(entityReference);
             }
@@ -417,21 +413,16 @@ public class ResourceApiController<T extends BaseEntity, U> {
         }
     }
 
-    private void validateRelatedResourcesTenantIds(String relation, Object[] relatedIds, UUID tenantId) {
-
+    private void validateRelatedResourcesTenantIds(String relation, List<UUID> relatedIds, UUID tenantId) {
         var builder = this.entityManager.getCriteriaBuilder();
         var query = builder.createQuery(Long.class);
         var relatedRoot = query.from(this.entityUtils.getRelatedType(relation));
-        var serializedRelatedIds = Arrays.stream(relatedIds)
-                .map(relatedId -> getIdentifier(relatedId, entityUtils.getRelatedIdType(relation))).collect(Collectors.toList());
-        var relatedIdPredicate = relatedRoot.get(this.entityUtils.getRelatedIdField(relation).getName()).in(serializedRelatedIds);
+        var relatedIdPredicate = relatedRoot.get(this.entityUtils.getRelatedIdField(relation).getName()).in(relatedIds);
         var relatedTenantPredicate = builder.equal(relatedRoot.get(TENANT_ID.getParamName()), tenantId);
         var relatedSelect = query.select(builder.count(relatedRoot)).where(builder.and(relatedIdPredicate, relatedTenantPredicate));
-        var tenantIdMatchesRelatedResources = this.entityManager.createQuery(relatedSelect).getSingleResult() == relatedIds.length;
-
+        var tenantIdMatchesRelatedResources = this.entityManager.createQuery(relatedSelect).getSingleResult() == relatedIds.size();
         if (!tenantIdMatchesRelatedResources) {
-            throw new ResourceNotFoundException(
-                    relatedResourcesMessage(Arrays.stream(relatedIds).collect(Collectors.toSet())));
+            throw new ResourceNotFoundException(relatedResourcesMessage(relatedIds));
         }
     }
 
