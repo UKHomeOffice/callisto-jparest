@@ -4,10 +4,13 @@ import io.cucumber.java.en.Then;
 import net.thucydides.core.annotations.Steps;
 import stepLib.ApiActions;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import java.util.LinkedList;
+
+import static org.mockito.Mockito.*;
 
 public class ApiStepDefinitionsStepDefs {
+
+    LinkedList mockedList = mock(LinkedList.class);
 
     @Steps
     private static ApiActions apiActions;
@@ -15,18 +18,11 @@ public class ApiStepDefinitionsStepDefs {
     @Then("^I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" and parameter \"([^\"]*)\"$")
     public void request(String requestType, String endpoint, String bearerToken, String param) throws InterruptedException {
 
+        when(mockedList.get(0)).thenReturn(200);
+        System.out.println("****************");
+        System.out.println(mockedList.get(0));
+        System.out.println("****************");
 
-
-        apiActions.restEndpointIsAvailable(endpoint);
-        apiActions.setEndpoint();
-
-        apiActions.getEndpointWithParamAndTenantId(param, bearerToken);
-    }
-
-    @Then("^I should get (\\d+) back$")
-    public void iShouldGetBack(int responseCode) {
-        apiActions.checkStatusCode(responseCode);
-        assertThat("Status code does not match", apiActions.getResponseStatusCode(), is(responseCode));
     }
 
 }
