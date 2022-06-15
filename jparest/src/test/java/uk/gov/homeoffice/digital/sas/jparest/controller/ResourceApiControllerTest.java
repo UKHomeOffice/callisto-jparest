@@ -170,14 +170,6 @@ class ResourceApiControllerTest {
     }
 
     @Test
-    void get_idIsNull_throwsIllegalArgumentException() {
-        var controller = getResourceApiController(DummyEntityA.class);
-
-        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
-                        controller.get(TENANT_ID, null));
-    }
-
-    @Test
     void get_requestTenantIdMatchesResourceTenantId_noExceptionThrown() {
 
         var controller = getResourceApiController(DummyEntityA.class);
