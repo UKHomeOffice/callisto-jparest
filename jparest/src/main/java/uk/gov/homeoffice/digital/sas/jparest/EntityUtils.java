@@ -11,6 +11,7 @@ import javax.persistence.ManyToMany;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -55,11 +56,15 @@ public class EntityUtils<T extends BaseEntity> {
         for (Field field : entityType.getDeclaredFields()) {
             if (field.isAnnotationPresent(ManyToMany.class)
                     && !StringUtils.hasText(field.getAnnotation(ManyToMany.class).mappedBy())
-                    && isBaseEntityType(field) // and make sure derives from BaseEntity
             ) {
-                field.setAccessible(true);
-                relations.putIfAbsent(field.getName(), new RelatedEntity(field, getRelatedEntityType(field)));
-                relatedResources.add(field.getName());
+                Type relatedEntityType = getRelatedEntityType(field);
+                // Validate the Related entity also inherits from the BaseEntity
+                if(relatedEntityType.getClass().isInstance(BaseEntity.class)) {
+                    field.setAccessible(true);
+                    RelatedEntity relatedEntity = new RelatedEntity(field, (Class<T>) relatedEntityType);
+                    relations.putIfAbsent(field.getName(), relatedEntity);
+                    relatedResources.add(field.getName());
+                }
             }
         }
     }
@@ -92,7 +97,7 @@ public class EntityUtils<T extends BaseEntity> {
      * Creates an instance of an entity with it's {@link Id} attributed field
      * set to the given identifier.
      * <p>
-     * This is used as an optimisation to the {@link EntityManager.getReference}
+     * This is used as an optimisation to the {@link EntityManager#getReference}
      * as it doesn't require a call to the database as it'a only intended to facilitate
      * adding and removing related entities in a ManyToMany relationship.
      *
@@ -144,13 +149,6 @@ public class EntityUtils<T extends BaseEntity> {
         return this.relations.get(relation).entityType;
     }
 
-    /**
-     * Provides the type of the Id field for the entity accessed by the specified relation
-     */
-    public Class<UUID> getRelatedIdType(String relation) {
-        return ID_FIELD_TYPE;
-    }
-
     class RelatedEntity {
         RelatedEntity(Field declaredField, Class<T> entityType) {
             this.declaredField = declaredField;
@@ -158,12 +156,6 @@ public class EntityUtils<T extends BaseEntity> {
         }
         Field declaredField;
         Class<T> entityType;
-    }
-
-    // Validate the Related entity also inherits from the BaseEntity
-    public boolean isBaseEntityType(Field declaredField){
-        Class<T> relatedEntityType = getRelatedEntityType(declaredField);
-        return (relatedEntityType.getClass().isInstance(BaseEntity.class));
     }
 
     private Class<T> getRelatedEntityType(Field field) {
