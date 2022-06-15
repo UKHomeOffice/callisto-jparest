@@ -73,7 +73,7 @@ class PathItemCreatorTest {
     void createRelatedRootPath_getOperationDataIsSet() {
 
         var pathItemCreator = new PathItemCreator();
-        var pathItem = pathItemCreator.createRelatedRootPath(TAG, RELATED_RESOURCE_CLASS, Long.class);
+        var pathItem = pathItemCreator.createRelatedRootPath(TAG, RELATED_RESOURCE_CLASS);
 
         //operation
         assertThat(pathItem.readOperationsMap()).containsKey(PathItem.HttpMethod.GET);
@@ -95,7 +95,7 @@ class PathItemCreatorTest {
     void createItemPath_getOperationDataIsSet() {
 
         var pathItemCreator = new PathItemCreator();
-        var pathItem = pathItemCreator.createItemPath(TAG, RESOURCE_CLASS, Long.class);
+        var pathItem = pathItemCreator.createItemPath(TAG, RESOURCE_CLASS);
 
         //operation
         assertThat(pathItem.readOperationsMap()).containsKey(PathItem.HttpMethod.GET);
@@ -115,7 +115,7 @@ class PathItemCreatorTest {
     void createItemPath_putOperationDataIsSet() {
 
         var pathItemCreator = new PathItemCreator();
-        var pathItem = pathItemCreator.createItemPath(TAG, RESOURCE_CLASS, Long.class);
+        var pathItem = pathItemCreator.createItemPath(TAG, RESOURCE_CLASS);
 
         //operation
         assertThat(pathItem.readOperationsMap()).containsKey(PathItem.HttpMethod.PUT);
@@ -135,7 +135,7 @@ class PathItemCreatorTest {
     void createItemPath_deleteOperationDataIsSet() {
 
         var pathItemCreator = new PathItemCreator();
-        var pathItem = pathItemCreator.createItemPath(TAG, RESOURCE_CLASS, Long.class);
+        var pathItem = pathItemCreator.createItemPath(TAG, RESOURCE_CLASS);
 
         //operation
         assertThat(pathItem.readOperationsMap()).containsKey(PathItem.HttpMethod.DELETE);
@@ -154,7 +154,7 @@ class PathItemCreatorTest {
     void createRelatedItemPath_deleteOperationDataIsSet() {
 
         var pathItemCreator = new PathItemCreator();
-        var pathItem = pathItemCreator.createRelatedItemPath(TAG, Long.class, Long.class);
+        var pathItem = pathItemCreator.createRelatedItemPath(TAG);
 
         //operation
         assertThat(pathItem.readOperationsMap()).containsKey(PathItem.HttpMethod.DELETE);
@@ -175,7 +175,7 @@ class PathItemCreatorTest {
     void createRelatedItemPath_putOperationDataIsSet() {
 
         var pathItemCreator = new PathItemCreator();
-        var pathItem = pathItemCreator.createRelatedItemPath(TAG, Long.class, Long.class);
+        var pathItem = pathItemCreator.createRelatedItemPath(TAG);
 
         //operation
         assertThat(pathItem.readOperationsMap()).containsKey(PathItem.HttpMethod.PUT);

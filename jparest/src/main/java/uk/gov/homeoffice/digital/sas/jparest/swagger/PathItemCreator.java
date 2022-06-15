@@ -19,7 +19,6 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.SpringDocAnnotationsUtils;
-import org.springdoc.core.converters.models.Pageable;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
@@ -32,8 +31,9 @@ import java.util.UUID;
 public class PathItemCreator {
 
     private static final ApiResponse EMPTY_RESPONSE = emptyResponse();
-    private static final Parameter PAGEABLE_PARAMETER = getParameter(Pageable.class, RequestParameter.PAGEABLE);
-    private static final Parameter TENANT_ID_PARAMETER = getParameter(UUID.class, RequestParameter.TENANT_ID);
+    private static final Parameter ID_PARAMETER = getParameter(RequestParameter.ID);
+    private static final Parameter PAGEABLE_PARAMETER = getParameter(RequestParameter.PAGEABLE);
+    private static final Parameter TENANT_ID_PARAMETER = getParameter(RequestParameter.TENANT_ID);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PathItemCreator.class);
 
@@ -80,25 +80,23 @@ public class PathItemCreator {
      * @param tag     The tag to group the endpoints together. Expected to be the
      *                simplename of the resource
      * @param clazz   The class representing the resource exposed by the endpoint
-     * @param idClazz The type of the identifier for the specified resource
      * @return PathItem documenting the GET one and PUT endpoints
      */
-    public PathItem createItemPath(String tag, Class<?> clazz, Class<?> idClazz) {
+    public PathItem createItemPath(String tag, Class<?> clazz) {
 
         var pi = new PathItem();
 
         ApiResponse response = getResourceResponse(clazz);
         ApiResponses responses = new ApiResponses().addApiResponse("200", response);
+
         var get = new Operation();
         get.setResponses(responses);
         get.addTagsItem(tag);
         pi.get(get);
-
-        var idParameter = getParameter(idClazz, RequestParameter.ID);
-        addParametersToOperation(get, TENANT_ID_PARAMETER, idParameter);
+        addParametersToOperation(get, TENANT_ID_PARAMETER, ID_PARAMETER);
 
         var put = new Operation();
-        addParametersToOperation(put, TENANT_ID_PARAMETER, idParameter);
+        addParametersToOperation(put, TENANT_ID_PARAMETER, ID_PARAMETER);
         var requestBody = getRequestBody(clazz);
         put.setRequestBody(requestBody);
         put.setResponses(responses);
@@ -107,7 +105,7 @@ public class PathItemCreator {
 
         var delete = new Operation();
         ApiResponses deleteResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
-        addParametersToOperation(delete, TENANT_ID_PARAMETER, idParameter);
+        addParametersToOperation(delete, TENANT_ID_PARAMETER, ID_PARAMETER);
         delete.setResponses(deleteResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
@@ -123,18 +121,16 @@ public class PathItemCreator {
      *                simplename of the parent resource
      * @param clazz   The class representing the related resource exposed by the
      *                endpoint
-     * @param idClazz The type of the identifier for the parent resource
      * @return PathItem documenting the GET many related items endpoint
      */
-    public PathItem createRelatedRootPath(String tag, Class<?> clazz, Class<?> idClazz) {
+    public PathItem createRelatedRootPath(String tag, Class<?> clazz) {
 
         var pi = new PathItem();
         ApiResponse response = getResourceResponse(clazz);
         ApiResponses responses = new ApiResponses().addApiResponse("200", response);
-        var idParameter = getParameter(idClazz, RequestParameter.ID);
 
         var get = new Operation();
-        addParametersToOperation(get, TENANT_ID_PARAMETER, idParameter, PAGEABLE_PARAMETER, getFilterParameter(clazz));
+        addParametersToOperation(get, TENANT_ID_PARAMETER, ID_PARAMETER, PAGEABLE_PARAMETER, getFilterParameter(clazz));
         get.setResponses(responses);
         get.addTagsItem(tag);
         pi.get(get);
@@ -147,27 +143,23 @@ public class PathItemCreator {
      *
      * @param tag            The tag to group the endpoints together. Expected to be
      *                       the simplename of the parent resource
-     * @param idClazz        The type of the identifier for the parent resource
-     * @param relatedIdClazz The type of the identifier for the related resource
      * @return PathItem documenting the DELETE/PUT many related items
      */
-    public PathItem createRelatedItemPath(String tag, Class<?> idClazz,
-                                           Class<?> relatedIdClazz) {
+    public PathItem createRelatedItemPath(String tag) {
 
         var pi = new PathItem();
 
         ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
 
-        var idParameter = getParameter(idClazz, RequestParameter.ID);
-        var relatedIdParameter = getArrayParameter(relatedIdClazz, RequestParameter.RELATED_IDS);
+        var relatedIdParameter = getArrayParameter(UUID.class, RequestParameter.RELATED_IDS);
         var delete = new Operation();
-        addParametersToOperation(delete, TENANT_ID_PARAMETER, idParameter, relatedIdParameter);
+        addParametersToOperation(delete, TENANT_ID_PARAMETER, ID_PARAMETER, relatedIdParameter);
         delete.setResponses(defaultResponses);
         delete.addTagsItem(tag);
         pi.delete(delete);
 
         var put = new Operation();
-        addParametersToOperation(put, TENANT_ID_PARAMETER, idParameter, relatedIdParameter);
+        addParametersToOperation(put, TENANT_ID_PARAMETER, ID_PARAMETER, relatedIdParameter);
         put.setResponses(defaultResponses);
         put.addTagsItem(tag);
         pi.put(put);
@@ -231,14 +223,14 @@ public class PathItemCreator {
      * Generates a parameter for the specified class
      * based on the given RequestParameter type
      *
-     * @param clazz The parameter type
      * @param requestParameter the parameter information used to create the Swagger Parameter
      * @return A Parameter with a schema for the given class
      */
-    private static Parameter getParameter(Class<?> clazz, RequestParameter requestParameter) {
+    private static Parameter getParameter(RequestParameter requestParameter) {
+
         var parameter = new Parameter();
 
-        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
+        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, requestParameter.getParamDataType(), null, null);
 
         parameter.schema(schema);
         parameter.setIn(requestParameter.getParamType());

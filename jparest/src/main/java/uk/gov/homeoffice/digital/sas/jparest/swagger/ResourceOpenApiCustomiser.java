@@ -70,7 +70,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
                 var relatedClazz = relatedElement.getKey();
                 var relatedDescriptor = relatedElement.getValue();
-                setRelatedResourcePaths(openApi, rootDescriptor, relatedDescriptor, relatedClazz, tag);
+                setRelatedResourcePaths(openApi, relatedDescriptor, relatedClazz, tag);
             }
         }
     }
@@ -108,19 +108,17 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     private void setParentResourcePaths(OpenAPI openApi, ResourceEndpoint.RootDescriptor rootDescriptor, Class<?> clazz, String tag) {
         var resourceRootPath = pathItemCreator.createRootPath(tag, clazz);
         openApi.path(rootDescriptor.getPath(), resourceRootPath);
-        var resourceItemPath = pathItemCreator.createItemPath(tag, clazz, rootDescriptor.getIdFieldType());
+        var resourceItemPath = pathItemCreator.createItemPath(tag, clazz);
         openApi.path(rootDescriptor.getPath() + URL_ID_PATH_PARAM, resourceItemPath);
     }
 
     private void setRelatedResourcePaths(OpenAPI openApi,
-                                         ResourceEndpoint.RootDescriptor rootDescriptor,
                                          ResourceEndpoint.Descriptor relatedDescriptor,
                                          Class<?> relatedClazz, String tag) {
 
-        var relatedRootPath = pathItemCreator.createRelatedRootPath(tag, relatedClazz, rootDescriptor.getIdFieldType());
+        var relatedRootPath = pathItemCreator.createRelatedRootPath(tag, relatedClazz);
         openApi.path(relatedDescriptor.getPath(), relatedRootPath);
-        var relatedItemPath = pathItemCreator.createRelatedItemPath(tag, rootDescriptor.getIdFieldType(),
-                relatedDescriptor.getIdFieldType());
+        var relatedItemPath = pathItemCreator.createRelatedItemPath(tag);
         openApi.path(relatedDescriptor.getPath() + URL_RELATED_ID_PATH_PARAM, relatedItemPath);
     }
 
