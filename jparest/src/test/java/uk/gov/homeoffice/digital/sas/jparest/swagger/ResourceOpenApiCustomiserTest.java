@@ -1,12 +1,11 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
-
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem.HttpMethod;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,18 +14,18 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springdoc.core.SpringDocAnnotationsUtils;
-
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem.HttpMethod;
-import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.parameters.Parameter;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.OpenApiTestUtil;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceOpenApiCustomiserTest {
@@ -111,9 +110,8 @@ class ResourceOpenApiCustomiserTest {
                 var secondRelatedResourceType = DummyEntityC.class;
                 var secondRelatedIdType = UUID.class;
 
-                resourceEndpoint.addRelated(resource, firstRelatedResourceType, firstRelationPath, firstRelatedIdType);
-                resourceEndpoint.addRelated(resource, secondRelatedResourceType, secondRelationPath,
-                                secondRelatedIdType);
+                resourceEndpoint.addRelated(resource, firstRelatedResourceType, firstRelationPath);
+                resourceEndpoint.addRelated(resource, secondRelatedResourceType, secondRelationPath);
 
                 var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint, new PathItemCreator());
                 var openApi = OpenApiTestUtil.createDefaultOpenAPI();

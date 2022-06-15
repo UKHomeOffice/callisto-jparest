@@ -1,16 +1,14 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
+import lombok.Getter;
+import org.springframework.stereotype.Component;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.stereotype.Component;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorException;
 
 @Component
 public class ResourceEndpoint {
@@ -41,12 +39,12 @@ public class ResourceEndpoint {
         }
 
         paths.add(path);
-        var rootDescriptor = new RootDescriptor(idFieldType, path);
+        var rootDescriptor = new RootDescriptor(path);
         descriptors.put(clazz, rootDescriptor);
 
     }
 
-    public void addRelated(Class<?> clazz, Class<?> relatedClazz, String path, Class<?> idFieldType) {
+    public void addRelated(Class<?> clazz, Class<?> relatedClazz, String path) {
 
         if (!descriptors.containsKey(clazz)) {
             throw new AddResourceDescriptorException(CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES,
@@ -66,25 +64,16 @@ public class ResourceEndpoint {
         }
 
         paths.add(path);
-        var descriptor = new Descriptor(idFieldType, path);
-        rootDescriptor.getRelations().put(relatedClazz, descriptor);
+        rootDescriptor.getRelations().put(relatedClazz, path);
     }
 
-    @AllArgsConstructor
-    public class Descriptor {
-        @Getter
-        private Class<?> idFieldType;
+    @Getter
+    public class RootDescriptor {
+        String path;
+        private Map<Class<?>, String> relations = new HashMap<>();
 
-        @Getter
-        private String path;
-    }
-
-    public class RootDescriptor extends Descriptor {
-        @Getter
-        private Map<Class<?>, Descriptor> relations = new HashMap<>();
-
-        public RootDescriptor(Class<?> idFieldType, String path) {
-            super(idFieldType, path);
+        public RootDescriptor(String path) {
+            this.path = path;
         }
     }
 }

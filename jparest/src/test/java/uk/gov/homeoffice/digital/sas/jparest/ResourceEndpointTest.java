@@ -6,9 +6,7 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.*;
 import static uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint.*;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode.RELATED_RESOURCE_ALREADY_EXISTS;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode.RESOURCE_ALREADY_EXISTS;
@@ -30,7 +28,6 @@ class ResourceEndpointTest {
         resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE);
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS);
         assertThat(actualDescriptor.getPath()).isEqualTo(RESOURCE_PATH);
-        assertThat(actualDescriptor.getIdFieldType()).isEqualTo(ID_FIELD_TYPE);
 
         // Add the resource again
         
@@ -59,7 +56,6 @@ class ResourceEndpointTest {
         assertThatNoException().isThrownBy(() -> resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE));
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS);
         assertThat(actualDescriptor.getPath()).isEqualTo(RESOURCE_PATH);
-        assertThat(actualDescriptor.getIdFieldType()).isEqualTo(ID_FIELD_TYPE);
     }
 
     @Test
@@ -68,7 +64,7 @@ class ResourceEndpointTest {
         resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE);
 
         assertThatExceptionOfType(AddResourceDescriptorException.class)
-                .isThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE))
+                .isThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RESOURCE_PATH))
                 .withMessage(PATH_ALREADY_EXISTS)
                 .extracting(EXCEPTION_ERROR_CODE_FIELD_NAME).isEqualTo(AddResourceDescriptorErrorCode.PATH_ALREADY_EXISTS.getCode());
     }
@@ -78,7 +74,7 @@ class ResourceEndpointTest {
         var resourceEndpoint = new ResourceEndpoint();
 
         assertThatExceptionOfType(AddResourceDescriptorException.class)
-                .isThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH, ID_FIELD_TYPE))
+                .isThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH))
                 .withMessage(CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES)
                 .extracting(EXCEPTION_ERROR_CODE_FIELD_NAME).isEqualTo(AddResourceDescriptorErrorCode.RESOURCE_DOES_NOT_EXIST.getCode());
 
@@ -91,20 +87,16 @@ class ResourceEndpointTest {
         // Add resource & related resource first
         var resourceEndpoint = new ResourceEndpoint();
         resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE);
-        resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH,
-                RELATED_ID_FIELD_TYPE);
+        resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH);
         // Verify resource & related resource exists
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS);
         assertThat(actualDescriptor.getPath()).isEqualTo(RESOURCE_PATH);
-        assertThat(actualDescriptor.getIdFieldType()).isEqualTo(ID_FIELD_TYPE);
-        var relatedDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS).getRelations()
-                .get(RELATED_RESOURCE_CLASS);
-        assertThat(relatedDescriptor.getPath()).isEqualTo(RELATED_RESOURCE_PATH);
-        assertThat(relatedDescriptor.getIdFieldType()).isEqualTo(RELATED_ID_FIELD_TYPE);
+        var path = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS).getRelations().get(RELATED_RESOURCE_CLASS);
+        assertThat(path).isEqualTo(RELATED_RESOURCE_PATH);
 
         // Try to add related resource again
         assertThatExceptionOfType(AddResourceDescriptorException.class)
-                .isThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH, RELATED_ID_FIELD_TYPE))
+                .isThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH))
                 .withMessage(RELATED_RESOURCE_ALREADY_ADDED)
                 .extracting(EXCEPTION_ERROR_CODE_FIELD_NAME).isEqualTo(RELATED_RESOURCE_ALREADY_EXISTS.getCode());
     }
@@ -117,18 +109,14 @@ class ResourceEndpointTest {
         // Verify resource & related resource does not exists
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS);
         assertThat(actualDescriptor.getPath()).isEqualTo(RESOURCE_PATH);
-        assertThat(actualDescriptor.getIdFieldType()).isEqualTo(ID_FIELD_TYPE);
-        var relatedDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS).getRelations()
-                .get(RELATED_RESOURCE_CLASS);
-        assertThat(relatedDescriptor).isNull();
+        var path = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS).getRelations().get(RELATED_RESOURCE_CLASS);
+        assertThat(path).isNull();
 
         // Add related resource
-        resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH,
-                RELATED_ID_FIELD_TYPE);
-        relatedDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS).getRelations()
+        resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH);
+        path = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS).getRelations()
                 .get(RELATED_RESOURCE_CLASS);
-        assertThat(relatedDescriptor.getPath()).isEqualTo(RELATED_RESOURCE_PATH);
-        assertThat(relatedDescriptor.getIdFieldType()).isEqualTo(String.class);
+        assertThat(path).isEqualTo(RELATED_RESOURCE_PATH);
     }
 
 }

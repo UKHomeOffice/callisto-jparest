@@ -65,8 +65,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
             setParentResourcePaths(openApi, rootDescriptor, clazz, tag);
 
             // Create documentation for relations in the entity
-            for (Entry<Class<?>, ResourceEndpoint.Descriptor> relatedElement : rootDescriptor.getRelations()
-                    .entrySet()) {
+            for (Entry<Class<?>, String> relatedElement : rootDescriptor.getRelations().entrySet()) {
 
                 var relatedClazz = relatedElement.getKey();
                 var relatedDescriptor = relatedElement.getValue();
@@ -113,13 +112,13 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     }
 
     private void setRelatedResourcePaths(OpenAPI openApi,
-                                         ResourceEndpoint.Descriptor relatedDescriptor,
+                                         String path,
                                          Class<?> relatedClazz, String tag) {
 
         var relatedRootPath = pathItemCreator.createRelatedRootPath(tag, relatedClazz);
-        openApi.path(relatedDescriptor.getPath(), relatedRootPath);
+        openApi.path(path, relatedRootPath);
         var relatedItemPath = pathItemCreator.createRelatedItemPath(tag);
-        openApi.path(relatedDescriptor.getPath() + URL_RELATED_ID_PATH_PARAM, relatedItemPath);
+        openApi.path(path + URL_RELATED_ID_PATH_PARAM, relatedItemPath);
     }
 
 
