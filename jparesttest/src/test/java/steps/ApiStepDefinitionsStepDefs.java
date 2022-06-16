@@ -8,12 +8,10 @@ public class ApiStepDefinitionsStepDefs {
 
     LinkedList mockedList = mock(LinkedList.class);
 
-    @Then("^I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" and parameter \"([^\"]*)\"$")
-    public void request(String requestType, String endpoint, String bearerToken, String param) throws InterruptedException {
-
-        when(mockedList.get(0)).thenReturn(200);
+    @Then("Test GET call")
+    public void request() {
         System.out.println("****************");
-        System.out.println(mockedList.get(0));
+        System.out.println("hello");
         System.out.println("****************");
 
     }

@@ -53,11 +53,6 @@
             <version>3.2.5</version>
         </dependency>
         <dependency>
-            <groupId>net.serenity-bdd</groupId>
-            <artifactId>serenity-rest-assured</artifactId>
-            <version>3.2.5</version>
-        </dependency>
-        <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
             <version>7.3.4</version>
@@ -90,11 +85,6 @@
             <artifactId>cucumber-junit</artifactId>
             <version>7.3.4</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>4.6.1</version>
         </dependency>
     </dependencies>
 
