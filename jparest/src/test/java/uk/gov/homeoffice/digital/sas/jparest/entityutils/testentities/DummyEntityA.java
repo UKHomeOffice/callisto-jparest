@@ -27,4 +27,8 @@ public class DummyEntityA extends BaseEntity {
     @Setter
     private Long profileId;
 
+    @Getter
+    @Setter
+    private Long index;
+
 }
