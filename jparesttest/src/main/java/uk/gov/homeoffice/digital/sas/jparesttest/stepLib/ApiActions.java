@@ -79,6 +79,15 @@ public class ApiActions {
                 .get(endpointRoot + parameter);
     }
 
+    public void deleteEndpointWithParamAndTenantId(String parameter, String tenantId) {
+        given()
+                .queryParams(tenantId, tenantId)
+                .contentType("application/json")
+                .log().all()
+                .when()
+                .delete(endpointRoot + parameter);
+    }
+
     @Step
     public void setEndpoint() {
             RestAssured.baseURI = endpointRoot;
@@ -110,7 +119,5 @@ public class ApiActions {
     public void saveBearerToken(String bearer) {
         bearerToken = bearer;
     }
-
-
 }
 

@@ -12,6 +12,7 @@ public class ApiStepDefinitionsStepDefs {
 
     @Steps
     private static ApiActions apiActions;
+    public static String profileId;
 
     @Then("A call to the GET endpoint has been made")
     public void request() throws Exception {
@@ -21,10 +22,32 @@ public class ApiStepDefinitionsStepDefs {
     }
 
     @Then("^as a tester I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" and the parameter \"([^\"]*)\"$")
-    public void request(String requestType, String endpoint, String bearerToken, String param) {
+    public void request(String requestType, String endpoint, String bearerToken, String param) throws InterruptedException {
         apiActions.restEndpointIsAvailable(endpoint);
         apiActions.setEndpoint();
         apiActions.getEndpointWithParamAndTenantId(param, bearerToken);
+        for (int x = 0; x < 10; x++) {
+            switch (requestType) {
+                case "RETRIEVE":
+                    Thread.sleep(1000);
+                    switch (endpoint) {
+                        case "jparestapi":
+                            apiActions.getEndpointWithParamAndTenantId(param, bearerToken);
+                            break;
+                    }
+                    break;
+                case "REMOVE":
+                    switch (endpoint) {
+                        case "jparestapi-profiles":
+                            apiActions.deleteEndpointWithParamAndTenantId(profileId, bearerToken);
+                            break;
+                    }
+                    break;
+            }
+            if (apiActions.getResponseStatusCode() == 200) {
+                break;
+            }
+        }
     }
 
     @Then("^I should get (\\d+) back$")
