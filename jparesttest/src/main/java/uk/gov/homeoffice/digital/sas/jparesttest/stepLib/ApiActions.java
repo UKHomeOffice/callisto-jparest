@@ -103,7 +103,7 @@ public class ApiActions {
 
     @Step
     public ArrayList getResponseValueFromArrayOfKey(String key) {
-        return then().extract().path(key);
+        return response.path(key);
     }
 
     @Step
