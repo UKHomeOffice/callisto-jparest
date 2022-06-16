@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
         tags = "@JpaRestApi",
         plugin = {"pretty"},
         features = "src/test/java/features",
-        glue = "steps"
+        glue = "uk.gov.homeoffice.digital.sas.jparesttest.steps"
 )
 public class RunTest {
 
