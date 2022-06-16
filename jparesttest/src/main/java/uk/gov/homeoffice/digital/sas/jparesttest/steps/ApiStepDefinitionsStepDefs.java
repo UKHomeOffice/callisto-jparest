@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparesttest.steps;
 
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import net.thucydides.core.annotations.Steps;
 import uk.gov.homeoffice.digital.sas.jparesttest.stepLib.ApiActions;
 
@@ -19,7 +20,7 @@ public class ApiStepDefinitionsStepDefs {
         System.out.println("****************");
     }
 
-    @Then("^I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" and parameter \"([^\"]*)\"$")
+    @Then("^as a tester I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" and the parameter \"([^\"]*)\"$")
     public void request(String requestType, String endpoint, String bearerToken, String param) {
         apiActions.restEndpointIsAvailable(endpoint);
         apiActions.setEndpoint();
@@ -31,5 +32,4 @@ public class ApiStepDefinitionsStepDefs {
         apiActions.checkStatusCode(responseCode);
         assertThat("Status code does not match", apiActions.getResponseStatusCode(), is(responseCode));
     }
-
 }
