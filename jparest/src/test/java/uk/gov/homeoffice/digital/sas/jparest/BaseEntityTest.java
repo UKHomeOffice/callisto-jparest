@@ -1,74 +1,74 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import lombok.Getter;
-import lombok.Setter;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import javax.persistence.Id;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.junit.jupiter.api.Named.named;
-
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.junit.jupiter.api.Named.named;
+
 class BaseEntityTest {
 
-    public static final String SHOULD_NOT_BE_EXTENDED_BY_A_SUBCLASS = "uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity should not be extended by a subclass";
+    public static final UUID SAMPLE_ID = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120000");
+    public static final UUID SAMPLE_TENANT_ID = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120001");
+    public static final UUID SAMPLE2_TENANT_ID = UUID.fromString("7a7c7da4-bb29-11ec-8422-0242ac120002");
+    public static final UUID UUID1 = UUID.fromString("7a7c7da4-bb29-11ec-1000-0242ac120001");
+    public static final UUID UUID2 = UUID.fromString("7a7c7da4-bb29-11ec-1001-0242ac120002");
+    public static final UUID UUID3 = UUID.fromString("7a7c7da4-bb29-11ec-1002-0242ac120003");
+
 
     @Test
-    void getIdField_classContainsSingleIdAnnotatedField_noExceptionThrown() {
+    void getIdField_classContainsSingleIdField_noExceptionThrown() {
         assertThatNoException().isThrownBy(DummyEntityA::new);
-    }
-
-    @Test
-    void getIdField_fieldsExist_noIdAnnotatedFieldExists_exceptionThrown() {
-        assertThatExceptionOfType(ResourceException.class)
-                .isThrownBy(BadEntityA::new)
-                .withMessageContaining(SHOULD_NOT_BE_EXTENDED_BY_A_SUBCLASS)
-                .withMessageContaining("with 0 number of @Id annotations");
-    }
-
-    @Test
-    void getIdField_noFieldsExist_exceptionThrown() {
-        assertThatExceptionOfType(ResourceException.class)
-                .isThrownBy(BadEntityB::new)
-                .withMessageContaining(SHOULD_NOT_BE_EXTENDED_BY_A_SUBCLASS)
-                .withMessageContaining("with 0 number of @Id annotations");
-    }
-
-    @Test
-    void getIdField_multipleIdAnnotatedFieldExists_exceptionThrown() {
-        assertThatExceptionOfType(ResourceException.class)
-                .isThrownBy(BadEntityC::new)
-                .withMessageContaining(SHOULD_NOT_BE_EXTENDED_BY_A_SUBCLASS)
-                .withMessageContaining("with 2 number of @Id annotations");
     }
 
     @Test
     void hashCode_calledOnEqualObjects_returnTheSameValue() {
         var obj1 = new DummyEntityC();
-        obj1.setId(100L);
+        obj1.setId(SAMPLE_ID);
+        obj1.setTenantId(SAMPLE_TENANT_ID);
         obj1.setDescription("something");
+
         var obj2 = new DummyEntityC();
-        obj2.setId(100L);
+        obj2.setId(SAMPLE_ID);
+        obj2.setTenantId(SAMPLE_TENANT_ID);
         obj2.setDescription("different");
+
         assertThat(obj1).isEqualTo(obj2).hasSameHashCodeAs(obj2);
     }
 
+
+    @Test
+    void hashCode_withSameIdAndDifferentTenantId_returnTheSameValue() {
+        var obj1 = new DummyEntityC();
+        obj1.setId(SAMPLE_ID);
+        obj1.setTenantId(SAMPLE_TENANT_ID);
+        obj1.setDescription("something");
+
+        var obj2 = new DummyEntityC();
+        obj2.setId(SAMPLE_ID);
+        obj2.setTenantId(SAMPLE2_TENANT_ID);
+        obj2.setDescription("something");
+
+        assertThat(obj1).isEqualTo(obj2).hasSameHashCodeAs(obj2);
+    }
+
+
+
     @ParameterizedTest(name="{0}")
     @MethodSource("equalObjects")
-    void equals_calledOnDifferentInstancesOfSameTypeWithMatchingIdAnnotatedFields_returnsTrue(Object object1, Object object2) {
+    void equals_calledOnDifferentInstancesOfSameTypeWithMatchingIdFields_returnsTrue(Object object1, Object object2) {
         assertThat(object1).isEqualTo(object2);
     }
 
@@ -95,76 +95,89 @@ class BaseEntityTest {
     }
 
     static class GuidIdEntity extends BaseEntity {
-        @Id
         @Getter
         @Setter
         private UUID identifier;
-
-        @Getter
-        @Setter
-        private Long id;
     }
 
     static Stream<Arguments> equalObjects() {
-        // Objects the the same ID annotated field
+        // Objects with the same ID field
         var g1 = new GuidIdEntity();
-        g1.setIdentifier(UUID.randomUUID());
+        g1.setId(SAMPLE_ID);
+        g1.setTenantId(SAMPLE_TENANT_ID);
+
         var g2 = new GuidIdEntity();
-        g2.setIdentifier(g1.getIdentifier());
-        
-        // Objects the the same ID annotated field
+        g2.setId(SAMPLE_ID);
+        g2.setTenantId(SAMPLE_TENANT_ID);
+
+        // Objects with the same ID field & different tenantid value
+        var gt2 = new GuidIdEntity();
+        gt2.setId(SAMPLE_ID);
+        gt2.setTenantId(SAMPLE2_TENANT_ID);
+
+        // Objects the same ID field
         var a1 = new DummyEntityA();
-        a1.setId(100L);
+        a1.setId(SAMPLE_ID);
+        a1.setTenantId(SAMPLE_TENANT_ID);
         var a2 = new DummyEntityA();
-        a2.setId(100L);
+        a2.setTenantId(SAMPLE_TENANT_ID);
+        a2.setId(SAMPLE_ID);
 
         return Stream.of(
-            Arguments.of(named("same id annotated field value", g1), g2),
+            Arguments.of(named("same id field value", g1), g2),
+            Arguments.of(named("same id & different tenantid value", g1), gt2),
             Arguments.of(named("same instance", g1), g1),
             Arguments.of(named("same instance", g2), g2),
-            Arguments.of(named("same id annotated field value", a1), a2),
+            Arguments.of(named("same id field value", a1), a2),
             Arguments.of(named("same instance", a1), a1),
             Arguments.of(named("same instance", a2), a2)
         );
     }
 
     static Stream<Arguments> unequalObjects() {
-        // Different values in id annotated field
+        // Different values in id field
         var g1 = new GuidIdEntity();
-        g1.setIdentifier(UUID.randomUUID());
+        g1.setId(UUID1);
+        g1.setTenantId(SAMPLE_TENANT_ID);
         var g2 = new GuidIdEntity();
-        g2.setIdentifier(UUID.randomUUID());
+        g2.setId(UUID2);
+        g2.setTenantId(SAMPLE_TENANT_ID);
 
-        // Same value in id field with null ID annotated field
+        // with null id field
         var g3 = new GuidIdEntity();
-        g3.setId(100L);
+        g3.setId(null);
+        g3.setTenantId(SAMPLE_TENANT_ID);
         var g4 = new GuidIdEntity();
-        g4.setId(100L);
+        g4.setId(null);
+        g4.setTenantId(SAMPLE_TENANT_ID);
 
-        // Same value in id field with non null ID annotated field
+        // with non-null id field
         var g5 = new GuidIdEntity();
-        g5.setIdentifier(UUID.randomUUID());
-        g5.setId(100L);
-        
-        // Same value in description field but null ID annotated field
+        g5.setId(SAMPLE_ID);
+        g5.setTenantId(SAMPLE_TENANT_ID);
+        g5.setIdentifier(UUID3);
+
+        // Same value in description field but null ID field
         var c1 = new DummyEntityC();
         c1.setDescription("something");
         var c2 = new DummyEntityC();
         c2.setDescription("something");
 
-        // Same ID annotated field value but different types
+        // Same id field value but different types
         var c3 = new DummyEntityC();
-        c3.setId(100L);
+        c3.setId(SAMPLE_ID);
+        c3.setTenantId(SAMPLE_TENANT_ID);
         var a1 = new DummyEntityA();
-        a1.setId(100L);
+        a1.setId(SAMPLE_ID);
+        a1.setTenantId(SAMPLE_TENANT_ID);
 
         return Stream.of(
             Arguments.of(named("different ids", g1), g2),
-            Arguments.of(named("null id annotated field", g3), g4),
-            Arguments.of(named("null id annotated field != non null id annotated field", g4), g5),
-            Arguments.of(named("non null id annotated field != null id annotated field", g4), g5),
-            Arguments.of(named("null id annotated field", c1), c2),
-            Arguments.of(named("same id annotated field but different types", c3), a1),
+            Arguments.of(named("null id field", g3), g4),
+            Arguments.of(named("null id  field != non null id  field", g4), g5),
+            Arguments.of(named("non null id  field != null id  field", g5), g4),
+            Arguments.of(named("null id field", c1), c2),
+            Arguments.of(named("same id field but different entity types", c3), a1),
             Arguments.of(named("right side null object", c3), null),
             Arguments.of(named("left side null object", null), c3)
         );

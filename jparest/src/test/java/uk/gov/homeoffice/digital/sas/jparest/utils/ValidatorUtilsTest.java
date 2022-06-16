@@ -32,6 +32,7 @@ class ValidatorUtilsTest {
     @Test
     void validateAndThrowIfErrorsExist_constraintViolationsExists_resourceConstraintViolationExceptionThrown() {
         var entity = new DummyEntityD();
+
         var validatorUtils =  new ValidatorUtils();
         assertThatExceptionOfType(ResourceConstraintViolationException.class)
             .isThrownBy(() -> validatorUtils.validateAndThrowIfErrorsExist(entity));
@@ -42,6 +43,7 @@ class ValidatorUtilsTest {
 
         var entity = new DummyEntityD();
         entity.setTelephone("-123456");
+
         var validatorUtils = new ValidatorUtils();
 
         assertThatExceptionOfType(ResourceConstraintViolationException.class)

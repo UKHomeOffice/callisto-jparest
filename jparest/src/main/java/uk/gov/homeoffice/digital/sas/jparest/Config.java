@@ -2,7 +2,9 @@ package uk.gov.homeoffice.digital.sas.jparest;
 
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.PathItemCreator;

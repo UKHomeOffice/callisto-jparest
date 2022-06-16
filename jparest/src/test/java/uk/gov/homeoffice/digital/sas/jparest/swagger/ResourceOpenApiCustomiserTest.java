@@ -1,12 +1,11 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
-
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem.HttpMethod;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,18 +14,18 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springdoc.core.SpringDocAnnotationsUtils;
-
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem.HttpMethod;
-import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.parameters.Parameter;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.testutils.OpenApiTestUtil;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceOpenApiCustomiserTest {
@@ -98,7 +97,7 @@ class ResourceOpenApiCustomiserTest {
         @ParameterizedTest
         @MethodSource("resources")
         void customise_resourceEndpointHasRelatedResources_openApiPathIsCustomised(Class<DummyEntityA> resource,
-                        String path, Class<Long> parentIdFieldType) {
+                        String path, Class<UUID> parentIdFieldType) {
 
                 var resourceEndpoint = new ResourceEndpoint();
                 resourceEndpoint.add(resource, path, parentIdFieldType);
@@ -109,11 +108,10 @@ class ResourceOpenApiCustomiserTest {
 
                 var secondRelationPath = path + "/{id}/dummyc";
                 var secondRelatedResourceType = DummyEntityC.class;
-                var secondRelatedIdType = Long.class;
+                var secondRelatedIdType = UUID.class;
 
-                resourceEndpoint.addRelated(resource, firstRelatedResourceType, firstRelationPath, firstRelatedIdType);
-                resourceEndpoint.addRelated(resource, secondRelatedResourceType, secondRelationPath,
-                                secondRelatedIdType);
+                resourceEndpoint.addRelated(resource, firstRelatedResourceType, firstRelationPath);
+                resourceEndpoint.addRelated(resource, secondRelatedResourceType, secondRelationPath);
 
                 var resourceOpenApiCustomiser = new ResourceOpenApiCustomiser(resourceEndpoint, new PathItemCreator());
                 var openApi = OpenApiTestUtil.createDefaultOpenAPI();
@@ -139,7 +137,8 @@ class ResourceOpenApiCustomiserTest {
                 var post = pathItem.getPost();
                 assertThat(post).isNotNull();
                 var parameters = post.getParameters();
-                assertThat(parameters).isNull();
+                assertThat(parameters).isNotNull();
+                validateTenantIdParameter(parameters);
                 validateRequestBody(post, resource);
                 validateApiResponse(post, resource);
 
@@ -206,7 +205,7 @@ class ResourceOpenApiCustomiserTest {
 
         private void validateRelatedModify(HttpMethod method, Paths paths, String path, Class<?> parentIdFieldType,
                         Class<?> resource, Class<?> idFieldType) {
-                var pathItem = paths.get(path + "/{relatedId}");
+                var pathItem = paths.get(path + "/{relatedIds}");
                 assertThat(pathItem).isNotNull();
                 var operation = pathItem.readOperationsMap().get(method);
                 assertThat(operation).isNotNull();
@@ -231,12 +230,21 @@ class ResourceOpenApiCustomiserTest {
 
         private void validateRelatedIdParameter(List<Parameter> parameters, Class<?> clazz) {
                 var idSchema = SpringDocAnnotationsUtils.extractSchema(null, clazz, null, null);
-                assertThat(parameters).filteredOn(p -> p.getName().equals("relatedId")).first().extracting(
+                assertThat(parameters).filteredOn(p -> p.getName().equals("relatedIds")).first().extracting(
                                 p -> p.getIn(),
                                 p -> ((ArraySchema) p.getSchema()).getItems())
                                 .containsExactly(
                                                 "path",
                                                 idSchema);
+        }
+
+        private void validateTenantIdParameter(List<Parameter> parameters) {
+                assertThat(parameters).filteredOn(p -> p.getName().equals("tenantId")).first().extracting(
+                                p -> p.getIn(),
+                                p -> p.getSchema().getType())
+                        .containsExactly(
+                                "query",
+                                "string");
         }
 
         private void validatePageableParameter(List<Parameter> parameters) {
@@ -308,7 +316,7 @@ class ResourceOpenApiCustomiserTest {
 
         private static Stream<Arguments> resources() {
                 return Stream.of(
-                                Arguments.of(DummyEntityA.class, "somepath", Long.class),
+                                Arguments.of(DummyEntityA.class, "somepath", UUID.class),
                                 Arguments.of(DummyEntityB.class, "somepath", UUID.class));
         }
 
