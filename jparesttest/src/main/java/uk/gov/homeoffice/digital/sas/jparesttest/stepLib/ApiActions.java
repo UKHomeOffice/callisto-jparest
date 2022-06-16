@@ -23,7 +23,9 @@ public class ApiActions {
 
     private static EnvironmentVariables environmentVariables;
 
-    Response response;
+    public static Response response;
+    public static String dynamicData;
+
 
     private static String getEnvironmentProperty(String propertyName){
         return EnvironmentSpecificConfiguration.from(environmentVariables)
@@ -70,18 +72,18 @@ public class ApiActions {
     }
 
     @Step
-    public void getEndpointWithParamAndTenantId(String parameter, String tenantId) {
+    public void getEndpointWithQueryParam(String parameter, String key, String value) {
        response = given()
-                .queryParams("tenantId", tenantId)
+                .queryParams("tenantId", value)
                 .contentType("application/json")
                 .log().all()
                 .when()
                 .get(endpointRoot + parameter);
     }
 
-    public void deleteEndpointWithParamAndTenantId(String parameter, String tenantId) {
+    public void deleteEndpointWithQueryParam(String parameter, String key, String value) {
         given()
-                .queryParams(tenantId, tenantId)
+                .queryParams("tenantId", value)
                 .contentType("application/json")
                 .log().all()
                 .when()

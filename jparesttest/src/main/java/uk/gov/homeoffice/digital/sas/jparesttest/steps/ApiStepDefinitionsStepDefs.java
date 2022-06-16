@@ -1,7 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparesttest.steps;
 
 import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
 import net.thucydides.core.annotations.Steps;
 import uk.gov.homeoffice.digital.sas.jparesttest.stepLib.ApiActions;
 
@@ -14,39 +13,14 @@ public class ApiStepDefinitionsStepDefs {
     private static ApiActions apiActions;
     public static String profileId;
 
-    @Then("A call to the GET endpoint has been made")
-    public void request() throws Exception {
-        System.out.println("****************");
-        System.out.println("hello");
-        System.out.println("****************");
-    }
-
-    @Then("^as a tester I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" and the parameter \"([^\"]*)\"$")
-    public void request(String requestType, String endpoint, String bearerToken, String param) throws InterruptedException {
+    @Then("^as a tester I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" value \"([^\"]*)\" and the parameter \"([^\"]*)\"$")
+    public void request(String requestType, String endpoint, String key, String value, String param) {
         apiActions.restEndpointIsAvailable(endpoint);
         apiActions.setEndpoint();
-        apiActions.getEndpointWithParamAndTenantId(param, bearerToken);
-        for (int x = 0; x < 10; x++) {
-            switch (requestType) {
-                case "RETRIEVE":
-                    Thread.sleep(1000);
-                    switch (endpoint) {
-                        case "jparestapi":
-                            apiActions.getEndpointWithParamAndTenantId(param, bearerToken);
-                            break;
-                    }
-                    break;
-                case "REMOVE":
-                    switch (endpoint) {
-                        case "jparestapi-profiles":
-                            apiActions.deleteEndpointWithParamAndTenantId(profileId, bearerToken);
-                            break;
-                    }
-                    break;
-            }
-            if (apiActions.getResponseStatusCode() == 200) {
-                break;
-            }
+        if(param.contains("dynamic")) param = ApiActions.dynamicData;
+        switch (requestType) {
+            case "RETRIEVE" -> apiActions.getEndpointWithQueryParam(param, key, value);
+            case "REMOVE" -> apiActions.deleteEndpointWithQueryParam(param, key, value);
         }
     }
 
@@ -54,5 +28,17 @@ public class ApiStepDefinitionsStepDefs {
     public void iShouldGetBack(int responseCode) {
         apiActions.checkStatusCode(responseCode);
         assertThat("Status code does not match", apiActions.getResponseStatusCode(), is(responseCode));
+    }
+
+    @Then("^The \"([^\"]*)\" value from the response \"([^\"]*)\" is saved$")
+    public void request(String value, String responseType) {
+        switch (responseType) {
+            case "Array":
+                ApiActions.dynamicData = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+                break;
+            case "Object":
+                apiActions.saveBearerToken(apiActions.getResponseBody());
+                break;
+        }
     }
 }
