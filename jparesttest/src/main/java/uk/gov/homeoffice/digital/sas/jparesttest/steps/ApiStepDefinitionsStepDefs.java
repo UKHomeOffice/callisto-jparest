@@ -6,6 +6,7 @@ import uk.gov.homeoffice.digital.sas.jparesttest.stepLib.ApiActions;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.homeoffice.digital.sas.jparesttest.stepLib.ApiActions.*;
 
 public class ApiStepDefinitionsStepDefs {
 
@@ -13,14 +14,15 @@ public class ApiStepDefinitionsStepDefs {
     private static ApiActions apiActions;
     public static String profileId;
 
-    @Then("^as a tester I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" value \"([^\"]*)\" and the parameter \"([^\"]*)\"$")
+    @Then("^As a tester I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" value \"([^\"]*)\" and the parameter \"([^\"]*)\"$")
     public void request(String requestType, String endpoint, String key, String value, String param) {
         apiActions.restEndpointIsAvailable(endpoint);
         apiActions.setEndpoint();
         if(param.contains("dynamic")) param = ApiActions.dynamicData;
         switch (requestType) {
-            case "RETRIEVE" -> apiActions.getEndpointWithQueryParam(param, key, value);
-            case "REMOVE" -> apiActions.deleteEndpointWithQueryParam(param, key, value);
+            case "RETRIEVE" -> apiActions.retrieveEndpointWithQueryParam(param, key, value);
+            case "REMOVE" -> apiActions.removeEndpointWithQueryParam(param, key, value);
+            case "SAVE" -> apiActions.saveEndpointWithQueryParam(generatedJson, param, key, value);
         }
     }
 

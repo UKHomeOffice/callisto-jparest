@@ -1,8 +1,10 @@
 package uk.gov.homeoffice.digital.sas.jparesttest.stepLib;
 
+import com.google.gson.JsonElement;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import net.serenitybdd.core.environment.EnvironmentSpecificConfiguration;
+import net.serenitybdd.rest.SerenityRest;
 import net.thucydides.core.annotations.Step;
 import net.thucydides.core.util.EnvironmentVariables;
 import org.junit.Assert;
@@ -24,8 +26,10 @@ public class ApiActions {
     private static EnvironmentVariables environmentVariables;
 
     public static Response response;
+
     public static String dynamicData;
 
+    public static JsonElement generatedJson;
 
     private static String getEnvironmentProperty(String propertyName){
         return EnvironmentSpecificConfiguration.from(environmentVariables)
@@ -72,22 +76,32 @@ public class ApiActions {
     }
 
     @Step
-    public void getEndpointWithQueryParam(String parameter, String key, String value) {
+    public void retrieveEndpointWithQueryParam(String parameter, String key, String value) {
        response = given()
-                .queryParams("tenantId", value)
+                .queryParams(key, value)
                 .contentType("application/json")
                 .log().all()
                 .when()
                 .get(endpointRoot + parameter);
     }
 
-    public void deleteEndpointWithQueryParam(String parameter, String key, String value) {
-        given()
-                .queryParams("tenantId", value)
+    public void removeEndpointWithQueryParam(String parameter, String key, String value) {
+        response = given()
+                .queryParams(key, value)
                 .contentType("application/json")
                 .log().all()
                 .when()
                 .delete(endpointRoot + parameter);
+    }
+
+    public void saveEndpointWithQueryParam(JsonElement json, String parameter, String key, String value) {
+        response = given()
+                .queryParams(key, value)
+                .contentType("application/json")
+                .log().all()
+                .when()
+                .body(json.toString())
+                .post(endpointRoot + parameter);
     }
 
     @Step
