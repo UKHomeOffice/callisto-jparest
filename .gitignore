@@ -18,7 +18,7 @@ target/
 *.iws
 *.iml
 *.ipr
-.java-version
+*.java-version
 
 ### NetBeans ###
 /nbproject/private/
