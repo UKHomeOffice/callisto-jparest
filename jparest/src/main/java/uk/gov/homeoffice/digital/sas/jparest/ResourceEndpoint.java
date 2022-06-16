@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorException;
+import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ public class ResourceEndpoint {
 
     private List<String> paths = new ArrayList<>();
 
-    public void add(Class<?> clazz, String path, Class<?> idFieldType) {
+    public void add(Class<?> clazz, String path) {
 
         if (descriptors.containsKey(clazz)) {
             throw new AddResourceDescriptorException(RESOURCE_ALREADY_ADDED,
@@ -44,7 +45,7 @@ public class ResourceEndpoint {
 
     }
 
-    public void addRelated(Class<?> clazz, Class<?> relatedClazz, String path) {
+    public void addRelated(Class<? extends BaseEntity> clazz, Class<? extends BaseEntity> relatedClazz, String path) {
 
         if (!descriptors.containsKey(clazz)) {
             throw new AddResourceDescriptorException(CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES,
@@ -69,9 +70,8 @@ public class ResourceEndpoint {
 
     @Getter
     public class RootDescriptor {
-        String path;
-        private Map<Class<?>, String> relations = new HashMap<>();
-
+        private String path;
+        private Map<Class<? extends BaseEntity>, String> relations = new HashMap<>();
         public RootDescriptor(String path) {
             this.path = path;
         }

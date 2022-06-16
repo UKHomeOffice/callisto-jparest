@@ -53,7 +53,6 @@ class EntityUtilsTest {
 
     @Test
     void entityUtils_entityTypeHasIdField_idFieldInformationStored() {
-
         var idFieldName = "id";
         var resourceClass = DummyEntityC.class;
         var entityUtils = new EntityUtils<>(resourceClass);
@@ -63,9 +62,7 @@ class EntityUtilsTest {
         } catch (NoSuchFieldException e) {
             LOGGER.info("{} field not found on class {}", idFieldName, resourceClass.toString());
         }
-        assertThat(entityUtils.getIdFieldName()).isEqualTo(expectedField.getName());
-        assertThat(entityUtils.getIdFieldType()).isEqualTo(expectedField.getType());
-
+        assertThat(idFieldName).isEqualTo(expectedField.getName());
     }
 
 

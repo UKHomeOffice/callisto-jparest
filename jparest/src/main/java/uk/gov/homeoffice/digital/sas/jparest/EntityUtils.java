@@ -37,13 +37,9 @@ public class EntityUtils<T extends BaseEntity> {
 
     @Getter
     private Class<T> entityType;
-    @Getter
-    private Set<String> relatedResources = new HashSet<>();
-    @Getter
-    private Class<?> idFieldType= ID_FIELD_TYPE;
-    @Getter
-    private String idFieldName = ID_FIELD_NAME;
     private Map<String, RelatedEntity> relations = new HashMap<>();
+    @Getter
+    private Set<String> relatedResources = relations.keySet();
 
     /**
      * Creates a utility class for the specified entityType
@@ -68,7 +64,6 @@ public class EntityUtils<T extends BaseEntity> {
                     field.setAccessible(true);
                     RelatedEntity relatedEntity = new RelatedEntity(field, (Class<T>) relatedEntityType);
                     relations.putIfAbsent(field.getName(), relatedEntity);
-                    relatedResources.add(field.getName());
                 }
             }
         }
@@ -150,7 +145,7 @@ public class EntityUtils<T extends BaseEntity> {
     /**
      * Provides the type of the entity accessed by the specified relation
      */
-    public Class<?> getRelatedType(String relation) {
+    public Class<? extends BaseEntity> getRelatedType(String relation) {
         return this.relations.get(relation).entityType;
     }
 

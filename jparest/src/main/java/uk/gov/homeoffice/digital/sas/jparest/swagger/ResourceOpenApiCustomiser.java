@@ -14,6 +14,7 @@ import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
+import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import java.util.Map.Entry;
 
@@ -65,7 +66,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
             setParentResourcePaths(openApi, rootDescriptor, clazz, tag);
 
             // Create documentation for relations in the entity
-            for (Entry<Class<?>, String> relatedElement : rootDescriptor.getRelations().entrySet()) {
+            for (Entry<Class<? extends BaseEntity>, String> relatedElement : rootDescriptor.getRelations().entrySet()) {
 
                 var relatedClazz = relatedElement.getKey();
                 var relatedDescriptor = relatedElement.getValue();

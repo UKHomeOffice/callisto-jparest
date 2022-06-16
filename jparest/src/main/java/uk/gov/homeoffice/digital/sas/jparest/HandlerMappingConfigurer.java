@@ -131,17 +131,17 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
         register(controller, "update",
                 getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.BODY),
                 path + URL_ID_PATH_PARAM, RequestMethod.PUT);
-        resourceEndpoint.add(resource, path, entityUtils.getIdFieldType());
+        resourceEndpoint.add(resource, path);
     }
 
-    private void registerRelatedPaths(Class<?> resource,
+    private void registerRelatedPaths(Class<? extends BaseEntity> resource,
                                       String path,
-                                      EntityUtils<?> entityUtils,
+                                      EntityUtils<? extends BaseEntity> entityUtils,
                                       ResourceApiController<?, ?> controller) throws NoSuchMethodException {
 
         for (String relation : entityUtils.getRelatedResources()) {
 
-            Class<?> relatedType = entityUtils.getRelatedType(relation);
+            Class<? extends BaseEntity> relatedType = entityUtils.getRelatedType(relation);
             resourceEndpoint.addRelated(resource, relatedType,
                     path + URL_ID_PATH_PARAM + "/" + relation);
             LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
