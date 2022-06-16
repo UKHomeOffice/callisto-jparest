@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <parent>
         <artifactId>parentpom</artifactId>
         <groupId>uk.gov.homeoffice.digital.sas</groupId>
@@ -9,13 +9,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <profiles>
-        <profile>
-            <id>jparesttest</id>
-        </profile>
-    </profiles>
-
+    <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>jparesttest</artifactId>
+    <version>0.0.1</version>
+    <packaging>jar</packaging>
+
     <build>
         <plugins>
             <plugin>
@@ -48,6 +46,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>uk.gov.homeoffice.digital.sas</groupId>
+            <artifactId>jparest</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>net.serenity-bdd</groupId>
             <artifactId>serenity-cucumber</artifactId>
             <version>3.2.5</version>
@@ -78,12 +81,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-junit</artifactId>
-            <version>7.3.4</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
