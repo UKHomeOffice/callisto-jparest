@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -161,6 +162,9 @@ public class ResourceApiController<T extends BaseEntity, U> {
         validateAndSetTenantIdPayloadMatch(tenantId, r2);
 
         this.validatorUtils.validateAndThrowIfErrorsExist(r2);
+
+        if (Objects.nonNull(r2.getId()))
+            throw new IllegalArgumentException("A resource id should not be provided when creating a new resource.");
 
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);

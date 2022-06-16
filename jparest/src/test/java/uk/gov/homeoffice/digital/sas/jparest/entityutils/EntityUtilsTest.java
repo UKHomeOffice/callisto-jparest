@@ -16,13 +16,11 @@ import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
-import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityG;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -46,10 +44,9 @@ class EntityUtilsTest {
 
     //region Constructor
 
-    @ParameterizedTest
-    @MethodSource("nullConstructorArgs")
-    void entityUtils_nullArgs_throwsNullPointerException(Class<?> clazz, EntityManager manager) {
-        assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> new EntityUtils(clazz, manager));
+    @Test
+    void entityUtils_nullArgs_throwsNullPointerException() {
+        assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> new EntityUtils(null));
     } 
 
     //endregion
@@ -59,7 +56,7 @@ class EntityUtilsTest {
 
         var idFieldName = "id";
         var resourceClass = DummyEntityC.class;
-        var entityUtils = new EntityUtils<>(resourceClass, entityManager);
+        var entityUtils = new EntityUtils<>(resourceClass);
         Field expectedField = null;
         try {
             expectedField = resourceClass.getSuperclass().getDeclaredField(idFieldName);
@@ -75,14 +72,23 @@ class EntityUtilsTest {
     @Test
     void entityUtils_entityTypeHasRelations_relatedEntitiesStored() {
 
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityA.class);
         assertThat(entityUtils.getRelatedResources()).contains("dummyEntityBSet");
     }
+
+
+    @Test
+    void entityUtils_relatedEntityTypeDoesNotExtendBaseEntity_relationIsNotStored() {
+
+        var entityUtils = new EntityUtils<>(DummyEntityG.class);
+        assertThat(entityUtils.getRelatedResources()).doesNotContain("dummyEntityHSet");
+    }
+
 
     @Test
     void entityUtils_oneIdField_noExceptionThrows(){
         assertThatNoException()
-                .isThrownBy(() -> new EntityUtils<>(DummyEntityA.class, entityManager));
+                .isThrownBy(() -> new EntityUtils<>(DummyEntityA.class));
     }
 
     // region getRelatedEntities
@@ -90,7 +96,7 @@ class EntityUtilsTest {
     @Test
     void getRelatedEntities_relatedEntitiesExist_relatedEntitiesReturned() {
 
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityA.class);
         var findA = entityManager.find(DummyEntityA.class, sampleId);
         var actualRelatedEntities = entityUtils.getRelatedEntities(findA, "dummyEntityBSet");
         assertThat(actualRelatedEntities).isNotEmpty();
@@ -98,7 +104,7 @@ class EntityUtilsTest {
 
     @Test
     void getRelatedEntities_relationDoesntExist_throwsIllegalArgumentException() {
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityA.class);
         var findA = entityManager.getReference(DummyEntityA.class, sampleId);
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> entityUtils.getRelatedEntities(findA, "invalidValue"));
     }
@@ -106,7 +112,7 @@ class EntityUtilsTest {
     @ParameterizedTest
     @MethodSource("getRelatedEntitiesNullArgs")
     void getRelatedEntities_nullArgs_throwsNullPointerException(DummyEntityA entity, String relation) {
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityA.class);
         assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> entityUtils.getRelatedEntities(entity, relation));
     }
 
@@ -117,7 +123,7 @@ class EntityUtilsTest {
     @Test
     void getEntityReference_relatedEntityExist_relatedEntityReferenceReturned() {
 
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityA.class);
         UUID relatedEntityReference = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120001");
         var actualReference = entityUtils.getEntityReference("dummyEntityBSet", relatedEntityReference);
         assertThat(actualReference).isInstanceOf(DummyEntityB.class);
@@ -127,7 +133,7 @@ class EntityUtilsTest {
 
     @Test
     void getEntityReference_entityReferenceReturned() {
-        var entityUtils = new EntityUtils<DummyEntityC>(DummyEntityC.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityC.class);
         var actualReference = entityUtils.getEntityReference(sampleId);
         assertThat(actualReference.getId()).isEqualTo(sampleId);
 
@@ -137,17 +143,6 @@ class EntityUtilsTest {
     //endregion
 
     //region Method sources
-    
-
-
-    private Stream<Arguments> nullConstructorArgs() {
-        return Stream.of(
-            Arguments.of(null, this.entityManager),
-            Arguments.of(DummyEntityC.class, null),
-            Arguments.of(null, null)            
-        );
-    }
-
     private static Stream<Arguments> getRelatedEntitiesNullArgs() {
         return Stream.of(
             Arguments.of(null, "relation"),

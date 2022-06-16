@@ -216,12 +216,18 @@ class ResourceApiControllerTest {
         assertThatExceptionOfType(PersistenceException.class).isThrownBy(() -> controller.create(TENANT_ID, "{}"));
     }
 
-
     @Test
     void create_unrecognizedPropertyOnPayload_unknownResourcePropertyExceptionThrown() {
         var controller = getResourceApiController(DummyEntityA.class);
         assertThatExceptionOfType(UnknownResourcePropertyException.class).isThrownBy(() ->
                 controller.create(TENANT_ID, "{\"otherUnknownProperty\": 1}"));
+    }
+
+    @Test
+    void create_idProvidedInPayload_illegalArgumentExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityA.class);
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
+                controller.create(TENANT_ID, "{\"" + ID_FIELD_NAME + "\": \"" + DUMMY_A_ID_1 + "\"}"));
     }
 
     @Test
@@ -235,7 +241,6 @@ class ResourceApiControllerTest {
     @Transactional
     void create_requestTenantIdMatchesPayloadTenantId_resourceIsCreatedWithTenantId() throws JsonProcessingException {
         String payload = "{\n" +
-                "            \"" + ID_FIELD_NAME + "\": \"" + NON_EXISTENT_ID + "\",\n" +
                 "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"" +
                 "        }";
 
@@ -262,7 +267,7 @@ class ResourceApiControllerTest {
     @Transactional
     void create_requestTenantIdIsPresent_payloadTenantIdIsNotPresent_tenantIdIsSavedWithResource() throws JsonProcessingException {
         String payload = "{\n" +
-                "            \"" + ID_FIELD_NAME + "\": \"" + NON_EXISTENT_ID + "\"\n" +
+                "            \"" + PROFILE_ID_FIELD_NAME + "\": \"" + 1 + "\"\n" +
                 "        }";
 
         var controller = getResourceApiController(DummyEntityA.class);
@@ -281,39 +286,40 @@ class ResourceApiControllerTest {
     void update_resourceExists_persistsChanges() throws JsonProcessingException {
 
         String payload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": \""+ DUMMY_C_ID_1 +"\"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 1" +
                 "        }";
 
-        String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": \""+ DUMMY_C_ID_1 +"\"," +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 2" +
-                "        }";
-
+        //create new resource
         var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponse = controller.create(TENANT_ID, payload);
+        assertThat(apiResponse.getItems()).hasSize(1);
+        var createdResource = apiResponse.getItems().get(0);
 
-
-        assertThatNoException().isThrownBy(() -> controller.create(TENANT_ID, payload));
-        var getResponse = controller.get(TENANT_ID, DUMMY_C_ID_1);
+        //get the newly created resource
+        var getResponse = controller.get(TENANT_ID, createdResource.getId());
         var getResource = getResponse.getItems().get(0);
         assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C");
 
-        var updateResponse = controller.update(TENANT_ID, DUMMY_C_ID_1, updatedPayload);
+        //update the newly created resource
+        String updatedPayload = "{" +
+                "            \"" + ID_FIELD_NAME + "\": \""+ createdResource.getId() +"\"," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 2" +
+                "        }";
+        var updateResponse = controller.update(TENANT_ID, createdResource.getId(), updatedPayload);
 
-        var dummy = updateResponse.getItems().get(0);
 
         assertThat(updateResponse.getItems()).hasSize(1);
+        var dummy = updateResponse.getItems().get(0);
         assertThat(dummy).isNotNull();
-        assertThat(dummy.getId()).isEqualTo(DUMMY_C_ID_1);
+        assertThat(dummy.getId()).isEqualTo(createdResource.getId());
         assertThat(dummy.getIndex()).isEqualTo(2);
         assertThat(dummy.getDescription()).isEqualTo("Updated Dummy Entity C");
 
-        var checkResponse = controller.get(TENANT_ID, DUMMY_C_ID_1);
+        var checkResponse = controller.get(TENANT_ID, createdResource.getId());
         var checkResource = checkResponse.getItems().get(0);
         assertThat(checkResource).isEqualTo(dummy);
-
     }
 
     @ParameterizedTest(name="{0}")
@@ -448,7 +454,6 @@ class ResourceApiControllerTest {
     void update_requestTenantIdDoesNotMatchPayloadTenantId_tenantIdMismatchExceptionThrown() {
 
         String payload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": \"" + NEW_RESOURCE_ID + "\"," +
                 "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
                 "            \"" + INDEX_FIELD_NAME + "\": 1" +
@@ -859,7 +864,7 @@ class ResourceApiControllerTest {
     // endregion
 
     private <T extends BaseEntity, U> ResourceApiController<T, U> getResourceApiController(Class<T> clazz) {
-        var entityUtils = new EntityUtils<>(clazz, entityManager);
+        var entityUtils = new EntityUtils<>(clazz);
         return new ResourceApiController<>(clazz, entityManager, transactionManager, entityUtils);
     }
 

@@ -76,33 +76,36 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
         // find the id field , build the request mapping path and register the controller
         for (EntityType<?> entityType : resourceEntityTypes) {
-            Class<? extends BaseEntity> resource = (Class<? extends BaseEntity>) entityType.getJavaType();
-            LOGGER.fine("Processing resource" + resource.getName());
-            var resourceAnnotation = resource.getAnnotation(Resource.class);
-            String resourcePath = resourceAnnotation.path();
-            if (!StringUtils.hasText(resourcePath)) {
-                resourcePath = entityType.getName().toLowerCase();
+
+            if (EntityUtils.classHasBaseEntityParent(entityType.getJavaType())) {
+                Class<? extends BaseEntity> resource = (Class<? extends BaseEntity>) entityType.getJavaType();
+                LOGGER.fine("Processing resource" + resource.getName());
+                var resourceAnnotation = resource.getAnnotation(Resource.class);
+                String resourcePath = resourceAnnotation.path();
+                if (!StringUtils.hasText(resourcePath)) {
+                    resourcePath = entityType.getName().toLowerCase();
+                }
+                String path = API_ROOT_PATH + PATH_DELIMITER + resourcePath;
+                LOGGER.log(Level.FINE, "root path for resource: {0}", path);
+
+                // Added to endpoint resource types for documentation customiser
+                resourceTypes.add(resource);
+
+                // Create a controller for the resource
+                LOGGER.fine("Creating controller");
+                EntityUtils<?> entityUtils = new EntityUtils<>(resource);
+                ResourceApiController<?, ?> controller = new ResourceApiController<>(
+                        resource, entityManager,
+                        transactionManager, entityUtils);
+
+                // Map the CRUD operations to the controllers methods
+                mapRestOperationsToController(resource, path, entityUtils, controller);
+
+                LOGGER.fine("Registering related paths");
+                registerRelatedPaths(resource, path, entityUtils, controller);
+
+                LOGGER.fine("All paths registered");
             }
-            String path = API_ROOT_PATH + PATH_DELIMITER + resourcePath;
-            LOGGER.log(Level.FINE, "root path for resource: {0}", path);
-
-            // Added to endpoint resource types for documentation customiser
-            resourceTypes.add(resource);
-
-            // Create a controller for the resource
-            LOGGER.fine("Creating controller");
-            EntityUtils<?> entityUtils = new EntityUtils<>(resource, entityManager);
-            ResourceApiController<?, ?> controller = new ResourceApiController<>(
-                    resource, entityManager,
-                    transactionManager, entityUtils);
-
-            // Map the CRUD operations to the controllers methods
-            mapRestOperationsToController(resource, path, entityUtils, controller);
-
-            LOGGER.fine("Registering related paths");
-            registerRelatedPaths(resource, path, entityUtils, controller);
-
-            LOGGER.fine("All paths registered");
         }
     }
 

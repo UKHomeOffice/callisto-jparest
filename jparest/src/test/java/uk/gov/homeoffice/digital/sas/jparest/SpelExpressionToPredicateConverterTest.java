@@ -82,7 +82,7 @@ class SpelExpressionToPredicateConverterTest {
     })
     void convert_when_expressionIsValid_shouldNotThrow(String expressionString){
         SpelExpression spelExpression = (SpelExpression)expressionParser.parseExpression(expressionString);
-        var entityUtils = new EntityUtils<>(DummyEntityC.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityC.class);
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
         assertThatNoException().isThrownBy(() -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root) );
@@ -105,7 +105,7 @@ class SpelExpressionToPredicateConverterTest {
     @MethodSource("invalidFilterValues")
     void convert_when_expressionIsInvalid_throws_invalidFilterException(String expressionString, String errorMessage){
         SpelExpression spelExpression = (SpelExpression)expressionParser.parseExpression(expressionString);
-        var entityUtils = new EntityUtils<>(DummyEntityC.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityC.class);
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
 
@@ -126,7 +126,7 @@ class SpelExpressionToPredicateConverterTest {
     })
     void convert_when_methodNameCaseIsDifferentCase_shouldNotThrow(String expressionString){
         SpelExpression spelExpression = (SpelExpression)expressionParser.parseExpression(expressionString);
-        var entityUtils = new EntityUtils<>(DummyEntityC.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityC.class);
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
         assertThatNoException().isThrownBy( () -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root) );
