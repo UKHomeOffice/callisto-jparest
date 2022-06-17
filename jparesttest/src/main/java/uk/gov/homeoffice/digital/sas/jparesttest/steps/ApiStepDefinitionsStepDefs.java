@@ -24,6 +24,7 @@ public class ApiStepDefinitionsStepDefs {
             case "RETRIEVE" -> apiActions.retrieveEndpointWithQueryParam(param, key, value);
             case "REMOVE" -> apiActions.removeEndpointWithQueryParam(param, key, value);
             case "SAVE" -> apiActions.saveEndpointWithQueryParam(generatedJson, param, key, value);
+            case "UPDATE" -> apiActions.updateEndpointWithQueryParam(generatedJson, param, key, value);
             default -> fail("Request type: " + requestType + " does not exist, please add to switch statement");
         }
     }

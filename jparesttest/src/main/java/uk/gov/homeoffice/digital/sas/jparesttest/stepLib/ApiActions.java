@@ -105,6 +105,17 @@ public class ApiActions {
     }
 
     @Step
+    public void updateEndpointWithQueryParam(JsonElement json, String parameter, String key, String value) {
+        SerenityRest.given()
+                .queryParams(key, value)
+                .contentType("application/json")
+                .log().all()
+                .when()
+                .body(json.toString())
+                .put(endpointRoot + parameter);
+    }
+
+    @Step
     public void setEndpoint() {
             RestAssured.baseURI = endpointRoot;
     }
