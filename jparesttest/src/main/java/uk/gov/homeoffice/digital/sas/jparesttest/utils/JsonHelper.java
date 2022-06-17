@@ -30,8 +30,8 @@ public class JsonHelper {
     public static String createJpaRestApiJsonObjectWithManipulation(final String fileName, final List<String> entityIdValue) {
         try {
             String payload = new String(Files.readAllBytes(Paths.get(fileName)));
-            for(int i=0; i <= entityIdValue.size();) {
-                if(payload.contains(VALUE_REPLACEMENT)) {
+            for (int i = 0; i <= entityIdValue.size(); ) {
+                if (payload.contains(VALUE_REPLACEMENT)) {
                     payload = payload.replace(VALUE_REPLACEMENT, entityIdValue.get(i));
                 }
                 int replaceIndex = i + 1;
