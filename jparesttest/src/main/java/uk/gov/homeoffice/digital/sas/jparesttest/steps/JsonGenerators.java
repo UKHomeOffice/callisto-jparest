@@ -14,9 +14,7 @@ import java.util.List;
 import static uk.gov.homeoffice.digital.sas.jparesttest.stepLib.ApiActions.*;
 
 public class JsonGenerators {
-
-    List<String> shiftList = new ArrayList<String>();
-
+    
     @Steps
     private static ApiActions apiActions;
 
@@ -28,14 +26,6 @@ public class JsonGenerators {
         JsonParser jsonParser = new JsonParser();
         generatedJson = new JsonObject();
         generatedJson = jsonParser.parse(requestJson.createJsonObject(value, dynamicData));
-        return generatedJson;
-    }
-
-    @And("I define the {string} request json with values {string}")
-    public JsonElement iDefineTheRequestJsonWithValues(String identifier, String value) {
-        JsonParser jsonParser = new JsonParser();
-        generatedJson = new JsonObject();
-        generatedJson = jsonParser.parse(requestJson.createMultipleJpaRestApiJsonObject(value, shiftList));
         return generatedJson;
     }
 }

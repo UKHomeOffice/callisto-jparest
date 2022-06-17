@@ -6,6 +6,7 @@ import uk.gov.homeoffice.digital.sas.jparesttest.stepLib.ApiActions;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static uk.gov.homeoffice.digital.sas.jparesttest.stepLib.ApiActions.*;
 
 public class ApiStepDefinitionsStepDefs {
@@ -23,6 +24,7 @@ public class ApiStepDefinitionsStepDefs {
             case "RETRIEVE" -> apiActions.retrieveEndpointWithQueryParam(param, key, value);
             case "REMOVE" -> apiActions.removeEndpointWithQueryParam(param, key, value);
             case "SAVE" -> apiActions.saveEndpointWithQueryParam(generatedJson, param, key, value);
+            default -> fail("Request type: " + requestType + " does not exist, please add to switch statement");
         }
     }
 
