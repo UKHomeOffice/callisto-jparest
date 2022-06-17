@@ -11,11 +11,11 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
     Then I should get 200 back
     And The "items.id" value from the response "Array" is saved
 
-#  Scenario: Test PUT call
-#    And I define the "profiles" request json with values "src/test/resources/java/request/update/records-update.json"
-#    When As a tester I call the "UPDATE" "profiles" endpoint with "tenantId" value "b7e813a2-bb28-11ec-8422-0242ac120002" and the parameter "profiles"
-#    Then I should get 200 back
-#    And The "items.id" value from the response "Array" is saved
+  Scenario: Test PUT call
+    And I define the "profiles" request json with values "src/test/resources/java/request/update/records-update.json"
+    When As a tester I call the "UPDATE" "profiles" endpoint with "tenantId" value "b7e813a2-bb28-11ec-8422-0242ac120002" and the parameter "profiles"
+    Then I should get 200 back
+    And The "items.id" value from the response "Array" is saved
 
 #  Scenario: Test DELETE call
 #    When As a tester I call the "REMOVE" "profiles" endpoint with "tenantId" value "b7e813a2-bb28-11ec-8422-0242ac120002" and the parameter "profilesId-dynamic"
