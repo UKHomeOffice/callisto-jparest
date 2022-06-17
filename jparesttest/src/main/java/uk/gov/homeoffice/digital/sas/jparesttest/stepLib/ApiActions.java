@@ -76,32 +76,32 @@ public class ApiActions {
     }
 
     @Step
-    public void retrieveEndpointWithQueryParam(String parameter, String key, String value) {
+    public void retrieveEndpointWithQueryParam(String key, String value) {
        response = given()
                 .queryParams(key, value)
                 .contentType("application/json")
                 .log().all()
                 .when()
-                .get(endpointRoot + parameter);
+                .get(endpointRoot);
     }
 
-    public void removeEndpointWithQueryParam(String parameter, String key, String value) {
+    public void removeEndpointWithQueryParam(String key, String value) {
         response = given()
                 .queryParams(key, value)
                 .contentType("application/json")
                 .log().all()
                 .when()
-                .delete(endpointRoot + parameter);
+                .delete(endpointRoot);
     }
 
-    public void saveEndpointWithQueryParam(JsonElement json, String parameter, String key, String value) {
+    public void saveEndpointWithQueryParam(JsonElement json, String key, String value) {
         response = given()
                 .queryParams(key, value)
                 .contentType("application/json")
                 .log().all()
                 .when()
                 .body(json.toString())
-                .post(endpointRoot + parameter);
+                .post(endpointRoot);
     }
 
     @Step

@@ -19,11 +19,11 @@ public class ApiStepDefinitionsStepDefs {
     public void request(String requestType, String endpoint, String key, String value, String param) {
         apiActions.restEndpointIsAvailable(endpoint);
         apiActions.setEndpoint();
-        if(param.contains("dynamic")) param = ApiActions.dynamicData;
+        if(param.equals("savedValue")) param = ApiActions.dynamicData;
         switch (requestType) {
-            case "RETRIEVE" -> apiActions.retrieveEndpointWithQueryParam(param, key, value);
-            case "REMOVE" -> apiActions.removeEndpointWithQueryParam(param, key, value);
-            case "SAVE" -> apiActions.saveEndpointWithQueryParam(generatedJson, param, key, value);
+            case "RETRIEVE" -> apiActions.retrieveEndpointWithQueryParam(key, value);
+            case "REMOVE" -> apiActions.removeEndpointWithQueryParam(key, value);
+            case "SAVE" -> apiActions.saveEndpointWithQueryParam(generatedJson, key, value);
             case "UPDATE" -> apiActions.updateEndpointWithQueryParam(generatedJson, param, key, value);
             default -> fail("Request type: " + requestType + " does not exist, please add to switch statement");
         }

@@ -17,7 +17,7 @@ steps:
 - name: test
   image: maven:3.8-openjdk-17
   commands:
-  - CHART_NAME=local mvn clean install -pl demo -pl jparest
+  - mvn clean install
 
 - name: sonar
   image: maven:3.8-openjdk-17
