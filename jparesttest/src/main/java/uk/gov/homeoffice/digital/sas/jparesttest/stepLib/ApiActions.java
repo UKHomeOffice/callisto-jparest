@@ -106,7 +106,7 @@ public class ApiActions {
 
     @Step
     public void updateEndpointWithQueryParam(JsonElement json, String parameter, String key, String value) {
-        SerenityRest.given()
+        response = given()
                 .queryParams(key, value)
                 .contentType("application/json")
                 .log().all()

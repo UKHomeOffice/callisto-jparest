@@ -3,13 +3,9 @@ package uk.gov.homeoffice.digital.sas.jparesttest.steps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import net.thucydides.core.annotations.Steps;
 import uk.gov.homeoffice.digital.sas.jparesttest.stepLib.ApiActions;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static uk.gov.homeoffice.digital.sas.jparesttest.stepLib.ApiActions.*;
 
