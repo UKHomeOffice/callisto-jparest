@@ -25,6 +25,8 @@ import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -34,6 +36,8 @@ public class PathItemCreator {
     private static final Parameter ID_PARAMETER = getParameter(RequestParameter.ID);
     private static final Parameter PAGEABLE_PARAMETER = getParameter(RequestParameter.PAGEABLE);
     private static final Parameter TENANT_ID_PARAMETER = getParameter(RequestParameter.TENANT_ID);
+
+    private static final Map<String, RequestParameter> PARAM_NAME_TO_ENUM_MAP = RequestParameter.getParamNameToEnumMap();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PathItemCreator.class);
 
@@ -330,7 +334,9 @@ public class PathItemCreator {
 
     private void addParametersToOperation(Operation operation, Parameter... parameters) {
         Arrays.stream(parameters)
-                .sorted(Comparator.comparing(param -> RequestParameter.getEnumByParamName(param.getName()).getOrder()))
+                .sorted(Comparator.comparing(param -> Optional.of(PARAM_NAME_TO_ENUM_MAP.get(param.getName())).orElseThrow(() ->
+                                new IllegalArgumentException(String.format("No %s enum constant found for parameter name: %s ",
+                                        RequestParameter.class.getCanonicalName(), param.getName()))).getOrder()))
                 .forEach(operation::addParametersItem);
     }
 

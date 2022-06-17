@@ -4,7 +4,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.expression.spel.standard.SpelExpression;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public enum RequestParameter {
 
@@ -53,12 +57,9 @@ public enum RequestParameter {
     }
 
 
-    public static RequestParameter getEnumByParamName(String requestParamName) {
-        for (RequestParameter requestParameter : values())
-            if(requestParameter.getParamName().equals(requestParamName)) return requestParameter;
-
-        throw new IllegalArgumentException(String.format(
-                "No %s enum constant found for parameter name: %s ",  RequestParameter.class.getCanonicalName(), requestParamName));
+    public static Map<String, RequestParameter> getParamNameToEnumMap() {
+        return Stream.of(values())
+                .collect(Collectors.toMap(RequestParameter::getParamName, Function.identity()));
     }
 
 
