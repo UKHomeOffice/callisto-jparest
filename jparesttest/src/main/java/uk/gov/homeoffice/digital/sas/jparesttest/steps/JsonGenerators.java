@@ -21,7 +21,7 @@ public class JsonGenerators {
     public JsonElement defineRequestJson(String identifier, String value) {
         JsonParser jsonParser = new JsonParser();
         generatedJson = new JsonObject();
-        generatedJson = jsonParser.parse(requestJson.createJsonObject(value, dynamicData));
+        generatedJson = jsonParser.parse(requestJson.createJsonObject(value, savedValue));
         return generatedJson;
     }
 }

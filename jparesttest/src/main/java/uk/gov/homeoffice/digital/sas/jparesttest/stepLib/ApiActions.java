@@ -27,7 +27,7 @@ public class ApiActions {
 
     public static Response response;
 
-    public static String dynamicData;
+    public static String savedValue;
 
     public static JsonElement generatedJson;
 

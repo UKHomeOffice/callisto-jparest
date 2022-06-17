@@ -19,7 +19,7 @@ public class ApiStepDefinitionsStepDefs {
     public void request(String requestType, String endpoint, String key, String value, String param) {
         apiActions.restEndpointIsAvailable(endpoint);
         apiActions.setEndpoint();
-        if(param.equals("savedValue")) param = ApiActions.dynamicData;
+        if(param.equals("savedValue")) param = ApiActions.savedValue;
         switch (requestType) {
             case "RETRIEVE" -> apiActions.retrieveEndpointWithQueryParam(key, value);
             case "REMOVE" -> apiActions.removeEndpointWithQueryParam(key, value);
@@ -39,7 +39,7 @@ public class ApiStepDefinitionsStepDefs {
     public void request(String value, String responseType) {
         switch (responseType) {
             case "Array":
-                ApiActions.dynamicData = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+                ApiActions.savedValue = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
                 break;
             case "Object":
                 apiActions.saveBearerToken(apiActions.getResponseBody());
