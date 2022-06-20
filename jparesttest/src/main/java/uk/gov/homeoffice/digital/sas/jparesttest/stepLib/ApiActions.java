@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.jparesttest.stepLib;
 import com.google.gson.JsonElement;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import net.serenitybdd.core.environment.EnvironmentSpecificConfiguration;
 import net.serenitybdd.rest.SerenityRest;
 import net.thucydides.core.annotations.Step;
@@ -26,6 +27,8 @@ public class ApiActions {
     private static EnvironmentVariables environmentVariables;
 
     public static Response response;
+
+    public static RequestSpecification requestBuilder;
 
     public static String savedValue;
 
@@ -76,43 +79,79 @@ public class ApiActions {
     }
 
     @Step
-    public void retrieveEndpointWithQueryParam(String key, String value) {
-       response = given()
-                .queryParams(key, value)
-                .contentType("application/json")
-                .log().all()
-                .when()
-                .get(endpointRoot);
-    }
-
-    public void removeEndpointWithQueryParam(String key, String value) {
-        response = given()
-                .queryParams(key, value)
-                .contentType("application/json")
-                .log().all()
-                .when()
-                .delete(endpointRoot);
-    }
-
-    public void saveEndpointWithQueryParam(JsonElement json, String key, String value) {
-        response = given()
-                .queryParams(key, value)
-                .contentType("application/json")
-                .log().all()
-                .when()
-                .body(json.toString())
-                .post(endpointRoot);
+    public void retrieveEndpoint(String parameter, String key, String value) {
+       requestBuilder = given()
+                .contentType("application/json");
+       if(key.isEmpty()) {
+           response = requestBuilder
+                   .log().all()
+                   .when()
+                   .get(endpointRoot + parameter);
+       } else {
+           response = requestBuilder
+                   .queryParams(key, value)
+                   .log().all()
+                   .when()
+                   .get(endpointRoot + parameter);
+       }
     }
 
     @Step
-    public void updateEndpointWithQueryParam(JsonElement json, String parameter, String key, String value) {
-        response = given()
-                .queryParams(key, value)
-                .contentType("application/json")
-                .log().all()
-                .when()
-                .body(json.toString())
-                .put(endpointRoot + parameter);
+    public void removeEndpoint(String parameter, String key, String value) {
+        requestBuilder = given()
+                .contentType("application/json");
+        if(key.isEmpty()) {
+            response = requestBuilder
+                    .log().all()
+                    .when()
+                    .delete(endpointRoot + parameter);
+        } else {
+            response = requestBuilder
+                    .queryParams(key, value)
+                    .log().all()
+                    .when()
+                    .delete(endpointRoot + parameter);
+        }
+    }
+
+    @Step
+    public void saveEndpoint(JsonElement json, String parameter, String key, String value) {
+        requestBuilder = given()
+                .contentType("application/json");
+        if(key.isEmpty()) {
+            response = requestBuilder
+                    .log().all()
+                    .when()
+                    .body(json.toString())
+                    .post(endpointRoot + parameter);
+        } else {
+            response = requestBuilder
+                    .queryParams(key, value)
+                    .log().all()
+                    .when()
+                    .body(json.toString())
+                    .post(endpointRoot + parameter);
+        }
+    }
+
+    @Step
+    public void updateEndpoint(JsonElement json, String parameter, String key, String value) {
+        requestBuilder = given()
+                .contentType("application/json");
+        if(key.isEmpty()) {
+            response = requestBuilder
+                    .log().all()
+                    .when()
+                    .body(json.toString())
+                    .put(endpointRoot + parameter);
+        } else {
+            response = requestBuilder
+                    .queryParams(key, value)
+                    .log().all()
+                    .when()
+                    .body(json.toString())
+                    .put(endpointRoot + parameter);
+        }
     }
 
     @Step

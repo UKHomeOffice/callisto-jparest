@@ -15,33 +15,34 @@ public class ApiStepDefinitionsStepDefs {
     private static ApiActions apiActions;
     public static String profileId;
 
-    @Then("^As a tester I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" value \"([^\"]*)\" and the parameter \"([^\"]*)\"$")
+    @Then("^As a tester I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" value \"([^\"]*)\"(?: and the parameter \"([^\"]*)\")?$")
     public void request(String requestType, String endpoint, String key, String value, String param) {
         apiActions.restEndpointIsAvailable(endpoint);
         apiActions.setEndpoint();
-        if(param.equals("savedValue")) param = ApiActions.savedValue;
+        if(param == null) param = "";
+        else if(param.equals("savedValue")) param = ApiActions.savedValue;
         switch (requestType) {
-            case "RETRIEVE" -> apiActions.retrieveEndpointWithQueryParam(key, value);
-            case "REMOVE" -> apiActions.removeEndpointWithQueryParam(key, value);
-            case "SAVE" -> apiActions.saveEndpointWithQueryParam(generatedJson, key, value);
-            case "UPDATE" -> apiActions.updateEndpointWithQueryParam(generatedJson, param, key, value);
+            case "RETRIEVE" -> apiActions.retrieveEndpoint(param, key, value);
+            case "REMOVE" -> apiActions.removeEndpoint(param, key, value);
+            case "SAVE" -> apiActions.saveEndpoint(generatedJson, param, key, value);
+            case "UPDATE" -> apiActions.updateEndpoint(generatedJson, param, key, value);
             default -> fail("Request type: " + requestType + " does not exist, please add to switch statement");
         }
     }
 
-    @Then("^I should get (\\d+) back$")
+    @Then("^A (\\d+) status code is returned$")
     public void iShouldGetBack(int responseCode) {
         apiActions.checkStatusCode(responseCode);
         assertThat("Status code does not match", apiActions.getResponseStatusCode(), is(responseCode));
     }
 
-    @Then("^The \"([^\"]*)\" value from the response \"([^\"]*)\" is saved$")
+    @Then("^The \"([^\"]*)\" value from the \"([^\"]*)\" response is saved$")
     public void request(String value, String responseType) {
         switch (responseType) {
-            case "Array":
+            case "Json Array":
                 ApiActions.savedValue = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
                 break;
-            case "Object":
+            case "Json Object":
                 apiActions.saveBearerToken(apiActions.getResponseBody());
                 break;
         }
