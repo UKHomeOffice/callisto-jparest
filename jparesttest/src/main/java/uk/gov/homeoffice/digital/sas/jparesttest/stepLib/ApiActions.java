@@ -82,7 +82,7 @@ public class ApiActions {
     public void retrieveEndpoint(String parameter, String key, String value) {
        requestBuilder = given()
                 .contentType("application/json");
-       if(key.isEmpty()) {
+       if(key == null) {
            response = requestBuilder
                    .log().all()
                    .when()

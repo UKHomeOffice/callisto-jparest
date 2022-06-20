@@ -15,7 +15,7 @@ public class ApiStepDefinitionsStepDefs {
     private static ApiActions apiActions;
     public static String profileId;
 
-    @Then("^As a tester I call the \"([^\"]*)\" \"([^\"]*)\" endpoint with \"([^\"]*)\" value \"([^\"]*)\"(?: and the parameter \"([^\"]*)\")?$")
+    @Then("^As a tester I call the \"([^\"]*)\" \"([^\"]*)\" endpoint(?: with query parameter key: \"([^\"]*)\" and value: \"([^\"]*)\")?(?: with URL parameter: \"([^\"]*)\")?$")
     public void request(String requestType, String endpoint, String key, String value, String param) {
         apiActions.restEndpointIsAvailable(endpoint);
         apiActions.setEndpoint();
