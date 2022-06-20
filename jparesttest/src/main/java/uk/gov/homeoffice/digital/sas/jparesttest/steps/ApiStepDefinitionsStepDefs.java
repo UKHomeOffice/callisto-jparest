@@ -20,12 +20,12 @@ public class ApiStepDefinitionsStepDefs {
         apiActions.restEndpointIsAvailable(endpoint);
         apiActions.setEndpoint();
         if(param == null) param = "";
-        else if(param.equals("savedValue")) param = ApiActions.savedValue;
+        else if(param.equals("savedValue")) param = "/" + ApiActions.savedValue;
         switch (requestType) {
-            case "RETRIEVE" -> apiActions.retrieveEndpoint(param, key, value);
-            case "REMOVE" -> apiActions.removeEndpoint(param, key, value);
-            case "SAVE" -> apiActions.saveEndpoint(generatedJson, param, key, value);
-            case "UPDATE" -> apiActions.updateEndpoint(generatedJson, param, key, value);
+            case "retrieve" -> apiActions.retrieveEndpoint(param, key, value);
+            case "save" -> apiActions.saveEndpoint(generatedJson, param, key, value);
+            case "update" -> apiActions.updateEndpoint(generatedJson, param, key, value);
+            case "remove" -> apiActions.removeEndpoint(param, key, value);
             default -> fail("Request type: " + requestType + " does not exist, please add to switch statement");
         }
     }
