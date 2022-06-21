@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "next": null
+  },
+  "items": [
+    {
+      "id" : 9999999999,
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "preferences": "My preferences updated",
+      "bio": "My bio updated",
+      "phoneNumber": "07879 123456 updated",
+      "dob": "2222-02-02T00:00:00.000+00:00",
+      "firstRelease": "2222-01-01T00:00:00.000+00:00"
+    }
+  ]
+}

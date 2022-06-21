@@ -2,12 +2,16 @@ package uk.gov.homeoffice.digital.sas.jparesttest.steps;
 
 import io.cucumber.java.en.Then;
 import net.thucydides.core.annotations.Steps;
+import org.junit.Assert;
 import uk.gov.homeoffice.digital.sas.jparesttest.stepLib.ApiActions;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static uk.gov.homeoffice.digital.sas.jparesttest.stepLib.ApiActions.*;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public class ApiStepDefinitionsStepDefs {
 
@@ -46,5 +50,13 @@ public class ApiStepDefinitionsStepDefs {
                 apiActions.saveBearerToken(apiActions.getResponseBody());
                 break;
         }
+    }
+
+    @Then("^I check that the return response is correct$")
+    public void checkResponse() {
+        JsonParser jsonParser = new JsonParser();
+        JsonElement actualResponse = jsonParser.parse(apiActions.getResponseBody());
+        JsonElement expectedResponse = generatedJson;
+        Assert.assertEquals("Expected response: " + expectedResponse + " did not equal Actual response: " + actualResponse, expectedResponse, actualResponse);
     }
 }

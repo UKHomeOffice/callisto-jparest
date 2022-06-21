@@ -17,8 +17,8 @@ public class JsonGenerators {
     @Steps
     private static RequestJson requestJson;
 
-    @Then("^A json file for \"([^\"]*)\" endpoint is created: \"(.*)\"$")
-    public JsonElement defineRequestJson(String identifier, String value) {
+    @Then("^A json file is created: \"(.*)\"$")
+    public JsonElement defineRequestJson(String value) {
         JsonParser jsonParser = new JsonParser();
         generatedJson = new JsonObject();
         generatedJson = jsonParser.parse(requestJson.createJsonObject(value, savedValue));
