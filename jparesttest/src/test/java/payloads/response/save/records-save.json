@@ -1,0 +1,13 @@
+{
+  "meta": {
+    "next": null
+  },
+  "items": [
+    {
+      "id": 9999999999,
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120001",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "recordName": "Good Luck World"
+    }
+  ]
+}

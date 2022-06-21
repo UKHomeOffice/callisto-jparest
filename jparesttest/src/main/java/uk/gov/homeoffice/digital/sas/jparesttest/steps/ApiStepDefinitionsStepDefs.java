@@ -43,12 +43,8 @@ public class ApiStepDefinitionsStepDefs {
     @Then("^The \"([^\"]*)\" value from the \"([^\"]*)\" response is saved$")
     public void request(String value, String responseType) {
         switch (responseType) {
-            case "Json Array":
-                ApiActions.savedValue = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
-                break;
-            case "Json Object":
-                apiActions.saveBearerToken(apiActions.getResponseBody());
-                break;
+            case "Json Array" -> ApiActions.savedValue = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+            case "Json Object" -> apiActions.saveBearerToken(apiActions.getResponseBody());
         }
     }
 
