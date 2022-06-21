@@ -14,7 +14,6 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
     Then A 200 status code is returned
     And The "items.id" value from the "Json Array" response is saved
     And A json file is created: "src/test/java/payloads/response/save/profiles-save.json"
-    #Check the response
     And I check that the return response is correct
 
   Scenario: Test Update call
