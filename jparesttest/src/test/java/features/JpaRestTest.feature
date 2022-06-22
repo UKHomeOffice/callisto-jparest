@@ -4,7 +4,6 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
   Scenario Outline: Test Retrieve call
     When As a tester I call the "retrieve" "<Entity>" endpoint with query parameter key: "<QueryParameterKey>" and value: "<QueryParamValue>"
     Then A 200 status code is returned
-    And The "items.id" value from the "Json Array" response is saved
     And A json file is created: "<ExpectedResponse>"
     And I check that the return response is correct
 
