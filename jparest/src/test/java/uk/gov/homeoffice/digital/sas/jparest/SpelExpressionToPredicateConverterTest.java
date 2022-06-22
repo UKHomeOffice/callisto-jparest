@@ -16,6 +16,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityTestUtil;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 
 import javax.persistence.EntityManager;
@@ -24,6 +25,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,6 +46,7 @@ class SpelExpressionToPredicateConverterTest {
 
     CriteriaBuilder builder=null;
     Root<DummyEntityA> root=null;
+    private final java.util.function.Predicate<Class<?>> baseEntitySubclassPredicate = DummyEntityTestUtil.getBaseEntitySubclassPredicate();
 
     @BeforeEach
     public void setUpBeforeEachTestCase(){
@@ -76,7 +79,7 @@ class SpelExpressionToPredicateConverterTest {
     })
     void convert_when_expressionIsValid_shouldNotThrow(String expressionString){
         SpelExpression spelExpression = (SpelExpression)expressionParser.parseExpression(expressionString);
-        var entityUtils = new EntityUtils<>(DummyEntityC.class);
+        var entityUtils = new EntityUtils<>(DummyEntityC.class, baseEntitySubclassPredicate);
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
         assertThatNoException().isThrownBy(() -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root) );
@@ -99,7 +102,7 @@ class SpelExpressionToPredicateConverterTest {
     @MethodSource("invalidFilterValues")
     void convert_when_expressionIsInvalid_throws_invalidFilterException(String expressionString, String errorMessage){
         SpelExpression spelExpression = (SpelExpression)expressionParser.parseExpression(expressionString);
-        var entityUtils = new EntityUtils<>(DummyEntityC.class);
+        var entityUtils = new EntityUtils<>(DummyEntityC.class, baseEntitySubclassPredicate);
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
 
@@ -120,7 +123,7 @@ class SpelExpressionToPredicateConverterTest {
     })
     void convert_when_methodNameCaseIsDifferentCase_shouldNotThrow(String expressionString){
         SpelExpression spelExpression = (SpelExpression)expressionParser.parseExpression(expressionString);
-        var entityUtils = new EntityUtils<>(DummyEntityC.class);
+        var entityUtils = new EntityUtils<>(DummyEntityC.class, baseEntitySubclassPredicate);
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
         assertThatNoException().isThrownBy( () -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root) );

@@ -25,14 +25,14 @@ class ResourceEndpointTest {
     void add_descriptorsAlreadyContainsResource_exceptionThrown() {
         // Add the resource first
         var resourceEndpoint = new ResourceEndpoint();
-        resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE);
+        resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH);
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS);
         assertThat(actualDescriptor.getPath()).isEqualTo(RESOURCE_PATH);
 
         // Add the resource again
         
         assertThatExceptionOfType(AddResourceDescriptorException.class)
-                .isThrownBy(() -> resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE))
+                .isThrownBy(() -> resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH))
                 .withMessage(RESOURCE_ALREADY_ADDED)
                 .extracting(EXCEPTION_ERROR_CODE_FIELD_NAME).isEqualTo(RESOURCE_ALREADY_EXISTS.getCode());
     }
@@ -40,10 +40,10 @@ class ResourceEndpointTest {
     @Test
     void add_pathAllreadyUsed_exceptionThrown() {
         var resourceEndpoint = new ResourceEndpoint();
-        resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE);
+        resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH);
 
         assertThatExceptionOfType(AddResourceDescriptorException.class)
-                .isThrownBy(() -> resourceEndpoint.add(RELATED_RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE))
+                .isThrownBy(() -> resourceEndpoint.add(RELATED_RESOURCE_CLASS, RESOURCE_PATH))
                 .isInstanceOf(AddResourceDescriptorException.class)
                 .withMessage(PATH_ALREADY_EXISTS)
                 .extracting(EXCEPTION_ERROR_CODE_FIELD_NAME).isEqualTo(AddResourceDescriptorErrorCode.PATH_ALREADY_EXISTS.getCode());
@@ -53,7 +53,7 @@ class ResourceEndpointTest {
     @Test
     void add_descriptorsDoesNotContainResource_resourceAdded() {
         var resourceEndpoint = new ResourceEndpoint();
-        assertThatNoException().isThrownBy(() -> resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE));
+        assertThatNoException().isThrownBy(() -> resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH));
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS);
         assertThat(actualDescriptor.getPath()).isEqualTo(RESOURCE_PATH);
     }
@@ -61,7 +61,7 @@ class ResourceEndpointTest {
     @Test
     void addRelated_pathAllreadyUsed_exceptionThrown() {
         var resourceEndpoint = new ResourceEndpoint();
-        resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE);
+        resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH);
 
         assertThatExceptionOfType(AddResourceDescriptorException.class)
                 .isThrownBy(() -> resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RESOURCE_PATH))
@@ -86,7 +86,7 @@ class ResourceEndpointTest {
     void addRelated_descriptorsContainsTheRelatedResourceAlready_exceptionThrown() {
         // Add resource & related resource first
         var resourceEndpoint = new ResourceEndpoint();
-        resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE);
+        resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH);
         resourceEndpoint.addRelated(RESOURCE_CLASS, RELATED_RESOURCE_CLASS, RELATED_RESOURCE_PATH);
         // Verify resource & related resource exists
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS);
@@ -105,7 +105,7 @@ class ResourceEndpointTest {
     void addRelated_descriptorContainsTheResourceButNotRelatedResource_relatedResourceAdded() {
         // Add resource
         var resourceEndpoint = new ResourceEndpoint();
-        resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH, ID_FIELD_TYPE);
+        resourceEndpoint.add(RESOURCE_CLASS, RESOURCE_PATH);
         // Verify resource & related resource does not exists
         var actualDescriptor = resourceEndpoint.getDescriptors().get(RESOURCE_CLASS);
         assertThat(actualDescriptor.getPath()).isEqualTo(RESOURCE_PATH);
