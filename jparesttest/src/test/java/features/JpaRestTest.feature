@@ -8,9 +8,9 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
     And I check that the return response is correct
 
     Examples:
-      | Entity   | QueryParameterKey | QueryParamValue                      | ExpectedResponse                                           |
-#      | records  | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002      | src/test/java/payloads/response/retrieve/records-all.json                        |
-      | profiles | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | src/test/java/payloads/response/retrieve/profiles-all.json |
+      | Entity   | QueryParameterKey | QueryParamValue                            | ExpectedResponse                                                                 |
+      | records  | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002       | src/test/java/payloads/response/retrieve/records-all.json                        |
+      | profiles | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002       | src/test/java/payloads/response/retrieve/profiles-all.json                       |
 #      | concerts | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002      | src/test/java/payloads/response/retrieve/concerts-all.json                       |
 #      | artists  | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002      | src/test/java/payloads/response/retrieve/artists-all.json                        |
 #      | artists  | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002      | src/test/java/payloads/response/retrieve/artistsById.json                        |

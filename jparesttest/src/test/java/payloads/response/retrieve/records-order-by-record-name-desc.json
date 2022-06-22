@@ -1,0 +1,127 @@
+{
+  "meta": {
+    "next": null
+  },
+  "items": [
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120002",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120002",
+      "recordName": "You Keep It All In"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120014",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120002",
+      "recordName": "Wonderwall"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120011",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120005",
+      "recordName": "Whatever"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120025",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120001",
+      "recordName": "We Will Rock You"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120007",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120001",
+      "recordName": "We Are Each Other"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120016",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120004",
+      "recordName": "Try"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120001",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120001",
+      "recordName": "Song for Whoever"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120021",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120003",
+      "recordName": "Someone Like You"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120017",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120005",
+      "recordName": "So What"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120023",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120005",
+      "recordName": "Sloop John B"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120020",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120002",
+      "recordName": "Set Fire To The Rain"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120006",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120006",
+      "recordName": "Old Red Eyes Is Back"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120004",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120004",
+      "recordName": "My Book"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120012",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120006",
+      "recordName": "Morning Glory"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120013",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120001",
+      "recordName": "Live Foreve"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120005",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120005",
+      "recordName": "Let Love Speak Up Itself"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120027",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120003",
+      "recordName": "Killer Queen"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120022",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120004",
+      "recordName": "I Get Around"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120024",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120006",
+      "recordName": "Help Me Rhonda"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120018",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120006",
+      "recordName": "Hello"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "next": null
+  },
+  "items": [
+    {
+      "id": "27e813a2-bb28-11ec-8422-0242ac120001",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "profileId": "17e813a2-bb28-11ec-8422-0242ac120001",
+      "performanceName": "Beautiful South"
+    },
+    {
+      "id": "27e813a2-bb28-11ec-8422-0242ac120002",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "profileId": "17e813a2-bb28-11ec-8422-0242ac120002",
+      "performanceName": "Oasis"
+    },
+    {
+      "id": "27e813a2-bb28-11ec-8422-0242ac120003",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "profileId": "17e813a2-bb28-11ec-8422-0242ac120003",
+      "performanceName": "Pink"
+    },
+    {
+      "id": "2a7c7da4-bb29-11ec-8422-0242ac120004",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "profileId": "1a7c7da4-bb29-11ec-8422-0242ac120004",
+      "performanceName": "Adele"
+    },
+    {
+      "id": "2a7c7da4-bb29-11ec-8422-0242ac120005",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "profileId": "7a7c7da4-bb29-11ec-8422-00242ac12005",
+      "performanceName": "Beach Boys"
+    },
+    {
+      "id": "2a7c7da4-bb29-11ec-8422-0242ac120006",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "profileId": "1a7c7da4-bb29-11ec-8422-0242ac120006",
+      "performanceName": "Queen"
+    }
+  ]
+}

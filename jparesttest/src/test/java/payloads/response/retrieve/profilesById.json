@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "next": null
+  },
+  "items": [
+    {
+      "id": "1a7c7da4-bb29-11ec-8422-0242ac120004",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "preferences": "My preferences for 4",
+      "bio": "My Bio for 4",
+      "phoneNumber": "07879 899104",
+      "dob": "1979-01-01T00:00:00.000+00:00",
+      "firstRelease": "1975-12-29T00:00:00.000+00:00"
+    }
+  ]
+}

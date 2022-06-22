@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "next": null
+  },
+  "items": [
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120001",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120001",
+      "recordName": "Song for Whoever"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120002",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120002",
+      "recordName": "You Keep It All In"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120003",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "27e813a2-bb28-11ec-8422-0242ac120003",
+      "recordName": "A Little Time"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120004",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120004",
+      "recordName": "My Book"
+    },
+    {
+      "id": "47e813a2-bb28-11ec-8422-0242ac120005",
+      "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+      "artistId": "2a7c7da4-bb29-11ec-8422-0242ac120005",
+      "recordName": "Let Love Speak Up Itself"
+    }
+  ]
+}
