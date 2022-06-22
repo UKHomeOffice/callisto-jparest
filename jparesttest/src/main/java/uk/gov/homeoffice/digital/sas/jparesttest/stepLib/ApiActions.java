@@ -32,6 +32,11 @@ public class ApiActions {
 
     public static String savedValue;
 
+    public static String idValueOne;
+    public static String idValueTwo;
+    public static String idValueThree;
+    public static String idValueFour;
+
     public static JsonElement generatedJson;
 
     private static String getEnvironmentProperty(String propertyName){

@@ -40,11 +40,20 @@ public class ApiStepDefinitionsStepDefs {
         assertThat("Status code does not match", apiActions.getResponseStatusCode(), is(responseCode));
     }
 
-    @Then("^The \"([^\"]*)\" value from the \"([^\"]*)\" response is saved$")
-    public void request(String value, String responseType) {
+    @Then("^The \"([^\"]*)\" value from the \"([^\"]*)\" response is saved(?: as: \"([^\"]*)\")?$")
+    public void request(String value, String responseType, String idValue) {
         switch (responseType) {
-            case "Json Array" -> ApiActions.savedValue = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
-            case "Json Object" -> apiActions.saveBearerToken(apiActions.getResponseBody());
+            case "Json Array":
+                    switch (idValue) {
+                        case "idValueOne" -> idValueOne = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+                        case "idValueTwo" -> idValueTwo = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+                        case "idValueThree" -> idValueThree = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+                        case "idValueFour" -> idValueFour = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+                        default -> ApiActions.savedValue = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+                    }
+                    break;
+            case "Json Object": apiActions.saveBearerToken(apiActions.getResponseBody());
+                    break;
         }
     }
 
@@ -54,5 +63,17 @@ public class ApiStepDefinitionsStepDefs {
         JsonElement actualResponse = jsonParser.parse(apiActions.getResponseBody());
         JsonElement expectedResponse = generatedJson;
         Assert.assertEquals("Expected response: " + expectedResponse + " did not equal Actual response: " + actualResponse, expectedResponse, actualResponse);
+    }
+
+
+    @Then("^\"([^\"]*)\" has been assigned$")
+    public void assignValue(String idValue) {
+        switch (idValue) {
+            case "idValueOne" -> savedValue = idValueOne;
+            case "idValueTwo" -> savedValue = idValueTwo;
+            case "idValueThree" -> savedValue = idValueThree;
+            case "idValueFour" -> savedValue = idValueFour;
+            default -> fail("idValue specified: " + idValue + " does not exist within the switch statement");
+        }
     }
 }
