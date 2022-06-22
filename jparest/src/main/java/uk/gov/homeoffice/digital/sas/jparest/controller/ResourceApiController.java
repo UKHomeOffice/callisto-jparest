@@ -231,7 +231,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
 
         validateResourceTenantId(tenantId, orig, id);
 
-        BeanUtils.copyProperties(r2, orig, this.entityUtils.getIdFieldName());
+        BeanUtils.copyProperties(r2, orig, EntityUtils.ID_FIELD_NAME);
 
         try {
             repository.saveAndFlush(orig);

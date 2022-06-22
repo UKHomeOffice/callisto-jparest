@@ -23,6 +23,7 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityF;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityTestUtil;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil;
@@ -864,7 +865,7 @@ class ResourceApiControllerTest {
     // endregion
 
     private <T extends BaseEntity, U> ResourceApiController<T, U> getResourceApiController(Class<T> clazz) {
-        var entityUtils = new EntityUtils<>(clazz);
+        var entityUtils = new EntityUtils<>(clazz, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
         return new ResourceApiController<>(clazz, entityManager, transactionManager, entityUtils);
     }
 

@@ -13,10 +13,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 import static java.util.Collections.emptyList;
@@ -37,23 +37,22 @@ public class EntityUtils<T extends BaseEntity> {
 
     @Getter
     private Class<T> entityType;
-    @Getter
-    private Set<String> relatedResources = new HashSet<>();
-    @Getter
-    private Class<?> idFieldType= ID_FIELD_TYPE;
-    @Getter
-    private String idFieldName = ID_FIELD_NAME;
     private Map<String, RelatedEntity> relations = new HashMap<>();
+    @Getter
+    private Set<String> relatedResources = relations.keySet();
 
     /**
      * Creates a utility class for the specified entityType
      *
      * @param entityType    The JPA entity class
+     * @param isBaseEntitySubclass A predicate that tests if a given class is a subclass of BaseEntity
      */
     @SuppressWarnings("squid:S3011") // Need to set accessibility of field to create instances with id set without
                                      // touching the database
-    public EntityUtils(@NonNull Class<T> entityType) {
+    public EntityUtils(@NonNull Class<T> entityType, Predicate<Class<?>> isBaseEntitySubclass) {
+
         this.entityType = entityType;
+
         // Iterate the declared fields to find the fields marked ManyToMany
         // Only record relationships that aren't mapped by another class
         for (Field field : entityType.getDeclaredFields()) {
@@ -61,21 +60,20 @@ public class EntityUtils<T extends BaseEntity> {
             if (field.isAnnotationPresent(ManyToMany.class)
                     && !StringUtils.hasText(field.getAnnotation(ManyToMany.class).mappedBy())) {
 
-                Class<?> relatedEntityType = getRelatedEntityType(field);
-                // Validate the Related entity also inherits from the BaseEntity
+                Class<?> relatedEntityClass = getRelatedEntityType(field);
 
-                if (classHasBaseEntityParent(relatedEntityType)) {
+                // Validate the Related entity also inherits from the BaseEntity
+                if (isBaseEntitySubclass.test(relatedEntityClass)) {
                     field.setAccessible(true);
-                    RelatedEntity relatedEntity = new RelatedEntity(field, (Class<T>) relatedEntityType);
+                    RelatedEntity relatedEntity = new RelatedEntity(field, (Class<T>) relatedEntityClass);
                     relations.putIfAbsent(field.getName(), relatedEntity);
-                    relatedResources.add(field.getName());
                 }
             }
         }
     }
 
     /**
-     * Returns the collection of entities decribed by the given
+     * Returns the collection of entities described by the given
      * relation.
      *
      * @param entity   The entity to retrieve related entities from
@@ -112,9 +110,9 @@ public class EntityUtils<T extends BaseEntity> {
      */
     @SuppressWarnings("squid:S3011") // Need to set accessibility of field to create instances with id set without
                                      // touching the database
-    private static <Y extends BaseEntity> Y getEntityReference(
-            Class<? extends BaseEntity> entityType,
-            UUID identifier) throws IllegalArgumentException {
+    private static <Y extends BaseEntity> Y getEntityReference(Class<? extends BaseEntity> entityType,
+                                                               UUID identifier) throws IllegalArgumentException {
+
         Y reference = null;
         try {
             reference = (Y) entityType.getConstructor().newInstance();
@@ -150,7 +148,7 @@ public class EntityUtils<T extends BaseEntity> {
     /**
      * Provides the type of the entity accessed by the specified relation
      */
-    public Class<?> getRelatedType(String relation) {
+    public Class<? extends BaseEntity> getRelatedType(String relation) {
         return this.relations.get(relation).entityType;
     }
 
@@ -169,14 +167,5 @@ public class EntityUtils<T extends BaseEntity> {
             relatedEntityType = parameterizedType.getActualTypeArguments()[0];
         }
         return (Class<T>) relatedEntityType;
-    }
-
-    public static boolean classHasBaseEntityParent(Class<?> childClass) {
-        var superType = childClass.getSuperclass();
-        while (!superType.equals(Object.class)) {
-            if (superType.equals(BaseEntity.class)) return true;
-            superType = superType.getSuperclass();
-        }
-        return false;
     }
 }
