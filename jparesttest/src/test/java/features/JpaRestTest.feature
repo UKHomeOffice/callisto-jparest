@@ -48,14 +48,22 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
       | artists  | src/test/java/payloads/request/save/artists-save.json  | idValueThree | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | src/test/java/payloads/response/save/artists-save.json      |
       | records  | src/test/java/payloads/request/save/records-save.json  | idValueFour  | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | src/test/java/payloads/response/save/records-save.json      |
 
-#  Scenario: Test Update call
-#    Given A json file is created: "src/test/java/payloads/request/update/profiles-update.json"
-#    When As a tester I call the "update" "profiles" endpoint with query parameter key: "tenantId" and value: "b7e813a2-bb28-11ec-8422-0242ac120002" with URL parameter: "savedValue"
-#    Then A 200 status code is returned
-#    And The "items.id" value from the "Json Array" response is saved
-#    And A json file is created: "src/test/java/payloads/response/update/profiles-update.json"
-#    And I check that the return response is correct
-#
+  Scenario Outline: Test Update call
+    Given A json file is created: "<RequestPayload>"
+    When As a tester I call the "update" "<Entity>" endpoint with query parameter key: "<QueryParameterKey>" and value: "<QueryParameterValue>"
+    Then A 200 status code is returned
+    And The "items.id" value from the "Json Array" response is saved as: "<IdValue>"
+    And A json file is created: "<ExpectedResponse>"
+    And I check that the return response is correct
+
+    Examples:
+      | Entity    | Endpoint            | RequestPayload                                               | ExpectedResponse                                              | QueryParameterKey | QueryParameterValue                  | IdValue      |
+      | profiles  | jparestapi-profiles | src/test/java/payloads/request/update/profiles-update.json   | src/test/java/payloads/response/update/profiles-update.json   | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | idValueOne   |
+      | artists   | jparestapi-artists  | src/test/java/payloads/request/update/artists-update.json    | src/test/java/payloads/response/update/artists-update.json    | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | idValueTwo   |
+      | concerts  | jparestapi-concerts | src/test/java/payloads/request/update/concerts-update.json   | src/test/java/payloads/response/update/concerts-update.json   | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | idValueThree |
+      | records   | jparestapi-records  | src/test/java/payloads/request/update/records-update.json    | src/test/java/payloads/response/update/records-update.json    | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | idValueFour  |
+
+
 #  Scenario: Test Remove call
 #    When As a tester I call the "remove" "profiles" endpoint with query parameter key: "tenantId" and value: "b7e813a2-bb28-11ec-8422-0242ac120002" with URL parameter: "savedValue"
 #    Then A 200 status code is returned
