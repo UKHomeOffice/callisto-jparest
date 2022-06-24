@@ -65,7 +65,14 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
       | records   | src/test/java/payloads/request/update/records-update.json    | idValueFour  | src/test/java/payloads/response/update/records-update.json    | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
 
 
-#  Scenario: Test Remove call
-#    When As a tester I call the "remove" "profiles" endpoint with query parameter key: "tenantId" and value: "b7e813a2-bb28-11ec-8422-0242ac120002" with URL parameter: "savedValue"
-#    Then A 200 status code is returned
+  Scenario Outline: Test Remove call
+    Given "<IdValue>" has been assigned
+    When As a tester I call the "remove" "<Entity>" endpoint with query parameter key: "<QueryParameterKey>" and value: "<QueryParameterValue>" with URL parameter: "savedValue"
+    Then A 200 status code is returned
 
+    Examples:
+      | Entity    | IdValue      | QueryParameterKey | QueryParameterValue                  |
+      | profiles  | idValueOne   | tenantId         | b7e813a2-bb28-11ec-8422-0242ac120002 |
+      | concerts  | idValueTwo   | tenantId         | b7e813a2-bb28-11ec-8422-0242ac120002 |
+      | artists   | idValueThree | tenantId         | b7e813a2-bb28-11ec-8422-0242ac120002 |
+      | records   | idValueFour  | tenantId         | b7e813a2-bb28-11ec-8422-0242ac120002 |
