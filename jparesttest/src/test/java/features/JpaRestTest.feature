@@ -3,9 +3,9 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
 
   Scenario Outline: Test retrieve call - with no url parameters
     When As a tester I call the "retrieve" "<Entity>" endpoint with query parameter key: "<QueryParameterKey>" and value: "<QueryParamValue>"
-    Then A 200 status code is returned
+    Then A successful 200 status code is returned
     And A json file is created: "<ExpectedResponse>"
-    And I check that the return response is correct
+    And As a tester I check that the expected response is correct
 
     Examples:
       | Entity   | QueryParameterKey | QueryParamValue                      | ExpectedResponse                                           |
@@ -16,9 +16,9 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
 
   Scenario Outline: Test retrieve call - with url parameters
     When As a tester I call the "retrieve" "<Entity>" endpoint with query parameter key: "<QueryParameterKey>" and value: "<QueryParamValue>" with URL parameter: "<ParamValue>"
-    Then A 200 status code is returned
+    Then A successful 200 status code is returned
     And A json file is created: "<ExpectedResponse>"
-    And I check that the return response is correct
+    And As a tester I check that the expected response is correct
 
     Examples:
       | Entity   | QueryParameterKey | QueryParamValue                      | ExpectedResponse                                                                | ParamValue                                         |
@@ -35,11 +35,11 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
   Scenario Outline: Test Save call
     Given A json file is created: "<RequestPayload>"
     When As a tester I call the "save" "<Entity>" endpoint with query parameter key: "<QueryParameterKey>" and value: "<QueryParameterValue>"
-    Then A 200 status code is returned
+    Then A successful 200 status code is returned
     And The "items.id" value from the "Json Array" response is saved as: "<IdValue>"
     And "<IdValue>" has been assigned
     And A json file is created: "<ExpectedResponse>"
-    And I check that the return response is correct
+    And As a tester I check that the expected response is correct
 
     Examples:
       | Entity   | RequestPayload                                         | IdValue      | QueryParameterKey | QueryParameterValue                  | ExpectedResponse                                            |
@@ -52,10 +52,10 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
     Given "<IdValue>" has been assigned
     And A json file is created: "<RequestPayload>"
     When As a tester I call the "update" "<Entity>" endpoint with query parameter key: "<QueryParameterKey>" and value: "<QueryParameterValue>" with URL parameter: "savedValue"
-    Then A 200 status code is returned
+    Then A successful 200 status code is returned
     And The "items.id" value from the "Json Array" response is saved as: "<IdValue>"
     And A json file is created: "<ExpectedResponse>"
-    And I check that the return response is correct
+    And As a tester I check that the expected response is correct
 
     Examples:
       | Entity    | RequestPayload                                               | IdValue      | ExpectedResponse                                              | QueryParameterKey | QueryParameterValue                  |
@@ -68,7 +68,7 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
   Scenario Outline: Test Remove call
     Given "<IdValue>" has been assigned
     When As a tester I call the "remove" "<Entity>" endpoint with query parameter key: "<QueryParameterKey>" and value: "<QueryParameterValue>" with URL parameter: "savedValue"
-    Then A 200 status code is returned
+    Then A successful 200 status code is returned
 
     Examples:
       | Entity    | IdValue      | QueryParameterKey | QueryParameterValue                  |

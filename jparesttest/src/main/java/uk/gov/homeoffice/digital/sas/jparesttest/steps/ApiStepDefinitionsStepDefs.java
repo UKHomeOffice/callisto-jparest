@@ -34,7 +34,7 @@ public class ApiStepDefinitionsStepDefs {
         }
     }
 
-    @Then("^A (\\d+) status code is returned$")
+    @Then("^A successful (\\d+) status code is returned$")
     public void iShouldGetBack(int responseCode) {
         apiActions.checkStatusCode(responseCode);
         assertThat("Status code does not match", apiActions.getResponseStatusCode(), is(responseCode));
@@ -57,7 +57,7 @@ public class ApiStepDefinitionsStepDefs {
         }
     }
 
-    @Then("^I check that the return response is correct$")
+    @Then("^As a tester I check that the expected response is correct$")
     public void checkResponse() {
         JsonParser jsonParser = new JsonParser();
         JsonElement actualResponse = jsonParser.parse(apiActions.getResponseBody());
