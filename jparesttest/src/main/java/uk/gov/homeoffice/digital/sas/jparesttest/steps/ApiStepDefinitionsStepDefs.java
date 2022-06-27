@@ -34,7 +34,7 @@ public class ApiStepDefinitionsStepDefs {
         }
     }
 
-    @Then("^A successful (\\d+) status code is returned$")
+    @Then("^A (?:successful|unsuccessful) (\\d+) status code is returned$")
     public void iShouldGetBack(int responseCode) {
         apiActions.checkStatusCode(responseCode);
         assertThat("Status code does not match", apiActions.getResponseStatusCode(), is(responseCode));
