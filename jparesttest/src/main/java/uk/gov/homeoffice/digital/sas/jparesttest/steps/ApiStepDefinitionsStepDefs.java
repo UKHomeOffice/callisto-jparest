@@ -1,5 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparesttest.steps;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import io.cucumber.java.en.Then;
 import net.thucydides.core.annotations.Steps;
 import org.junit.Assert;
@@ -9,9 +11,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static uk.gov.homeoffice.digital.sas.jparesttest.stepLib.ApiActions.*;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 public class ApiStepDefinitionsStepDefs {
 
@@ -40,10 +39,8 @@ public class ApiStepDefinitionsStepDefs {
         assertThat("Status code does not match", apiActions.getResponseStatusCode(), is(responseCode));
     }
 
-    @Then("^The \"([^\"]*)\" value from the \"([^\"]*)\" response is saved(?: as: \"([^\"]*)\")?$")
-    public void request(String value, String responseType, String idValue) {
-        switch (responseType) {
-            case "Json Array":
+    @Then("^The (?:ID) value is extracted from the Json field: \"([^\"]*)\" and is saved as: \"([^\"]*)\"$")
+    public void request(String value, String idValue) {
                     switch (idValue) {
                         case "idValueOne" -> idValueOne = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
                         case "idValueTwo" -> idValueTwo = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
@@ -51,10 +48,6 @@ public class ApiStepDefinitionsStepDefs {
                         case "idValueFour" -> idValueFour = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
                         default -> ApiActions.savedValue = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
                     }
-                    break;
-            case "Json Object": apiActions.saveBearerToken(apiActions.getResponseBody());
-                    break;
-        }
     }
 
     @Then("^As a tester I check that the expected response is correct$")

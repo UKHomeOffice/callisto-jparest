@@ -5,7 +5,6 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import net.serenitybdd.core.environment.EnvironmentSpecificConfiguration;
-import net.serenitybdd.rest.SerenityRest;
 import net.thucydides.core.annotations.Step;
 import net.thucydides.core.util.EnvironmentVariables;
 import org.junit.Assert;
@@ -64,7 +63,7 @@ public class ApiActions {
 
     public static String endpointRoot;
 
-    public static String bearerToken;
+    public static String responseBody;
 
     @Step
     public void restEndpointIsAvailable(String name) {
@@ -187,8 +186,8 @@ public class ApiActions {
     }
 
     @Step
-    public void saveBearerToken(String bearer) {
-        bearerToken = bearer;
+    public void saveResponseBody(String responseBody) {
+        ApiActions.responseBody = responseBody;
     }
 }
 

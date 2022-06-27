@@ -36,7 +36,7 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
     Given A json file is created: "<RequestPayload>"
     When As a tester I call the "save" "<Entity>" endpoint with query parameter key: "<QueryParameterKey>" and value: "<QueryParameterValue>"
     Then A successful 200 status code is returned
-    And The "items.id" value from the "Json Array" response is saved as: "<IdValue>"
+    And The ID value is extracted from the Json field: "items.id" and is saved as: "<IdValue>"
     And "<IdValue>" has been assigned
     And A json file is created: "<ExpectedResponse>"
     And As a tester I check that the expected response is correct
@@ -53,7 +53,7 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
     And A json file is created: "<RequestPayload>"
     When As a tester I call the "update" "<Entity>" endpoint with query parameter key: "<QueryParameterKey>" and value: "<QueryParameterValue>" with URL parameter: "savedValue"
     Then A successful 200 status code is returned
-    And The "items.id" value from the "Json Array" response is saved as: "<IdValue>"
+    And The ID value is extracted from the Json field: "items.id" and is saved as: "<IdValue>"
     And A json file is created: "<ExpectedResponse>"
     And As a tester I check that the expected response is correct
 
