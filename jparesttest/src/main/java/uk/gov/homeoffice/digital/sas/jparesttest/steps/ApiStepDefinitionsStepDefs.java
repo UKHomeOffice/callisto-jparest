@@ -22,8 +22,8 @@ public class ApiStepDefinitionsStepDefs {
     public void request(String requestType, String endpoint, String key, String value, String param) {
         apiActions.restEndpointIsAvailable(endpoint);
         apiActions.setEndpoint();
-        if(param == null) param = "";
-        else if(param.equals("savedValue")) param = "/" + ApiActions.savedValue;
+        if (param == null) param = "";
+        else if (param.equals("savedValue")) param = "/" + ApiActions.savedValue;
         switch (requestType) {
             case "retrieve" -> apiActions.retrieveEndpoint(param, key, value);
             case "save" -> apiActions.saveEndpoint(generatedJson, param, key, value);
@@ -41,13 +41,13 @@ public class ApiStepDefinitionsStepDefs {
 
     @Then("^The (?:ID) value is extracted from the Json field: \"([^\"]*)\" and is saved as: \"([^\"]*)\"$")
     public void request(String value, String idValue) {
-                    switch (idValue) {
-                        case "idValueOne" -> idValueOne = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
-                        case "idValueTwo" -> idValueTwo = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
-                        case "idValueThree" -> idValueThree = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
-                        case "idValueFour" -> idValueFour = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
-                        default -> ApiActions.savedValue = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
-                    }
+        switch (idValue) {
+            case "idValueOne" -> idValueOne = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+            case "idValueTwo" -> idValueTwo = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+            case "idValueThree" -> idValueThree = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+            case "idValueFour" -> idValueFour = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+            default -> ApiActions.savedValue = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
+        }
     }
 
     @Then("^As a tester I check that the expected response is correct$")
@@ -57,7 +57,6 @@ public class ApiStepDefinitionsStepDefs {
         JsonElement expectedResponse = generatedJson;
         Assert.assertEquals("Expected response: " + expectedResponse + " did not equal Actual response: " + actualResponse, expectedResponse, actualResponse);
     }
-
 
     @Then("^\"([^\"]*)\" has been assigned$")
     public void assignValue(String idValue) {

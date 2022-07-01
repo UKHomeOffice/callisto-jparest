@@ -42,11 +42,11 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
     And As a tester I check that the expected response is correct
 
     Examples:
-      | Entity   | RequestPayload                                         | IdValue      | QueryParameterKey | QueryParameterValue                  | ExpectedResponse                                            |
-      | profiles | src/test/java/payloads/request/save/profiles-save.json | idValueOne   | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | src/test/java/payloads/response/save/profiles-save.json     |
-      | concerts | src/test/java/payloads/request/save/concerts-save.json | idValueTwo   | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | src/test/java/payloads/response/save/concerts-save.json     |
-      | artists  | src/test/java/payloads/request/save/artists-save.json  | idValueThree | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | src/test/java/payloads/response/save/artists-save.json      |
-      | records  | src/test/java/payloads/request/save/records-save.json  | idValueFour  | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | src/test/java/payloads/response/save/records-save.json      |
+      | Entity   | RequestPayload                                         | IdValue      | QueryParameterKey | QueryParameterValue                  | ExpectedResponse                                        |
+      | profiles | src/test/java/payloads/request/save/profiles-save.json | idValueOne   | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | src/test/java/payloads/response/save/profiles-save.json |
+      | concerts | src/test/java/payloads/request/save/concerts-save.json | idValueTwo   | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | src/test/java/payloads/response/save/concerts-save.json |
+      | artists  | src/test/java/payloads/request/save/artists-save.json  | idValueThree | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | src/test/java/payloads/response/save/artists-save.json  |
+      | records  | src/test/java/payloads/request/save/records-save.json  | idValueFour  | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 | src/test/java/payloads/response/save/records-save.json  |
 
   Scenario Outline: Test Update call
     Given "<IdValue>" has been assigned
@@ -58,12 +58,11 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
     And As a tester I check that the expected response is correct
 
     Examples:
-      | Entity    | RequestPayload                                               | IdValue      | ExpectedResponse                                              | QueryParameterKey | QueryParameterValue                  |
-      | profiles  | src/test/java/payloads/request/update/profiles-update.json   | idValueOne   | src/test/java/payloads/response/update/profiles-update.json   | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
-      | concerts  | src/test/java/payloads/request/update/concerts-update.json   | idValueTwo   | src/test/java/payloads/response/update/concerts-update.json   | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
-      | artists   | src/test/java/payloads/request/update/artists-update.json    | idValueThree | src/test/java/payloads/response/update/artists-update.json    | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
-      | records   | src/test/java/payloads/request/update/records-update.json    | idValueFour  | src/test/java/payloads/response/update/records-update.json    | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
-
+      | Entity   | RequestPayload                                             | IdValue      | ExpectedResponse                                            | QueryParameterKey | QueryParameterValue                  |
+      | profiles | src/test/java/payloads/request/update/profiles-update.json | idValueOne   | src/test/java/payloads/response/update/profiles-update.json | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
+      | concerts | src/test/java/payloads/request/update/concerts-update.json | idValueTwo   | src/test/java/payloads/response/update/concerts-update.json | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
+      | artists  | src/test/java/payloads/request/update/artists-update.json  | idValueThree | src/test/java/payloads/response/update/artists-update.json  | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
+      | records  | src/test/java/payloads/request/update/records-update.json  | idValueFour  | src/test/java/payloads/response/update/records-update.json  | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
 
   Scenario Outline: Test Remove call
     Given "<IdValue>" has been assigned
@@ -71,8 +70,8 @@ Feature: Integration of JPA Rest Service - Get, Save, Update and Delete
     Then A successful 200 status code is returned
 
     Examples:
-      | Entity    | IdValue      | QueryParameterKey | QueryParameterValue                  |
-      | profiles  | idValueOne   | tenantId         | b7e813a2-bb28-11ec-8422-0242ac120002 |
-      | concerts  | idValueTwo   | tenantId         | b7e813a2-bb28-11ec-8422-0242ac120002 |
-      | artists   | idValueThree | tenantId         | b7e813a2-bb28-11ec-8422-0242ac120002 |
-      | records   | idValueFour  | tenantId         | b7e813a2-bb28-11ec-8422-0242ac120002 |
+      | Entity   | IdValue      | QueryParameterKey | QueryParameterValue                  |
+      | profiles | idValueOne   | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
+      | concerts | idValueTwo   | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
+      | artists  | idValueThree | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
+      | records  | idValueFour  | tenantId          | b7e813a2-bb28-11ec-8422-0242ac120002 |
