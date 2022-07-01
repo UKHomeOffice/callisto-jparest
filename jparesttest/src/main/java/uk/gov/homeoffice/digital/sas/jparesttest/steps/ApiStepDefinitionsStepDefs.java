@@ -39,7 +39,7 @@ public class ApiStepDefinitionsStepDefs {
         assertThat("Status code does not match", apiActions.getResponseStatusCode(), is(responseCode));
     }
 
-    @Then("^The (?:ID) value is extracted from the Json field: \"([^\"]*)\" and is saved as: \"([^\"]*)\"$")
+    @Then("^The (?:unique id) value is extracted from the Json field: \"([^\"]*)\" and is saved as: \"([^\"]*)\"$")
     public void request(String value, String idValue) {
         switch (idValue) {
             case "idValueOne" -> idValueOne = apiActions.getResponseValueFromArrayOfKey(value).get(0).toString();
