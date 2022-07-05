@@ -138,10 +138,13 @@ class ResourceApiControllerTest {
     }
 
     @Test
-    void list_requestTenantIdMatchesResourceTenantIds_noExceptionThrown() {
+    void list_resourcesExists_requestTenantIdMatchesResourceTenantIds_resourcesReturned() {
 
         var controller = getResourceApiController(DummyEntityA.class);
-        assertThatNoException().isThrownBy(() -> controller.list(TENANT_ID, Pageable.ofSize(100), null));
+        var response = controller.list(TENANT_ID, Pageable.ofSize(100), null);
+        assertThat(response).isNotNull();
+        assertThat(response.getItems()).isNotEmpty();
+
     }
 
     @Test
@@ -150,7 +153,8 @@ class ResourceApiControllerTest {
         var controller = getResourceApiController(DummyEntityA.class);
 
         var response = controller.list(INVALID_TENANT_ID, Pageable.ofSize(100), null);
-        assertThat(response.getItems().toArray(new DummyEntityA[0])).isEmpty();
+        assertThat(response).isNotNull();
+        assertThat(response.getItems()).isEmpty();
     }
 
     // endregion
@@ -673,19 +677,19 @@ class ResourceApiControllerTest {
     }
 
     @Test
-    void getRelated_requestTenantIdMatchesParentAndRelatedResourceTenantIds_noExceptionThrown() {
+    void getRelated_relatedResourcesExists_requestTenantIdMatchesParentTenantId_resourcesReturned() {
 
         var controller = getResourceApiController(DummyEntityA.class);
-        assertThatNoException().isThrownBy(() ->
-                controller.getRelated(TENANT_ID, DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null));
+        var response = controller.getRelated(TENANT_ID, DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null);
+        assertThat(response).isNotNull();
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @Test
-    void getRelated_requestTenantIdDoesNotMatchParentAndRelatedResourceTenantIds_noResourcesReturned() {
+    void getRelated_requestTenantIdDoesNotMatchParentTenantId_noResourcesReturned() {
 
         var controller = getResourceApiController(DummyEntityA.class);
         var apiResponse = controller.getRelated(INVALID_TENANT_ID, DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, Pageable.ofSize(100), null);
-
         assertThat(apiResponse).isNotNull();
         assertThat(apiResponse.getItems()).isEmpty();
     }
