@@ -25,10 +25,9 @@ Instead try calling mvnw with the `-am` option and specify the target module wit
 $ mvnw package -pl demo -am
 ```
 
-#### VS Code extensions
+#### Recommended VS Code extensions
 
-- Extension Pack for Java
-- Lombok Annotations Support
+See these by running ‘Show Recommended Extensions’ in the VS Code command palate
 
 #### JDK configuration
 
