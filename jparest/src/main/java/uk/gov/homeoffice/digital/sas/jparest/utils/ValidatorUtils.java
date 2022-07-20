@@ -2,7 +2,10 @@ package uk.gov.homeoffice.digital.sas.jparest.utils;
 
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 
-import javax.validation.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.NoProviderFoundException;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,6 +33,7 @@ public class ValidatorUtils {
     public void validateAndThrowIfErrorsExist(Object objectToValidate) {
         if (this.validator != null) {
             var constraintViolations = this.validator.validate(objectToValidate);
+
             if (!constraintViolations.isEmpty()) {
                 throw new ResourceConstraintViolationException(createResourceConstraintViolationMessage(constraintViolations));
             }

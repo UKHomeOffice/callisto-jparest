@@ -11,6 +11,7 @@
             <props>
                 <prop key="hibernate.hbm2ddl.auto">none</prop>
                 <prop key="hibernate.dialect">org.hibernate.dialect.H2Dialect</prop>
+                <prop key="hibernate.physical_naming_strategy">org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy</prop>
             </props>
         </property>
     </bean>

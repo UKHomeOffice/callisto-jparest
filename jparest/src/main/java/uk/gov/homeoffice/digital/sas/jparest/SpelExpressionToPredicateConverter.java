@@ -1,7 +1,19 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
 import org.springframework.expression.spel.SpelNode;
-import org.springframework.expression.spel.ast.*;
+import org.springframework.expression.spel.ast.Literal;
+import org.springframework.expression.spel.ast.MethodReference;
+import org.springframework.expression.spel.ast.OpAnd;
+import org.springframework.expression.spel.ast.OpEQ;
+import org.springframework.expression.spel.ast.OpGE;
+import org.springframework.expression.spel.ast.OpGT;
+import org.springframework.expression.spel.ast.OpLE;
+import org.springframework.expression.spel.ast.OpLT;
+import org.springframework.expression.spel.ast.OpNE;
+import org.springframework.expression.spel.ast.OpOr;
+import org.springframework.expression.spel.ast.OperatorMatches;
+import org.springframework.expression.spel.ast.OperatorNot;
+import org.springframework.expression.spel.ast.PropertyOrFieldReference;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.WebDataBinder;
@@ -82,7 +94,6 @@ public class SpelExpressionToPredicateConverter {
 
         PropertyOrFieldReference fieldReference = (PropertyOrFieldReference) leftNode;
         Path<Comparable<Object>> field = root.get(fieldReference.getName());
-        Class<?> clazz = field.getJavaType();
 
         // Get the right side
         SpelNode rightNode = node.getChild(1);
@@ -101,6 +112,7 @@ public class SpelExpressionToPredicateConverter {
         
         // handle literal comparison
         if (Literal.class.isAssignableFrom(rightNode.getClass())) {
+            Class<?> clazz = field.getJavaType();
             Object rightValue = convertTo(((Literal) rightNode).getLiteralValue().getValue(), clazz);
             @SuppressWarnings("unchecked")
             Comparable<Object> comparableValue = (Comparable<Object>) rightValue;

@@ -15,11 +15,6 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 @Entity(name = "dummyEntityB")
 public class DummyEntityB extends BaseEntity {
 
-    @Id
-    @Getter
-    @Setter
-    private Long id;
-
     @ManyToMany(mappedBy = "dummyEntityBSet")
     private Set<DummyEntityA> dummyEntityASet;
 

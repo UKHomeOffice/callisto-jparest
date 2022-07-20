@@ -14,6 +14,7 @@ import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
+import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 import java.util.Map.Entry;
 
@@ -28,6 +29,7 @@ import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_REL
 public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
 
+    public static final int DEFAULT_PAGE_SIZE = 10;
     private final ResourceEndpoint endpoint;
     private final PathItemCreator pathItemCreator;
 
@@ -64,12 +66,11 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
             setParentResourcePaths(openApi, rootDescriptor, clazz, tag);
 
             // Create documentation for relations in the entity
-            for (Entry<Class<?>, ResourceEndpoint.Descriptor> relatedElement : rootDescriptor.getRelations()
-                    .entrySet()) {
+            for (Entry<Class<? extends BaseEntity>, String> relatedElement : rootDescriptor.getRelations().entrySet()) {
 
                 var relatedClazz = relatedElement.getKey();
                 var relatedDescriptor = relatedElement.getValue();
-                setRelatedResourcePaths(openApi, rootDescriptor, relatedDescriptor, relatedClazz, tag);
+                setRelatedResourcePaths(openApi, relatedDescriptor, relatedClazz, tag);
             }
         }
     }
@@ -79,11 +80,11 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     /**
      * Ensures the ApiResponse schema is registered along with the metadata schema
      */
-    private Schema<?> registerSchema(Components components) {
+    private static Schema<?> registerSchema(Components components) {
         var apiResponseSchema = ensureSchema(components, "ApiResponse", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
         ensureSchema(components, "Metadata", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
         var pageableSchema = ensureSchema(components, "Pageable", Pageable.class);
-        var value = new Pageable(0,10, null);
+        var value = new Pageable(0, DEFAULT_PAGE_SIZE, null);
         pageableSchema.setExample(value);
         return apiResponseSchema;
     }
@@ -107,20 +108,18 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     private void setParentResourcePaths(OpenAPI openApi, ResourceEndpoint.RootDescriptor rootDescriptor, Class<?> clazz, String tag) {
         var resourceRootPath = pathItemCreator.createRootPath(tag, clazz);
         openApi.path(rootDescriptor.getPath(), resourceRootPath);
-        var resourceItemPath = pathItemCreator.createItemPath(tag, clazz, rootDescriptor.getIdFieldType());
+        var resourceItemPath = pathItemCreator.createItemPath(tag, clazz);
         openApi.path(rootDescriptor.getPath() + URL_ID_PATH_PARAM, resourceItemPath);
     }
 
     private void setRelatedResourcePaths(OpenAPI openApi,
-                                         ResourceEndpoint.RootDescriptor rootDescriptor,
-                                         ResourceEndpoint.Descriptor relatedDescriptor,
+                                         String path,
                                          Class<?> relatedClazz, String tag) {
 
-        var relatedRootPath = pathItemCreator.createRelatedRootPath(tag, relatedClazz, rootDescriptor.getIdFieldType());
-        openApi.path(relatedDescriptor.getPath(), relatedRootPath);
-        var relatedItemPath = pathItemCreator.createRelatedItemPath(tag, rootDescriptor.getIdFieldType(),
-                relatedDescriptor.getIdFieldType());
-        openApi.path(relatedDescriptor.getPath() + URL_RELATED_ID_PATH_PARAM, relatedItemPath);
+        var relatedRootPath = pathItemCreator.createRelatedRootPath(tag, relatedClazz);
+        openApi.path(path, relatedRootPath);
+        var relatedItemPath = pathItemCreator.createRelatedItemPath(tag);
+        openApi.path(path + URL_RELATED_ID_PATH_PARAM, relatedItemPath);
     }
 
 

@@ -1,28 +1,41 @@
-CREATE TABLE dummyEntityA
+CREATE TABLE dummy_EntityA
 (
-    id           SERIAL PRIMARY KEY
+    id           varchar(36) NOT NULL PRIMARY KEY,
+    tenant_id    varchar(36) NOT NULL,
+    profile_id   integer,
+    index        integer
 );
 
-CREATE TABLE dummyEntityB
+CREATE TABLE dummy_EntityB
 (
-    id           SERIAL PRIMARY KEY
+    id           varchar(36) NOT NULL PRIMARY KEY,
+    tenant_id    varchar(36) NOT NULL
 );
 
-CREATE TABLE dummyEntityC
+CREATE TABLE dummy_EntityC
 (
-    id           SERIAL PRIMARY KEY,
+    id           varchar(36) NOT NULL PRIMARY KEY,
+    tenant_id    varchar(36) NOT NULL,
     description  varchar(800) NULL,
-    index        integer NOT NULL
+    index        integer NOT NULL,
+    profile_id   integer
 );
 
-CREATE TABLE dummyEntityD
+CREATE TABLE dummy_EntityD
 (
-    id           SERIAL PRIMARY KEY,
+    id           varchar(36) NOT NULL PRIMARY KEY,
     description  varchar(800) NULL
 );
 
-CREATE TABLE dummyEntityA_dummyEntityB
+CREATE TABLE dummy_EntityF
 (
-    dummyEntityA  integer NOT NULL REFERENCES dummyEntityA (id),
-    dummyEntityB   integer NOT NULL REFERENCES dummyEntityB (id)
+    id                  varchar(36),
+    tenant_id           varchar(36) NOT NULL,
+    dummy_entityC_id    varchar(36) NOT NULL REFERENCES dummy_EntityC (id)
+);
+
+CREATE TABLE dummy_EntityA_dummy_EntityB
+(
+    dummy_EntityA  varchar(36) NOT NULL REFERENCES dummy_EntityA (id),
+    dummy_EntityB   varchar(36) NOT NULL REFERENCES dummy_EntityB (id)
 );

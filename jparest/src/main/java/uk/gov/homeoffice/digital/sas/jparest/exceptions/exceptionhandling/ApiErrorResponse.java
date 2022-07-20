@@ -1,7 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling;
 
-import lombok.*;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * A class to hold information relating to an error thrown by the API
