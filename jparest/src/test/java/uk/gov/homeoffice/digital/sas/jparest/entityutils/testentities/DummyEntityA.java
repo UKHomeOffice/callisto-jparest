@@ -17,15 +17,18 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 @Entity(name = "dummyEntityA")
 public class DummyEntityA extends BaseEntity {
 
-    @Id
-    @Getter
-    @Setter
-    private Long id;
-
     @Getter
     @Setter
     @ManyToMany
-    @JoinTable(name = "dummyEntityA_dummyEntityB", joinColumns = @JoinColumn(name = "dummyEntityA"), inverseJoinColumns = @JoinColumn(name = "dummyEntityB"))
+    @JoinTable(name = "dummy_EntityA_dummy_EntityB", joinColumns = @JoinColumn(name = "dummy_EntityA"), inverseJoinColumns = @JoinColumn(name = "dummy_EntityB"))
     private Set<DummyEntityB> dummyEntityBSet;
+
+    @Getter
+    @Setter
+    private Long profileId;
+
+    @Getter
+    @Setter
+    private Long index;
 
 }

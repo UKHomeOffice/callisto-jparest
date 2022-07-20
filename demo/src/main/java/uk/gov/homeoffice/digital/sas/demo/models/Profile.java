@@ -1,22 +1,17 @@
 package uk.gov.homeoffice.digital.sas.demo.models;
 
-import java.util.Date;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
-import lombok.AllArgsConstructor;
-import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
-import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
+import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+
+import javax.persistence.Entity;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 @Resource(path = "profiles")
 @Entity(name = "profiles")
@@ -25,10 +20,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Profile extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long profile_id;
-
     @NotEmpty
     private String preferences;
 
@@ -36,13 +27,13 @@ public class Profile extends BaseEntity {
     private String bio;
 
     @NotEmpty
-    private String phone_number;
+    private String phoneNumber;
 
     @NotNull
     private Date dob;
 
     @NotNull
-    private Date first_release;
+    private Date firstRelease;
 
 
 }

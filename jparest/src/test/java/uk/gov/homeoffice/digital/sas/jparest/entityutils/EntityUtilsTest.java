@@ -1,6 +1,5 @@
 package uk.gov.homeoffice.digital.sas.jparest.entityutils;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -17,18 +16,19 @@ import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityE;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceException;
-import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityG;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityTestUtil;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
-import java.io.Serializable;
-import java.lang.reflect.Field;
+import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -38,55 +38,41 @@ import static org.assertj.core.api.Assertions.*;
 class EntityUtilsTest {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(EntityUtilsTest.class);
+    public static final UUID sampleId = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac110001");
 
     @PersistenceContext
     private EntityManager entityManager;
 
+    private final Predicate<Class<?>> baseEntitySubclassPredicate = DummyEntityTestUtil.getBaseEntitySubclassPredicate();
+
+
     //region Constructor
 
-    @ParameterizedTest
-    @MethodSource("nullConstructorArgs")
-    void entityUtils_nullArgs_throwsNullPointerException(Class<?> clazz, EntityManager manager) {
-        assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> new EntityUtils<>(clazz, manager));
-    } 
-
-    //endregion
-
     @Test
-    void entityUtils_entityTypeHasIdField_idFieldInformationStored() {
-
-        var idFieldName = "id";
-        var resourceClass = DummyEntityC.class;
-        var entityUtils = new EntityUtils<>(resourceClass, entityManager);
-        Field expectedField = null;
-        try {
-            expectedField = resourceClass.getDeclaredField(idFieldName);
-        } catch (NoSuchFieldException e) {
-            LOGGER.info("{} field not found on class {}", idFieldName, resourceClass.toString());
-        }
-        assertThat(entityUtils.getIdFieldName()).isEqualTo(expectedField.getName());
-        assertThat(entityUtils.getIdFieldType()).isEqualTo(expectedField.getType());
-
-    }
-
+    void entityUtils_nullArgs_throwsNullPointerException() {
+        assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> new EntityUtils(null, baseEntitySubclassPredicate));
+    } 
 
     @Test
     void entityUtils_entityTypeHasRelations_relatedEntitiesStored() {
 
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityA.class, baseEntitySubclassPredicate);
         assertThat(entityUtils.getRelatedResources()).contains("dummyEntityBSet");
     }
 
+
     @Test
-    void entityUtils_moreThanOneIdField_throwsResourceException(){
-        assertThatExceptionOfType(ResourceException.class)
-                .isThrownBy(() -> new EntityUtils<>(DummyEntityE.class, entityManager));
+    void entityUtils_relatedEntityTypeDoesNotExtendBaseEntity_relationIsNotStored() {
+
+        var entityUtils = new EntityUtils<>(DummyEntityG.class, baseEntitySubclassPredicate);
+        assertThat(entityUtils.getRelatedResources()).isEmpty();
     }
+
 
     @Test
     void entityUtils_oneIdField_noExceptionThrows(){
         assertThatNoException()
-                .isThrownBy(() -> new EntityUtils<>(DummyEntityA.class, entityManager));
+                .isThrownBy(() -> new EntityUtils<>(DummyEntityA.class, baseEntitySubclassPredicate));
     }
 
     // region getRelatedEntities
@@ -94,23 +80,23 @@ class EntityUtilsTest {
     @Test
     void getRelatedEntities_relatedEntitiesExist_relatedEntitiesReturned() {
 
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        var findA = entityManager.find(DummyEntityA.class, 1L);
+        var entityUtils = new EntityUtils<>(DummyEntityA.class, baseEntitySubclassPredicate);
+        var findA = entityManager.find(DummyEntityA.class, sampleId);
         var actualRelatedEntities = entityUtils.getRelatedEntities(findA, "dummyEntityBSet");
         assertThat(actualRelatedEntities).isNotEmpty();
     }
 
     @Test
     void getRelatedEntities_relationDoesntExist_throwsIllegalArgumentException() {
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        var findA = entityManager.getReference(DummyEntityA.class, 1L);
+        var entityUtils = new EntityUtils<>(DummyEntityA.class, baseEntitySubclassPredicate);
+        var findA = entityManager.getReference(DummyEntityA.class, sampleId);
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> entityUtils.getRelatedEntities(findA, "invalidValue"));
     }
 
     @ParameterizedTest
     @MethodSource("getRelatedEntitiesNullArgs")
     void getRelatedEntities_nullArgs_throwsNullPointerException(DummyEntityA entity, String relation) {
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityA.class, baseEntitySubclassPredicate);
         assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> entityUtils.getRelatedEntities(entity, relation));
     }
 
@@ -121,63 +107,17 @@ class EntityUtilsTest {
     @Test
     void getEntityReference_relatedEntityExist_relatedEntityReferenceReturned() {
 
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-        long relatedEntityReference = 123;
+        var entityUtils = new EntityUtils<>(DummyEntityA.class, baseEntitySubclassPredicate);
+        UUID relatedEntityReference = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120001");
         var actualReference = entityUtils.getEntityReference("dummyEntityBSet", relatedEntityReference);
         assertThat(actualReference).isInstanceOf(DummyEntityB.class);
         DummyEntityB typedActual = (DummyEntityB)actualReference;
         assertThat(typedActual.getId()).isEqualTo(relatedEntityReference);
     }
 
-
-    
-    @ParameterizedTest
-    @MethodSource("invalidReferenceValues")
-    void getEntityReference_relatedEntityExist_referenceTypeIsInvalid_throws_illegalArgumentException(Serializable reference) {
-
-        var entityUtils = new EntityUtils<>(DummyEntityA.class, entityManager);
-
-        assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> entityUtils.getEntityReference("dummyEntityBSet", reference));
-    }
-
-    @Test
-    void getEntityReference_entityReferenceReturned() {
-        long expectedEntityId = 1;
-        var entityUtils = new EntityUtils<DummyEntityC>(DummyEntityC.class, entityManager);
-        var actualReference = entityUtils.getEntityReference(expectedEntityId);
-        assertThat(actualReference.getId()).isEqualTo(expectedEntityId);
-
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidReferenceValues")
-    void getEntityReference_referenceTypeIsInvalid_throwsIllegalArgumentException(Serializable reference) {
-        var entityUtils = new EntityUtils<>(DummyEntityC.class, entityManager);
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> entityUtils.getEntityReference(reference));
-
-    }
-
     //endregion
 
     //region Method sources
-    
-    private static Stream<Arguments> invalidReferenceValues() {
-        return Stream.of(
-          Arguments.of(1),
-          Arguments.of("123"),
-          Arguments.of("invalid")
-        );
-    }
-
-    private Stream<Arguments> nullConstructorArgs() {
-        return Stream.of(
-            Arguments.of(null, this.entityManager),
-            Arguments.of(DummyEntityC.class, null),
-            Arguments.of(null, null)            
-        );
-    }
-
     private static Stream<Arguments> getRelatedEntitiesNullArgs() {
         return Stream.of(
             Arguments.of(null, "relation"),

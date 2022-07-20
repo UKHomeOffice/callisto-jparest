@@ -16,6 +16,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityTestUtil;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 
 import javax.persistence.EntityManager;
@@ -24,6 +25,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,6 +46,7 @@ class SpelExpressionToPredicateConverterTest {
 
     CriteriaBuilder builder=null;
     Root<DummyEntityA> root=null;
+    private final java.util.function.Predicate<Class<?>> baseEntitySubclassPredicate = DummyEntityTestUtil.getBaseEntitySubclassPredicate();
 
     @BeforeEach
     public void setUpBeforeEachTestCase(){
@@ -60,29 +63,23 @@ class SpelExpressionToPredicateConverterTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "id == 1",
-        "id != 2",
-        "id >= 2",
-        "id <= 2",
-        "id > 2",
-        "id < 2",
+        "index == 1",
+        "index != 2",
+        "index >= 2",
+        "index <= 2",
+        "index > 2",
+        "index < 2",
         "description == \"Ricardo\"",
         "description matches \"%the%\"",
-        "id == index",
-        "id != index",
-        "id >= index",
-        "id <= index",
-        "id > index",
-        "id < index",
-        "id != 2 && id != 3 || id != 4",
-        "!(id != 2 && id != 3)",
-        "in(id, 1, 2, 3, 4)",
-        "between(id, 1, 4)",
-        "not (id == 1)"
+        "index != 2 && index != 3 || index != 4",
+        "!(index != 2 && index != 3)",
+        "in(index, 1, 2, 3, 4)",
+        "between(index, 1, 4)",
+        "not (index == 1)"
     })
     void convert_when_expressionIsValid_shouldNotThrow(String expressionString){
         SpelExpression spelExpression = (SpelExpression)expressionParser.parseExpression(expressionString);
-        var entityUtils = new EntityUtils<>(DummyEntityC.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityC.class, baseEntitySubclassPredicate);
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
         assertThatNoException().isThrownBy(() -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root) );
@@ -105,7 +102,7 @@ class SpelExpressionToPredicateConverterTest {
     @MethodSource("invalidFilterValues")
     void convert_when_expressionIsInvalid_throws_invalidFilterException(String expressionString, String errorMessage){
         SpelExpression spelExpression = (SpelExpression)expressionParser.parseExpression(expressionString);
-        var entityUtils = new EntityUtils<>(DummyEntityC.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityC.class, baseEntitySubclassPredicate);
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
 
@@ -116,17 +113,17 @@ class SpelExpressionToPredicateConverterTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "between(id, 1, 4)",
-        "Between(id, 1, 4)",
-        "BETWEEN(id, 1, 4)",
-        "BetWeen(id, 1, 4)",
-        "in(id, 1, 4)",
-        "In(id, 1, 4)",
-        "IN(id, 1, 4)"
+        "between(index, 1, 4)",
+        "Between(index, 1, 4)",
+        "BETWEEN(index, 1, 4)",
+        "BetWeen(index, 1, 4)",
+        "in(index, 1, 4)",
+        "In(index, 1, 4)",
+        "IN(index, 1, 4)"
     })
     void convert_when_methodNameCaseIsDifferentCase_shouldNotThrow(String expressionString){
         SpelExpression spelExpression = (SpelExpression)expressionParser.parseExpression(expressionString);
-        var entityUtils = new EntityUtils<>(DummyEntityC.class, entityManager);
+        var entityUtils = new EntityUtils<>(DummyEntityC.class, baseEntitySubclassPredicate);
         CriteriaQuery<DummyEntityC> query = builder.createQuery(entityUtils.getEntityType());
         Root<DummyEntityC> root = query.from(entityUtils.getEntityType());
         assertThatNoException().isThrownBy( () -> SpelExpressionToPredicateConverter.convert(spelExpression, builder, root) );
@@ -134,7 +131,7 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_with_or_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw("id==1L or id>2L");
+        SpelExpression expression = expressionParser.parseRaw("index==1L or index>2L");
         Predicate predicate = SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getOperator()).isEqualTo(OR);
         assertThat(predicate.getExpressions()).hasSize(2);
@@ -144,7 +141,7 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_with_and_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw("id==1L and id>2L");
+        SpelExpression expression = expressionParser.parseRaw("index==1L and index>2L");
         Predicate predicate = SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getOperator()).isEqualTo(AND);
         assertThat(predicate.getExpressions()).hasSize(2);
@@ -153,48 +150,43 @@ class SpelExpressionToPredicateConverterTest {
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     void test_convert_with_equal_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw("id==1L");
+        SpelExpression expression = expressionParser.parseRaw("index==1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(EQUAL);
-        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     void test_convert_with_greaterThan_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw("id>1L");
+        SpelExpression expression = expressionParser.parseRaw("index>1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(GREATER_THAN);
-        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     void test_convert_with_greaterThanOrEqual_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw("id>=1L");
+        SpelExpression expression = expressionParser.parseRaw("index>=1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(GREATER_THAN_OR_EQUAL);
-        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     void test_convert_with_lessthan_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw("id<1L");
+        SpelExpression expression = expressionParser.parseRaw("index<1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(LESS_THAN);
-        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     void test_convert_with_lessThanOrEqual_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw("id<=1L");
+        SpelExpression expression = expressionParser.parseRaw("index<=1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(LESS_THAN_OR_EQUAL);
-        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
@@ -206,7 +198,7 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_with_field_or_operation_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw("id == dummyEntityBSet or id>2");
+        SpelExpression expression = expressionParser.parseRaw("id == dummyEntityBSet or index>2");
         CompoundPredicate predicate = (CompoundPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getOperator()).isEqualTo(OR);
         assertThat(((ComparisonPredicate)predicate.getExpressions().get(0)).getComparisonOperator()).isEqualTo(EQUAL);
@@ -232,7 +224,7 @@ class SpelExpressionToPredicateConverterTest {
 
     @Test
     void test_convert_throws_InvalidFilterException_with_describeError_in_filter() {
-        SpelExpression expression = expressionParser.parseRaw("1==id");
+        SpelExpression expression = expressionParser.parseRaw("1==index");
 
         assertThatExceptionOfType(InvalidFilterException.class)
             .isThrownBy(() -> SpelExpressionToPredicateConverter.convert(expression, builder, root))

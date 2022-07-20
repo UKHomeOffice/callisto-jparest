@@ -20,10 +20,6 @@ import javax.validation.constraints.Positive;
 
 public class DummyEntityD extends BaseEntity {
 
-    @Id
-    @Getter
-    private Long id;
-
     @Getter
     @Setter
     @NotEmpty

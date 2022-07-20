@@ -1,61 +1,69 @@
-INSERT INTO profiles (profile_id, preferences, bio, phone_number, dob, first_release)
-VALUES  (1, 'My preferences for 1', 'My Bio for 1', '07879 899101', '1979-01-01', '1979-01-01'),
-        (2, 'My preferences for 2', 'My Bio for 2', '07879 899102', '1973-06-12', '1979-01-01'),
-        (3, 'My preferences for 3', 'My Bio for 3', '07879 899103', '1976-11-21', '1979-01-01'),
-        (4, 'My preferences for 4', 'My Bio for 4', '07879 899104', '1979-04-12', '1976-01-01'),
-        (5, 'My preferences for 5', 'My Bio for 5', '07879 899105', '1972-06-19', '1979-01-01'),
-        (6, 'My preferences for 6', 'My Bio for 6', '07879 899106', '1974-01-01', '1972-01-01');
+INSERT INTO profiles (id, tenant_id, bio, dob, first_release, phone_number, preferences) VALUES
+('17e813a2-bb28-11ec-8422-0242ac120001', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My Bio for 1', '1979-01-01', '1979-01-01', '07879 899101', 'My preferences for 1'),
+('17e813a2-bb28-11ec-8422-0242ac120002', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My Bio for 2', '1973-01-01', '1979-01-01', '07879 899102', 'My preferences for 2'),
+('17e813a2-bb28-11ec-8422-0242ac120003', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My Bio for 3', '1975-12-29', '1979-01-01', '07879 899103', 'My preferences for 3'),
+('1a7c7da4-bb29-11ec-8422-0242ac120004', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My Bio for 4', '1979-01-01', '1975-12-29', '07879 899104', 'My preferences for 4'),
+('7a7c7da4-bb29-11ec-8422-00242ac12005', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My Bio for 5', '1972-01-03', '1979-01-01', '07879 899105', 'My preferences for 5'),
+('1a7c7da4-bb29-11ec-8422-0242ac120006', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My Bio for 6', '1973-12-31', '1972-01-03', '07879 899106', 'My preferences for 6'),
+('d63ea18b-52c3-4d61-9eb1-a822f88639d1', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'My Bio for 1', '1973-12-31', '1972-01-03', '07879 899106', 'My preferences for 1'),
+('d63ea18b-52c3-4d61-9eb1-a822f88639d2', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'My Bio for 2', '1973-12-31', '1972-01-03', '07879 899106', 'My preferences for 2');
 
-INSERT INTO artists (artist_id, profile_id, performance_name)
-VALUES  (1, 1, 'Beautiful South'),
-        (2, 2, 'Oasis'),
-        (3, 3, 'Pink'),
-        (4, 4, 'Adele'),
-        (5, 5, 'Beach Boys'),
-        (6, 6, 'Queen');
+INSERT INTO artists (id, tenant_id, performance_name, profile_id) VALUES
+('27e813a2-bb28-11ec-8422-0242ac120001', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Beautiful South', '17e813a2-bb28-11ec-8422-0242ac120001'),
+('27e813a2-bb28-11ec-8422-0242ac120002', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Oasis', '17e813a2-bb28-11ec-8422-0242ac120002'),
+('27e813a2-bb28-11ec-8422-0242ac120003', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Pink', '17e813a2-bb28-11ec-8422-0242ac120003'),
+('2a7c7da4-bb29-11ec-8422-0242ac120004', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Adele', '1a7c7da4-bb29-11ec-8422-0242ac120004'),
+('2a7c7da4-bb29-11ec-8422-0242ac120005', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Beach Boys', '7a7c7da4-bb29-11ec-8422-00242ac12005'),
+('2a7c7da4-bb29-11ec-8422-0242ac120006', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Queen', '1a7c7da4-bb29-11ec-8422-0242ac120006'),
+('dc27d5aa-4e7d-474e-98b6-ebf9aae9a471', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'Drake', 'd63ea18b-52c3-4d61-9eb1-a822f88639d1'),
+('dc27d5aa-4e7d-474e-98b6-ebf9aae9a472', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'Future', 'd63ea18b-52c3-4d61-9eb1-a822f88639d2');
 
-INSERT INTO concerts (concert_id, concert_name) VALUES
-    (1, 'Live Aid 2020'),
-    (2, 'Live Aid 2021');
+INSERT INTO concerts (id, tenant_id, concert_name) VALUES
+('37e813a2-bb28-11ec-8422-0242ac120001', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Live Aid 2020'),
+('3a7c7da4-bb29-11ec-8422-0242ac120002', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Live Aid 2021'),
+('37e813a2-bb28-11ec-8422-0242ac120003', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Live Aid 2020'),
+('b3f9fd1b-ca94-4891-96d0-9898101b04e1', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'Summer Sixteen');
 
 INSERT INTO concert_artists (concert_id, artist_id) VALUES
-    (1, 1),
-    (1, 2),
-    (2, 1),
-    (2, 2),
-    (2, 3),
-    (2, 4),
-    (2, 5),
-    (2, 6);
-    
-INSERT INTO records (record_id, artist_id, record_name) VALUES
-(1, 1, 'Song for Whoever'),
-(2, 1, 'You Keep It All In'),
-(3, 1, 'A Little Time'),
-(4, 1, 'My Book'),
-(5, 1, 'Let Love Speak Up Itself'),
-(6, 1, 'Old Red Eyes Is Back'),
-(7, 1, 'We Are Each Other'),
-(8, 1, 'Bell Bottomed Tear'),
-(9, 1, '36D'),
-(10,2, 'Champagne Supernova'),
-(11,2, 'Whatever'),
-(12,2, 'Morning Glory'),
-(13,2, 'Live Foreve'),
-(14,2, 'Wonderwall'),
-(15,2, 'Cast No Shadow'),
-(16,3, 'Try'),
-(17,3, 'So What'),
-(18,4, 'Hello'),
-(19,4, 'Easy on Me'),
-(20,4, 'Set Fire To The Rain'),
-(21,4, 'Someone Like You'),
-(22,5, 'I Get Around'),
-(23,5, 'Sloop John B'),
-(24,5, 'Help Me Rhonda'),
-(25,6, 'We Will Rock You'),
-(26,6, 'Bohemian Rhapsody'),
-(27,6, 'Killer Queen'),
-(28,6, 'Bicycle Race'),
-(29,6, 'Fat Bottomed Girls'),
-(30,6, 'Crazy Little Thing Called Love');
+('37e813a2-bb28-11ec-8422-0242ac120001', '27e813a2-bb28-11ec-8422-0242ac120002'),
+('37e813a2-bb28-11ec-8422-0242ac120001', '27e813a2-bb28-11ec-8422-0242ac120001'),
+('3a7c7da4-bb29-11ec-8422-0242ac120002', '27e813a2-bb28-11ec-8422-0242ac120003'),
+('3a7c7da4-bb29-11ec-8422-0242ac120002', '2a7c7da4-bb29-11ec-8422-0242ac120004'),
+('37e813a2-bb28-11ec-8422-0242ac120003', '2a7c7da4-bb29-11ec-8422-0242ac120005'),
+('37e813a2-bb28-11ec-8422-0242ac120003', '2a7c7da4-bb29-11ec-8422-0242ac120006'),
+('b3f9fd1b-ca94-4891-96d0-9898101b04e1', 'dc27d5aa-4e7d-474e-98b6-ebf9aae9a471'),
+('b3f9fd1b-ca94-4891-96d0-9898101b04e1', 'dc27d5aa-4e7d-474e-98b6-ebf9aae9a472');
+
+INSERT INTO records (id, tenant_id, record_name, artist_id) VALUES
+('47e813a2-bb28-11ec-8422-0242ac120001', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Song for Whoever', '27e813a2-bb28-11ec-8422-0242ac120001'),
+('47e813a2-bb28-11ec-8422-0242ac120002', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'You Keep It All In', '27e813a2-bb28-11ec-8422-0242ac120002'),
+('47e813a2-bb28-11ec-8422-0242ac120003', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'A Little Time', '27e813a2-bb28-11ec-8422-0242ac120003'),
+('47e813a2-bb28-11ec-8422-0242ac120004', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My Book', '2a7c7da4-bb29-11ec-8422-0242ac120004'),
+('47e813a2-bb28-11ec-8422-0242ac120005', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Let Love Speak Up Itself', '2a7c7da4-bb29-11ec-8422-0242ac120005'),
+('47e813a2-bb28-11ec-8422-0242ac120006', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Old Red Eyes Is Back', '2a7c7da4-bb29-11ec-8422-0242ac120006'),
+('47e813a2-bb28-11ec-8422-0242ac120007', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'We Are Each Other', '27e813a2-bb28-11ec-8422-0242ac120001'),
+('47e813a2-bb28-11ec-8422-0242ac120008', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Bell Bottomed Tear', '27e813a2-bb28-11ec-8422-0242ac120002'),
+('47e813a2-bb28-11ec-8422-0242ac120009', 'b7e813a2-bb28-11ec-8422-0242ac120002', '36D', '27e813a2-bb28-11ec-8422-0242ac120003'),
+('47e813a2-bb28-11ec-8422-0242ac120010', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Champagne Supernova', '2a7c7da4-bb29-11ec-8422-0242ac120004'),
+('47e813a2-bb28-11ec-8422-0242ac120011', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Whatever', '2a7c7da4-bb29-11ec-8422-0242ac120005'),
+('47e813a2-bb28-11ec-8422-0242ac120012', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Morning Glory', '2a7c7da4-bb29-11ec-8422-0242ac120006'),
+('47e813a2-bb28-11ec-8422-0242ac120013', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Live Foreve', '27e813a2-bb28-11ec-8422-0242ac120001'),
+('47e813a2-bb28-11ec-8422-0242ac120014', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Wonderwall', '27e813a2-bb28-11ec-8422-0242ac120002'),
+('47e813a2-bb28-11ec-8422-0242ac120015', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Cast No Shadow', '27e813a2-bb28-11ec-8422-0242ac120003'),
+('47e813a2-bb28-11ec-8422-0242ac120016', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Try', '2a7c7da4-bb29-11ec-8422-0242ac120004'),
+('47e813a2-bb28-11ec-8422-0242ac120017', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'So What', '2a7c7da4-bb29-11ec-8422-0242ac120005'),
+('47e813a2-bb28-11ec-8422-0242ac120018', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Hello', '2a7c7da4-bb29-11ec-8422-0242ac120006'),
+('47e813a2-bb28-11ec-8422-0242ac120019', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Easy on Me', '27e813a2-bb28-11ec-8422-0242ac120001'),
+('47e813a2-bb28-11ec-8422-0242ac120020', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Set Fire To The Rain', '27e813a2-bb28-11ec-8422-0242ac120002'),
+('47e813a2-bb28-11ec-8422-0242ac120021', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Someone Like You', '27e813a2-bb28-11ec-8422-0242ac120003'),
+('47e813a2-bb28-11ec-8422-0242ac120022', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'I Get Around', '2a7c7da4-bb29-11ec-8422-0242ac120004'),
+('47e813a2-bb28-11ec-8422-0242ac120023', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Sloop John B', '2a7c7da4-bb29-11ec-8422-0242ac120005'),
+('47e813a2-bb28-11ec-8422-0242ac120024', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Help Me Rhonda', '2a7c7da4-bb29-11ec-8422-0242ac120006'),
+('47e813a2-bb28-11ec-8422-0242ac120025', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'We Will Rock You', '27e813a2-bb28-11ec-8422-0242ac120001'),
+('47e813a2-bb28-11ec-8422-0242ac120026', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Bohemian Rhapsody', '27e813a2-bb28-11ec-8422-0242ac120002'),
+('47e813a2-bb28-11ec-8422-0242ac120027', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Killer Queen', '27e813a2-bb28-11ec-8422-0242ac120003'),
+('47e813a2-bb28-11ec-8422-0242ac120028', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Bicycle Race', '2a7c7da4-bb29-11ec-8422-0242ac120004'),
+('47e813a2-bb28-11ec-8422-0242ac120029', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Fat Bottomed Girls', '2a7c7da4-bb29-11ec-8422-0242ac120005'),
+('47e813a2-bb28-11ec-8422-0242ac120030', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Crazy Little Thing Called Love', '2a7c7da4-bb29-11ec-8422-0242ac120006'),
+('0e54cb95-670f-4c02-b1a6-72c7b40f6e41', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'Passionfruit', 'dc27d5aa-4e7d-474e-98b6-ebf9aae9a471'),
+('0e54cb95-670f-4c02-b1a6-72c7b40f6e42', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'Life Is Good', 'dc27d5aa-4e7d-474e-98b6-ebf9aae9a472');

@@ -25,7 +25,7 @@ public class JpaRestMvcConfigurer implements WebMvcConfigurer {
         argumentResolvers.add(new SpelExpressionArgumentResolver());
     }
 
-    private ObjectMapper getObjectMapper() {
+    private static ObjectMapper getObjectMapper() {
         var om = new ObjectMapper();
         om.registerModule(new Hibernate5Module());
         om.registerModule(new JavaTimeModule());

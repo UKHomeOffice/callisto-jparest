@@ -1,16 +1,15 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
+import lombok.Getter;
+import org.springframework.stereotype.Component;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorException;
+import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.stereotype.Component;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorException;
 
 @Component
 public class ResourceEndpoint {
@@ -28,7 +27,7 @@ public class ResourceEndpoint {
 
     private List<String> paths = new ArrayList<>();
 
-    public void add(Class<?> clazz, String path, Class<?> idFieldType) {
+    public void add(Class<?> clazz, String path) {
 
         if (descriptors.containsKey(clazz)) {
             throw new AddResourceDescriptorException(RESOURCE_ALREADY_ADDED,
@@ -41,12 +40,12 @@ public class ResourceEndpoint {
         }
 
         paths.add(path);
-        var rootDescriptor = new RootDescriptor(idFieldType, path);
+        var rootDescriptor = new RootDescriptor(path);
         descriptors.put(clazz, rootDescriptor);
 
     }
 
-    public void addRelated(Class<?> clazz, Class<?> relatedClazz, String path, Class<?> idFieldType) {
+    public void addRelated(Class<? extends BaseEntity> clazz, Class<? extends BaseEntity> relatedClazz, String path) {
 
         if (!descriptors.containsKey(clazz)) {
             throw new AddResourceDescriptorException(CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES,
@@ -66,25 +65,15 @@ public class ResourceEndpoint {
         }
 
         paths.add(path);
-        var descriptor = new Descriptor(idFieldType, path);
-        rootDescriptor.getRelations().put(relatedClazz, descriptor);
+        rootDescriptor.getRelations().put(relatedClazz, path);
     }
 
-    @AllArgsConstructor
-    public class Descriptor {
-        @Getter
-        private Class<?> idFieldType;
-
-        @Getter
+    @Getter
+    public class RootDescriptor {
         private String path;
-    }
-
-    public class RootDescriptor extends Descriptor {
-        @Getter
-        private Map<Class<?>, Descriptor> relations = new HashMap<>();
-
-        public RootDescriptor(Class<?> idFieldType, String path) {
-            super(idFieldType, path);
+        private Map<Class<? extends BaseEntity>, String> relations = new HashMap<>();
+        public RootDescriptor(String path) {
+            this.path = path;
         }
     }
 }
