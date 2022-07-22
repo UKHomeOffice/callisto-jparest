@@ -67,7 +67,7 @@ class HandlerMappingConfigurerTest {
     public void setup() {
         when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
         handlerMappingConfigurer = new HandlerMappingConfigurer(entityManager, transactionManager, context,
-                resourceEndpoint);
+                resourceEndpoint, requestMappingHandlerMapping);
     }
 
     @Test

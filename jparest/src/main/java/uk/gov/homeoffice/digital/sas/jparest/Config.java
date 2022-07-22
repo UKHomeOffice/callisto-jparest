@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.PathItemCreator;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.ResourceOpenApiCustomiser;
@@ -30,9 +31,10 @@ public class Config {
     HandlerMappingConfigurer handlerMappingConfigurer(EntityManager entityManager,
                                                       PlatformTransactionManager transactionManager,
                                                       ApplicationContext context,
-                                                      ResourceEndpoint resourceEndpoint) {
+                                                      ResourceEndpoint resourceEndpoint,
+                                                      RequestMappingHandlerMapping requestMappingHandlerMapping) {
         LOGGER.info(("auto configure handler mapping"));
-        return new HandlerMappingConfigurer(entityManager, transactionManager, context, resourceEndpoint);
+        return new HandlerMappingConfigurer(entityManager, transactionManager, context, resourceEndpoint, requestMappingHandlerMapping);
     }
 
     @Bean

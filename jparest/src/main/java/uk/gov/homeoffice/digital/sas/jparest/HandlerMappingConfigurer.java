@@ -55,17 +55,17 @@ public class HandlerMappingConfigurer {
             EntityManager entityManager,
             PlatformTransactionManager transactionManager,
             ApplicationContext context,
-            ResourceEndpoint resourceEndpoint) {
+            ResourceEndpoint resourceEndpoint,
+            RequestMappingHandlerMapping requestMappingHandlerMapping) {
         this.entityManager = entityManager;
         this.transactionManager = transactionManager;
         this.context = context;
         this.resourceEndpoint = resourceEndpoint;
+        this.requestMappingHandlerMapping = requestMappingHandlerMapping;
     }
 
     @PostConstruct
     public void registerUserController() throws NoSuchMethodException, SecurityException {
-        requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
-
         createBuilderOptions();
 
         LOGGER.fine("Searching for classes annotated as resources");
