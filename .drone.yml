@@ -20,7 +20,7 @@ steps:
     commands:
       - mvn install -gs settings.xml
 
-  - name: authenticate:
+  - name: authenticate
       image: robertstettner/drone-mvn-auth
       pull: true
       settings:
