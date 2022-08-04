@@ -102,4 +102,12 @@
         </pluginManagement>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>artifactory</id>
+            <name>callisto-jparest</name>
+            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest/</url>
+        </repository>
+    </distributionManagement>
+    
 </project>
