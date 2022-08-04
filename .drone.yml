@@ -20,20 +20,20 @@ steps:
     commands:
       - mvn install -gs settings.xml
 
-  authenticate:
-    image: robertstettner/drone-mvn-auth
-    pull: true
-    settings:
-      servers: [ maven_servers ]
-    profiles:
-      - id: artifactory
-        repositories:
-          - id: artifactory
-            name: callisto-jparest
-            url: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
-            layout: default
-    active_profiles:
-      - artifactory
+  - name: authenticate:
+      image: robertstettner/drone-mvn-auth
+      pull: true
+      settings:
+        servers: [ maven_servers ]
+      profiles:
+        - id: artifactory
+          repositories:
+            - id: artifactory
+              name: callisto-jparest
+              url: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
+              layout: default
+      active_profiles:
+        - artifactory
 
 
     deploy:
