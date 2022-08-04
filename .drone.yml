@@ -57,6 +57,7 @@ services:
     image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
     pull: always
     commands:
+    - /run.sh server
 ---
 kind: pipeline
 type: kubernetes
