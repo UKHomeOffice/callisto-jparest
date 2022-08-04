@@ -23,7 +23,8 @@ steps:
   authenticate:
     image: robertstettner/drone-mvn-auth
     pull: true
-    secrets: [ maven_servers ]
+    settings:
+      servers: [ maven_servers ]
     profiles:
       - id: artifactory
         repositories:
