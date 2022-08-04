@@ -13,7 +13,7 @@ steps:
     commands:
       # wait for docker service to be up before running docker build
       - n=0; while [ "$n" -lt 60 ] && [ ! docker stats --no-stream ]; do n=$(( n + 1 )); sleep 1; done
-      - docker build -t acp-example-app:$${DRONE_COMMIT_SHA} . --no-cache
+      - docker build -t callisto-jparest:$${DRONE_COMMIT_SHA} . --no-cache
     when:
       event:
         - push
