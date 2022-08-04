@@ -20,26 +20,27 @@ steps:
     commands:
       - mvn install -gs settings.xml
 
-  - name: authenticate
-    image: robertstettner/drone-mvn-auth:latest
-    settings:
-      servers:
-        from_secret: [ maven_servers ]
-    profiles:
-      - id: artifactory
-        repositories:
-          - id: artifactory
-            name: callisto-jparest
-            url: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
-            layout: default
-    active_profiles:
-      - artifactory
+- name: authenticate
+  image: robertstettner/drone-mvn-auth:latest
+  settings:
+    servers:
+      from_secret: [ maven_servers ]
+  profiles:
+    - id: artifactory
+      repositories:
+        - id: artifactory
+          name: callisto-jparest
+          url: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
+          layout: default
+  active_profiles:
+    - artifactory
 
 
-    deploy:
-      image: maven:3.8-openjdk-17
-      commands:
-        - mvn clean deploy -gs settings.xml
+- name: deploy
+  image: maven:3.8-openjdk-17
+  commands:
+    - mvn clean deploy -gs settings.xml
+
 
 - name: sonar
   image: maven:3.8-openjdk-17
