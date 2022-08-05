@@ -10,8 +10,8 @@ platform:
 trigger:
   event:
     include:
-    - push
-    - pull_request
+      - push
+      - pull_request
 
 steps:
   - name: build
@@ -22,7 +22,10 @@ steps:
       commands:
         mvn clean package -DskipTests
         mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DuniqueVersion=false -DaltReleaseDeploymentRepository=artifactory::default::https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest -DskipTests
-
+      when:
+        event:
+          - push
+          - pull_request
   - name: test
     image: maven:3.8-openjdk-17
     commands:
@@ -31,7 +34,7 @@ steps:
   - name: sonar
     image: maven:3.8-openjdk-17
     depends_on:
-    - test
+      - test
     environment:
       SONAR_HOST:
         from_secret: sonar_host
@@ -43,7 +46,7 @@ steps:
     when:
       event:
         exclude:
-        - pull_request
+          - pull_request
 
 # - name: sonar pr decoration
 #   image: maven:3.8-openjdk-17
