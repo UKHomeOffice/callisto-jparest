@@ -27,22 +27,22 @@ steps:
         exclude:
           - pull_request
 
-- name: sonar
-  image: maven:3.8-openjdk-17
-  depends_on:
-  - publish
-  environment:
-    SONAR_HOST:
-      from_secret: sonar_host
-    SONAR_TOKEN:
-      from_secret: sonar_token
-  commands:
-  - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
-  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -DprojectKeySuffix=$${projectSuffix}
-  when:
-    event:
-      exclude:
-      - pull_request
+  - name: sonar
+    image: maven:3.8-openjdk-17
+    depends_on:
+      - test
+    environment:
+      SONAR_HOST:
+        from_secret: sonar_host
+      SONAR_TOKEN:
+        from_secret: sonar_token
+    commands:
+    - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
+    - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -DprojectKeySuffix=$${projectSuffix}
+    when:
+      event:
+        exclude:
+          - pull_request
 
 # - name: sonar pr decoration
 #   image: maven:3.8-openjdk-17
