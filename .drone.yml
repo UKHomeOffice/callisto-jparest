@@ -14,12 +14,7 @@ trigger:
     - pull_request
 
 steps:
-- name: test
-  image: maven:3.8-openjdk-17
-  commands:
-  - mvn clean install
-
-- name: build
+  - name: build
     image: maven:3.8-openjdk-17
     environment:
       ARTIFACTORY_TOKEN:
@@ -28,22 +23,27 @@ steps:
         mvn clean package -DskipTests
         mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DuniqueVersion=false -DaltReleaseDeploymentRepository=artifactory::default::https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest -DskipTests
 
-- name: sonar
-  image: maven:3.8-openjdk-17
-  depends_on:
-  - test
-  environment:
-    SONAR_HOST:
-      from_secret: sonar_host
-    SONAR_TOKEN:
-      from_secret: sonar_token
-  commands:
-  - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
-  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -DprojectKeySuffix=$${projectSuffix}
-  when:
-    event:
-      exclude:
-      - pull_request
+  - name: test
+    image: maven:3.8-openjdk-17
+    commands:
+      - mvn clean install
+
+  - name: sonar
+    image: maven:3.8-openjdk-17
+    depends_on:
+    - test
+    environment:
+      SONAR_HOST:
+        from_secret: sonar_host
+      SONAR_TOKEN:
+        from_secret: sonar_token
+    commands:
+    - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
+    - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -DprojectKeySuffix=$${projectSuffix}
+    when:
+      event:
+        exclude:
+        - pull_request
 
 # - name: sonar pr decoration
 #   image: maven:3.8-openjdk-17
