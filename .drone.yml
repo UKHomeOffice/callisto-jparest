@@ -51,8 +51,6 @@ steps:
         exclude:
           - pull_request
 
-
-
 # - name: sonar pr decoration
 #   image: maven:3.8-openjdk-17
 #   depends_on:
