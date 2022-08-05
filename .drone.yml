@@ -10,14 +10,18 @@ platform:
 trigger:
   event:
     include:
-      - push
-      - pull_request
+    - push
+    - pull_request
 
 steps:
   - name: build
     image: maven:3.8-openjdk-17
     environment:
-
+        ARTIFCATORY_USER:
+          from_secret: actifactory_user
+        ARTIFACTORY_TOKEN:
+          from_secret: actifactory_token
+    
     when:
       branch:
         - callisto
@@ -29,7 +33,7 @@ steps:
           image: maven:3.8-openjdk-17
           commands:
             - mvn clean install
-          
+
   - name: test
     image: maven:3.8-openjdk-17
     commands:
