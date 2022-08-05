@@ -17,10 +17,10 @@ steps:
   - name: build
     image: maven:3.8-openjdk-17
     environment:
-        ARTIFCATORY_USER:
-          from_secret: actifactory_user
-        ARTIFACTORY_TOKEN:
-          from_secret: actifactory_token
+      ARTIFCATORY_USER:
+        from_secret: actifactory_user
+      ARTIFACTORY_TOKEN:
+        from_secret: actifactory_token
       commands:
         mvn clean package -DskipTests
         mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DuniqueVersion=false -DaltReleaseDeploymentRepository=artifactory::default::https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest -DskipTests
@@ -50,6 +50,8 @@ steps:
       event:
         exclude:
           - pull_request
+
+
 
 # - name: sonar pr decoration
 #   image: maven:3.8-openjdk-17
