@@ -43,9 +43,9 @@ steps:
   environment:
     ARTIFACTORY_TOKEN:
       from_secret: artifactory_token
-    commands:
-    - mvn clean install
-    - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DuniqueVersion=false -DaltReleaseDeploymentRepository=artifactory::default::https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest -DskipTests
+  commands:
+  - mvn clean install
+  - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DuniqueVersion=false -DaltReleaseDeploymentRepository=artifactory::default::https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest -DskipTests
     when: 
       event:
         exclude:
