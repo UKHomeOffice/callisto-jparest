@@ -3,9 +3,15 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <servers>
         <server>
-            <username>${ARTIFACTORY_USERNAME}</username>
-            <password>${ARTIFACTORY_TOKEN}</password>
             <id>artifactory</id>
+            <configuration>
+                <httpHeaders>
+                    <property>
+                        <name>Authorization</name>
+                        <value>Bearer ${ARTIFACTORY_TOKEN}</value>
+                    </property>
+                </httpHeaders>
+            </configuration>
         </server>
     </servers>
 </settings>
