@@ -17,8 +17,6 @@ steps:
   - name: build
     image: maven:3.8-openjdk-17
     environment:
-      ARTIFCATORY_USER:
-        from_secret: artifactory_user
       ARTIFACTORY_TOKEN:
         from_secret: artifactory_token
       commands:
@@ -28,11 +26,6 @@ steps:
         event:
           - push
           - pull_request
-
-  - name: test
-    image: maven:3.8-openjdk-17
-    commands:
-      - mvn clean install
 
   - name: sonar
     image: maven:3.8-openjdk-17
