@@ -26,6 +26,32 @@
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>callisto-jparest</id>
+            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>callisto-jparest</id>
+            <name>Callisto Jparest Repo</name>
+            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
+        </repository>
+        <snapshotRepository>
+            <id>callisto-jparest</id>
+            <name>Callisto Jparest Repo</name>
+            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>

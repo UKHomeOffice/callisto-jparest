@@ -14,32 +14,6 @@
     <artifactId>jparest</artifactId>
     <version>${project.version}</version>
 
-    <repositories>
-        <repository>
-            <id>callisto-jparest</id>
-            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <distributionManagement>
-        <repository>
-            <id>callisto-jparest</id>
-            <name>Callisto Jparest Repo</name>
-            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
-        </repository>
-        <snapshotRepository>
-            <id>callisto-jparest</id>
-            <name>Callisto Jparest Repo</name>
-            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
