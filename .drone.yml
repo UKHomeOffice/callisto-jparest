@@ -46,9 +46,29 @@ steps:
   commands:
   - mvn clean install
   - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
+  - git tag $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+  - git push origin $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
   when:
     branch:
     - main
+    event:
+      exclude:
+        - pull_request
+
+- name: snapshot
+  image: maven:3.8-openjdk-17
+  depends_on:
+  - sonar
+  environment:
+    ARTIFACTORY_TOKEN:
+      from_secret: artifactory_token
+  commands:
+    - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && snapshotSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
+    - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DsnapshotSuffix=-$${snapshotSuffix}-SNAPSHOT -DskipTests
+  when:
+    branch:
+      exclude:
+        - main
     event:
       exclude:
         - pull_request
