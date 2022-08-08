@@ -10,7 +10,8 @@
     <packaging>pom</packaging>
 
     <properties>
-        <project.version>0.0.1</project.version>
+        <project.version>0.0.1${qualifier}-SNAPSHOT</project.version>
+        <qualifier>EAHW2109</qualifier>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
