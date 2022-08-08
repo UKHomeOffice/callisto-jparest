@@ -11,7 +11,6 @@ trigger:
   event:
     include:
     - push
-    - pull_request
 
 steps:
 - name: test
@@ -31,10 +30,6 @@ steps:
   commands:
   - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
   - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -DprojectKeySuffix=$${projectSuffix}
-  when:
-    event:
-      exclude:
-      - pull_request
 
 - name: publish
   image: maven:3.8-openjdk-17
@@ -45,11 +40,9 @@ steps:
       from_secret: artifactory_token
   commands:
   - mvn clean install
-  - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DuniqueVersion=false -DaltReleaseDeploymentRepository=artifactory::default::https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest -DskipTests
-  when: 
-    event:
-     exclude:
-     - pull_request
+  - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
+  when:
+    branch: main
 
 # - name: sonar pr decoration
 #   image: maven:3.8-openjdk-17
