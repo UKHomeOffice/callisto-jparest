@@ -5,11 +5,12 @@ on:
 #      - main
 jobs:
   tag_repo:
-    name: Get runner id and tag the current code
+    name: Tag the Current Code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: tag and push current repo code
+      - name: Tag and Push Current Repo Code
         run: |
-          git tag 0.0.0
-          git push origin 0.0.0
+          VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
+          git tag $VERSION
+          git push origin $VERSION
