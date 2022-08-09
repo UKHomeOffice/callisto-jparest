@@ -9,11 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set version environment variable
-        run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
-
+      - name: Set Version Variable
+        id: project
+        run: echo ::set-output name=version::$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
       - uses: actions/checkout@v2
       - name: Tag and Push Current Repo Code
         run: |
-          git tag ${{ env.version }}
-          git push origin ${{ env.version }}
+          git tag ${{ steps.project.version.outputs.version }}
+          git push origin ${{ steps.project.version.outputs.version }}
