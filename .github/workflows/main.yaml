@@ -11,5 +11,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: tag and push current repo code
         run: |
-          git tag $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          git push origin $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          git tag 0.0.0
+          git push origin 0.0.0
