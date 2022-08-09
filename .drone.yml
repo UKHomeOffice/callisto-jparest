@@ -47,7 +47,7 @@ steps:
   - mvn clean install
   - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
   - git tag $${DRONE_TAG}
-  - git push origin $${DRONE_TAG} $${DRONE_GIT_SSH_URL}
+  - git push $${DRONE_GIT_SSH_URL}
 
 #  when:
 #    branch:
