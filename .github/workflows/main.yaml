@@ -1,0 +1,15 @@
+name: auto_tag
+on:
+  push:
+#    branches:
+#      - main
+jobs:
+  tag_repo:
+    name: Get runner id and tag the current code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: tag and push current repo code
+        run: |
+          git tag $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          git push origin $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
