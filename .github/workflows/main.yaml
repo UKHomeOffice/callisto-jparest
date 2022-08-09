@@ -15,5 +15,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: Tag and Push Current Repo Code
         run: |
-          git tag ${{ steps.project.version.outputs.version }}
-          git push origin ${{ steps.project.version.outputs.version }}
+          git tag ${{ steps.project.outputs.version }}
+          git push origin ${{ steps.project.outputs.version }}
