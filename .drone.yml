@@ -46,8 +46,8 @@ steps:
   commands:
   - mvn clean install
   - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
-  - git tag $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-  - git push $${DRONE_COMMIT_SHA}@github.com:UKHomeOffice/callisto-jparest.git
+  - git tag $${DRONE_TAG}
+  - git push origin $${DRONE_TAG} $$ $${DRONE_GIT_SSH_URL}
 
 #  when:
 #    branch:
