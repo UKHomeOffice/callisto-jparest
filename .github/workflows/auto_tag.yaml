@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Set Version Variable
         id: project
-        run: echo '::set-output name=version::$(echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout))'
+        run: echo '::set-output name=version::echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)'
       - uses: actions/checkout@v2
       - name: Tag and Push Current Repo Code
         run: |
