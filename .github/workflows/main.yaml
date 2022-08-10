@@ -24,10 +24,10 @@ jobs:
            registry: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
            ARTIFACTORY_TOKEN: "${{ secrets.ARTIFACTORY_TOKEN }}"
 
-name: Snapshot
-on:
-  branches:
-    - '!main'
+# name: Snapshot
+# on:
+#   branches:
+#     - '!main'
 
 # jobs:
 #    name: Deploy Snapshot
