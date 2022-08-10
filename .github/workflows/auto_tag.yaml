@@ -13,10 +13,7 @@ jobs:
       - name: Set Version Variable
         id: project
         run: |
-          "VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
-          echo ${{ env.VERSION }}
-      - uses: actions/checkout@v2
-      - name: Tag and Push Current Repo Code
-        run: |
-          git tag ${{ env.VERSION }}
-          git push origin ${{ env.VERSION }}
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo $VERSION
+          git tag $VERSION
+          git tag
