@@ -6,10 +6,12 @@
 
     <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>parentpom</artifactId>
-    <version>0.0.0</version>
+    <version>${project.version}</version>
     <packaging>pom</packaging>
 
     <properties>
+        <project.version>0.0.0${snapshotSuffix}</project.version>
+        <snapshotSuffix></snapshotSuffix>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
@@ -18,11 +20,35 @@
         <!-- Sonar Properties -->
         <projectKeySuffix></projectKeySuffix>
         <sonar.projectKey>callisto-JpaRest${projectKeySuffix}</sonar.projectKey>
-        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey> 
+        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
         <sonar.projectName>callisto-JpaRest${projectKeySuffix}</sonar.projectName>
         <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>callisto-jparest</id>
+            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>callisto-jparest</id>
+            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
+        </repository>
+        <snapshotRepository>
+            <id>callisto-jparest</id>
+            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -32,7 +58,7 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-    
+
     <modules>
         <module>jparest</module>
         <module>demo</module>
