@@ -51,4 +51,26 @@ jobs:
 #            run: |
 #             "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && snapshotSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
 #             mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DsnapshotSuffix=$${snapshotSuffix}-SNAPSHOT -DskipTests
+name: auto_tag
+on:
+  push:
+#    branches:
+#      - main
+
+jobs:
+  tag_repo:
+    name: Tag the Current Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set Version Variable
+        id: project
+        run: echo ::set-output name=version::$(echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout))
+      - uses: actions/checkout@v2
+      - name: Tag and Push Current Repo Code
+        run: |
+          git tag ${{ steps.project.outputs.version }}
+          # git push origin ${{ steps.project.outputs.version }}
+          echo "The version is: ${{ steps.project.outputs.version }}"
+
 
