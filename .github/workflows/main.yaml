@@ -12,14 +12,16 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Set up JDK 17
-      - uses: actions/setup-java@v3
+        uses: actions/setup-java@v3
         with:
           java-version: 17
 
       - name: build with Maven
+        id: Maven
         run: mvn clean install
 
       - name: Publish to Artifactory
+        id: publish
         run: mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
         env:
           registry: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
