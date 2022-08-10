@@ -12,17 +12,17 @@ jobs:
     - uses: actions/setup-java@v3
 
     - name: Set up JDK 17
-        with:
-          java-version: 17
+      with:
+        java-version: 17
 
     - name: build with Maven
       run: mvn clean install
 
     - name: Publish to Artifactory
       run: mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
-        env:
-          registry: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
-          ARTIFACTORY_TOKEN: "${{ secrets.ARTIFACTORY_TOKEN }}"
+      env:
+        registry: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
+        ARTIFACTORY_TOKEN: "${{ secrets.ARTIFACTORY_TOKEN }}"
 
 # name: Snapshot
 # on:
