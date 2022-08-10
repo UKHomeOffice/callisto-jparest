@@ -13,7 +13,7 @@ jobs:
       - name: Set Version Variable
         id: project
         run: |
+          mvn clean install -DSkipTests
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo $VERSION
-          git tag $VERSION
-          git tag
+          echo "::set-output name=version::$VERSION"
+          echo ${{ steps.project.version }}
