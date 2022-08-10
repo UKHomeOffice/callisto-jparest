@@ -13,7 +13,7 @@ jobs:
       - name: Set Version Variable
         id: project
         run: |
-          echo '::set-output name=version::echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)'
+          echo "::set-output name=version::$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
           echo "The version is: ${{ steps.project.outputs.version }}"
       - uses: actions/checkout@v2
       - name: Tag and Push Current Repo Code
