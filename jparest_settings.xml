@@ -8,7 +8,7 @@
                 <httpHeaders>
                     <property>
                         <name>Authorization</name>
-                        <value>Bearer ${env.ARTIFACTORY_TOKEN}</value>
+                        <value>Bearer env.ARTIFACTORY_TOKEN</value>
                     </property>
                 </httpHeaders>
             </configuration>
