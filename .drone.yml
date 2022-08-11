@@ -65,9 +65,9 @@ steps:
     skip_verify: true
     ssh_key:
       from_secret: GITHUB_TOKEN
-
   commands:
-    - git tag $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+    - "version=$$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+    - git tag $${version}
     - git push origin --tags
 
 - name: snapshot
