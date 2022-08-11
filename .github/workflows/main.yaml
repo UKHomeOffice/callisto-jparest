@@ -15,12 +15,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          server-password: ARTIFACTORY_TOKEN
 
       - name: Publish to Artifactory
         id: publish
         env:
           registry: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
           ARTIFACTORY_TOKEN: "${{ secrets.ARTIFACTORY_TOKEN }}"
-        run: mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
+        run: mvn -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
 
 
