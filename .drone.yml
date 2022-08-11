@@ -54,18 +54,18 @@ steps:
       exlcude:
       - pull_request
 
-#- name: Get Version
-#  image: maven:3.8-openjdk-17
-#  environment:
-#    VERSION: $${version}
-#  commands:
-#    - "version=$$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
-#    - echo $${version}
-#    - echo "DRONE_SEMVER=${DRONE_TAG}"
-#    - echo "DRONE_SEMVER=${DRONE_SEMVER}"
+- name: Get Version
+  image: maven:3.8-openjdk-17
+  environment:
+    VERSION: $${version}
+  commands:
+    - "version=$$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+    - echo $${version}
 
 - name: Git Tag
   image: alpine/git
+  depends_on:
+    - Get Version
   environment:
     SSH_KEY:
       from_secret: github_token
@@ -76,8 +76,9 @@ steps:
     - chmod 0600 /root/.ssh/config
     - printf "[github]\n[user]\n user = git" > /root/.gitconfig
     - git remote add tag-origin  git@github.com:UKHomeOffice/callisto-jparest.git
-    - git tag ${DRONE_SEMVER}
-    - git push tag-origin ${DRONE_SEMVER}
+    - echo "Drone_Semver equals ${DRONE_SEMVER}"
+    - git tag "$VERSION"
+    - git push tag-origin "$VERSION"
 
 - name: snapshot
   image: maven:3.8-openjdk-17
