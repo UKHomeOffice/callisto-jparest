@@ -54,6 +54,20 @@ steps:
       exlcude:
       - pull_request
 
+- name: push-commit
+  image: appleboy/drone-git-push
+  depends_on:
+    - publish
+  settings:
+    branch: main
+    remote: git@github.com:UKHomeOffice/callisto-jparest.git
+    ssh_key:
+      from_secret: GITHUB_TOKEN
+    force: false
+  commands:
+    - git tag $(mvn help:evaluate -Dexpression=project.version -q DforceStdout)
+    - git push origin --tags
+
 - name: snapshot
   image: maven:3.8-openjdk-17
   depends_on:
