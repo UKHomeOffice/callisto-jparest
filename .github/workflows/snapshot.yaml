@@ -21,4 +21,4 @@ name: Snapshot
 #         - name: Publish to Artifactory
 #            run: |
 #             "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && snapshotSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
-#             mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DsnapshotSuffix=$${snapshotSuffix}-SNAPSHOT -DskipTests
+#             mvn -s ./settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DsnapshotSuffix=$${snapshotSuffix}-SNAPSHOT -DskipTests
