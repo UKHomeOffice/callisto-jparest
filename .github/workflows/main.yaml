@@ -19,12 +19,12 @@ jobs:
 
       - name: Publish to Artifactory
         uses: actions/setup-java@v1
-          with:
-            distribution: temurin
-            java-version: '17'
-            server-id: callisto-jparest
-            server-username: ARTIFACTORY_USER
-            server-password: ARTIFACTORY_TOKEN
+        with:
+          distribution: temurin
+          java-version: '17'
+          server-id: callisto-jparest
+          server-username: ARTIFACTORY_USER
+          server-password: ARTIFACTORY_TOKEN
         run: mvn -B package      
         id: publish
         env:
