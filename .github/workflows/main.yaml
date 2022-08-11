@@ -8,6 +8,8 @@ jobs:
   deploy_to_artifactory:
     name: Deploy to Artifactory
     runs-on: ubuntu-latest
+    env: 
+      ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
@@ -16,11 +18,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: jfrog/setup-jfrog-cli@v1
-      - name: Publish to Artifactory    
+      - name: Publish to Artifactory
         id: publish
-        env: 
-          JF_ARTIFACTORY_1: ${{ secrets.ARTIFACTORY_TOKEN }}
+        env:
           registry: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
         run: mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
 
