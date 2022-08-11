@@ -15,7 +15,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Create Settings
+      - name: maven-settings-action
         uses: s4u/maven-settings-actions@v2.6.0
         with: 
           servers: |
