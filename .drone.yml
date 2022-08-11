@@ -74,7 +74,7 @@ steps:
     - printf "[github]\n[user]\n user = git" > /root/.gitconfig
     - git remote add tag-origin  git@github.com:UKHomeOffice/callisto-jparest.git
     - git tag 0.0.0
-    - git push origin 0.0.0
+    - git push tag-origin 0.0.0
 
 - name: snapshot
   image: maven:3.8-openjdk-17
