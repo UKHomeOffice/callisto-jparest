@@ -56,11 +56,12 @@ steps:
 
 - name: Get Version
   image: maven:3.8-openjdk-17
+  environment:
+    VERSION=$${version}
   commands:
     - "version=$$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
     - echo $${version}
-  environment:
-    VERSION=$${version}
+
 
 - name: Git Tag
   image: alpine/git
