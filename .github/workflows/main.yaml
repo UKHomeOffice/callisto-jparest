@@ -9,26 +9,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up JDK 17
+      - name: Setup Maven
         uses: actions/setup-java@v3
         with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Publish to Artifactory
-        uses: actions/setup-java@v1
-        with:
-          distribution: temurin
+          distribution: 'adopt'
           java-version: '17'
           server-id: callisto-jparest
           server-username: ARTIFACTORY_USER
           server-password: ARTIFACTORY_TOKEN
       - name: Build with Maven
-        run: mvn -B package      
-        id: publish
+        run: mvn --batch-mode deploy
         env:
           ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-        
-
-
