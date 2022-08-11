@@ -16,9 +16,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - uses: jfrog/setup-jfrog-cli@v1
       - name: Publish to Artifactory    
         id: publish
-      - uses: jfrog/setup-jfrog-cli@v1
         env: 
           JF_ARTIFACTORY_1: ${{ secrets.ARTIFACTORY_TOKEN }}
           registry: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
