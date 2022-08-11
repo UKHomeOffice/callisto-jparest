@@ -15,16 +15,8 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Publish to Artifactory
-        uses: actions/setup-java@v1
-        with:
-          distribution: temurin
-          java-version: '17'
-          server-id: callisto-jparest
-          server-username: ARTIFACTORY_USER
-          server-password: ARTIFACTORY_TOKEN
       - name: Build with Maven
-        run: mvn -B package      
+        run:  mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DsnapshotSuffix=$${snapshotSuffix}-SNAPSHOT -DskipTests  
         id: publish
         env:
           ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
