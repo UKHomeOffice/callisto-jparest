@@ -1,8 +1,6 @@
 name: Publish
 on:
   push:
-    branches:
-      - dev/eahw-2109/publish-jparest-github-actions
 
 jobs:
   deploy_to_artifactory:
