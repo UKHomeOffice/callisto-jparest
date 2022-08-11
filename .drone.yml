@@ -56,16 +56,18 @@ steps:
 
 - name: push-commit
   image: appleboy/drone-git-push
-  depends_on:
-    - publish
   settings:
     branch: main
+    remote_name: origin
     remote: git@github.com:UKHomeOffice/callisto-jparest.git
+    force: false
+    commit: true
+    skip_verify: true
     ssh_key:
       from_secret: GITHUB_TOKEN
-    force: false
+
   commands:
-    - git tag $(mvn help:evaluate -Dexpression=project.version -q DforceStdout)
+    - git tag $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
     - git push origin --tags
 
 - name: snapshot
