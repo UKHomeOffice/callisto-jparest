@@ -58,6 +58,7 @@ steps:
   image: maven:3.8-openjdk-17
   commands:
     - "version=$$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+    - echo $${version}
 - name: Git Tag
   image: alpine/git
   depends_on:
@@ -72,8 +73,8 @@ steps:
     - chmod 0600 /root/.ssh/config
     - printf "[github]\n[user]\n user = git" > /root/.gitconfig
     - git remote add tag-origin  git@github.com:UKHomeOffice/callisto-jparest.git
-    - git tag $${version}
-    - git push tag-origin $${version}
+    - git tag 0.0.0
+    - git push origin 0.0.0
 
 - name: snapshot
   image: maven:3.8-openjdk-17
