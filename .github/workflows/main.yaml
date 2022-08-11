@@ -26,7 +26,7 @@ jobs:
       - name: Build with Maven
         run: |
           mvn -B package
-          mvn -s ./home/runner/.m2/settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DsnapshotSuffix=$${snapshotSuffix}-SNAPSHOT -DskipTests      
+          mvn -s /home/runner/.m2/settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DsnapshotSuffix=$${snapshotSuffix}-SNAPSHOT -DskipTests      
         id: publish
         env:
           ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
