@@ -54,21 +54,24 @@ steps:
       exlcude:
       - pull_request
 
-- name: push-commit
-  image: appleboy/drone-git-push
-  settings:
-    branch: main
-    remote_name: origin
-    remote: git@github.com:UKHomeOffice/callisto-jparest.git
-    force: false
-    commit: true
-    skip_verify: true
-    ssh_key:
-      from_secret: GITHUB_TOKEN
+- name: Get Version
+  image: maven:3.8-openjdk-17
   commands:
     - "version=$$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+- name: Git Tag
+  image: alpine/git
+  environmet:
+    SSH_KEY:
+      from_secret: GITHUB_TOKEN
+  commands:
+    - mkdir /root/.ssh/ && echo "$SSH_KEY" > /root/.ssh/id_rsa && chmod 0600 /root/.ssh/id_rsa
+    - ssh-keyscan github.com >> /root/.ssh/known_hosts && chmod 600 /root/.ssh/known_hosts
+    - printf  "Host github.com\n   Hostname github.com\n   IdentityFile /root/.ssh/id_rsa\n" > /root/.ssh/config
+    - chmod 0600 /root/.ssh/config
+    - printf "[github]\n[user]\n user = git" > /root/.gitconfig
+    - git remote add tag-origin  git@github.com:UKHomeOffice/callisto-jparest.git
     - git tag $${version}
-    - git push origin --tags
+    - git push tag-origin $${version}
 
 - name: snapshot
   image: maven:3.8-openjdk-17
