@@ -16,15 +16,11 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Build with Maven
-        id: Maven
-        run: mvn --batch-mode package
-
       - name: Publish to Artifactory
         id: publish
-        run: mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
         env:
           registry: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
           ARTIFACTORY_TOKEN: "${{ secrets.ARTIFACTORY_TOKEN }}"
+        run: mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
 
 
