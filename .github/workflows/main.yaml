@@ -1,16 +1,31 @@
-name: auto_tag
+name: Publish
 on:
   push:
-#    branches:
-#      - main
+    branches:
+      - dev/eahw-2109/publish-jparest
+
 jobs:
-  tag_repo:
-    name: Tag the Current Code
+  deploy_to_artifactory:
+    name: Deploy to Artifactory
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Tag and Push Current Repo Code
-        run: |
-          VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
-          git tag $VERSION
-          git push origin $VERSION
+      - uses: actions/checkout@v3
+      - name: Set up Maven Repository
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '17'
+          server-id: callisto-jparest
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      - name: Build with Maven
+        id: Maven
+        run: mvn --batch-mode package
+
+      - name: Publish to Artifactory
+        id: publish
+        run: mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
+        env:
+          MAVEN_USERNAME: "${{ secrets.artifactory_user }}"
+          MAVEN_PASSWORD: "${{ secrets.artifactory_token }}"
