@@ -16,11 +16,12 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Publish to Artifactory
+      - name: Publish to Artifactory    
         id: publish
-        env:
+      - uses: jfrog/setup-jfrog-cli@v1
+        env: 
+          JF_ARTIFACTORY_1: ${{ secrets.ARTIFACTORY_TOKEN }}
           registry: https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest
-          ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
         run: mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
 
 
