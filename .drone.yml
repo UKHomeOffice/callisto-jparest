@@ -76,7 +76,6 @@ steps:
     - chmod 0600 /root/.ssh/config
     - printf "[github]\n[user]\n user = git" > /root/.gitconfig
     - git remote add tag-origin  git@github.com:UKHomeOffice/callisto-jparest.git
-    - "version=$$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
     - echo "Drone_Semver equals $DRONE_SEMVER"
     - echo $${version}}
     - git tag "$VERSION"
