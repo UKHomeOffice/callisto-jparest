@@ -4,8 +4,14 @@
     <servers>
         <server>
             <id>callisto-jparest</id>
-            <username>callisto-jparest</username>
-            <password>env.ARTIFACTORY_TOKEN</password>
+            <configuration>
+                <httpHeaders>
+                    <property>
+                        <name>Authorization</name>
+                        <value>Bearer ${env.ARTIFACTORY_TOKEN}</value>
+                    </property>
+                </httpHeaders>
+            </configuration>
         </server>
     </servers>
 </settings>
