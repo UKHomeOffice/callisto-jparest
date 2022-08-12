@@ -28,7 +28,7 @@
 
     <distributionManagement>
         <repository>
-            <id>callisto-jparest</id>
+            <id>github</id>
             <url>https://maven.pkg.github.com/UKHomeOffice/callisto-jparest</url>
         </repository>
     </distributionManagement>
