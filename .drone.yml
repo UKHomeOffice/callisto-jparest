@@ -1,109 +1,109 @@
----
-kind: pipeline
-type: kubernetes
-name: jparest
+# ---
+# kind: pipeline
+# type: kubernetes
+# name: jparest
 
-platform:
-  os: linux
-  arch: amd64
+# platform:
+#   os: linux
+#   arch: amd64
 
-trigger:
-  event:
-    include:
-    - push
-    - pull_request
+# trigger:
+#   event:
+#     include:
+#     - push
+#     - pull_request
 
-steps:
-- name: test
-  image: maven:3.8-openjdk-17
-  commands:
-  - mvn clean install
+# steps:
+# - name: test
+#   image: maven:3.8-openjdk-17
+#   commands:
+#   - mvn clean install
 
-- name: sonar
-  image: maven:3.8-openjdk-17
-  depends_on:
-  - test
-  environment:
-    SONAR_HOST:
-      from_secret: sonar_host
-    SONAR_TOKEN:
-      from_secret: sonar_token
-  commands:
-  - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
-  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -DprojectKeySuffix=$${projectSuffix}
-  when:
-    event:
-      exclude:
-      - pull_request
-
-# - name: sonar pr decoration
+# - name: sonar
 #   image: maven:3.8-openjdk-17
 #   depends_on:
-#   - sonar
+#   - test
 #   environment:
 #     SONAR_HOST:
 #       from_secret: sonar_host
 #     SONAR_TOKEN:
 #       from_secret: sonar_token
 #   commands:
-#   - echo this is where I run the pull request decoration
+#   - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
+#   - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -DprojectKeySuffix=$${projectSuffix}
 #   when:
 #     event:
-#       include:
+#       exclude:
 #       - pull_request
 
----
-kind: pipeline
-type: kubernetes
-name: sonar housekeeping
+# # - name: sonar pr decoration
+# #   image: maven:3.8-openjdk-17
+# #   depends_on:
+# #   - sonar
+# #   environment:
+# #     SONAR_HOST:
+# #       from_secret: sonar_host
+# #     SONAR_TOKEN:
+# #       from_secret: sonar_token
+# #   commands:
+# #   - echo this is where I run the pull request decoration
+# #   when:
+# #     event:
+# #       include:
+# #       - pull_request
 
-trigger:
-  event:
-  - cron
-  cron:
-    include:
-    - nightly
+# ---
+# kind: pipeline
+# type: kubernetes
+# name: sonar housekeeping
 
-steps:
-- name: SonarQube housekeeping
-  image: quay.io/ukhomeofficedigital/cicd-actions-sonarqube-housekeeping:v1
-  settings:
-    sonarqube_host: https://sonarqube.digital.homeoffice.gov.uk/
-    sonarqube_token:
-      from_secret: sonar_token
-    sonarqube_project_prefix: 'callisto-jparest'
-    jira_project_key: 'eahw'
+# trigger:
+#   event:
+#   - cron
+#   cron:
+#     include:
+#     - nightly
 
----
-kind: pipeline
-type: kubernetes
-name: build notifications
+# steps:
+# - name: SonarQube housekeeping
+#   image: quay.io/ukhomeofficedigital/cicd-actions-sonarqube-housekeeping:v1
+#   settings:
+#     sonarqube_host: https://sonarqube.digital.homeoffice.gov.uk/
+#     sonarqube_token:
+#       from_secret: sonar_token
+#     sonarqube_project_prefix: 'callisto-jparest'
+#     jira_project_key: 'eahw'
 
-trigger:
-  status:
-    - success
-    - failure
-  event:
-    - push
+# ---
+# kind: pipeline
+# type: kubernetes
+# name: build notifications
 
-depends_on:
-  - jparest
+# trigger:
+#   status:
+#     - success
+#     - failure
+#   event:
+#     - push
 
-steps:
-  - name: slack
-    image: plugins/slack
-    settings:
-      webhook:
-        from_secret: SLACK_WEBHOOK_URL
-      channel: callisto-tech-notifications
-      username: Drone
-      template: |
-        {{#success build.status}}
-          Build #{{ build.number }} succeeded! :tada:
-        {{else}}
-          Build #{{ build.number }} failed :alert:
-        {{/success}}
-        Commit: <${DRONE_REPO_LINK}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}> - {{{ trim build.message }}}
-        Repo: {{ repo.name }}
-        Branch: <${DRONE_REPO_LINK}/commits/{{ build.branch }}|{{ build.branch }}>
-        Author: {{ build.author }}
+# depends_on:
+#   - jparest
+
+# steps:
+#   - name: slack
+#     image: plugins/slack
+#     settings:
+#       webhook:
+#         from_secret: SLACK_WEBHOOK_URL
+#       channel: callisto-tech-notifications
+#       username: Drone
+#       template: |
+#         {{#success build.status}}
+#           Build #{{ build.number }} succeeded! :tada:
+#         {{else}}
+#           Build #{{ build.number }} failed :alert:
+#         {{/success}}
+#         Commit: <${DRONE_REPO_LINK}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}> - {{{ trim build.message }}}
+#         Repo: {{ repo.name }}
+#         Branch: <${DRONE_REPO_LINK}/commits/{{ build.branch }}|{{ build.branch }}>
+#         Author: {{ build.author }}

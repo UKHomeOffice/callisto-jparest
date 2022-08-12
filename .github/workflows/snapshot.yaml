@@ -1,4 +1,4 @@
-name: Snapshot
+# name: Snapshot
 # on:
 #   branches:
 #     - '!main'
