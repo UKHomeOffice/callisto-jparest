@@ -5,14 +5,14 @@
     <parent>
         <groupId>uk.gov.homeoffice.digital.sas</groupId>
         <artifactId>parentpom</artifactId>
-        <version>${project.version}</version>
+        <version>0.0.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>jparest</artifactId>
-    <version>${project.version}</version>
+    <version>0.0.0</version>
 
     <dependencyManagement>
         <dependencies>
