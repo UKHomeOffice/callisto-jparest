@@ -11,7 +11,6 @@ trigger:
   event:
     include:
     - push
-    - pull_request
 
 steps:
 - name: test
@@ -31,11 +30,6 @@ steps:
   commands:
   - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
   - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -DprojectKeySuffix=$${projectSuffix}
-  when:
-    event:
-      exclude:
-      - pull_request
-
 
 - name: publish
   image: maven:3.8-openjdk-17
@@ -48,20 +42,22 @@ steps:
   - mvn clean install
   - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
   when:
-    branch:
-    - main
-    event:
-      exlcude:
-      - pull_request
+    branch: main
+    event: push
 
 - name: Git Tag
   image: jlrigau/maven-git
+  depends_on:
+    - publish
   environment:
     SSH_KEY:
       from_secret: github_token
   commands:
     - chmod 777 git_tag.sh
     - ./git_tag.sh
+  when:
+    branch: main
+    event: push
 
 - name: snapshot
   image: maven:3.8-openjdk-17
@@ -75,11 +71,7 @@ steps:
     - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DsnapshotSuffix=$${snapshotSuffix}-SNAPSHOT -DskipTests
   when:
     branch:
-      exclude:
-      - main
-    event:
-      exclude:
-      - pull request
+      exclude: main
 
 # - name: sonar pr decoration
 #   image: maven:3.8-openjdk-17
