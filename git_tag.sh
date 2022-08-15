@@ -4,7 +4,5 @@ printf  "Host github.com\n   Hostname github.com\n   IdentityFile /root/.ssh/id_
 chmod 0600 /root/.ssh/config
 git remote add tag-origin  git@github.com:UKHomeOffice/callisto-jparest.git
 version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-echo $version
 git tag $version
-git tag
 git push tag-origin $version
