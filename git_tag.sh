@@ -3,10 +3,8 @@ ssh-keyscan github.com >> /root/.ssh/known_hosts && chmod 600 /root/.ssh/known_h
 printf  "Host github.com\n   Hostname github.com\n   IdentityFile /root/.ssh/id_rsa\n" > /root/.ssh/config
 chmod 0600 /root/.ssh/config
 git remote add tag-origin  git@github.com:UKHomeOffice/callisto-jparest.git
-
-version=$(head -n 1 VERSION)
+version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 echo $version
-
 git tag $version
 git tag
 git push tag-origin $version
