@@ -60,6 +60,7 @@ steps:
     SSH_KEY:
       from_secret: github_token
   commands:
+    - chmod 777 git_tag.sh
     - ./git_tag.sh
 
 - name: snapshot
