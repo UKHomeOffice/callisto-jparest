@@ -13,6 +13,9 @@ trigger:
     - push
     - pull_request
 
+environment:
+  VERSION: blank
+
 steps:
 - name: test
   image: maven:3.8-openjdk-17
@@ -56,11 +59,10 @@ steps:
 
 - name: Get Version
   image: maven:3.8-openjdk-17
-  environment:
-    VERSION: $${version}
-  commands:
-    - "version=$$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
-    - echo $${version}
+  commands
+    - echo $VERSION
+    - export VERSION=$$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+    - echo $VERSION
 
 - name: Git Tag
   image: alpine/git
@@ -76,6 +78,7 @@ steps:
     - chmod 0600 /root/.ssh/config
     - printf "[github]\n[user]\n user = git" > /root/.gitconfig
     - git remote add tag-origin  git@github.com:UKHomeOffice/callisto-jparest.git
+    - echo $VERSION
     - git tag "$VERSION"
     - git push tag-origin "$VERSION"
 
