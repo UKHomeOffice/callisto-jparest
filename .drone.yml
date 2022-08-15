@@ -56,8 +56,6 @@ steps:
 
 - name: Git Tag
   image: alpine/git
-  depends_on:
-    - Get Version
   environment:
     SSH_KEY:
       from_secret: github_token
