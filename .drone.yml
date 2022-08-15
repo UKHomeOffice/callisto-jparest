@@ -55,7 +55,7 @@ steps:
       - pull_request
 
 - name: Git Tag
-  image: alpine/git
+  image: jlrigau/maven-git
   environment:
     SSH_KEY:
       from_secret: github_token
@@ -65,7 +65,7 @@ steps:
     - printf  "Host github.com\n   Hostname github.com\n   IdentityFile /root/.ssh/id_rsa\n" > /root/.ssh/config
     - chmod 0600 /root/.ssh/config
     - git remote add tag-origin  git@github.com:UKHomeOffice/callisto-jparest.git
-    - version=$(head -n 1 VERSION)
+    - version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
     - echo $version
     - git tag $version
     - git tag
