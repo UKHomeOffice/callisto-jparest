@@ -65,7 +65,7 @@ steps:
     - ./git_tag.sh
   when:
     branch: main
-  event:
+    event:
     exlcude:
     - pull_request
 
