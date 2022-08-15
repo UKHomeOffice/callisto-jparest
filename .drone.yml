@@ -34,8 +34,7 @@ steps:
   when:
     event:
       exlcude:
-        - pull_request
-
+      - pull_request
 
 - name: publish
   image: maven:3.8-openjdk-17
@@ -66,8 +65,8 @@ steps:
   when:
     branch: main
     event:
-    exlcude:
-    - pull_request
+      exlcude:
+      - pull_request
 
 - name: snapshot
   image: maven:3.8-openjdk-17
