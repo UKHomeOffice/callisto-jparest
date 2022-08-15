@@ -59,7 +59,7 @@ steps:
 
 - name: Get Version
   image: maven:3.8-openjdk-17
-  commands
+  commands:
     - echo $VERSION
     - export VERSION=$$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
     - echo $VERSION
