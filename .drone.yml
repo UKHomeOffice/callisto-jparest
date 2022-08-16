@@ -33,7 +33,7 @@ steps:
   - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -DprojectKeySuffix=$${projectSuffix}
   when:
     event:
-      exlcude:
+      exclude:
       - pull_request
 
 - name: publish
