@@ -38,8 +38,8 @@ steps:
 
 - name: publish
   image: maven:3.8-openjdk-17
-#  depends_on:
-#    - sonar
+  depends_on:
+    - sonar
   environment:
     ARTIFACTORY_TOKEN:
         from_secret: artifactory_token
@@ -47,12 +47,12 @@ steps:
   - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
   when:
     branch: main
-#    event:
-#      exlcude:
-#      - pull_request
+    event:
+      exlcude:
+      - pull_request
 
 - name: Git Tag
-  image: jlrigau/maven-git
+  image: alpine/git-tag
   depends_on:
     - publish
   environment:
