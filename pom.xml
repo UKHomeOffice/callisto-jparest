@@ -6,7 +6,7 @@
 
     <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>parentpom</artifactId>
-    <version>${project.version}</version>
+    <version>0.0.0</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -25,19 +25,7 @@
         <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     </properties>
-    <repositories>
-        <repository>
-            <id>callisto-jparest</id>
-            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
+    
     <distributionManagement>
         <repository>
             <id>callisto-jparest</id>
