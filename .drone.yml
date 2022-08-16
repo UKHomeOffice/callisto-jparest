@@ -48,9 +48,9 @@ steps:
   - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
   when:
     branch: main
-    event:
-      exlcude:
-      - pull_request
+#    event:
+#      exlcude:
+#      - pull_request
 
 - name: Git Tag
   image: jlrigau/maven-git
