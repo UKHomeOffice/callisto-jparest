@@ -52,7 +52,7 @@ steps:
       - pull_request
 
 - name: Git Tag
-  image: ubuntu-latest
+  image: ubuntu:latest
   depends_on:
     - publish
   environment:
