@@ -49,9 +49,9 @@ steps:
   - sed -i "/^version=/{s|.$|"=$versionExtract"|}" git_tag.sh
   when:
     branch: main
-#    event:
-#      exclude:
-#      - pull_request
+    event:
+      exclude:
+      - pull_request
 
 - name: Git Tag
   image: alpine/git
@@ -65,9 +65,9 @@ steps:
     - ./git_tag.sh
   when:
     branch: main
-#    event:
-#      exclude:
-#      - pull_request
+    event:
+      exclude:
+      - pull_request
 
 - name: snapshot
   image: maven:3.8-openjdk-17
