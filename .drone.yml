@@ -49,9 +49,9 @@ steps:
   - sed -i "/^version=/{s|.$|"=$versionExtract"|}" git_tag.sh
   when:
     branch: main
-    event:
-      exclude:
-      - pull_request
+#    event:
+#      exclude:
+#      - pull_request
 
 - name: Git Tag
   image: alpine/git
@@ -65,9 +65,9 @@ steps:
     - ./git_tag.sh
   when:
     branch: main
-    event:
-      exclude:
-      - pull_request
+#    event:
+#      exclude:
+#      - pull_request
 
 - name: snapshot
   image: maven:3.8-openjdk-17
@@ -78,8 +78,6 @@ steps:
       from_secret: artifactory_token
   commands:
     - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && snapshotSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
-    - versionExtract=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)$$snapshotSuffix-SNAPSHOT
-    - sed -i  "0,/<version>.*<\/version>/{s/<version>.*<\/version>/<version>$versionExtract<\/version>/}" pom.xml
     - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DsnapshotSuffix=$${snapshotSuffix}-SNAPSHOT -DskipTests
   when:
     branch:
