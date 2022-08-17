@@ -64,13 +64,15 @@ JPA Rest has a shell script which will automatically update the version number.
 
 Run the following command in the root directory.
 
-./updateVersion.sh {version-number}
-
+```bash
+  $ ./updateVersion.sh {version-number}
+```
 When pushing a branch jparest will automatically deploy a snapshot image to artifactory. The naming convention for this
 is as follows 
 
-{version-number}-{Jira-Reference}-SNAPSHOT
-
-## Merging into main
+```bash
+{Version-Number}-{Jira-Reference}-SNAPSHOT
+```
+## Merging into Main
 Once a PR is merged into the main branch the snapshot suffix will be deleted from the version.
 The assigned version number will be used to create a version release in artifactory and a Github tag for backup.
