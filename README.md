@@ -60,12 +60,10 @@ You also need JDK 17.
 ```
 
 ## Bumping Versions
-JPA Rest has a shell script which will automatically update the version number.
-
-Run the following command in the root directory.
+To update the parent pom version globally throughout the project run the following command.
 
 ```bash
-  $ ./updateVersion.sh {version-number}
+  $ mvn versions:set -DnewVersion={version} -f pom.xml
 ```
 When pushing a branch jparest will automatically deploy a snapshot image to artifactory. The naming convention for this
 is as follows 
