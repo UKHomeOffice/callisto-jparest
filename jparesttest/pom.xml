@@ -13,6 +13,7 @@
     <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>jparesttest</artifactId>
     <version>${project.version}</version>
+    <packaging>jar</packaging>
 
     <properties>
         <sonar.skip>true</sonar.skip>
