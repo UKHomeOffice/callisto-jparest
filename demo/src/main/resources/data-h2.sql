@@ -4,7 +4,9 @@ INSERT INTO profiles (id, tenant_id, bio, dob, first_release, phone_number, pref
 ('17e813a2-bb28-11ec-8422-0242ac120003', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My Bio for 3', '1975-12-29', '1979-01-01', '07879 899103', 'My preferences for 3'),
 ('1a7c7da4-bb29-11ec-8422-0242ac120004', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My Bio for 4', '1979-01-01', '1975-12-29', '07879 899104', 'My preferences for 4'),
 ('7a7c7da4-bb29-11ec-8422-00242ac12005', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My Bio for 5', '1972-01-03', '1979-01-01', '07879 899105', 'My preferences for 5'),
-('1a7c7da4-bb29-11ec-8422-0242ac120006', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My Bio for 6', '1973-12-31', '1972-01-03', '07879 899106', 'My preferences for 6');
+('1a7c7da4-bb29-11ec-8422-0242ac120006', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'My Bio for 6', '1973-12-31', '1972-01-03', '07879 899106', 'My preferences for 6'),
+('d63ea18b-52c3-4d61-9eb1-a822f88639d1', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'My Bio for 1', '1973-12-31', '1972-01-03', '07879 899106', 'My preferences for 1'),
+('d63ea18b-52c3-4d61-9eb1-a822f88639d2', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'My Bio for 2', '1973-12-31', '1972-01-03', '07879 899106', 'My preferences for 2');
 
 INSERT INTO artists (id, tenant_id, performance_name, profile_id) VALUES
 ('27e813a2-bb28-11ec-8422-0242ac120001', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Beautiful South', '17e813a2-bb28-11ec-8422-0242ac120001'),
@@ -12,12 +14,15 @@ INSERT INTO artists (id, tenant_id, performance_name, profile_id) VALUES
 ('27e813a2-bb28-11ec-8422-0242ac120003', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Pink', '17e813a2-bb28-11ec-8422-0242ac120003'),
 ('2a7c7da4-bb29-11ec-8422-0242ac120004', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Adele', '1a7c7da4-bb29-11ec-8422-0242ac120004'),
 ('2a7c7da4-bb29-11ec-8422-0242ac120005', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Beach Boys', '7a7c7da4-bb29-11ec-8422-00242ac12005'),
-('2a7c7da4-bb29-11ec-8422-0242ac120006', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Queen', '1a7c7da4-bb29-11ec-8422-0242ac120006');
+('2a7c7da4-bb29-11ec-8422-0242ac120006', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Queen', '1a7c7da4-bb29-11ec-8422-0242ac120006'),
+('dc27d5aa-4e7d-474e-98b6-ebf9aae9a471', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'Drake', 'd63ea18b-52c3-4d61-9eb1-a822f88639d1'),
+('dc27d5aa-4e7d-474e-98b6-ebf9aae9a472', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'Future', 'd63ea18b-52c3-4d61-9eb1-a822f88639d2');
 
 INSERT INTO concerts (id, tenant_id, concert_name) VALUES
 ('37e813a2-bb28-11ec-8422-0242ac120001', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Live Aid 2020'),
 ('3a7c7da4-bb29-11ec-8422-0242ac120002', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Live Aid 2021'),
-('37e813a2-bb28-11ec-8422-0242ac120003', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Live Aid 2020');
+('37e813a2-bb28-11ec-8422-0242ac120003', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Live Aid 2020'),
+('b3f9fd1b-ca94-4891-96d0-9898101b04e1', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'Summer Sixteen');
 
 INSERT INTO concert_artists (concert_id, artist_id) VALUES
 ('37e813a2-bb28-11ec-8422-0242ac120001', '27e813a2-bb28-11ec-8422-0242ac120002'),
@@ -25,7 +30,9 @@ INSERT INTO concert_artists (concert_id, artist_id) VALUES
 ('3a7c7da4-bb29-11ec-8422-0242ac120002', '27e813a2-bb28-11ec-8422-0242ac120003'),
 ('3a7c7da4-bb29-11ec-8422-0242ac120002', '2a7c7da4-bb29-11ec-8422-0242ac120004'),
 ('37e813a2-bb28-11ec-8422-0242ac120003', '2a7c7da4-bb29-11ec-8422-0242ac120005'),
-('37e813a2-bb28-11ec-8422-0242ac120003', '2a7c7da4-bb29-11ec-8422-0242ac120006');
+('37e813a2-bb28-11ec-8422-0242ac120003', '2a7c7da4-bb29-11ec-8422-0242ac120006'),
+('b3f9fd1b-ca94-4891-96d0-9898101b04e1', 'dc27d5aa-4e7d-474e-98b6-ebf9aae9a471'),
+('b3f9fd1b-ca94-4891-96d0-9898101b04e1', 'dc27d5aa-4e7d-474e-98b6-ebf9aae9a472');
 
 INSERT INTO records (id, tenant_id, record_name, artist_id) VALUES
 ('47e813a2-bb28-11ec-8422-0242ac120001', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Song for Whoever', '27e813a2-bb28-11ec-8422-0242ac120001'),
@@ -57,4 +64,6 @@ INSERT INTO records (id, tenant_id, record_name, artist_id) VALUES
 ('47e813a2-bb28-11ec-8422-0242ac120027', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Killer Queen', '27e813a2-bb28-11ec-8422-0242ac120003'),
 ('47e813a2-bb28-11ec-8422-0242ac120028', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Bicycle Race', '2a7c7da4-bb29-11ec-8422-0242ac120004'),
 ('47e813a2-bb28-11ec-8422-0242ac120029', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Fat Bottomed Girls', '2a7c7da4-bb29-11ec-8422-0242ac120005'),
-('47e813a2-bb28-11ec-8422-0242ac120030', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Crazy Little Thing Called Love', '2a7c7da4-bb29-11ec-8422-0242ac120006');
+('47e813a2-bb28-11ec-8422-0242ac120030', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'Crazy Little Thing Called Love', '2a7c7da4-bb29-11ec-8422-0242ac120006'),
+('0e54cb95-670f-4c02-b1a6-72c7b40f6e41', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'Passionfruit', 'dc27d5aa-4e7d-474e-98b6-ebf9aae9a471'),
+('0e54cb95-670f-4c02-b1a6-72c7b40f6e42', '4a711954-36ef-4ccf-ac57-a36fc66ea802', 'Life Is Good', 'dc27d5aa-4e7d-474e-98b6-ebf9aae9a472');

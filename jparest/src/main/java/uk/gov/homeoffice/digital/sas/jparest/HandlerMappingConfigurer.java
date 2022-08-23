@@ -39,7 +39,7 @@ import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_REL
  * and registers a {@link ResourceApiController} for them.
  */
 @Component
-public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
+public class HandlerMappingConfigurer {
 
     private static final Logger LOGGER = Logger.getLogger(HandlerMappingConfigurer.class.getName());
 
@@ -99,8 +99,8 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
             // Create a controller for the resource
             LOGGER.fine("Creating controller");
-            EntityUtils<?> entityUtils = new EntityUtils<>(resource, isBaseEntitySubclass);
-            ResourceApiController<?, ?> controller = new ResourceApiController<>(
+            EntityUtils<?, ?> entityUtils = new EntityUtils<>(resource, isBaseEntitySubclass);
+            ResourceApiController<?> controller = new ResourceApiController<>(
                     resource, entityManager,
                     transactionManager, entityUtils);
 
@@ -125,7 +125,7 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
     private void mapRestOperationsToController(Class<?> resource,
                                                String path,
-                                               ResourceApiController<?, ?> controller) throws NoSuchMethodException {
+                                               ResourceApiController<?> controller) throws NoSuchMethodException {
 
         LOGGER.fine("Registering common paths");
 
@@ -149,8 +149,8 @@ public class HandlerMappingConfigurer extends RequestMappingHandlerMapping {
 
     private void registerRelatedPaths(Class<? extends BaseEntity> resource,
                                       String path,
-                                      EntityUtils<? extends BaseEntity> entityUtils,
-                                      ResourceApiController<?, ?> controller) throws NoSuchMethodException {
+                                      EntityUtils<? extends BaseEntity, ?> entityUtils,
+                                      ResourceApiController<?> controller) throws NoSuchMethodException {
 
         for (String relation : entityUtils.getRelatedResources()) {
 

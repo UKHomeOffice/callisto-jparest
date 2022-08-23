@@ -29,7 +29,7 @@ CREATE TABLE dummy_EntityD
 
 CREATE TABLE dummy_EntityF
 (
-    id                  varchar(36) PRIMARY KEY,
+    id                  varchar(36),
     tenant_id           varchar(36) NOT NULL,
     dummy_entityC_id    varchar(36) NOT NULL REFERENCES dummy_EntityC (id)
 );

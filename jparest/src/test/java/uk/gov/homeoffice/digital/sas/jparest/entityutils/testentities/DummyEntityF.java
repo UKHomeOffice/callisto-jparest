@@ -10,6 +10,10 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
+/**
+ * A dummy entity used for a table without a primary key, helpful for testing unique scenarios
+ */
+
 @Resource(path = "dummy_EntityFs")
 @Entity(name = "dummy_EntityF")
 @NoArgsConstructor

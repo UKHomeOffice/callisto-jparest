@@ -15,7 +15,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,10 +23,10 @@ import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.utils.ValidatorUtils;
-import uk.gov.homeoffice.digital.sas.jparest.utils.WebDataBinderFactory;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
 import javax.persistence.EntityGraph;
@@ -45,7 +44,6 @@ import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -68,7 +66,7 @@ import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundE
  * Resources for ManyToMany relationships can also be queried.
  */
 @ResponseBody
-public class ResourceApiController<T extends BaseEntity, U> {
+public class ResourceApiController<T extends BaseEntity> {
 
     @Getter
     private Class<T> entityType;
@@ -76,22 +74,21 @@ public class ResourceApiController<T extends BaseEntity, U> {
     private PersistenceUnitUtil persistenceUnitUtil;
     private PlatformTransactionManager transactionManager;
     private JpaRepository<T, Serializable> repository;
-    private EntityUtils<T> entityUtils;
+    private EntityUtils<T, ?> entityUtils;
     private final ValidatorUtils validatorUtils = new ValidatorUtils();
 
-    private static WebDataBinder binder = WebDataBinderFactory.getWebDataBinder();
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
 
 
 
     @SuppressWarnings("unchecked")
     public ResourceApiController(Class<T> entityType, EntityManager entityManager,
-                                 PlatformTransactionManager transactionManager, EntityUtils<?> entityUtils) {
+                                 PlatformTransactionManager transactionManager, EntityUtils<?, ?> entityUtils) {
         this.entityType = entityType;
         this.entityManager = entityManager;
         this.transactionManager = transactionManager;
         this.repository = new SimpleJpaRepository<>(entityType, entityManager);
-        this.entityUtils = (EntityUtils<T>) entityUtils;
+        this.entityUtils = (EntityUtils<T, ?>) entityUtils;
         this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
     }
 
@@ -194,9 +191,8 @@ public class ResourceApiController<T extends BaseEntity, U> {
             query.where(builder.and(tenantPredicate, idPredicate));
 
             var updatedItems = this.entityManager.createQuery(query).executeUpdate();
-            if (updatedItems != 1) {
-                throw new EmptyResultDataAccessException(1);
-            }
+            if (updatedItems == 0)  throw new EmptyResultDataAccessException(1);
+            else if (updatedItems > 1) throw new UnexpectedQueryResultException(id);
 
             transactionManager.commit(transactionStatus);
         } catch (EmptyResultDataAccessException ex) {
@@ -244,8 +240,8 @@ public class ResourceApiController<T extends BaseEntity, U> {
         return new ApiResponse<>(Arrays.asList(orig));
     }
 
-    @SuppressWarnings("rawtypes")
-    public ApiResponse getRelated(@RequestParam UUID tenantId,
+    @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters
+    public ApiResponse<?> getRelated(@RequestParam UUID tenantId,
                                   @PathVariable UUID id,
                                   @PathVariable String relation,
                                   Pageable pageable,
@@ -288,6 +284,9 @@ public class ResourceApiController<T extends BaseEntity, U> {
                               @PathVariable String relation,
                               @PathVariable List<UUID> relatedIds) throws IllegalArgumentException {
 
+        var transactionDefinition = new DefaultTransactionDefinition();
+        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
+
         var originalEntity = getById(id, relation, tenantId);
 
         var relatedEntities = entityUtils.getRelatedEntities(originalEntity, relation);
@@ -307,8 +306,6 @@ public class ResourceApiController<T extends BaseEntity, U> {
             throw new ResourceNotFoundException(deletableRelatedResourcesMessage(relatedType, notDeletableRelatedIds));
         }
 
-        var transactionDefinition = new DefaultTransactionDefinition();
-        var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
         try {
             repository.saveAndFlush(originalEntity);
             transactionManager.commit(transactionStatus);
@@ -325,13 +322,13 @@ public class ResourceApiController<T extends BaseEntity, U> {
                            @PathVariable List<UUID> relatedIds) throws IllegalArgumentException {
 
 
-        var originalEntity = getById(id, relation, tenantId);
-        validateRelatedResourcesTenantIds(relation, relatedIds, tenantId);
-
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
 
-        Collection<Object> relatedEntities = entityUtils.getRelatedEntities(originalEntity, relation);
+        var originalEntity = getById(id, relation, tenantId);
+        validateRelatedResourcesTenantIds(relation, relatedIds, tenantId);
+
+        var relatedEntities = entityUtils.getRelatedEntities(originalEntity, relation);
         var relatedEntityIdToEntityMap = relatedEntities.stream()
                 .map(BaseEntity.class::cast)
                 .collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
@@ -401,7 +398,7 @@ public class ResourceApiController<T extends BaseEntity, U> {
         var builder = this.entityManager.getCriteriaBuilder();
         var query = builder.createQuery(Long.class);
         var relatedRoot = query.from(this.entityUtils.getRelatedType(relation));
-        var relatedIdPredicate = relatedRoot.get(this.entityUtils.ID_FIELD_NAME).in(relatedIds);
+        var relatedIdPredicate = relatedRoot.get(EntityUtils.ID_FIELD_NAME).in(relatedIds);
         var relatedTenantPredicate = builder.equal(relatedRoot.get(TENANT_ID.getParamName()), tenantId);
         var relatedSelect = query.select(builder.count(relatedRoot)).where(builder.and(relatedIdPredicate, relatedTenantPredicate));
         var tenantIdMatchesRelatedResources = this.entityManager.createQuery(relatedSelect).getSingleResult() == relatedIds.size();

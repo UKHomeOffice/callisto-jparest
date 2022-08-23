@@ -34,3 +34,7 @@ INSERT INTO dummy_EntityA_dummy_EntityB (dummy_EntityA, dummy_EntityB) VALUES
     ('b7e813a2-bb28-11ec-8422-0242ac110001', 'b7e813a2-bb28-11ec-8422-0242ac120001'),
     ('b7e813a2-bb28-11ec-8422-0242ac110001', 'b7e813a2-bb28-11ec-8422-0242ac120002'),
     ('b7e813a2-bb28-11ec-8422-0242ac110002', 'b7e813a2-bb28-11ec-8422-0242ac120002');
+
+INSERT INTO dummy_EntityF (id, tenant_id, dummy_entityC_id) VALUES
+    ('4424d0e2-e8f2-40b8-a564-f23d67e6f3a1', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'b7e813a2-bb28-11ec-8422-0242ac130001'),
+    ('4424d0e2-e8f2-40b8-a564-f23d67e6f3a1', 'b7e813a2-bb28-11ec-8422-0242ac120002', 'b7e813a2-bb28-11ec-8422-0242ac130001');

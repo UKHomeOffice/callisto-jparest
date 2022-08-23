@@ -86,7 +86,7 @@ class HandlerMappingConfigurerTest {
         for (var expected : expectedCalls) {
             Mockito.verify(requestMappingHandlerMapping, never()).registerMapping(
                     argThat((requestMappingInfo) -> requestMappingInfo.toString().equals(expected.get(0))),
-                    argThat((controller) -> ((ResourceApiController<?,?>) controller).getEntityType().equals(DummyEntityH.class)),
+                    argThat((controller) -> ((ResourceApiController<?>) controller).getEntityType().equals(DummyEntityH.class)),
                     argThat((method) -> method.getName().equals(expected.get(1))));
         }
 
@@ -125,7 +125,7 @@ class HandlerMappingConfigurerTest {
         for (var expected : expectedCalls) {
             Mockito.verify(requestMappingHandlerMapping).registerMapping(
                     argThat((a) -> a.toString().equals(expected.get(0))),
-                    argThat((b) -> ((ResourceApiController<?,?>) b).getEntityType().equals(clazz)),
+                    argThat((b) -> ((ResourceApiController<?>) b).getEntityType().equals(clazz)),
                     argThat((c) -> c.getName().equals(expected.get(1))));
         }
     }

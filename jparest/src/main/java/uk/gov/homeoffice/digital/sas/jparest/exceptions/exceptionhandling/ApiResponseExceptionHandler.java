@@ -12,6 +12,7 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolat
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 
 import javax.persistence.PersistenceException;
 import java.util.logging.Logger;
@@ -49,6 +50,11 @@ public class ApiResponseExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
         return createResponseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UnexpectedQueryResultException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnexpectedQueryResultException(UnexpectedQueryResultException ex) {
+        return createResponseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private static ResponseEntity<ApiErrorResponse> createResponseEntity(String message, HttpStatus httpStatus) {

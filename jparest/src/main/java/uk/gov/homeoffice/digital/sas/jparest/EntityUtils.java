@@ -29,7 +29,7 @@ import static java.util.Collections.emptyList;
  * i.e. it excludes {@link ManyToMany} with the
  * mappedBy property set.
  */
-public class EntityUtils<T extends BaseEntity> {
+public class EntityUtils<T extends BaseEntity, Y extends BaseEntity> {
 
     private static final Logger LOGGER = Logger.getLogger(EntityUtils.class.getName());
     public static final String ID_FIELD_NAME = "id";
@@ -60,12 +60,12 @@ public class EntityUtils<T extends BaseEntity> {
             if (field.isAnnotationPresent(ManyToMany.class)
                     && !StringUtils.hasText(field.getAnnotation(ManyToMany.class).mappedBy())) {
 
-                Class<?> relatedEntityClass = getRelatedEntityType(field);
+                Class<Y> relatedEntityClass = getRelatedEntityType(field);
 
                 // Validate the Related entity also inherits from the BaseEntity
                 if (isBaseEntitySubclass.test(relatedEntityClass)) {
                     field.setAccessible(true);
-                    RelatedEntity relatedEntity = new RelatedEntity(field, (Class<T>) relatedEntityClass);
+                    var relatedEntity = new RelatedEntity(field, relatedEntityClass);
                     relations.putIfAbsent(field.getName(), relatedEntity);
                 }
             }
@@ -108,14 +108,12 @@ public class EntityUtils<T extends BaseEntity> {
      * @param identifier The value of the Id.
      * @return An instance of entityType with the idField set to the identifier
      */
-    @SuppressWarnings("squid:S3011") // Need to set accessibility of field to create instances with id set without
-                                     // touching the database
-    private static <Y extends BaseEntity> Y getEntityReference(Class<? extends BaseEntity> entityType,
-                                                               UUID identifier) throws IllegalArgumentException {
+    private Y getEntityReference(Class<Y> entityType,
+                                 UUID identifier) throws IllegalArgumentException {
 
         Y reference = null;
         try {
-            reference = (Y) entityType.getConstructor().newInstance();
+            reference = entityType.getConstructor().newInstance();
             reference.setId(identifier);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
@@ -123,17 +121,6 @@ public class EntityUtils<T extends BaseEntity> {
         }
         return reference;
 
-    }
-
-    /**
-     * Creates a reference for the entity type this utility class is for
-     *
-     * @param identifier The value to set the Id to
-     * @return An instance of the entityType represented by the utility class
-     * with its identifier set to the given value
-     */
-    public T getEntityReference(UUID identifier) {
-        return getEntityReference(this.entityType,identifier);
     }
 
     /**
@@ -148,24 +135,27 @@ public class EntityUtils<T extends BaseEntity> {
     /**
      * Provides the type of the entity accessed by the specified relation
      */
-    public Class<? extends BaseEntity> getRelatedType(String relation) {
+    public Class<Y> getRelatedType(String relation) {
         return this.relations.get(relation).entityType;
     }
 
     class RelatedEntity {
-        RelatedEntity(Field declaredField, Class<T> entityType) {
+
+        RelatedEntity(Field declaredField, Class<Y> entityType) {
             this.declaredField = declaredField;
             this.entityType = entityType;
         }
         Field declaredField;
-        Class<T> entityType;
+        Class<Y> entityType;
     }
 
-    private Class<T> getRelatedEntityType(Field field) {
+    private Class<Y> getRelatedEntityType(Field field) {
         var relatedEntityType = field.getGenericType();
         if (relatedEntityType instanceof ParameterizedType parameterizedType) {
             relatedEntityType = parameterizedType.getActualTypeArguments()[0];
         }
-        return (Class<T>) relatedEntityType;
+        return (Class<Y>) relatedEntityType;
     }
+
+
 }

@@ -16,9 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Resource(path = "artists", filterExamples = {
-    @ExampleObject(name = "performanceName match", value = "performanceName matches '%the%'"),
-    @ExampleObject(name = "artist_id less than", value = "artisit_id < 5"),
-    @ExampleObject(name = "artist_id less than or eaqual to", value = "artisit_id <= 10")
+    @ExampleObject(name = "performanceName match", value = "performanceName matches '%Be%'")
 })
 @Entity(name = "artists")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

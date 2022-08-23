@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.controller.enums;
 
+import lombok.Getter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.expression.spel.standard.SpelExpression;
 
@@ -10,6 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Getter
 public enum RequestParameter {
 
     TENANT_ID("tenantId", ParameterType.QUERY, UUID.class, true, 10),
@@ -35,26 +37,10 @@ public enum RequestParameter {
         this.order = order;
     }
 
-
-    public String getParamName() {
-        return paramName;
-    }
-
     public String getParamType() {
         return paramType.getType();
     }
 
-    public Class<?> getParamDataType() {
-        return paramDataType;
-    }
-
-    public boolean isRequired() {
-        return isRequired;
-    }
-
-    public int getOrder() {
-        return order;
-    }
 
 
     public static Map<String, RequestParameter> getParamNameToEnumMap() {
@@ -69,15 +55,13 @@ public enum RequestParameter {
         PATH("path"),
         BODY("body");
 
+        @Getter
         private final String type;
 
         ParameterType(String type) {
             this.type = type;
         }
 
-        public String getType() {
-            return type;
-        }
     }
 
 }

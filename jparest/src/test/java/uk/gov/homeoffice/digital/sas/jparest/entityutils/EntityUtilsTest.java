@@ -22,7 +22,6 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
-import java.lang.reflect.Field;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -54,23 +53,6 @@ class EntityUtilsTest {
         assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> new EntityUtils(null, baseEntitySubclassPredicate));
     } 
 
-    //endregion
-
-    @Test
-    void entityUtils_entityTypeHasIdField_idFieldInformationStored() {
-        var idFieldName = "id";
-        var resourceClass = DummyEntityC.class;
-        new EntityUtils<>(resourceClass, baseEntitySubclassPredicate);
-        Field expectedField = null;
-        try {
-            expectedField = resourceClass.getSuperclass().getDeclaredField(idFieldName);
-        } catch (NoSuchFieldException e) {
-            LOGGER.info("{} field not found on class {}", idFieldName, resourceClass.toString());
-        }
-        assertThat(idFieldName).isEqualTo(expectedField.getName());
-    }
-
-
     @Test
     void entityUtils_entityTypeHasRelations_relatedEntitiesStored() {
 
@@ -83,7 +65,7 @@ class EntityUtilsTest {
     void entityUtils_relatedEntityTypeDoesNotExtendBaseEntity_relationIsNotStored() {
 
         var entityUtils = new EntityUtils<>(DummyEntityG.class, baseEntitySubclassPredicate);
-        assertThat(entityUtils.getRelatedResources()).doesNotContain("dummyEntityHSet");
+        assertThat(entityUtils.getRelatedResources()).isEmpty();
     }
 
 
@@ -132,15 +114,6 @@ class EntityUtilsTest {
         DummyEntityB typedActual = (DummyEntityB)actualReference;
         assertThat(typedActual.getId()).isEqualTo(relatedEntityReference);
     }
-
-    @Test
-    void getEntityReference_entityReferenceReturned() {
-        var entityUtils = new EntityUtils<>(DummyEntityC.class, baseEntitySubclassPredicate);
-        var actualReference = entityUtils.getEntityReference(sampleId);
-        assertThat(actualReference.getId()).isEqualTo(sampleId);
-
-    }
-
 
     //endregion
 

@@ -60,6 +60,14 @@ class ApiResponseExceptionHandlerTest {
         assertResponseData(response, msg, HttpStatus.BAD_REQUEST);
     }
 
+    @Test
+    void handleUnexpectedQueryResultException_internalServerErrorWithErrorDataIsReturned() {
+        var apiResponseExceptionHandler = new ApiResponseExceptionHandler();
+        var exception = new UnexpectedQueryResultException(UUID.randomUUID());
+        var response = apiResponseExceptionHandler.handleUnexpectedQueryResultException(exception);
+        assertResponseData(response, exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
     private void assertResponseData(ResponseEntity<ApiErrorResponse> response, String message, HttpStatus httpStatus) {
         assertThat(response.getStatusCode()).isEqualTo(httpStatus);

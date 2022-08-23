@@ -150,48 +150,43 @@ class SpelExpressionToPredicateConverterTest {
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     void test_convert_with_equal_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("index==1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(EQUAL);
-        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     void test_convert_with_greaterThan_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("index>1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(GREATER_THAN);
-        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     void test_convert_with_greaterThanOrEqual_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("index>=1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(GREATER_THAN_OR_EQUAL);
-        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     void test_convert_with_lessthan_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("index<1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(LESS_THAN);
-        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
-    @SuppressWarnings("rawtypes")
     void test_convert_with_lessThanOrEqual_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("index<=1L");
         ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getComparisonOperator()).isEqualTo(LESS_THAN_OR_EQUAL);
-        assertThat(((LiteralExpression)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
     }
 
     @Test
