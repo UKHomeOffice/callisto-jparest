@@ -58,3 +58,19 @@ You also need JDK 17.
 ```bash
  $ ./mvnw clean install
 ```
+
+## Bumping Versions
+To update the parent pom version globally throughout the project run the following command.
+
+```bash
+  $ mvn versions:set -DnewVersion={version} -f pom.xml
+```
+When pushing a branch jparest will automatically deploy a snapshot image to artifactory. The naming convention for this
+is as follows 
+
+```bash
+{Version-Number}-{Jira-Reference}-SNAPSHOT
+```
+## Merging into Main
+Once a PR is merged into the main branch the snapshot suffix will be deleted from the version.
+The assigned version number will be used to create a version release in artifactory and a Github tag for backup.
