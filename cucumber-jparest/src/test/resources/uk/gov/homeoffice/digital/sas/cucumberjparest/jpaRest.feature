@@ -8,16 +8,16 @@ Feature: Make requests to endpoints created by JpaRest
 
 Background:
   Given Trevor is a user
-  And Trevor creates users from the file './features/data/wip/login/user1.json' in the demo service
-  And Trevor creates users from the file './features/data/wip/login/user2.json' in the demo service
+  And Trevor creates profiles from the file 'data/profiles2.json' in the test service
+  And Trevor creates profiles from the file 'data/profiles3.json' in the test service
 
 Scenario: Get specific resources by reference
 
   Get a single resource from the endpoint using
   its identifier
-  e.g. "/resources/users/test-admin-user"
+  e.g. "/resources/profiles/17e813a2-bb28-11ec-8422-0242ac120001"
 
-  When Trevor gets the users 'test-admin-user' from the demo service 
+  When Trevor gets the profiles '17e813a2-bb28-11ec-8422-0242ac120001' from the test service 
 
 Scenario: Retrieve all resources
 
@@ -25,7 +25,7 @@ Scenario: Retrieve all resources
   Additional scenarios might be required to
   demonstrate how to page results
 
-  When Trevor retrieves users in the demo service
+  When Trevor retrieves profiles from the test service
 
 Scenario: Retrieve filtered resources
 
@@ -34,7 +34,7 @@ Scenario: Retrieve filtered resources
   Additional scenarios might be required to
   demonstrate how to page results
 
-  When Trevor retrieves users in the demo service with
+  When Trevor retrieves users in the test service with
   | filter    | value |
   | withName  | User1 |
 
@@ -43,19 +43,19 @@ Scenario: Create resource
 
   Create a new resource from the payload in the file.
 
-  When Trevor create users from the file './features/data/wip/login/valid-user.json' in the demo service
+  When Trevor creates users from the file './features/data/wip/login/valid-user.json' in the test service
 
 Scenario: Update a resource
 
   Update the specific resource with the given identifier
 
-  When Trevor updates the users "1" from the file './features/data/wip/login/valid-user.json' in the demo service
+  When Trevor updates the users "1" from the file './features/data/wip/login/valid-user.json' in the test service
 
 Scenario: Delete a resource
 
   Delete one or more resources using their identifier
   
-  When Trevor deletes the users 'test-admin-user, test-admin-user2' in the demo service with
+  When Trevor deletes the users 'test-admin-user, test-admin-user2' in the test service with
 
 
 # Need to think about related resources too

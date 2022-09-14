@@ -14,7 +14,7 @@ Feature: Personas
 
     Given Trevor is a user
     And Paula is a user
-    Then Trevor is not Paula
+    Then Trevor is a different persona to Paula
 
 
 Scenario: Anonymous access
@@ -24,5 +24,5 @@ Scenario: Anonymous access
   achieve this a single well known persona exists for making 
   annonymous requests. The persona is called `someone`
 
-  When someone stores users from the file './features/data/wip/login/valid-user.json' in the demo service
-  Then the last response should have a status code of 401
+  When someone creates profiles from the file 'data/profiles.json' in the test service
+  Then the last response should have a status code of 200

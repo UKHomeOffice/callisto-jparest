@@ -15,5 +15,5 @@ Feature: Create a delay before any step
   before executing the specified step. 
 
   Given Trevor is a user
-  And Trevor creates users from the file './features/data/wip/login/valid-user.json' in the demo service
+  And Trevor creates users from the file './features/data/wip/login/valid-user.json' in the test service
   And eventually data becomes consistent

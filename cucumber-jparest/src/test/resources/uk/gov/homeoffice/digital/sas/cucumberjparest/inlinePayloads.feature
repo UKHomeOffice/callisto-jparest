@@ -33,4 +33,4 @@ Feature: Inline Payloads
     Then the time-entries payload should contain
       | field     | type   | expect | match         |
       | bookmarks | Array  | to     | have(1).items |
-    And the tester creates the time-entries in the demo service
+    And the tester creates the time-entries in the test service

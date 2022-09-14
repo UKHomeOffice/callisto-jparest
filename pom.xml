@@ -50,6 +50,7 @@
     <modules>
         <module>jparest</module>
         <module>demo</module>
+        <module>cucumber-jparest</module>
     </modules>
 
     <build>

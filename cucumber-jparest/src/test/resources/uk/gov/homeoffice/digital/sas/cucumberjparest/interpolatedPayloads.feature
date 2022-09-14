@@ -25,7 +25,7 @@ Scenario: Reference a persona
   populate one of the fields with the identifier from
   the viewer.
 
-  When the tester successfully stores profiles from the file './features/data/wip/userProfile/userProfileForViewer.json' in the demo service
+  When the tester successfully stores profiles from the file './features/data/wip/userProfile/userProfileForViewer.json' in the test service
   Then the first of the profiles in the last response should contain
     | field       | type    | expect | match                          |
     | description | String  | to     | eq users['viewer']['personId'] |

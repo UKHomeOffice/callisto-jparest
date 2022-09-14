@@ -23,22 +23,22 @@ Feature: Assertions
 
 
   Scenario: Assert response body should not be empty
-    When someone successfully GETs /descriptor/raw?_pretty=true from the demo service
+    When someone successfully GETs /descriptor/raw?_pretty=true from the test service
     Then the last response body should not be empty
 
   Scenario: Assert response body should be empty
-    When someone successfully GETs /EmptyResponse from the demo service
+    When someone successfully GETs /EmptyResponse from the test service
     Then the last response body should be empty
 
   Scenario: Response should contain fields
-    When the tester creates users from the file './features/data/wip/login/valid-user.json' in the demo service
+    When the tester creates users from the file './features/data/wip/login/valid-user.json' in the test service
     Then the last response should contain fields
       | field |
       | users |
       | meta  |
 
   Scenario: Response should not contain fields
-    When the tester creates users from the file './features/data/wip/login/valid-user.json' in the demo service
+    When the tester creates users from the file './features/data/wip/login/valid-user.json' in the test service
     Then the last response should not contain fields
       | field   |
       | made_up |
@@ -46,7 +46,7 @@ Feature: Assertions
 
   Scenario: Object should contain fields
 
-    When the admin successfully retrieves tenants in the demo service with
+    When the admin successfully retrieves tenants in the test service with
       | filter | value |
       | owner  | root  |
     Then the first of the tenants in the last response should contain the fields
@@ -56,7 +56,7 @@ Feature: Assertions
       | description |
 
   Scenario: Object should not contain fields
-    When the admin successfully retrieves tenants in the demo service with
+    When the admin successfully retrieves tenants in the test service with
       | filter | value |
       | owner  | root  |
     Then the first of the tenants in the last response should not contain the fields
@@ -70,8 +70,8 @@ Feature: Assertions
     a specific response.
     This step enables two objects to be directly compared.
 
-    When the admin successfully GETs /pauth/tenants from the demo service
-    And the admin successfully GETs /pauth/tenants from the demo service
+    When the admin successfully GETs /pauth/tenants from the test service
+    And the admin successfully GETs /pauth/tenants from the test service
     Then the first of the tenants in the first /pauth/tenants response should equal the first of the tenants in the last /pauth/tenants response
 
   Scenario: Property expectations
@@ -81,7 +81,7 @@ Feature: Assertions
 
     It can also be specified as a specific resource in a response
 
-    When the admin successfully GETs /pauth/tenants from the demo service
+    When the admin successfully GETs /pauth/tenants from the test service
     Then the last response should contain
       | field   | type  | expect | match                  |
       | tenants | Array | to     | have_at_least(1).items |
@@ -93,7 +93,7 @@ Feature: Assertions
 
   Scenario: Property expectations for each object
 
-    When the admin successfully retrieves tenants in the demo service with
+    When the admin successfully retrieves tenants in the test service with
       | filter | value |
       | owner  | root  |
     Then the last response should contain
@@ -105,9 +105,9 @@ Feature: Assertions
       | title       | String | to not | be_empty               |
 
   Scenario: Automatic prefixing of the generated owner for ref fields
-    Given the admin creates users from the file './features/data/wip/login/valid-user.json' in the demo service
+    Given the admin creates users from the file './features/data/wip/login/valid-user.json' in the test service
     And eventually data becomes consistent
-    When the admin successfully retrieves users in the demo service with
+    When the admin successfully retrieves users in the test service with
       | filter  | value           |
       | withRef | test-admin-user |
     Then the last response should contain
@@ -121,7 +121,7 @@ Feature: Assertions
   Scenario: Persona substitution for underlying user's ref for userRef and profileRef fields
     When the admin creates an assignment for the tester
     And eventually data becomes consistent
-    When the admin successfully retrieves assignments in the demo service with
+    When the admin successfully retrieves assignments in the test service with
       | filter      | value    |
       | withUserRef | tester |
     Then the last response should contain
@@ -139,9 +139,9 @@ Feature: Assertions
     Assertions against an object can test nested properties
     This is done by specifying the path to the nested property
 
-    And the admin creates roles from the file './features/data/wip/login/valid-role.json' in the demo service
+    And the admin creates roles from the file './features/data/wip/login/valid-role.json' in the test service
     And eventually data becomes consistent
-    When the admin successfully retrieves roles in the demo service with
+    When the admin successfully retrieves roles in the test service with
       | filter  | value      |
       | withRef | valid-role |
     Then the last response should contain
