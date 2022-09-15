@@ -23,7 +23,6 @@ public class JpaTestContext {
      * reference was used.
      */
     public static final ServiceRegistry serviceRegistry = new ServiceRegistry();
-    // TODO: @Scope(CucumberTestContext.SCOPE_CUCUMBER_GLUE)
 
     /** 
      * 
