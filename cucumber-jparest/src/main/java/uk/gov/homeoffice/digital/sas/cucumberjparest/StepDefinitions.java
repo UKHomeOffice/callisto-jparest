@@ -43,7 +43,7 @@ public class StepDefinitions {
      * 
      * @param name The name of the persona to create
      */
-    @Given("^(\\S*) is a user$")
+    @Given("^(?:the )?(\\S*) is a user$")
     public void persona_is_a_user(String name) {
         personaManager.createPersona(name);
     }
@@ -126,7 +126,7 @@ public class StepDefinitions {
      * @param name The name of the persona
      * @return Persona The persona associated with the given name
      */
-    @ParameterType("(\\S*)")
+    @ParameterType("(?:the )?(\\S*)")
     public Persona persona(String name){
         return this.personaManager.getPersona(name);        
     }
