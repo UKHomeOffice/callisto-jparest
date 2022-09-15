@@ -1,8 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -15,7 +13,11 @@ import java.util.List;
 
 public class JpaRestMvcConfigurer implements WebMvcConfigurer {
 
-    private final ObjectMapper objectMapper = getObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public JpaRestMvcConfigurer(ObjectMapper objectMapper){
+        this.objectMapper = objectMapper;
+    }
 
     /**
      * Registers the {@link com.example.misc.ApiRequestParamArgumentResolver}.
@@ -23,13 +25,6 @@ public class JpaRestMvcConfigurer implements WebMvcConfigurer {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         argumentResolvers.add(new SpelExpressionArgumentResolver());
-    }
-
-    private static ObjectMapper getObjectMapper() {
-        var om = new ObjectMapper();
-        om.registerModule(new Hibernate5Module());
-        om.registerModule(new JavaTimeModule());
-        return om;
     }
 
     /**

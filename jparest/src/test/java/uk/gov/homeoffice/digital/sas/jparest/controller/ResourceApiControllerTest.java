@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,8 +59,9 @@ class ResourceApiControllerTest {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
-    
-    
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     public static final UUID NON_EXISTENT_ID = UUID.fromString("7a7c7da4-bb29-11ec-1000-0242ac120001");
     public static final UUID NON_EXISTENT_ID_2 = UUID.fromString("7a7c7da4-bb29-11ec-1001-0242ac120002");
     public static final UUID NEW_RESOURCE_ID = UUID.fromString("7a7c7da4-bb29-11ec-1002-0242ac120003");
@@ -582,7 +584,6 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    @SuppressWarnings("unchecked")
     void addRelated_allResourcesExist_addsRelatedItems() {
 
         var controller = getResourceApiController(DummyEntityA.class);
@@ -682,7 +683,6 @@ class ResourceApiControllerTest {
 
     @ParameterizedTest
     @MethodSource("relatedResourceFilters")
-    @SuppressWarnings("unchecked")
     void getRelated_filterExpressionProvided_returnsFilteredResources(UUID resourceId,
                                                                       SpelExpression expression,
                                                                       int expectedItems) {
@@ -894,7 +894,7 @@ class ResourceApiControllerTest {
 
     private <T extends BaseEntity, U> ResourceApiController<T> getResourceApiController(Class<T> clazz) {
         var entityUtils = new EntityUtils<>(clazz, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
-        return new ResourceApiController<>(clazz, entityManager, transactionManager, entityUtils);
+        return new ResourceApiController<>(clazz, entityManager, transactionManager, entityUtils, objectMapper);
     }
 
     private <T extends BaseEntity> T createResource(ResourceApiController<T> controller,

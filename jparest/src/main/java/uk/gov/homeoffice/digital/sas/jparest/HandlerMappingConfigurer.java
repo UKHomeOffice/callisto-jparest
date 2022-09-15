@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
@@ -49,17 +50,21 @@ public class HandlerMappingConfigurer {
     private final ApplicationContext context;
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
     private BuilderConfiguration builderOptions;
+    private final ObjectMapper objectMapper;
+
 
     @Autowired
     public HandlerMappingConfigurer(
             EntityManager entityManager,
             PlatformTransactionManager transactionManager,
             ApplicationContext context,
-            ResourceEndpoint resourceEndpoint) {
+            ResourceEndpoint resourceEndpoint,
+            ObjectMapper objectMapper) {
         this.entityManager = entityManager;
         this.transactionManager = transactionManager;
         this.context = context;
         this.resourceEndpoint = resourceEndpoint;
+        this.objectMapper = objectMapper;
     }
 
     @PostConstruct
@@ -102,7 +107,7 @@ public class HandlerMappingConfigurer {
             EntityUtils<?, ?> entityUtils = new EntityUtils<>(resource, isBaseEntitySubclass);
             ResourceApiController<?> controller = new ResourceApiController<>(
                     resource, entityManager,
-                    transactionManager, entityUtils);
+                    transactionManager, entityUtils, objectMapper);
 
             // Map the CRUD operations to the controllers methods
             mapRestOperationsToController(resource, path, controller);

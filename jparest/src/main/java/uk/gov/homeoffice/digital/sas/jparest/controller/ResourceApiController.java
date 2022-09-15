@@ -43,7 +43,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -69,13 +68,14 @@ import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundE
 public class ResourceApiController<T extends BaseEntity> {
 
     @Getter
-    private Class<T> entityType;
-    private EntityManager entityManager;
-    private PersistenceUnitUtil persistenceUnitUtil;
-    private PlatformTransactionManager transactionManager;
-    private JpaRepository<T, Serializable> repository;
-    private EntityUtils<T, ?> entityUtils;
+    private final Class<T> entityType;
+    private final EntityManager entityManager;
+    private final PersistenceUnitUtil persistenceUnitUtil;
+    private final PlatformTransactionManager transactionManager;
+    private final JpaRepository<T, Serializable> repository;
+    private final EntityUtils<T, ?> entityUtils;
     private final ValidatorUtils validatorUtils = new ValidatorUtils();
+    private final ObjectMapper objectMapper;
 
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
 
@@ -83,13 +83,15 @@ public class ResourceApiController<T extends BaseEntity> {
 
     @SuppressWarnings("unchecked")
     public ResourceApiController(Class<T> entityType, EntityManager entityManager,
-                                 PlatformTransactionManager transactionManager, EntityUtils<?, ?> entityUtils) {
+                                 PlatformTransactionManager transactionManager, EntityUtils<?, ?> entityUtils,
+                                 ObjectMapper objectMapper) {
         this.entityType = entityType;
         this.entityManager = entityManager;
         this.transactionManager = transactionManager;
         this.repository = new SimpleJpaRepository<>(entityType, entityManager);
         this.entityUtils = (EntityUtils<T, ?>) entityUtils;
         this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
+        this.objectMapper = objectMapper;
     }
 
     public ApiResponse<T> list(@RequestParam UUID tenantId, Pageable pageable, SpelExpression filter) {
@@ -148,7 +150,7 @@ public class ResourceApiController<T extends BaseEntity> {
 
     public ApiResponse<T> get(@RequestParam UUID tenantId, @PathVariable UUID id) {
         var result = getById(id, null, tenantId);
-        return new ApiResponse<>(Arrays.asList(result));
+        return new ApiResponse<>(List.of(result));
     }
 
 
@@ -173,7 +175,7 @@ public class ResourceApiController<T extends BaseEntity> {
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
-        return new ApiResponse<>(Arrays.asList(result));
+        return new ApiResponse<>(List.of(result));
     }
 
     public void delete(@RequestParam UUID tenantId, @PathVariable UUID id) {
@@ -237,7 +239,7 @@ public class ResourceApiController<T extends BaseEntity> {
             throw ex;
         }
 
-        return new ApiResponse<>(Arrays.asList(orig));
+        return new ApiResponse<>(List.of(orig));
     }
 
     @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters
@@ -381,7 +383,6 @@ public class ResourceApiController<T extends BaseEntity> {
 
     private T readPayload(String body) throws JsonProcessingException {
         try {
-            var objectMapper = new ObjectMapper();
             return objectMapper.readValue(body, this.entityUtils.getEntityType());
         } catch (UnrecognizedPropertyException ex) {
             throw new UnknownResourcePropertyException(ex.getPropertyName(), ex.getReferringClass().getSimpleName());
