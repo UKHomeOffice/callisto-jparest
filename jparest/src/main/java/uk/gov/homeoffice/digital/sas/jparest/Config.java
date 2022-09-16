@@ -33,9 +33,9 @@ public class Config {
 
     @Bean
     @Lazy(false)
-    JpaRestMvcConfigurer jpaRestMvcConfigurer() {
+    JpaRestMvcConfigurer jpaRestMvcConfigurer(ObjectMapper objectMapper) {
         LOGGER.info(("auto configure"));
-        return new JpaRestMvcConfigurer(objectMapper());
+        return new JpaRestMvcConfigurer(objectMapper);
     }
 
     @Bean

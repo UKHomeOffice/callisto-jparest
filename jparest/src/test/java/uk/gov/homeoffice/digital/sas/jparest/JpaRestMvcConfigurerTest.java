@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,8 +28,11 @@ class JpaRestMvcConfigurerTest {
     @Mock
     MappingJackson2SmileHttpMessageConverter mappingJackson2SmileHttpMessageConverter;
 
+    @Mock
+    private ObjectMapper objectMapper;
+
     @Spy
-    private JpaRestMvcConfigurer jpaRestMvcConfigurer;
+    private JpaRestMvcConfigurer jpaRestMvcConfigurer = new JpaRestMvcConfigurer(objectMapper);
 
     @Test
     void addArgumentResolvers_shouldAddArgumentResolvers() {
