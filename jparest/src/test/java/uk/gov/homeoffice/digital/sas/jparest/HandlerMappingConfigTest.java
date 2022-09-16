@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @Transactional
 @ContextConfiguration(locations = "/test-context.xml")
-class HandlerMappingConfigurerTest {
+class HandlerMappingConfigTest {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -57,7 +57,7 @@ class HandlerMappingConfigurerTest {
     @MockBean
     private ObjectMapper objectMapper;
 
-    private HandlerMappingConfigurer handlerMappingConfigurer;
+    private HandlerMappingConfig handlerMappingConfig;
 
     private static Stream<Arguments> resources() {
         return Stream.of(
@@ -70,7 +70,7 @@ class HandlerMappingConfigurerTest {
     @BeforeEach
     public void setup() {
         when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
-        handlerMappingConfigurer = new HandlerMappingConfigurer(entityManager, transactionManager, context,
+        handlerMappingConfig = new HandlerMappingConfig(entityManager, transactionManager, context,
                 resourceEndpoint, objectMapper);
     }
 
@@ -85,7 +85,7 @@ class HandlerMappingConfigurerTest {
                 List.of("{DELETE [/resources/" + resourceName + "/{id}], produces [application/json]}", "delete"),
                 List.of("{PUT [/resources/" + resourceName + "/{id}], produces [application/json]}", "update"));
 
-        assertThatNoException().isThrownBy(() -> handlerMappingConfigurer.registerUserController());
+        assertThatNoException().isThrownBy(() -> handlerMappingConfig.registerUserController());
 
         for (var expected : expectedCalls) {
             Mockito.verify(requestMappingHandlerMapping, never()).registerMapping(
@@ -106,7 +106,7 @@ class HandlerMappingConfigurerTest {
                 List.of("{POST [/resources/" + resourceName + "], produces [application/json]}", "create"),
                 List.of("{DELETE [/resources/" + resourceName + "/{id}], produces [application/json]}", "delete"),
                 List.of("{PUT [/resources/" + resourceName + "/{id}], produces [application/json]}", "update"));
-        assertThatNoException().isThrownBy(() -> handlerMappingConfigurer.registerUserController());
+        assertThatNoException().isThrownBy(() -> handlerMappingConfig.registerUserController());
         verifyExpectedHandlerMappingCalls(clazz, expectedCalls);
     }
 
@@ -119,7 +119,7 @@ class HandlerMappingConfigurerTest {
                         "deleteRelated"),
                 List.of("{PUT [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedIds}], produces [application/json]}",
                         "addRelated"));
-        assertThatNoException().isThrownBy(() -> handlerMappingConfigurer.registerUserController());
+        assertThatNoException().isThrownBy(() -> handlerMappingConfig.registerUserController());
         verifyExpectedHandlerMappingCalls(DummyEntityA.class, expectedCalls);
     }
 
