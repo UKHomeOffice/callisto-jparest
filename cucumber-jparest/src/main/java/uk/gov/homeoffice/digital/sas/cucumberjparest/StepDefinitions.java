@@ -62,7 +62,7 @@ public class StepDefinitions {
     @When("{persona} creates {word} from the {filecontents}{service}")
     public void persona_creates_resource_from_the_file_in_the_service(Persona persona, String resource, String fileContents, String service) {
 
-        Response response = this.jpaRestApiClient.Create(service, resource, fileContents);
+        Response response = this.jpaRestApiClient.Create(persona, service, resource, fileContents);
 
         this.httpResponseManager.addResponse("/resources/" + resource, response);
         
@@ -79,14 +79,14 @@ public class StepDefinitions {
      */
     @When("{persona} retrieves {word}{service}")
     public void persona_retrieves_resources_from_the_service(Persona persona, String resource, String service) {
-        Response response = this.jpaRestApiClient.Retrieve(service, resource, null);
+        Response response = this.jpaRestApiClient.Retrieve(persona, service, resource, null);
 
         this.httpResponseManager.addResponse("/resources/" + resource, response);
     }
 
     @When("{persona} successfully GETs {string}{service}")
     public void someone_successfully_gets_url_from_service(Persona persona, String path, String service) {
-        Response response = this.jpaRestApiClient.Get(service, path);
+        Response response = this.jpaRestApiClient.Get(persona, service, path);
 
         this.httpResponseManager.addResponse(path, response);
     }
@@ -108,7 +108,7 @@ public class StepDefinitions {
             .isNotNull()
             .isNotEqualTo("");
     }
-    
+
     /** 
      * 
      * Matchs when a file is specified and returns the contents

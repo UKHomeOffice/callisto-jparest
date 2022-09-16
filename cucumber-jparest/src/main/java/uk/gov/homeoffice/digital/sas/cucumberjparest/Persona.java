@@ -1,5 +1,8 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * 
  * For future implementation for storing state about a 
@@ -10,4 +13,7 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest;
  */
 public class Persona {
 
+    @Getter
+    @Setter
+    private String authToken;
 }
