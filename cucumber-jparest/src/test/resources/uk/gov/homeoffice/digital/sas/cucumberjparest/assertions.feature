@@ -1,6 +1,6 @@
 Feature: Assertions
 
-  When a request is issued assertions will be made against the returned
+    When a request is issued assertions will be made against the returned
   response to ensure the correct result is returned.
 
   Several steps are provided for basic checking of the returned response
@@ -31,10 +31,9 @@ Feature: Assertions
     Then the last response body should be empty
 
   Scenario: Response should contain fields
-    When the tester creates users from the file './features/data/wip/login/valid-user.json' in the test service
+    When someone retrieves profiles from the test service
     Then the last response should contain fields
-      | field |
-      | users |
+      | items |
       | meta  |
 
   Scenario: Response should not contain fields
@@ -122,16 +121,16 @@ Feature: Assertions
     When the admin creates an assignment for the tester
     And eventually data becomes consistent
     When the admin successfully retrieves assignments in the test service with
-      | filter      | value    |
+      | filter      | value  |
       | withUserRef | tester |
     Then the last response should contain
       | field       | type  | expect | match         |
       | assignments | Array | to     | have(2).items |
     And the first of the assignments in the last response should contain
-      | field   | type   | expect | match                           |
+      | field   | type   | expect | match                         |
       | userRef | String | to     | eq users['tester']['userRef'] |
     And the second of the assignments in the last response should contain
-      | field   | type   | expect | match                           |
+      | field   | type   | expect | match                         |
       | userRef | String | to     | eq users['tester']['userRef'] |
 
   Scenario: Asserting against nested properties in a response
@@ -161,7 +160,7 @@ Feature: Assertions
   Scenario: Asserting against properties of raw HTTP response
 
     Assertions can test against properties of the response object.
-    The expression for 'field' will be evaluated against the response body first 
+    The expression for 'field' will be evaluated against the response body first
     if the response body can be parsed as a json object. In case of ambiguity
     e.g. for a field named `code` you can explicitly specify `response.code`
     to check for the property on the response object itself.
@@ -169,7 +168,7 @@ Feature: Assertions
     When someone GETs /MockedEndpoint2 from the dcr
     Then the response should contain
       | field                | type    | expect | match                      |
-      | code                 | Integer | to     | eq(300)                    |    
+      | code                 | Integer | to     | eq(300)                    |
       | parsed_response      | Hash    | to     | include({"code"=>300})     |
       | parsed_response.code | Integer | to     | eq(300)                    |
       | response.code        | String  | to     | eq("200")                  |

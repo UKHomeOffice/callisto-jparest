@@ -1,20 +1,22 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 
+import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.util.Files;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 import io.cucumber.java.ParameterType;
 import io.cucumber.java.en.Given;
-import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import io.restassured.response.Response;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * 
@@ -22,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 
  */
 @CucumberContextConfiguration
-@ContextConfiguration(classes = JpaTestContext.class) 
+@ContextConfiguration(classes = JpaTestContext.class)
 public class StepDefinitions {
 
     private final PersonaManager personaManager;
@@ -30,14 +32,14 @@ public class StepDefinitions {
     private final JpaRestApiClient jpaRestApiClient;
 
     @Autowired
-    public StepDefinitions(PersonaManager personaManager, HttpResponseManager httpResponseManager, JpaRestApiClient jpaRestApiClient) {
-        this.personaManager = Objects.requireNonNull( personaManager, "personaManager must not be null" );
-        this.httpResponseManager = Objects.requireNonNull( httpResponseManager, "httpResponseManager must not be null" );
-        this.jpaRestApiClient = Objects.requireNonNull( jpaRestApiClient, "jpaRestApiClient must not be null" );
+    public StepDefinitions(PersonaManager personaManager, HttpResponseManager httpResponseManager,
+            JpaRestApiClient jpaRestApiClient) {
+        this.personaManager = Objects.requireNonNull(personaManager, "personaManager must not be null");
+        this.httpResponseManager = Objects.requireNonNull(httpResponseManager, "httpResponseManager must not be null");
+        this.jpaRestApiClient = Objects.requireNonNull(jpaRestApiClient, "jpaRestApiClient must not be null");
     }
-    
-    
-    /** 
+
+    /**
      * 
      * Creates a new persona for the given name
      * 
@@ -48,34 +50,33 @@ public class StepDefinitions {
         personaManager.createPersona(name);
     }
 
-    
-    /** 
+    /**
      * 
      * Creates a payload from the specified file and posts it to
      * the the endpoint exposed for the given resource.
      * 
-     * @param persona The persona to use for auth context
-     * @param resource The type of resource to be created
+     * @param persona      The persona to use for auth context
+     * @param resource     The type of resource to be created
      * @param fileContents The file contents of the specified file
-     * @param service There service to use
+     * @param service      There service to use
      */
     @When("{persona} creates {word} from the {filecontents}{service}")
-    public void persona_creates_resource_from_the_file_in_the_service(Persona persona, String resource, String fileContents, String service) {
+    public void persona_creates_resource_from_the_file_in_the_service(Persona persona, String resource,
+            String fileContents, String service) {
 
         Response response = this.jpaRestApiClient.Create(persona, service, resource, fileContents);
 
         this.httpResponseManager.addResponse("/resources/" + resource, response);
-        
+
     }
 
-    
-    /** 
+    /**
      * 
      * Retrieves the specified resource type from the given service.
      * 
-     * @param persona The persona to use for auth context
+     * @param persona  The persona to use for auth context
      * @param resource The type of resources to be retrieved
-     * @param service There service to use
+     * @param service  There service to use
      */
     @When("{persona} retrieves {word}{service}")
     public void persona_retrieves_resources_from_the_service(Persona persona, String resource, String service) {
@@ -84,6 +85,14 @@ public class StepDefinitions {
         this.httpResponseManager.addResponse("/resources/" + resource, response);
     }
 
+    /**
+     * 
+     * Makes a GET request to the service with the given path
+     * 
+     * @param persona The persona to use for auth context
+     * @param path    The URL to request
+     * @param service There service to use
+     */
     @When("{persona} successfully GETs {string}{service}")
     public void someone_successfully_gets_url_from_service(Persona persona, String path, String service) {
         Response response = this.jpaRestApiClient.Get(persona, service, path);
@@ -91,7 +100,7 @@ public class StepDefinitions {
         this.httpResponseManager.addResponse(path, response);
     }
 
-    /** 
+    /**
      * 
      * Validates the last responses status code against the given value
      * 
@@ -105,18 +114,37 @@ public class StepDefinitions {
     @Then("the last response body should not be empty")
     public void the_last_response_body_should_not_be_empty() {
         assertThat(this.httpResponseManager.getLastResponse().body().asString())
-            .isNotNull()
-            .isNotEqualTo("");
+                .isNotNull()
+                .isNotEqualTo("");
     }
 
     @Then("the last response body should be empty")
     public void the_last_response_body_should_be_empty() {
         assertThat(this.httpResponseManager.getLastResponse().body().asString())
-            .isNotNull()
-            .isEqualTo("");
+                .isNotNull()
+                .isEqualTo("");
     }
-    
-    /** 
+
+    /**
+     * 
+     * Checks that the response contains the given fields
+     * 
+     * @param fields The fields to check the response for
+     */
+    @Then("the last response should contain fields")
+    public void the_last_response_should_contain_fields(List<String> fields) {
+        var root = this.httpResponseManager.getLastResponse().getBody().jsonPath().getMap("");
+        SoftAssertions softly = new SoftAssertions();
+        fields.forEach((field) -> {
+            softly
+                    .assertThat(root)
+                    .withFailMessage("Expected the response to contain the field %s", field)
+                    .containsKey(field);
+        });
+        softly.assertAll();
+    }
+
+    /**
      * 
      * Matchs when a file is specified and returns the contents
      * of the specified file
@@ -125,20 +153,18 @@ public class StepDefinitions {
      * @return String The contents of the file
      */
     @ParameterType("file '([^']*)'")
-    public String filecontents(String path){
+    public String filecontents(String path) {
         try {
             ClassLoader classLoader = getClass().getClassLoader();
             File file = new File(classLoader.getResource(path).getFile());
             String data = Files.contentOf(file, "UTF-8");
             return data;
-        }
-        catch(RuntimeException ex) {
+        } catch (RuntimeException ex) {
             throw new IllegalArgumentException("File doesn't exist " + path);
-        }        
+        }
     }
 
-    
-    /** 
+    /**
      * 
      * Gets the persona for the given name
      * 
@@ -146,12 +172,11 @@ public class StepDefinitions {
      * @return Persona The persona associated with the given name
      */
     @ParameterType("(?:the )?(\\S*)")
-    public Persona persona(String name){
-        return this.personaManager.getPersona(name);        
+    public Persona persona(String name) {
+        return this.personaManager.getPersona(name);
     }
 
-    
-    /** 
+    /**
      * 
      * Retrieves the location of the given service.
      * 
@@ -159,8 +184,8 @@ public class StepDefinitions {
      * @return String The URL of the service
      */
     @ParameterType("(?: (?:from|in) the (\\S*) service)?")
-    public String service(String name){
-        return name;        
+    public String service(String name) {
+        return name;
     }
 
 }
