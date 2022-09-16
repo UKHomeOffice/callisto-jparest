@@ -2,20 +2,24 @@ package uk.gov.homeoffice.digital.sas.jparest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import uk.gov.homeoffice.digital.sas.jparest.web.SpelExpressionArgumentResolver;
 
 import java.util.List;
 
-public class JpaRestMvcConfigurer implements WebMvcConfigurer {
+@EnableWebMvc
+@Configuration
+public class JpaRestMvcConfig implements WebMvcConfigurer {
 
     private final ObjectMapper objectMapper;
 
-    public JpaRestMvcConfigurer(ObjectMapper objectMapper){
+    public JpaRestMvcConfig(ObjectMapper objectMapper){
         this.objectMapper = objectMapper;
     }
 

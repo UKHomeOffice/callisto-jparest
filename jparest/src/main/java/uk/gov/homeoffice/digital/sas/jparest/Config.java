@@ -17,17 +17,10 @@ import javax.persistence.EntityManager;
 import java.util.logging.Logger;
 
 @Configuration
-@Import({ObjectMapperConfig.class})
+@Import({ObjectMapperConfig.class, JpaRestMvcConfig.class})
 public class Config {
 
     private static final Logger LOGGER = Logger.getLogger(Config.class.getName());
-
-    @Bean
-    @Lazy(false)
-    JpaRestMvcConfigurer jpaRestMvcConfigurer(ObjectMapper objectMapper) {
-        LOGGER.info(("auto configure"));
-        return new JpaRestMvcConfigurer(objectMapper);
-    }
 
     @Bean
     @Lazy(false)

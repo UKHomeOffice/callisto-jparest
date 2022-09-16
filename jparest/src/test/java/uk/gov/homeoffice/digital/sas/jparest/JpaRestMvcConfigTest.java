@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class JpaRestMvcConfigurerTest {
+class JpaRestMvcConfigTest {
 
     @Mock
     MappingJackson2HttpMessageConverter messageConverter;
@@ -32,12 +32,12 @@ class JpaRestMvcConfigurerTest {
     private ObjectMapper objectMapper;
 
     @Spy
-    private JpaRestMvcConfigurer jpaRestMvcConfigurer = new JpaRestMvcConfigurer(objectMapper);
+    private JpaRestMvcConfig jpaRestMvcConfig = new JpaRestMvcConfig(objectMapper);
 
     @Test
     void addArgumentResolvers_shouldAddArgumentResolvers() {
         List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
-        jpaRestMvcConfigurer.addArgumentResolvers(argumentResolvers);
+        jpaRestMvcConfig.addArgumentResolvers(argumentResolvers);
         assertThat(argumentResolvers).hasSize(1);
         assertThat(argumentResolvers.get(0)).isInstanceOf(SpelExpressionArgumentResolver.class);
     }
@@ -45,14 +45,14 @@ class JpaRestMvcConfigurerTest {
     @Test
     void extendMessageConverters_shouldCallRegisterObjectMappersForType() {
         List<HttpMessageConverter<?>> converters = List.of(messageConverter);
-        jpaRestMvcConfigurer.extendMessageConverters(converters);
+        jpaRestMvcConfig.extendMessageConverters(converters);
         verify(messageConverter, times(1)).registerObjectMappersForType(any(), any());
     }
 
     @Test
     void extendMessageConverters_converterTypeNotApplicable_objectMappersNotRegistered() {
         List<HttpMessageConverter<?>> converters = List.of(mappingJackson2SmileHttpMessageConverter);
-        jpaRestMvcConfigurer.extendMessageConverters(converters);
+        jpaRestMvcConfig.extendMessageConverters(converters);
         verifyNoInteractions(messageConverter);
     }
 
