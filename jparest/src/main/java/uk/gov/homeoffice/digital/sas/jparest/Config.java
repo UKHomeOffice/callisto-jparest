@@ -8,7 +8,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.PathItemCreator;
@@ -23,7 +22,6 @@ public class Config {
     private static final Logger LOGGER = Logger.getLogger(Config.class.getName());
 
     @Bean
-    @Primary
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new Hibernate5Module());
