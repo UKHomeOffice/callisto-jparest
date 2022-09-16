@@ -1,10 +1,10 @@
-package uk.gov.homeoffice.digital.sas.jparest;
+package uk.gov.homeoffice.digital.sas.jparest.config;
 
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
+import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.PathItemCreator;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.ResourceOpenApiCustomiser;
@@ -15,7 +15,7 @@ import uk.gov.homeoffice.digital.sas.jparest.swagger.ResourceOpenApiCustomiser;
         JpaRestMvcConfig.class,
         HandlerMappingConfig.class,
 })
-public class Config {
+public class ApplicationConfig {
 
     @Bean
     public OpenApiCustomiser resourceOpenApiCustomiser(ResourceEndpoint endpoint, PathItemCreator pathItemCreator) {

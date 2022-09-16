@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest;
+package uk.gov.homeoffice.digital.sas.jparest.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
