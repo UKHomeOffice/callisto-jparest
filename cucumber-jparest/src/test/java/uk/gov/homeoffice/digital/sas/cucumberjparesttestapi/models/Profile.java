@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest.models;
+package uk.gov.homeoffice.digital.sas.cucumberjparesttestapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

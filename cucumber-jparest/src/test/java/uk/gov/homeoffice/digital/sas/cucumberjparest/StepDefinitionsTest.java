@@ -12,6 +12,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import io.cucumber.java.AfterAll;
 import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.Then;
+import uk.gov.homeoffice.digital.sas.cucumberjparesttestapi.TestApiRunner;
 
 /**
  * 
