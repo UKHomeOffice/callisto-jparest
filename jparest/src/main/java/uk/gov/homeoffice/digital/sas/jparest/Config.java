@@ -41,9 +41,10 @@ public class Config {
     HandlerMappingConfigurer handlerMappingConfigurer(EntityManager entityManager,
                                                       PlatformTransactionManager transactionManager,
                                                       ApplicationContext context,
-                                                      ResourceEndpoint resourceEndpoint) {
+                                                      ResourceEndpoint resourceEndpoint,
+                                                      ObjectMapper objectMapper) {
         LOGGER.info(("auto configure handler mapping"));
-        return new HandlerMappingConfigurer(entityManager, transactionManager, context, resourceEndpoint, objectMapper());
+        return new HandlerMappingConfigurer(entityManager, transactionManager, context, resourceEndpoint, objectMapper);
     }
 
     @Bean

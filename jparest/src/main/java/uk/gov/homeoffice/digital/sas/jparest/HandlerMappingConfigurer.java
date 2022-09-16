@@ -52,7 +52,6 @@ public class HandlerMappingConfigurer {
     private BuilderConfiguration builderOptions;
     private final ObjectMapper objectMapper;
 
-
     @Autowired
     public HandlerMappingConfigurer(
             EntityManager entityManager,
