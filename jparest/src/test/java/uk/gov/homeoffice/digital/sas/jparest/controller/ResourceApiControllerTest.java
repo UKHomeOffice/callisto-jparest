@@ -19,6 +19,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
+import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
@@ -51,7 +52,7 @@ import static org.junit.jupiter.api.Named.named;
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @Transactional
-@ContextConfiguration(locations = "/test-context.xml")
+@ContextConfiguration(locations = "/test-context.xml", classes = {ObjectMapperConfig.class})
 class ResourceApiControllerTest {
 
     @PersistenceContext
@@ -60,7 +61,8 @@ class ResourceApiControllerTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public static final UUID NON_EXISTENT_ID = UUID.fromString("7a7c7da4-bb29-11ec-1000-0242ac120001");
     public static final UUID NON_EXISTENT_ID_2 = UUID.fromString("7a7c7da4-bb29-11ec-1001-0242ac120002");
@@ -87,10 +89,6 @@ class ResourceApiControllerTest {
     private static final String DUMMY_B_SET_FIELD_NAME = "dummyEntityBSet";
     
     private static final String RESOURCE_NOT_FOUND_ERROR_FORMAT = "Resource with id: %s was not found";
-
-
-
-    // region list
 
     @Test
     void list_withoutFilter_returnsAllEntities() {
@@ -159,11 +157,6 @@ class ResourceApiControllerTest {
         assertThat(response).isNotNull();
         assertThat(response.getItems()).isEmpty();
     }
-
-    // endregion
-
-    // region get
-
 
     @Test
     void get_resourceWithIdExists_returnsEntity() {

@@ -54,6 +54,9 @@ class HandlerMappingConfigurerTest {
     @MockBean
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
+    @MockBean
+    private ObjectMapper objectMapper;
+
     private HandlerMappingConfigurer handlerMappingConfigurer;
 
     private static Stream<Arguments> resources() {
@@ -68,7 +71,7 @@ class HandlerMappingConfigurerTest {
     public void setup() {
         when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
         handlerMappingConfigurer = new HandlerMappingConfigurer(entityManager, transactionManager, context,
-                resourceEndpoint, new ObjectMapper());
+                resourceEndpoint, objectMapper);
     }
 
     @Test
