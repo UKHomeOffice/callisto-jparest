@@ -5,7 +5,7 @@ Feature: Personas
 
   It will create completely new users for total scenario isolation.
   Personas only live for the context of a single scenario, so when using
-  scenario outlines the context of the persona will be unique for each 
+  scenario outlines the context of the persona will be unique for each
   example row.
 
   Scenario: Defining a persona
@@ -16,13 +16,22 @@ Feature: Personas
     And Paula is a user
     Then Trevor is a different persona to Paula
 
+  Scenario: Defining a persona as a noun
 
-Scenario: Anonymous access
+    Usually personas are proper nouns but the step also allows the persona
+    name to be prefixed with "the" in order to use a noun instead of a 
+    proper noun
 
-  Sometimes scenarios will need to be performed for unuthenticated 
-  resources or to test authentication/authorisation. In order to 
-  achieve this a single well known persona exists for making 
-  annonymous requests. The persona is called `someone`
+    Given the tester is a user
+    And the admin is a user
 
-  When someone creates profiles from the file 'data/profiles.json' in the test service
-  Then the last response should have a status code of 200
+
+  Scenario: Anonymous access
+
+    Sometimes scenarios will need to be performed for unuthenticated
+    resources or to test authentication/authorisation. In order to
+    achieve this a single well known persona exists for making
+    annonymous requests. The persona is called `someone`
+
+    When someone creates profiles from the file 'data/profiles.json' in the test service
+    Then the last response should have a status code of 200

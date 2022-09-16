@@ -18,16 +18,16 @@ Feature: Assertions
   customised see the Expectations supplement in the documentation.
 
   Background:
-    Given the test is a user
+    Given the tester is a user
     And the admin is a user
 
-
   Scenario: Assert response body should not be empty
-    When someone successfully GETs /descriptor/raw?_pretty=true from the test service
-    Then the last response body should not be empty
+    When someone successfully GETs "/swagger-ui/index.html" from the test service
+    Then the last response should have a status code of 200
+    And the last response body should not be empty
 
   Scenario: Assert response body should be empty
-    When someone successfully GETs /EmptyResponse from the test service
+    When someone successfully GETs "/tests/empty.html" from the test service
     Then the last response body should be empty
 
   Scenario: Response should contain fields

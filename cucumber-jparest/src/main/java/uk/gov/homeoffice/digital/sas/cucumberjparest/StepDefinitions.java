@@ -84,7 +84,13 @@ public class StepDefinitions {
         this.httpResponseManager.addResponse("/resources/" + resource, response);
     }
 
-    
+    @When("{persona} successfully GETs {string}{service}")
+    public void someone_successfully_gets_url_from_service(Persona persona, String path, String service) {
+        Response response = this.jpaRestApiClient.Get(service, path);
+
+        this.httpResponseManager.addResponse(path, response);
+    }
+
     /** 
      * 
      * Validates the last responses status code against the given value
@@ -96,6 +102,12 @@ public class StepDefinitions {
         assertThat(this.httpResponseManager.getLastResponse().statusCode()).isEqualTo(expectedCode);
     }
 
+    @Then("the last response body should not be empty")
+    public void the_last_response_body_should_not_be_empty() {
+        assertThat(this.httpResponseManager.getLastResponse().body())
+            .isNotNull()
+            .isNotEqualTo("");
+    }
     
     /** 
      * 

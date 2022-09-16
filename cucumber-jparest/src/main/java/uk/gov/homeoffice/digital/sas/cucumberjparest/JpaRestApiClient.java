@@ -124,4 +124,24 @@ public class JpaRestApiClient {
         return null;
     }
 
+    /** 
+     * 
+     * Retrieves resources in the specified service using the 
+     * provided filter.
+     * 
+     * @param service The name of the service where the resources will be retrieved from.
+     *  The service name must exist in the {@Link ServiceRegistry}
+     * @param resource The name of the type of resource to be retrieved
+     * @param filter The filter to apply to the resources
+     * @return Response
+     */
+    public Response Get(String service, String path) {
+        String baseUrl = this.serviceRegistry.getService(service);
+        String url = baseUrl + path;
+
+        RequestSpecification spec = given()
+            .queryParam("tenantId", "b7e813a2-bb28-11ec-8422-0242ac120002");
+
+        return spec.get(url);
+    }
 }
