@@ -104,11 +104,18 @@ public class StepDefinitions {
 
     @Then("the last response body should not be empty")
     public void the_last_response_body_should_not_be_empty() {
-        assertThat(this.httpResponseManager.getLastResponse().body())
+        assertThat(this.httpResponseManager.getLastResponse().body().asString())
             .isNotNull()
             .isNotEqualTo("");
     }
 
+    @Then("the last response body should be empty")
+    public void the_last_response_body_should_be_empty() {
+        assertThat(this.httpResponseManager.getLastResponse().body().asString())
+            .isNotNull()
+            .isEqualTo("");
+    }
+    
     /** 
      * 
      * Matchs when a file is specified and returns the contents
