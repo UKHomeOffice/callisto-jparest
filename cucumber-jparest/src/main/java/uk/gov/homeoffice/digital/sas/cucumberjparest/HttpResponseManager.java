@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +21,7 @@ import lombok.Getter;
 @Component
 public class HttpResponseManager {
 
-    private Map<String, ArrayList<Response>> responses = new HashMap<>();
+    private Map<URL, ArrayList<Response>> responses = new HashMap<>();
     
     // Provides quick access to the last response added
     @Getter
@@ -41,15 +42,15 @@ public class HttpResponseManager {
      * @param response The response received
      * @return Response
      */
-    public Response addResponse(String path, Response response) {
+    public Response addResponse(URL url, Response response) {
 
         // If this is the first time the path has been used
         // initialise an ArrayList for storing the responses
-        if (!responses.containsKey(path)) {
-            responses.put(path, new ArrayList<Response>());
+        if (!responses.containsKey(url)) {
+            responses.put(url, new ArrayList<Response>());
         }
         
-        ArrayList<Response> pathResponses = responses.get(path);
+        ArrayList<Response> pathResponses = responses.get(url);
         assertThat(pathResponses.add(response)).isTrue();
         this.lastResponse = response;
         return response;

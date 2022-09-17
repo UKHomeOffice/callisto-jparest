@@ -17,7 +17,6 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
-import io.restassured.response.Response;
 
 /**
  * 
@@ -53,7 +52,7 @@ public class StepDefinitions {
         });
         softly.assertAll();
     }
-    
+
     @Autowired
     public StepDefinitions(PersonaManager personaManager, HttpResponseManager httpResponseManager,
             JpaRestApiClient jpaRestApiClient) {
@@ -87,9 +86,9 @@ public class StepDefinitions {
     public void persona_creates_resource_from_the_file_in_the_service(Persona persona, String resource,
             String fileContents, String service) {
 
-        Response response = this.jpaRestApiClient.Create(persona, service, resource, fileContents);
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Create(persona, service, resource, fileContents);
 
-        this.httpResponseManager.addResponse("/resources/" + resource, response);
+        this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
 
     }
 
@@ -103,9 +102,9 @@ public class StepDefinitions {
      */
     @When("{persona} retrieves {word}{service}")
     public void persona_retrieves_resources_from_the_service(Persona persona, String resource, String service) {
-        Response response = this.jpaRestApiClient.Retrieve(persona, service, resource, null);
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Retrieve(persona, service, resource, null);
 
-        this.httpResponseManager.addResponse("/resources/" + resource, response);
+        this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
     }
 
     /**
@@ -118,9 +117,9 @@ public class StepDefinitions {
      */
     @When("{persona} successfully GETs {string}{service}")
     public void someone_successfully_gets_url_from_service(Persona persona, String path, String service) {
-        Response response = this.jpaRestApiClient.Get(persona, service, path);
+        JpaRestApiResponse apiResponse = this.jpaRestApiClient.Get(persona, service, path);
 
-        this.httpResponseManager.addResponse(path, response);
+        this.httpResponseManager.addResponse(apiResponse.getUrl(), apiResponse.getResponse());
     }
 
     /**
@@ -159,7 +158,6 @@ public class StepDefinitions {
         var root = this.httpResponseManager.getLastResponse().getBody().jsonPath().getMap("");
         objectContainsFields(root, fields);
     }
-
 
     /**
      * 
