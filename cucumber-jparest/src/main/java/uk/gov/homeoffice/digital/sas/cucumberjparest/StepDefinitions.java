@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.assertj.core.api.SoftAssertions;
@@ -31,6 +32,28 @@ public class StepDefinitions {
     private final HttpResponseManager httpResponseManager;
     private final JpaRestApiClient jpaRestApiClient;
 
+    private void objectContainsFields(Map<Object, Object> objectUnderTest, List<String> fields) {
+        SoftAssertions softly = new SoftAssertions();
+        fields.forEach((field) -> {
+            softly
+                    .assertThat(objectUnderTest)
+                    .withFailMessage("Expected the object to contain the field '%s'", field)
+                    .containsKey(field);
+        });
+        softly.assertAll();
+    }
+
+    private void objectDoesNotContainFields(Map<Object, Object> objectUnderTest, List<String> fields) {
+        SoftAssertions softly = new SoftAssertions();
+        fields.forEach((field) -> {
+            softly
+                    .assertThat(objectUnderTest)
+                    .withFailMessage("Expected the object to not contain the field '%s'", field)
+                    .doesNotContainKey(field);
+        });
+        softly.assertAll();
+    }
+    
     @Autowired
     public StepDefinitions(PersonaManager personaManager, HttpResponseManager httpResponseManager,
             JpaRestApiClient jpaRestApiClient) {
@@ -131,17 +154,23 @@ public class StepDefinitions {
      * 
      * @param fields The fields to check the response for
      */
-    @Then("the last response should contain fields")
+    @Then("the last response should contain the fields")
     public void the_last_response_should_contain_fields(List<String> fields) {
         var root = this.httpResponseManager.getLastResponse().getBody().jsonPath().getMap("");
-        SoftAssertions softly = new SoftAssertions();
-        fields.forEach((field) -> {
-            softly
-                    .assertThat(root)
-                    .withFailMessage("Expected the response to contain the field %s", field)
-                    .containsKey(field);
-        });
-        softly.assertAll();
+        objectContainsFields(root, fields);
+    }
+
+
+    /**
+     * 
+     * Checks that the response does not contains the given fields
+     * 
+     * @param fields The fields to check the response for
+     */
+    @Then("the last response should not contain the fields")
+    public void the_last_response_should_not_contain_fields(List<String> fields) {
+        var root = this.httpResponseManager.getLastResponse().getBody().jsonPath().getMap("");
+        objectDoesNotContainFields(root, fields);
     }
 
     /**
