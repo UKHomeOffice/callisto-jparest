@@ -19,7 +19,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
-import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
@@ -52,7 +51,7 @@ import static org.junit.jupiter.api.Named.named;
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @Transactional
-@ContextConfiguration(locations = "/test-context.xml", classes = {ObjectMapperConfig.class})
+@ContextConfiguration(locations = "/test-context.xml")
 class ResourceApiControllerTest {
 
     @PersistenceContext
