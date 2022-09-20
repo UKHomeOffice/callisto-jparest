@@ -1,15 +1,17 @@
-package uk.gov.homeoffice.digital.sas.jparest;
+package uk.gov.homeoffice.digital.sas.jparest.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo.BuilderConfiguration;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
+import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
@@ -38,10 +40,10 @@ import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_REL
  * Discovers JPA entities annotated with {@link Resource}
  * and registers a {@link ResourceApiController} for them.
  */
-@Component
-public class HandlerMappingConfigurer {
+@Configuration
+public class HandlerMappingConfig {
 
-    private static final Logger LOGGER = Logger.getLogger(HandlerMappingConfigurer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(HandlerMappingConfig.class.getName());
 
     private final EntityManager entityManager;
     private final PlatformTransactionManager transactionManager;
@@ -49,17 +51,19 @@ public class HandlerMappingConfigurer {
     private final ApplicationContext context;
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
     private BuilderConfiguration builderOptions;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    public HandlerMappingConfigurer(
+    public HandlerMappingConfig(
             EntityManager entityManager,
             PlatformTransactionManager transactionManager,
             ApplicationContext context,
-            ResourceEndpoint resourceEndpoint) {
+            ResourceEndpoint resourceEndpoint,
+            ObjectMapper objectMapper) {
         this.entityManager = entityManager;
         this.transactionManager = transactionManager;
         this.context = context;
         this.resourceEndpoint = resourceEndpoint;
+        this.objectMapper = objectMapper;
     }
 
     @PostConstruct
@@ -102,7 +106,7 @@ public class HandlerMappingConfigurer {
             EntityUtils<?, ?> entityUtils = new EntityUtils<>(resource, isBaseEntitySubclass);
             ResourceApiController<?> controller = new ResourceApiController<>(
                     resource, entityManager,
-                    transactionManager, entityUtils);
+                    transactionManager, entityUtils, objectMapper);
 
             // Map the CRUD operations to the controllers methods
             mapRestOperationsToController(resource, path, controller);

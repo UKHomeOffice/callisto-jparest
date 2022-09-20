@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,8 +59,10 @@ class ResourceApiControllerTest {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
-    
-    
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     public static final UUID NON_EXISTENT_ID = UUID.fromString("7a7c7da4-bb29-11ec-1000-0242ac120001");
     public static final UUID NON_EXISTENT_ID_2 = UUID.fromString("7a7c7da4-bb29-11ec-1001-0242ac120002");
     public static final UUID NEW_RESOURCE_ID = UUID.fromString("7a7c7da4-bb29-11ec-1002-0242ac120003");
@@ -85,10 +88,6 @@ class ResourceApiControllerTest {
     private static final String DUMMY_B_SET_FIELD_NAME = "dummyEntityBSet";
     
     private static final String RESOURCE_NOT_FOUND_ERROR_FORMAT = "Resource with id: %s was not found";
-
-
-
-    // region list
 
     @Test
     void list_withoutFilter_returnsAllEntities() {
@@ -157,11 +156,6 @@ class ResourceApiControllerTest {
         assertThat(response).isNotNull();
         assertThat(response.getItems()).isEmpty();
     }
-
-    // endregion
-
-    // region get
-
 
     @Test
     void get_resourceWithIdExists_returnsEntity() {
@@ -582,7 +576,6 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    @SuppressWarnings("unchecked")
     void addRelated_allResourcesExist_addsRelatedItems() {
 
         var controller = getResourceApiController(DummyEntityA.class);
@@ -682,7 +675,6 @@ class ResourceApiControllerTest {
 
     @ParameterizedTest
     @MethodSource("relatedResourceFilters")
-    @SuppressWarnings("unchecked")
     void getRelated_filterExpressionProvided_returnsFilteredResources(UUID resourceId,
                                                                       SpelExpression expression,
                                                                       int expectedItems) {
@@ -894,7 +886,7 @@ class ResourceApiControllerTest {
 
     private <T extends BaseEntity, U> ResourceApiController<T> getResourceApiController(Class<T> clazz) {
         var entityUtils = new EntityUtils<>(clazz, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
-        return new ResourceApiController<>(clazz, entityManager, transactionManager, entityUtils);
+        return new ResourceApiController<>(clazz, entityManager, transactionManager, entityUtils, objectMapper);
     }
 
     private <T extends BaseEntity> T createResource(ResourceApiController<T> controller,

@@ -1,5 +1,6 @@
-package uk.gov.homeoffice.digital.sas.jparest;
+package uk.gov.homeoffice.digital.sas.jparest.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
@@ -36,7 +38,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @Transactional
 @ContextConfiguration(locations = "/test-context.xml")
-class HandlerMappingConfigurerTest {
+class HandlerMappingConfigTest {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -53,7 +55,10 @@ class HandlerMappingConfigurerTest {
     @MockBean
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
-    private HandlerMappingConfigurer handlerMappingConfigurer;
+    @MockBean
+    private ObjectMapper objectMapper;
+
+    private HandlerMappingConfig handlerMappingConfig;
 
     private static Stream<Arguments> resources() {
         return Stream.of(
@@ -66,8 +71,8 @@ class HandlerMappingConfigurerTest {
     @BeforeEach
     public void setup() {
         when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
-        handlerMappingConfigurer = new HandlerMappingConfigurer(entityManager, transactionManager, context,
-                resourceEndpoint);
+        handlerMappingConfig = new HandlerMappingConfig(entityManager, transactionManager, context,
+                resourceEndpoint, objectMapper);
     }
 
     @Test
@@ -81,7 +86,7 @@ class HandlerMappingConfigurerTest {
                 List.of("{DELETE [/resources/" + resourceName + "/{id}], produces [application/json]}", "delete"),
                 List.of("{PUT [/resources/" + resourceName + "/{id}], produces [application/json]}", "update"));
 
-        assertThatNoException().isThrownBy(() -> handlerMappingConfigurer.registerUserController());
+        assertThatNoException().isThrownBy(() -> handlerMappingConfig.registerUserController());
 
         for (var expected : expectedCalls) {
             Mockito.verify(requestMappingHandlerMapping, never()).registerMapping(
@@ -102,8 +107,8 @@ class HandlerMappingConfigurerTest {
                 List.of("{POST [/resources/" + resourceName + "], produces [application/json]}", "create"),
                 List.of("{DELETE [/resources/" + resourceName + "/{id}], produces [application/json]}", "delete"),
                 List.of("{PUT [/resources/" + resourceName + "/{id}], produces [application/json]}", "update"));
-        assertThatNoException().isThrownBy(() -> handlerMappingConfigurer.registerUserController());
-        verifyExpectedHandlerMappingCalls(requestMappingHandlerMapping, clazz, expectedCalls);
+        assertThatNoException().isThrownBy(() -> handlerMappingConfig.registerUserController());
+        verifyExpectedHandlerMappingCalls(clazz, expectedCalls);
     }
 
     @Test
@@ -115,12 +120,11 @@ class HandlerMappingConfigurerTest {
                         "deleteRelated"),
                 List.of("{PUT [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedIds}], produces [application/json]}",
                         "addRelated"));
-        assertThatNoException().isThrownBy(() -> handlerMappingConfigurer.registerUserController());
-        verifyExpectedHandlerMappingCalls(requestMappingHandlerMapping, DummyEntityA.class, expectedCalls);
+        assertThatNoException().isThrownBy(() -> handlerMappingConfig.registerUserController());
+        verifyExpectedHandlerMappingCalls(DummyEntityA.class, expectedCalls);
     }
 
     private void verifyExpectedHandlerMappingCalls(
-            RequestMappingHandlerMapping requestMappingHandlerMapping2,
             Class<?> clazz, List<List<String>> expectedCalls) {
         for (var expected : expectedCalls) {
             Mockito.verify(requestMappingHandlerMapping).registerMapping(

@@ -28,4 +28,6 @@
     </bean>
 
     <bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+    <bean class="uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig"/>
 </beans>
