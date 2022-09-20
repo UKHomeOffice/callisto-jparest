@@ -3,6 +3,8 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,6 +19,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
+import io.restassured.response.Response;
 
 /**
  * 
@@ -27,10 +30,20 @@ import io.cucumber.spring.CucumberContextConfiguration;
 @ContextConfiguration(classes = JpaTestContext.class)
 public class StepDefinitions {
 
+    class ObjectObjectMap extends HashMap<Object, Object> {
+    }
+
     private final PersonaManager personaManager;
     private final HttpResponseManager httpResponseManager;
     private final JpaRestApiClient jpaRestApiClient;
 
+    /**
+     * 
+     * Checks that the objectUnderTest contains the given fields
+     * 
+     * @param objectUnderTest The object to check
+     * @param fields          The fields the objectUnderTest should contain
+     */
     private void objectContainsFields(Map<Object, Object> objectUnderTest, List<String> fields) {
         SoftAssertions softly = new SoftAssertions();
         fields.forEach((field) -> {
@@ -42,6 +55,13 @@ public class StepDefinitions {
         softly.assertAll();
     }
 
+    /**
+     * 
+     * Checks that the objectUnderTest does not contain the given fields
+     * 
+     * @param objectUnderTest The object to check
+     * @param fields          The fields the objectUnderTest should not contain
+     */
     private void objectDoesNotContainFields(Map<Object, Object> objectUnderTest, List<String> fields) {
         SoftAssertions softly = new SoftAssertions();
         fields.forEach((field) -> {
@@ -172,6 +192,30 @@ public class StepDefinitions {
     }
 
     /**
+     *
+     * Checks that a resource contains the given fields
+     *
+     * @param objectUnderTest The object to test
+     * @param fields          The fields to check the response for
+     */
+    @Then("the {object_to_test} should contain the fields")
+    public void the_object_should_contain_fields(Map<Object, Object> objectUnderTest, List<String> fields) {
+        objectContainsFields(objectUnderTest, fields);
+    }
+
+    /**
+     *
+     * Checks that a resource does not contains the given fields
+     *
+     * @param objectUnderTest The object to test
+     * @param fields          The fields to check the response for
+     */
+    @Then("the {object_to_test} should not contain the fields")
+    public void the_object_should_not_contain_fields(Map<Object, Object> objectUnderTest, List<String> fields) {
+        objectDoesNotContainFields(objectUnderTest, fields);
+    }
+
+    /**
      * 
      * Matchs when a file is specified and returns the contents
      * of the specified file
@@ -210,9 +254,61 @@ public class StepDefinitions {
      * @param name The name of the service
      * @return String The URL of the service
      */
-    @ParameterType("(?: (?:from|in) the (\\S*) service)?")
+    @ParameterType("(?: (?:from|in) the (\\S*) service)")
     public String service(String name) {
         return name;
+    }
+
+    /**
+     * 
+     * Extracts a specific object from a specific response
+     * 
+     * @param objectPosition   The position of the resource to return
+     * @param resourceName     The name of the type of resource to extract
+     * @param responsePosition The ordinal of the response to retrieve the resource
+     *                         from
+     * @param path             The path specified in the request when retrieve
+     *                         resources from a GET request (Optional)
+     * @param service          The service the request was made to
+     * @return Map<Object, Object>
+     */
+    @ParameterType("(?:last|(?:(\\d+)(?:st|nd|rd|th))) of the (\\S*) in the (?:last|(?:(\\d+)(?:st|nd|rd|th))) (?:\\\"([^\\\"]*)\\\" )?response from the (\\S*) service")
+    public Map<Object, Object> object_to_test(String objectPosition,
+            String resourceName, String responsePosition, String path, String service) {
+
+        URL url;
+        if (path == null || path.isEmpty()) {
+            url = this.jpaRestApiClient.GetResourceURL(service, resourceName);
+        } else {
+            url = this.jpaRestApiClient.GetServiceURL(service, path);
+        }
+
+        int responseIndex = getIndex(responsePosition);
+        Response response = this.httpResponseManager.getResponse(url, responseIndex);
+        List<Map<Object, Object>> items = response.getBody().jsonPath().get("items");
+        int objectIndex = getIndex(objectPosition);
+        if (objectIndex == -1) {
+            objectIndex = items.size() - 1;
+        }
+
+        return items.get(objectIndex);
+    }
+
+    /**
+     * 
+     * Converts positional string last, 1st, 2nd, 23rd, 30th etc
+     * to a zero based ordinal integer.
+     * 
+     * The word last is converted to a -1
+     * 
+     * @param responsePosition
+     * @return int
+     */
+    private int getIndex(String responsePosition) {
+        if (responsePosition == null) {
+            return -1;
+        }
+        return Integer.parseInt(responsePosition);
     }
 
 }
