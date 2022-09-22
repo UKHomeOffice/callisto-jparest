@@ -33,6 +33,7 @@
         </repository>
         <snapshotRepository>
             <id>callisto-jparest</id>
+            <uniqueVersion>true</uniqueVersion>
             <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
         </snapshotRepository>
     </distributionManagement>
