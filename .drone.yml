@@ -48,7 +48,7 @@ steps:
   - versionExtract=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
   - sed -i "/^version=/{s|.$|"=$versionExtract"|}" git_tag.sh
   when:
-    branch: main
+#    branch: main
     event:
       exclude:
       - pull_request

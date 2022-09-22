@@ -354,7 +354,6 @@ public class ResourceApiController<T extends BaseEntity> {
         }
 
     }
-    //comment added for testing unique version
     private static List<Order> toOrders(Sort sort, Path<?> path, CriteriaBuilder builder) {
 
         if (sort.isUnsorted()) {
