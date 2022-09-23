@@ -80,8 +80,8 @@ Feature: Assertions
 
     When someone retrieves profiles from the test service
     Then the last response should contain
-      | field    | type | expectation           |
-      | items    | List | hasSizeGreaterThan(1) |
+      | field | type | expectation           |
+      | items | List | hasSizeGreaterThan(1) |
     Then the 1st of the profiles in the last response from the test service should contain
       | field       | type    | expectation |
       | dob         | Instant | isNotNull() |
@@ -89,16 +89,15 @@ Feature: Assertions
 
   Scenario: Property expectations for each object
 
-    When the admin successfully retrieves tenants in the test service with
-      | filter | value |
-      | owner  | root  |
+    When someone retrieves profiles from the test service
     Then the last response should contain
-      | field   | type  | expect | match                  |
-      | tenants | Array | to     | have_at_least(1).items |
-    And each of the tenants in the last response should contain
-      | field       | type   | expect | match                  |
-      | featureRefs | Array  | to     | have_at_least(1).items |
-      | title       | String | to not | be_empty               |
+      | field | type | expectation           |
+      | items | List | hasSizeGreaterThan(1) |
+    And each of the profiles in the last response from the test service should contain
+      | field        | type    | expectation                                        |
+      | dob          | Instant | isNotNull()                                        |
+      | preferences  | String  | isNotNull()                                        |
+      | firstRelease | Instant | isBeforeOrEqualTo("1979-01-01T00:00:00.000+00:00") |
 
   Scenario: Automatic prefixing of the generated owner for ref fields
     Given the admin creates users from the file './features/data/wip/login/valid-user.json' in the test service

@@ -90,18 +90,33 @@ public class StepDefinitions {
         softly.assertAll();
     }
 
-    
-    /** 
+    /**
      * 
-     * Asserts that the objectUnderTests meets the provided expectations
+     * A convenience method for {@see #objectMeetsExpectations(SoftAssertions,
+     * JsonPath, List)}
+     * Creates an instance of SoftAssertions and calls the wrapped method
+     * then calles {@see SoftAssertions#assertAll()}
      * 
      * @param objectUnderTest JsonPath pointing to the object to assert against
-     * @param expectations A table of expectations to assert
+     * @param expectations    A table of expectations to assert
      */
     private void objectMeetsExpectations(JsonPath objectUnderTest, List<Expectation> expectations) {
-
-        Map<Object, Object> objectMap = objectUnderTest.get();
         SoftAssertions softly = new SoftAssertions();
+        objectMeetsExpectations(softly, objectUnderTest, expectations);
+        softly.assertAll();
+    }
+
+    /**
+     * 
+     * Softly asserts that the objectUnderTests meets the provided expectations
+     * 
+     * @param softly          The SoftAssertions instance
+     * @param objectUnderTest JsonPath pointing to the object to assert against
+     * @param expectations    A table of expectations to assert
+     */
+    private void objectMeetsExpectations(@NonNull SoftAssertions softly, JsonPath objectUnderTest,
+            List<Expectation> expectations) {
+        Map<Object, Object> objectMap = objectUnderTest.get();
 
         expectations.forEach((expect) -> {
             var field = expect.getField();
@@ -121,7 +136,8 @@ public class StepDefinitions {
                 Expression expression = expressionParser
                         .parseExpression("#assertThat(#objectToTest)." + expect.getExpectation());
 
-                // Retrieve the typed object from the JsonPath and fail if the type doesn't match
+                // Retrieve the typed object from the JsonPath and fail if the type doesn't
+                // match
                 var testSubject = this.objectMapper.convertValue(objectUnderTest.get(field), expect.getType());
 
                 // Create the evaluation context and set the variable and function
@@ -140,7 +156,7 @@ public class StepDefinitions {
                 context.registerFunction("assertThat", assertThatMethod);
 
                 // Execute the expression and capture any EvaluationException to determine
-                // how the expectation failed 
+                // how the expectation failed
                 expression.getValue(context);
             } catch (IllegalArgumentException ex) {
                 softly.fail("Expected value to be of type '%s'", expect.getType());
@@ -157,7 +173,6 @@ public class StepDefinitions {
                 }
             }
         });
-        softly.assertAll();
     }
 
     @Autowired
@@ -280,8 +295,7 @@ public class StepDefinitions {
         objectDoesNotContainFields(root, fields);
     }
 
-    
-    /** 
+    /**
      * 
      * Assert expectations against the last response
      * 
@@ -317,18 +331,40 @@ public class StepDefinitions {
         objectDoesNotContainFields(objectUnderTest.getMap(""), fields);
     }
 
-    
-    /** 
+    /**
      * 
-     * Retrieves a specific resource from a list of resources from the 
+     * Retrieves a specific resource from a list of resources from the
      * specified response and applies the given expectations to that resource.
      * 
      * @param objectUnderTest The object to test
-     * @param expectations A table of expectations to assert
+     * @param expectations    A table of expectations to assert
      */
     @Then("the {object_to_test} should contain")
     public void the_object_should_contain(JsonPath objectUnderTest, List<Expectation> expectations) {
         objectMeetsExpectations(objectUnderTest, expectations);
+    }
+
+    /**
+     * 
+     * Retrieves all resources from the specified response and applies
+     * the given expectations to each resource.
+     * 
+     * @param objectsUnderTest The object to test
+     * @param expectations     A table of expectations to assert against each
+     *                         resource
+     */
+    @Then("{each_of_the_objects_to_test} should contain")
+    public void the_objects_should_contain(JsonPath objectsUnderTest, List<Expectation> expectations) {
+
+        SoftAssertions softly = new SoftAssertions();
+
+        var itemsSize = objectsUnderTest.getInt("size()");
+        for (int i = 0; i < itemsSize; i++) {
+            objectsUnderTest.setRootPath("items[" + i + "]");
+            objectMeetsExpectations(softly, objectsUnderTest, expectations);
+        }
+
+        softly.assertAll();
     }
 
     /**
@@ -386,7 +422,7 @@ public class StepDefinitions {
      * @param path             The path specified in the request when retrieve
      *                         resources from a GET request (Optional)
      * @param service          The service the request was made to
-     * @return Map<Object, Object>
+     * @return JsonPath
      */
     @ParameterType("(?:last|(?:(\\d+)(?:st|nd|rd|th))) of the (\\S*) in the (?:last|(?:(\\d+)(?:st|nd|rd|th))) (?:\\\"([^\\\"]*)\\\" )?response from the (\\S*) service")
     public JsonPath object_to_test(String objectPosition,
@@ -402,17 +438,44 @@ public class StepDefinitions {
         int responseIndex = getIndex(responsePosition);
         Response response = this.httpResponseManager.getResponse(url, responseIndex);
         var itemsPath = response.getBody().jsonPath().setRootPath("items");
-        var items = itemsPath.getList("");
         int objectIndex = getIndex(objectPosition);
         if (objectIndex == -1) {
-            objectIndex = items.size() - 1;
+            objectIndex = itemsPath.getInt("size()") - 1;
         }
 
         return itemsPath.setRootPath("items[" + objectIndex + "]");
     }
 
-    
-    /** 
+    /**
+     * 
+     * Extracts all resources from a specific response
+     * 
+     * @param resourceName     The name of the type of resource to extract
+     * @param responsePosition The ordinal of the response to retrieve the resource
+     *                         from
+     * @param path             The path specified in the request when retrieve
+     *                         resources from a GET request (Optional)
+     * @param service          The service the request was made to
+     * @return JsonPath
+     */
+    @ParameterType("each of the (\\S*) in the (?:last|(?:(\\d+)(?:st|nd|rd|th))) (?:\\\"([^\\\"]*)\\\" )?response from the (\\S*) service")
+    public JsonPath each_of_the_objects_to_test(String resourceName, String responsePosition, String path,
+            String service) {
+
+        URL url;
+        if (path == null || path.isEmpty()) {
+            url = this.jpaRestApiClient.GetResourceURL(service, resourceName);
+        } else {
+            url = this.jpaRestApiClient.GetServiceURL(service, path);
+        }
+
+        int responseIndex = getIndex(responsePosition);
+        Response response = this.httpResponseManager.getResponse(url, responseIndex);
+        var itemsPath = response.getBody().jsonPath().setRootPath("items");
+        return itemsPath;
+    }
+
+    /**
      * 
      * DataTable conversion for expectations. Converts tables
      * with the columns field, type, and expectation.
@@ -434,9 +497,9 @@ public class StepDefinitions {
         Expectation expectation = null;
         try {
             expectation = new Expectation(
-                entry.get("field"),
-                clazz,
-                entry.get("expectation"));
+                    entry.get("field"),
+                    clazz,
+                    entry.get("expectation"));
         } catch (NullPointerException exx) {
             fail("Expectation tables are expected to contain the fields 'field', 'type', and 'expectation'. Each field requires a valid value");
         }
@@ -444,13 +507,12 @@ public class StepDefinitions {
         return expectation;
     }
 
-    
-    /** 
+    /**
      * 
      * Resolves a specified type. If a simple name is used
      * it is first looked up in {@see JpaTestContext#classSimpleStrings}
      * Otherwise it will be resolved using {@see Class#forName(String)}
-     * If neither method returns a result an attempt is made to 
+     * If neither method returns a result an attempt is made to
      * resolve the class from the {@see ObjectMapper#getTypeFactory()}
      * 
      * @param type The name of the class to find
