@@ -65,6 +65,18 @@ public class JpaTestContext {
 
     /**
      * 
+     * ScenarioState per scenario
+     * 
+     * @return ScenarioState
+     */
+    @ScenarioScope
+    @Bean
+    public ScenarioState scenarioState() {
+        return new ScenarioState();
+    }
+
+    /**
+     * 
      * Singleton JpaRestApiClient
      * 
      * @return JpaRestApiClient

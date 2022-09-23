@@ -46,12 +46,15 @@ import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
 @ContextConfiguration(classes = { JpaTestContext.class, ObjectMapperConfig.class })
 public class StepDefinitions {
 
+    private static final String FROM_IN_SERVICE = "(?: (?:from|in) the (\\S*) service)?";
+
     class ObjectObjectMap extends HashMap<Object, Object> {
     }
 
     private final PersonaManager personaManager;
     private final HttpResponseManager httpResponseManager;
     private final JpaRestApiClient jpaRestApiClient;
+    private final ScenarioState scenarioState;
     private final ObjectMapper objectMapper;
 
     /**
@@ -177,11 +180,13 @@ public class StepDefinitions {
 
     @Autowired
     public StepDefinitions(@NonNull PersonaManager personaManager, @NonNull HttpResponseManager httpResponseManager,
-            @NonNull JpaRestApiClient jpaRestApiClient, @NonNull ObjectMapper objectMapper) {
+            @NonNull JpaRestApiClient jpaRestApiClient, @NonNull ObjectMapper objectMapper,
+            @NonNull ScenarioState scenarioState) {
         this.personaManager = personaManager;
         this.httpResponseManager = httpResponseManager;
         this.jpaRestApiClient = jpaRestApiClient;
         this.objectMapper = objectMapper;
+        this.scenarioState = scenarioState;
 
     }
 
@@ -348,7 +353,7 @@ public class StepDefinitions {
      * 
      * Compares 2 resources to see if they are equal
      * 
-     * @param objectToCompare The object to be compared
+     * @param objectToCompare     The object to be compared
      * @param objectToCompareWith The object to compare with
      */
     @Then("the {object_to_test} should equal the {object_to_test}")
@@ -418,9 +423,9 @@ public class StepDefinitions {
      * @param name The name of the service
      * @return String The URL of the service
      */
-    @ParameterType("(?: (?:from|in) the (\\S*) service)")
+    @ParameterType(FROM_IN_SERVICE)
     public String service(String name) {
-        return name;
+        return this.scenarioState.trackService(name);
     }
 
     /**
@@ -436,15 +441,18 @@ public class StepDefinitions {
      * @param service          The service the request was made to
      * @return JsonPath
      */
-    @ParameterType("(?:last|(?:(\\d+)(?:st|nd|rd|th))) of the (\\S*) in the (?:last|(?:(\\d+)(?:st|nd|rd|th))) (?:\\\"([^\\\"]*)\\\" )?response from the (\\S*) service")
+    @ParameterType("(?:last|(?:(\\d+)(?:st|nd|rd|th))) of the (\\S*) in the (?:last|(?:(\\d+)(?:st|nd|rd|th))) (?:\\\"([^\\\"]*)\\\" )?response"
+            + FROM_IN_SERVICE)
     public JsonPath object_to_test(String objectPosition,
             String resourceName, String responsePosition, String path, String service) {
 
+        String targetService = this.scenarioState.trackService(service);
+
         URL url;
         if (path == null || path.isEmpty()) {
-            url = this.jpaRestApiClient.GetResourceURL(service, resourceName);
+            url = this.jpaRestApiClient.GetResourceURL(targetService, resourceName);
         } else {
-            url = this.jpaRestApiClient.GetServiceURL(service, path);
+            url = this.jpaRestApiClient.GetServiceURL(targetService, path);
         }
 
         int responseIndex = getIndex(responsePosition);
@@ -470,15 +478,18 @@ public class StepDefinitions {
      * @param service          The service the request was made to
      * @return JsonPath
      */
-    @ParameterType("each of the (\\S*) in the (?:last|(?:(\\d+)(?:st|nd|rd|th))) (?:\\\"([^\\\"]*)\\\" )?response from the (\\S*) service")
+    @ParameterType("each of the (\\S*) in the (?:last|(?:(\\d+)(?:st|nd|rd|th))) (?:\\\"([^\\\"]*)\\\" )?response"
+            + FROM_IN_SERVICE)
     public JsonPath each_of_the_objects_to_test(String resourceName, String responsePosition, String path,
             String service) {
 
+        String targetService = this.scenarioState.trackService(service);
+
         URL url;
         if (path == null || path.isEmpty()) {
-            url = this.jpaRestApiClient.GetResourceURL(service, resourceName);
+            url = this.jpaRestApiClient.GetResourceURL(targetService, resourceName);
         } else {
-            url = this.jpaRestApiClient.GetServiceURL(service, path);
+            url = this.jpaRestApiClient.GetServiceURL(targetService, path);
         }
 
         int responseIndex = getIndex(responsePosition);
