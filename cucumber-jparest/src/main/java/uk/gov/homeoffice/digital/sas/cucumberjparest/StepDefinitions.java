@@ -346,6 +346,18 @@ public class StepDefinitions {
 
     /**
      * 
+     * Compares 2 resources to see if they are equal
+     * 
+     * @param objectToCompare The object to be compared
+     * @param objectToCompareWith The object to compare with
+     */
+    @Then("the {object_to_test} should equal the {object_to_test}")
+    public void the_object_should_contain(JsonPath objectToCompare, JsonPath objectToCompareWith) {
+        assertThat(objectToCompare.getMap("")).isEqualTo(objectToCompareWith.getMap(""));
+    }
+
+    /**
+     * 
      * Retrieves all resources from the specified response and applies
      * the given expectations to each resource.
      * 

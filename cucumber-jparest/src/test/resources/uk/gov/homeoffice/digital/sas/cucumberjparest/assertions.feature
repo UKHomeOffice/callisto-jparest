@@ -67,9 +67,9 @@ Feature: Assertions
     a specific response.
     This step enables two objects to be directly compared.
 
-    When the admin successfully GETs /pauth/tenants from the test service
-    And the admin successfully GETs /pauth/tenants from the test service
-    Then the first of the tenants in the first /pauth/tenants response should equal the first of the tenants in the last /pauth/tenants response
+    When someone retrieves profiles from the test service
+    And someone retrieves profiles from the test service
+    Then the 1st of the profiles in the 1st response from the test service should equal the 1st of the profiles in the last response from the test service
 
   Scenario: Property expectations
 
