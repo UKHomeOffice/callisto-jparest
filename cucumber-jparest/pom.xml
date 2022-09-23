@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <groupId>uk.gov.homeoffice.digital.sas</groupId>
@@ -12,7 +11,7 @@
 
     <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>cucumber-jparest</artifactId>
-	<version>${project.version}</version>
+    <version>${project.version}</version>
 
 
     <properties>
@@ -47,31 +46,35 @@
 
     <dependencies>
         <dependency>
-			<groupId>uk.gov.homeoffice.digital.sas</groupId>
-			<artifactId>jparest</artifactId>
-			<version>${project.version}</version>
-            <scope>test</scope>
-		</dependency>
+            <groupId>uk.gov.homeoffice.digital.sas</groupId>
+            <artifactId>jparest</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
         </dependency>
 
         <!-- SpringDoc -->
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.6.5</version>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.6.5</version>
             <scope>test</scope>
-		</dependency>
+        </dependency>
 
         <dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
             <scope>test</scope>
-		</dependency>
+        </dependency>
 
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
+        
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-junit-platform-engine</artifactId>
@@ -118,7 +121,8 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>5.1.1</version>
-            <exclusions><!-- https://www.baeldung.com/maven-version-collision -->
+            <exclusions>
+                <!-- https://www.baeldung.com/maven-version-collision -->
                 <exclusion>
                     <groupId>io.rest-assured</groupId>
                     <artifactId>xml-path</artifactId>
@@ -143,10 +147,10 @@
             </exclusions>
         </dependency>
         <dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>test</scope>
-		</dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!--
         <dependency>
             <groupId>net.serenity-bdd</groupId>

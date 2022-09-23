@@ -1,25 +1,41 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang3.reflect.MethodUtils;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.util.Files;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.EvaluationException;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.SpelParseException;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.test.context.ContextConfiguration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.cucumber.java.DataTableType;
 import io.cucumber.java.ParameterType;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import lombok.NonNull;
+import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
 
 /**
  * 
@@ -27,7 +43,7 @@ import io.restassured.response.Response;
  * 
  */
 @CucumberContextConfiguration
-@ContextConfiguration(classes = JpaTestContext.class)
+@ContextConfiguration(classes = { JpaTestContext.class, ObjectMapperConfig.class })
 public class StepDefinitions {
 
     class ObjectObjectMap extends HashMap<Object, Object> {
@@ -36,6 +52,7 @@ public class StepDefinitions {
     private final PersonaManager personaManager;
     private final HttpResponseManager httpResponseManager;
     private final JpaRestApiClient jpaRestApiClient;
+    private final ObjectMapper objectMapper;
 
     /**
      * 
@@ -73,12 +90,84 @@ public class StepDefinitions {
         softly.assertAll();
     }
 
+    
+    /** 
+     * 
+     * Asserts that the objectUnderTests meets the provided expectations
+     * 
+     * @param objectUnderTest JsonPath pointing to the object to assert against
+     * @param expectations A table of expectations to assert
+     */
+    private void objectMeetsExpectations(JsonPath objectUnderTest, List<Expectation> expectations) {
+
+        Map<Object, Object> objectMap = objectUnderTest.get();
+        SoftAssertions softly = new SoftAssertions();
+
+        expectations.forEach((expect) -> {
+            var field = expect.getField();
+
+            // Assert field exists
+            softly
+                    .assertThat(objectMap)
+                    .withFailMessage("Expected the object to contain the field '%s'", field)
+                    .containsKey(field);
+
+            // Assert the expectation
+            try {
+                // Construct an expression from the provided expectation using a reference
+                // to the assertFunction to be resolved and the variable that
+                // will represent the object under test.
+                ExpressionParser expressionParser = new SpelExpressionParser();
+                Expression expression = expressionParser
+                        .parseExpression("#assertThat(#objectToTest)." + expect.getExpectation());
+
+                // Retrieve the typed object from the JsonPath and fail if the type doesn't match
+                var testSubject = this.objectMapper.convertValue(objectUnderTest.get(field), expect.getType());
+
+                // Create the evaluation context and set the variable and function
+                StandardEvaluationContext context = new StandardEvaluationContext();
+                context.setVariable("objectToTest", testSubject);
+
+                // The assertThat functiion has to be reflected because of type erasure
+                // otherwise we would only be able to assert against objects
+                Method assertThatMethod = MethodUtils.getMatchingAccessibleMethod(Assertions.class, "assertThat",
+                        testSubject.getClass());
+                if (assertThatMethod == null) {
+                    softly.fail(
+                            "Unable to verify expectation. The org.assertj.core.api.Assertions class contains no matching assertThat method for the type %s",
+                            testSubject.getClass());
+                }
+                context.registerFunction("assertThat", assertThatMethod);
+
+                // Execute the expression and capture any EvaluationException to determine
+                // how the expectation failed 
+                expression.getValue(context);
+            } catch (IllegalArgumentException ex) {
+                softly.fail("Expected value to be of type '%s'", expect.getType());
+            } catch (SpelParseException ex) {
+                softly.fail("Invalid expectation: " + expect.getExpectation());
+            } catch (EvaluationException ex) {
+                // If an expectation exectued correctly but failed retrieve the underlying cause
+                // to expose the failed expectation
+                var cause = ex.getCause();
+                if (cause != null) {
+                    softly.fail(ex.getCause().getMessage());
+                } else {
+                    softly.fail(ex.getMessage());
+                }
+            }
+        });
+        softly.assertAll();
+    }
+
     @Autowired
-    public StepDefinitions(PersonaManager personaManager, HttpResponseManager httpResponseManager,
-            JpaRestApiClient jpaRestApiClient) {
-        this.personaManager = Objects.requireNonNull(personaManager, "personaManager must not be null");
-        this.httpResponseManager = Objects.requireNonNull(httpResponseManager, "httpResponseManager must not be null");
-        this.jpaRestApiClient = Objects.requireNonNull(jpaRestApiClient, "jpaRestApiClient must not be null");
+    public StepDefinitions(@NonNull PersonaManager personaManager, @NonNull HttpResponseManager httpResponseManager,
+            @NonNull JpaRestApiClient jpaRestApiClient, @NonNull ObjectMapper objectMapper) {
+        this.personaManager = personaManager;
+        this.httpResponseManager = httpResponseManager;
+        this.jpaRestApiClient = jpaRestApiClient;
+        this.objectMapper = objectMapper;
+
     }
 
     /**
@@ -191,6 +280,19 @@ public class StepDefinitions {
         objectDoesNotContainFields(root, fields);
     }
 
+    
+    /** 
+     * 
+     * Assert expectations against the last response
+     * 
+     * @param expectations A table of expectations to assert
+     */
+    @Then("the last response should contain")
+    public void the_last_response_should_contain(List<Expectation> expectations) {
+        var root = this.httpResponseManager.getLastResponse().getBody().jsonPath();
+        objectMeetsExpectations(root, expectations);
+    }
+
     /**
      *
      * Checks that a resource contains the given fields
@@ -199,8 +301,8 @@ public class StepDefinitions {
      * @param fields          The fields to check the response for
      */
     @Then("the {object_to_test} should contain the fields")
-    public void the_object_should_contain_fields(Map<Object, Object> objectUnderTest, List<String> fields) {
-        objectContainsFields(objectUnderTest, fields);
+    public void the_object_should_contain_fields(JsonPath objectUnderTest, List<String> fields) {
+        objectContainsFields(objectUnderTest.getMap(""), fields);
     }
 
     /**
@@ -211,8 +313,22 @@ public class StepDefinitions {
      * @param fields          The fields to check the response for
      */
     @Then("the {object_to_test} should not contain the fields")
-    public void the_object_should_not_contain_fields(Map<Object, Object> objectUnderTest, List<String> fields) {
-        objectDoesNotContainFields(objectUnderTest, fields);
+    public void the_object_should_not_contain_fields(JsonPath objectUnderTest, List<String> fields) {
+        objectDoesNotContainFields(objectUnderTest.getMap(""), fields);
+    }
+
+    
+    /** 
+     * 
+     * Retrieves a specific resource from a list of resources from the 
+     * specified response and applies the given expectations to that resource.
+     * 
+     * @param objectUnderTest The object to test
+     * @param expectations A table of expectations to assert
+     */
+    @Then("the {object_to_test} should contain")
+    public void the_object_should_contain(JsonPath objectUnderTest, List<Expectation> expectations) {
+        objectMeetsExpectations(objectUnderTest, expectations);
     }
 
     /**
@@ -273,7 +389,7 @@ public class StepDefinitions {
      * @return Map<Object, Object>
      */
     @ParameterType("(?:last|(?:(\\d+)(?:st|nd|rd|th))) of the (\\S*) in the (?:last|(?:(\\d+)(?:st|nd|rd|th))) (?:\\\"([^\\\"]*)\\\" )?response from the (\\S*) service")
-    public Map<Object, Object> object_to_test(String objectPosition,
+    public JsonPath object_to_test(String objectPosition,
             String resourceName, String responsePosition, String path, String service) {
 
         URL url;
@@ -285,13 +401,84 @@ public class StepDefinitions {
 
         int responseIndex = getIndex(responsePosition);
         Response response = this.httpResponseManager.getResponse(url, responseIndex);
-        List<Map<Object, Object>> items = response.getBody().jsonPath().get("items");
+        var itemsPath = response.getBody().jsonPath().setRootPath("items");
+        var items = itemsPath.getList("");
         int objectIndex = getIndex(objectPosition);
         if (objectIndex == -1) {
             objectIndex = items.size() - 1;
         }
 
-        return items.get(objectIndex);
+        return itemsPath.setRootPath("items[" + objectIndex + "]");
+    }
+
+    
+    /** 
+     * 
+     * DataTable conversion for expectations. Converts tables
+     * with the columns field, type, and expectation.
+     * The field is a property name on the object and the
+     * type defines the class of the field. The type can be
+     * a fully qualified name or be a short version added to
+     * {@see JpaTestContext#classSimpleStrings}
+     * 
+     * @param entry The table row to be converted
+     * @return Expectation
+     */
+    @DataTableType
+    public Expectation expectationEntry(Map<String, String> entry) {
+        String type = entry.get("type");
+        Objects.requireNonNull(type, "A type must be specified for the expectation");
+
+        Class<?> clazz = resolveType(type);
+
+        Expectation expectation = null;
+        try {
+            expectation = new Expectation(
+                entry.get("field"),
+                clazz,
+                entry.get("expectation"));
+        } catch (NullPointerException exx) {
+            fail("Expectation tables are expected to contain the fields 'field', 'type', and 'expectation'. Each field requires a valid value");
+        }
+
+        return expectation;
+    }
+
+    
+    /** 
+     * 
+     * Resolves a specified type. If a simple name is used
+     * it is first looked up in {@see JpaTestContext#classSimpleStrings}
+     * Otherwise it will be resolved using {@see Class#forName(String)}
+     * If neither method returns a result an attempt is made to 
+     * resolve the class from the {@see ObjectMapper#getTypeFactory()}
+     * 
+     * @param type The name of the class to find
+     * @return Class<?>
+     */
+    private Class<?> resolveType(String type) {
+
+        Class<?> clazz = null;
+        if (type.contains(".")) {
+            try {
+                clazz = Class.forName(type);
+            } catch (ClassNotFoundException e) {
+            }
+        } else {
+            clazz = JpaTestContext.classSimpleStrings.get(type);
+        }
+
+        if (clazz == null) {
+            try {
+                clazz = this.objectMapper.getTypeFactory().findClass(type);
+            } catch (ClassNotFoundException e) {
+                fail("Unknown type '%s'. To configure use JpaTestContext.put(\"%<s\", FullyQualifiedTypeName.class);",
+                        type);
+            }
+        }
+
+        return clazz;
+
     }
 
     /**

@@ -1,5 +1,11 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
+import static java.util.Map.entry;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.context.annotation.Bean;
 
 import io.cucumber.spring.ScenarioScope;
@@ -24,7 +30,16 @@ public class JpaTestContext {
      */
     public static final ServiceRegistry serviceRegistry = new ServiceRegistry();
 
-    /** 
+    public static final Map<String, Class<?>> classSimpleStrings = Map.ofEntries(
+            entry("String", String.class),
+            entry("Integer", Integer.class),
+            entry("Boolean", Boolean.class),
+            entry("Decimal", Double.class),
+            entry("Map", Map.class),
+            entry("List", List.class),
+            entry("Instant", Instant.class));
+
+    /**
      * 
      * PersonaManager per scenario
      * 
@@ -36,9 +51,8 @@ public class JpaTestContext {
         return new PersonaManager();
     }
 
-    
     /**
-     *  
+     * 
      * HttpResponseManager per scenario
      * 
      * @return HttpResponseManager
@@ -49,8 +63,7 @@ public class JpaTestContext {
         return new HttpResponseManager();
     }
 
-    
-    /** 
+    /**
      * 
      * Singleton JpaRestApiClient
      * 

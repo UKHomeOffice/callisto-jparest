@@ -78,15 +78,14 @@ Feature: Assertions
 
     It can also be specified as a specific resource in a response
 
-    When the admin successfully GETs /pauth/tenants from the test service
+    When someone retrieves profiles from the test service
     Then the last response should contain
-      | field   | type  | expect | match                  |
-      | tenants | Array | to     | have_at_least(1).items |
-    And the first of the tenants in the last /pauth/tenants response should contain
-      | field       | type   | expect | match                  |
-      | featureRefs | Array  | to     | have_at_least(1).items |
-      | title       | String | to not | be_empty               |
-      | description | String | to not | be_empty               |
+      | field    | type | expectation           |
+      | items    | List | hasSizeGreaterThan(1) |
+    Then the 1st of the profiles in the last response from the test service should contain
+      | field       | type    | expectation |
+      | dob         | Instant | isNotNull() |
+      | preferences | String  | isNotNull() |
 
   Scenario: Property expectations for each object
 
