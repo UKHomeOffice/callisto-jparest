@@ -99,19 +99,6 @@ Feature: Assertions
       | preferences  | String  | isNotNull()                                        |
       | firstRelease | Instant | isBeforeOrEqualTo("1979-01-01T00:00:00.000+00:00") |
 
-  Scenario: Automatic prefixing of the generated owner for ref fields
-    Given the admin creates users from the file './features/data/wip/login/valid-user.json' in the test service
-    And eventually data becomes consistent
-    When the admin successfully retrieves users in the test service with
-      | filter  | value           |
-      | withRef | test-admin-user |
-    Then the last response should contain
-      | field | type  | expect | match         |
-      | users | Array | to     | have(1).items |
-    And the first of the users in the last response should contain
-      | field | type   | expect | match             |
-      | title | String | to     | eq 'Example user' |
-
   Scenario: Asserting against nested properties in a response
 
     Assertions against an object can test nested properties
