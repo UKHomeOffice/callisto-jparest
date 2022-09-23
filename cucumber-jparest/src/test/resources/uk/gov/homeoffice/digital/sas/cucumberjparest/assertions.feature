@@ -112,23 +112,6 @@ Feature: Assertions
       | field | type   | expect | match             |
       | title | String | to     | eq 'Example user' |
 
-
-  Scenario: Persona substitution for underlying user's ref for userRef and profileRef fields
-    When the admin creates an assignment for the tester
-    And eventually data becomes consistent
-    When the admin successfully retrieves assignments in the test service with
-      | filter      | value  |
-      | withUserRef | tester |
-    Then the last response should contain
-      | field       | type  | expect | match         |
-      | assignments | Array | to     | have(2).items |
-    And the first of the assignments in the last response should contain
-      | field   | type   | expect | match                         |
-      | userRef | String | to     | eq users['tester']['userRef'] |
-    And the second of the assignments in the last response should contain
-      | field   | type   | expect | match                         |
-      | userRef | String | to     | eq users['tester']['userRef'] |
-
   Scenario: Asserting against nested properties in a response
 
     Assertions against an object can test nested properties
