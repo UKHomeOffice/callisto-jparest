@@ -104,24 +104,23 @@ Feature: Assertions
     Assertions against an object can test nested properties
     This is done by specifying the path to the nested property
 
-    And the admin creates roles from the file './features/data/wip/login/valid-role.json' in the test service
-    And eventually data becomes consistent
-    When the admin successfully retrieves roles in the test service with
-      | filter  | value      |
-      | withRef | valid-role |
+    When someone retrieves profiles from the test service
     Then the last response should contain
-      | field | type  | expect | match         |
-      | roles | Array | to     | have(1).items |
-    Then the last response should contain
-      | field          | type   | expect | match                                |
-      | roles[0].title | String | to     | eq 'role created by test automation' |
-    And the first of the roles in the last response should contain
-      | field      | type   | expect | match                               |
-      | actions[0] | String | to     | eq 'service:resource:action'        |
-      | actions[1] | String | to     | eq 'anotherservice:resource:write'  |
-      | actions[2] | String | to     | eq 'differentservice:resource:read' |
-      | actions[3] | String | to     | eq 'sameservice:resource:write'     |
-      | actions[4] | String | to     | eq 'whichservice:resource:read'     |
+      | field | type | expectation           |
+      | items | List | hasSizeGreaterThan(1) |
+    And the last response should contain
+      | field        | type   | expectation               |
+      | items[2]     | Object | isNotNull                 |
+      | items[1].bio | String | isEqualTo("My Bio for 2") |
+    And the 1st of the profiles in the last response should contain
+      | field                  | type   | expectation           |
+      | props.subItems         | List   | hasSize(2)            |
+      | props.subItems[0].make | String | isEqualTo("Vauxhall") |
+      | props.subItems[1].make | String | isEqualTo("Austin")   |
+    And the 2nd of the profiles in the last response should contain
+      | field | type | expectation |
+      | props | Map  | isNull      |
+
 
   Scenario: Asserting against properties of raw HTTP response
 

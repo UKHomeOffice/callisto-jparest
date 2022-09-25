@@ -32,6 +32,7 @@ public class JpaTestContext {
 
     public static final Map<String, Class<?>> classSimpleStrings = Map.ofEntries(
             entry("String", String.class),
+            entry("Object", Object.class),
             entry("Integer", Integer.class),
             entry("Boolean", Boolean.class),
             entry("Decimal", Double.class),

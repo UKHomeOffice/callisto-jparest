@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.assertj.core.api.Assertions;
@@ -47,6 +48,8 @@ import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
 public class StepDefinitions {
 
     private static final String FROM_IN_SERVICE = "(?: (?:from|in) the (\\S*) service)?";
+    private static final Pattern FIELD_PATH_IS_AN_ARRAY = Pattern.compile("(?=(.*)\\[(\\d+)\\]$).*");
+    private static final Pattern FIELD_PATH = Pattern.compile("(.*)(\\.|^)(.*)");
 
     class ObjectObjectMap extends HashMap<Object, Object> {
     }
@@ -119,16 +122,40 @@ public class StepDefinitions {
      */
     private void objectMeetsExpectations(@NonNull SoftAssertions softly, JsonPath objectUnderTest,
             List<Expectation> expectations) {
-        Map<Object, Object> objectMap = objectUnderTest.get();
 
         expectations.forEach((expect) -> {
             var field = expect.getField();
 
-            // Assert field exists
-            softly
-                    .assertThat(objectMap)
-                    .withFailMessage("Expected the object to contain the field '%s'", field)
-                    .containsKey(field);
+            /**
+             * Assert field exists
+             *
+             * In order to support nested properties in the field we can't depend on the
+             * get method because we cant distinguish between a key that is not present and
+             * key that is present but has a null value. We can inject containsKey into the
+             * path and also catch IllegalArgumentException which are caused when any
+             * parent part of the path doesn't exist.
+             * e.g.
+             * | field | JsonPath to test existence
+             * | description | containsKey('description')
+             * | summary | containsKey('summary')
+             * | items[0].description | items[0].containsKey('description')
+             * | items[0].summary | items[0].containsKey('summary')
+             * 
+             * (.*)(\.|^)(.*)
+             * $1$2containsKey('$3')
+             * 
+             * 
+             */
+            softly.assertThatCode(() -> {
+                String pathCheck = null;
+                if (field.endsWith("]")) {
+                    pathCheck = FIELD_PATH_IS_AN_ARRAY.matcher(field).replaceAll("$1.size() > $2");
+                } else {
+                    pathCheck = FIELD_PATH.matcher(field).replaceAll("$1$2containsKey('$3')");
+                }
+                assertThat(objectUnderTest.getBoolean(pathCheck)).isTrue();
+            }).withFailMessage("Expected the object to contain the field '%s'", field)
+                    .doesNotThrowAnyException();
 
             // Assert the expectation
             try {
@@ -143,24 +170,28 @@ public class StepDefinitions {
                 // match
                 var testSubject = this.objectMapper.convertValue(objectUnderTest.get(field), expect.getType());
 
-                // Create the evaluation context and set the variable and function
-                StandardEvaluationContext context = new StandardEvaluationContext();
-                context.setVariable("objectToTest", testSubject);
+                // Skip this if test subject doesn't exist, this will be caught in previous
+                // assertion
+                if (testSubject != null) {
+                    // Create the evaluation context and set the variable and function
+                    StandardEvaluationContext context = new StandardEvaluationContext();
+                    context.setVariable("objectToTest", testSubject);
 
-                // The assertThat functiion has to be reflected because of type erasure
-                // otherwise we would only be able to assert against objects
-                Method assertThatMethod = MethodUtils.getMatchingAccessibleMethod(Assertions.class, "assertThat",
-                        testSubject.getClass());
-                if (assertThatMethod == null) {
-                    softly.fail(
-                            "Unable to verify expectation. The org.assertj.core.api.Assertions class contains no matching assertThat method for the type %s",
+                    // The assertThat functiion has to be reflected because of type erasure
+                    // otherwise we would only be able to assert against objects
+                    Method assertThatMethod = MethodUtils.getMatchingAccessibleMethod(Assertions.class, "assertThat",
                             testSubject.getClass());
-                }
-                context.registerFunction("assertThat", assertThatMethod);
+                    if (assertThatMethod == null) {
+                        softly.fail(
+                                "Unable to verify expectation. The org.assertj.core.api.Assertions class contains no matching assertThat method for the type %s",
+                                testSubject.getClass());
+                    }
+                    context.registerFunction("assertThat", assertThatMethod);
 
-                // Execute the expression and capture any EvaluationException to determine
-                // how the expectation failed
-                expression.getValue(context);
+                    // Execute the expression and capture any EvaluationException to determine
+                    // how the expectation failed
+                    expression.getValue(context);
+                }
             } catch (IllegalArgumentException ex) {
                 softly.fail("Expected value to be of type '%s'", expect.getType());
             } catch (SpelParseException ex) {
@@ -580,7 +611,7 @@ public class StepDefinitions {
         if (responsePosition == null) {
             return -1;
         }
-        return Integer.parseInt(responsePosition);
+        return Integer.parseInt(responsePosition) - 1;
     }
 
 }
