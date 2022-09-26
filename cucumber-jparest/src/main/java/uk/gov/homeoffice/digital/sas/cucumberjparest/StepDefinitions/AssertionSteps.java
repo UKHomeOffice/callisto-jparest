@@ -1,11 +1,13 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.StepDefinitions;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.homeoffice.digital.sas.cucumberjparest.ExpectationUtils.headersMeetsExpectations;
 import static uk.gov.homeoffice.digital.sas.cucumberjparest.ExpectationUtils.objectContainsFields;
 import static uk.gov.homeoffice.digital.sas.cucumberjparest.ExpectationUtils.objectDoesNotContainFields;
 import static uk.gov.homeoffice.digital.sas.cucumberjparest.ExpectationUtils.objectMeetsExpectations;
 
 import java.util.List;
+import java.util.Map;
 
 import org.assertj.core.api.SoftAssertions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +62,7 @@ public class AssertionSteps {
      * 
      * @param fields The fields to check the response for
      */
-    @Then("the last response should contain the fields")
+    @Then("the last response body should contain the fields")
     public void the_last_response_should_contain_fields(List<String> fields) {
         var root = this.httpResponseManager.getLastResponse().getBody().jsonPath().getMap("");
         objectContainsFields(root, fields);
@@ -72,7 +74,7 @@ public class AssertionSteps {
      * 
      * @param fields The fields to check the response for
      */
-    @Then("the last response should not contain the fields")
+    @Then("the last response body should not contain the fields")
     public void the_last_response_should_not_contain_fields(List<String> fields) {
         var root = this.httpResponseManager.getLastResponse().getBody().jsonPath().getMap("");
         objectDoesNotContainFields(root, fields);
@@ -84,10 +86,22 @@ public class AssertionSteps {
      * 
      * @param expectations A table of expectations to assert
      */
-    @Then("the last response should contain")
+    @Then("the last response body should contain")
     public void the_last_response_should_contain(List<Expectation> expectations) {
         var root = this.httpResponseManager.getLastResponse().getBody().jsonPath();
         objectMeetsExpectations(root, expectations, this.objectMapper);
+    }
+
+    /**
+     * 
+     * Assert expectations against the last response's headers
+     * 
+     * @param expectations A table of expectations to assert
+     */
+    @Then("the last response should contain the headers")
+    public void the_last_response_should_contain_the_headers(Map<String, String> expectations) {
+        var response = this.httpResponseManager.getLastResponse();
+        headersMeetsExpectations(response.getHeaders(), expectations);
     }
 
     /**

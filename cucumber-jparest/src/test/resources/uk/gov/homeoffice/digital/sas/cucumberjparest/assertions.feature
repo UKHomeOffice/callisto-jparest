@@ -32,13 +32,13 @@ Feature: Assertions
 
   Scenario: Response should contain fields
     When someone retrieves profiles from the test service
-    Then the last response should contain the fields
+    Then the last response body should contain the fields
       | items |
       | meta  |
 
   Scenario: Response should not contain fields
     When someone retrieves profiles from the test service
-    Then the last response should not contain the fields
+    Then the last response body should not contain the fields
       | made_up |
       | missing |
 
@@ -79,7 +79,7 @@ Feature: Assertions
     It can also be specified as a specific resource in a response
 
     When someone retrieves profiles from the test service
-    Then the last response should contain
+    Then the last response body should contain
       | field | type | expectation           |
       | items | List | hasSizeGreaterThan(1) |
     Then the 1st of the profiles in the last response from the test service should contain
@@ -90,7 +90,7 @@ Feature: Assertions
   Scenario: Property expectations for each object
 
     When someone retrieves profiles from the test service
-    Then the last response should contain
+    Then the last response body should contain
       | field | type | expectation           |
       | items | List | hasSizeGreaterThan(1) |
     And each of the profiles in the last response from the test service should contain
@@ -105,10 +105,10 @@ Feature: Assertions
     This is done by specifying the path to the nested property
 
     When someone retrieves profiles from the test service
-    Then the last response should contain
+    Then the last response body should contain
       | field | type | expectation           |
       | items | List | hasSizeGreaterThan(1) |
-    And the last response should contain
+    And the last response body should contain
       | field        | type   | expectation               |
       | items[2]     | Object | isNotNull                 |
       | items[1].bio | String | isEqualTo("My Bio for 2") |
@@ -121,22 +121,10 @@ Feature: Assertions
       | field | type | expectation |
       | props | Map  | isNull      |
 
+  Scenario: Asserting against headers of HTTP response
 
-  Scenario: Asserting against properties of raw HTTP response
+    Assertions can be made against headers of the response object.
 
-    Assertions can test against properties of the response object.
-    The expression for 'field' will be evaluated against the response body first
-    if the response body can be parsed as a json object. In case of ambiguity
-    e.g. for a field named `code` you can explicitly specify `response.code`
-    to check for the property on the response object itself.
-
-    When someone GETs /MockedEndpoint2 from the dcr
-    Then the response should contain
-      | field                | type    | expect | match                      |
-      | code                 | Integer | to     | eq(300)                    |
-      | parsed_response      | Hash    | to     | include({"code"=>300})     |
-      | parsed_response.code | Integer | to     | eq(300)                    |
-      | response.code        | String  | to     | eq("200")                  |
-      | headers.content-type | String  | to     | eq("application/json")     |
-      | headers.vary         | String  | to     | include("User-Agent")      |
-      | headers.vary         | String  | to     | include("Accept-Encoding") |
+    When someone retrieves profiles from the test service
+    Then the last response should contain the headers
+      | content-type | isEqualTo("application/json") |
