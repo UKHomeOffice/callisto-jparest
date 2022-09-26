@@ -39,7 +39,7 @@ steps:
 - name: sonar branch
   image: maven:3.8-openjdk-17
   depends_on:
-    - test
+  - test
   environment:
     SONAR_HOST:
       from_secret: sonar_cloud_host
