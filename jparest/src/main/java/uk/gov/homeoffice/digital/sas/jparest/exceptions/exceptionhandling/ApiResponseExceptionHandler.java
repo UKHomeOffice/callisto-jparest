@@ -42,9 +42,9 @@ public class ApiResponseExceptionHandler {
 
     @ExceptionHandler(PersistenceException.class)
     public ResponseEntity<ApiErrorResponse> handlePersistenceException(PersistenceException ex) {
-        LOGGER.severe("Persistence exception occurred whilst saving a resource. " + ex.getMessage());
-        var msg = "There was an error persisting data.";
-        return createResponseEntity(msg, HttpStatus.BAD_REQUEST);
+        LOGGER.severe("Server Error: Unable to process the request. " + ex.getMessage());
+        var msg = "Server Error: Unable to process the request.";
+        return createResponseEntity(msg, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

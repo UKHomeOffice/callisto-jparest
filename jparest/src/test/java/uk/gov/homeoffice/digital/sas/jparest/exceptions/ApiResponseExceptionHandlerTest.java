@@ -46,8 +46,8 @@ class ApiResponseExceptionHandlerTest {
         var apiResponseExceptionHandler = new ApiResponseExceptionHandler();
         var exception = new PersistenceException(ERROR_MESSAGE);
         var response = apiResponseExceptionHandler.handlePersistenceException(exception);
-        var msg = "There was an error persisting data.";
-        assertResponseData(response, msg, HttpStatus.BAD_REQUEST);
+        var msg = "Server Error: Unable to process the request.";
+        assertResponseData(response, msg, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Test
