@@ -45,13 +45,13 @@ steps:
       from_secret: sonar_cloud_host
     SONAR_TOKEN:
       from_secret: sonar_cloud_token
-    commands:
-    - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
-    - mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=6d6fd8074b1729accb9f98cd3930979abc5e2512 -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.pullrequest.branch=$${projectSuffix} -Dsonar.pullrequest.key=${DRONE_COMMIT}
-    when:
-      event:
-        exclude:
-          - pull_request
+  commands:
+  - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
+  - mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=6d6fd8074b1729accb9f98cd3930979abc5e2512 -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.pullrequest.branch=$${projectSuffix} -Dsonar.pullrequest.key=${DRONE_COMMIT}
+  when:
+    event:
+      exclude:
+      - pull_request
 
 - name: publish
   image: maven:3.8-openjdk-17
