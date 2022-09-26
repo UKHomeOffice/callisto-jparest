@@ -25,12 +25,11 @@ steps:
   - test
   environment:
     SONAR_HOST:
-      from_secret: sonar_host
+      from_secret: sonar_cloud_host
     SONAR_TOKEN:
-      from_secret: sonar_token
+      from_secret: sonar_cloud_token
   commands:
-  - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
-  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -DprojectKeySuffix=$${projectSuffix}
+  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest
   when:
     event:
       exclude:
