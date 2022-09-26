@@ -67,10 +67,28 @@ public class ApiSteps {
      * @param service There service to use
      */
     @When("{persona} successfully GETs {string}{service}")
-    public void someone_successfully_gets_url_from_service(Persona persona, String path, String service) {
+    public void persona_successfully_gets_url_from_service(Persona persona, String path, String service) {
         JpaRestApiResponse apiResponse = this.jpaRestApiClient.Get(persona, service, path);
 
         this.httpResponseManager.addResponse(apiResponse.getUrl(), apiResponse.getResponse());
+    }
+
+    /**
+     * 
+     * Retrieves the specified resource by identifier from the given service.
+     * 
+     * @param persona    The persona to use for auth context
+     * @param resource   The type of resources to be retrieved
+     * @param identifier The resource identifier
+     * @param service    There service to use
+     */
+    @When("{persona} gets the {word} {string}{service}")
+    public void persona_retrieves_specific_resources_from_the_service(Persona persona, String resource,
+            String identifier, String service) {
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.RetrieveById(persona, service, resource,
+                identifier);
+
+        this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
     }
 
 }

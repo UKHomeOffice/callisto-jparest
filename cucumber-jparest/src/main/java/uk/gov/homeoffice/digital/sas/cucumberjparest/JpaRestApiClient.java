@@ -1,5 +1,8 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
+import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Fail.fail;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,12 +17,8 @@ import io.restassured.response.Response;
 import io.restassured.specification.QueryableRequestSpecification;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.SpecificationQuerier;
-
 import lombok.Getter;
 import lombok.NonNull;
-
-import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.Fail.fail;
 
 /**
  * The purpose of this class is to understand the protocol
@@ -147,8 +146,21 @@ public class JpaRestApiClient {
      * @param reference The identifier of the resource to be retrieved
      * @return JpaRestApiResourceResponse
      */
-    public JpaRestApiResourceResponse Retrieve(Persona persona, String service, String resource, int reference) {
-        return null;
+    public JpaRestApiResourceResponse RetrieveById(Persona persona, String service, String resource, String reference) {
+        URL url = GetResourceURL(service, resource);
+
+        RequestSpecification spec = given()
+                .baseUri(url.toString())
+                .queryParam("tenantId", "b7e813a2-bb28-11ec-8422-0242ac120002");
+
+        addPersonaAuthToRequestSpecification(spec, persona);
+
+        spec.basePath(reference);
+        URL requestURL = getURL(spec);
+        Response response = spec.get();
+
+        return new JpaRestApiResourceResponse(url, requestURL, response);
+
     }
 
     /**
