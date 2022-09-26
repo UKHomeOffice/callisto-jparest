@@ -47,7 +47,7 @@ steps:
       from_secret: sonar_cloud_token
   commands:
     - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
-    - mvn clean verify sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.pullrequest.branch=$${projectSuffix} -Dsonar.pullrequest.key=${DRONE_COMMIT}
+    - mvn -s ./jparest_settings.xml -f pom.xml clean verify sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.pullrequest.branch=$${projectSuffix} -Dsonar.pullrequest.key=${DRONE_COMMIT}
   when:
     event:
       exclude:
