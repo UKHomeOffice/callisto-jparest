@@ -15,10 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.java.en.Then;
-import io.restassured.path.json.JsonPath;
 import lombok.NonNull;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Expectation;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
 
 public class AssertionSteps {
 
@@ -111,9 +111,9 @@ public class AssertionSteps {
      * @param objectUnderTest The object to test
      * @param fields          The fields to check the response for
      */
-    @Then("the {object_to_test} should contain the fields")
-    public void the_object_should_contain_fields(JsonPath objectUnderTest, List<String> fields) {
-        objectContainsFields(objectUnderTest.getMap(""), fields);
+    @Then("the {resource} should contain the fields")
+    public void the_object_should_contain_fields(Resource objectUnderTest, List<String> fields) {
+        objectContainsFields(objectUnderTest.getJsonPath().getMap(""), fields);
     }
 
     /**
@@ -123,9 +123,9 @@ public class AssertionSteps {
      * @param objectUnderTest The object to test
      * @param fields          The fields to check the response for
      */
-    @Then("the {object_to_test} should not contain the fields")
-    public void the_object_should_not_contain_fields(JsonPath objectUnderTest, List<String> fields) {
-        objectDoesNotContainFields(objectUnderTest.getMap(""), fields);
+    @Then("the {resource} should not contain the fields")
+    public void the_object_should_not_contain_fields(Resource objectUnderTest, List<String> fields) {
+        objectDoesNotContainFields(objectUnderTest.getJsonPath().getMap(""), fields);
     }
 
     /**
@@ -136,9 +136,9 @@ public class AssertionSteps {
      * @param objectUnderTest The object to test
      * @param expectations    A table of expectations to assert
      */
-    @Then("the {object_to_test} should contain")
-    public void the_object_should_contain(JsonPath objectUnderTest, List<Expectation> expectations) {
-        objectMeetsExpectations(objectUnderTest, expectations, this.objectMapper);
+    @Then("the {resource} should contain")
+    public void the_object_should_contain(Resource objectUnderTest, List<Expectation> expectations) {
+        objectMeetsExpectations(objectUnderTest.getJsonPath(), expectations, this.objectMapper);
     }
 
     /**
@@ -148,9 +148,9 @@ public class AssertionSteps {
      * @param objectToCompare     The object to be compared
      * @param objectToCompareWith The object to compare with
      */
-    @Then("the {object_to_test} should equal the {object_to_test}")
-    public void the_object_should_contain(JsonPath objectToCompare, JsonPath objectToCompareWith) {
-        assertThat(objectToCompare.getMap("")).isEqualTo(objectToCompareWith.getMap(""));
+    @Then("the {resource} should equal the {resource}")
+    public void the_object_should_contain(Resource objectToCompare, Resource objectToCompareWith) {
+        assertThat(objectToCompare.getJsonPath().getMap("")).isEqualTo(objectToCompareWith.getJsonPath().getMap(""));
     }
 
     /**
@@ -162,15 +162,15 @@ public class AssertionSteps {
      * @param expectations     A table of expectations to assert against each
      *                         resource
      */
-    @Then("{each_of_the_objects_to_test} should contain")
-    public void the_objects_should_contain(JsonPath objectsUnderTest, List<Expectation> expectations) {
+    @Then("{each_resource} should contain")
+    public void the_objects_should_contain(Resource objectsUnderTest, List<Expectation> expectations) {
 
         SoftAssertions softly = new SoftAssertions();
 
-        var itemsSize = objectsUnderTest.getInt("size()");
+        var itemsSize = objectsUnderTest.getJsonPath().getInt("size()");
         for (int i = 0; i < itemsSize; i++) {
-            objectsUnderTest.setRootPath("items[" + i + "]");
-            objectMeetsExpectations(objectsUnderTest, expectations, this.objectMapper, softly);
+            objectsUnderTest.getJsonPath().setRootPath("items[" + i + "]");
+            objectMeetsExpectations(objectsUnderTest.getJsonPath(), expectations, this.objectMapper, softly);
         }
 
         softly.assertAll();

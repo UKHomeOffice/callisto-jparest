@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.ParameterType;
 import io.cucumber.spring.CucumberContextConfiguration;
-import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import lombok.NonNull;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Expectation;
@@ -26,6 +25,7 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiClient;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaTestContext;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Persona;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PersonaManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.ScenarioState;
 import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
 
@@ -116,11 +116,11 @@ public class ParameterTypes {
      * @param path             The path specified in the request when retrieve
      *                         resources from a GET request (Optional)
      * @param service          The service the request was made to
-     * @return JsonPath
+     * @return Resource
      */
     @ParameterType("(?:last|(?:(\\d+)(?:st|nd|rd|th))) of the (\\S*) in the (?:last|(?:(\\d+)(?:st|nd|rd|th))) (?:\\\"([^\\\"]*)\\\" )?response"
             + FROM_IN_SERVICE)
-    public JsonPath object_to_test(String objectPosition,
+    public Resource resource(String objectPosition,
             String resourceName, String responsePosition, String path, String service) {
 
         String targetService = this.scenarioState.trackService(service);
@@ -140,7 +140,7 @@ public class ParameterTypes {
             objectIndex = itemsPath.getInt("size()") - 1;
         }
 
-        return itemsPath.setRootPath("items[" + objectIndex + "]");
+        return new Resource(resourceName, itemsPath.setRootPath("items[" + objectIndex + "]"));
     }
 
     /**
@@ -153,11 +153,11 @@ public class ParameterTypes {
      * @param path             The path specified in the request when retrieve
      *                         resources from a GET request (Optional)
      * @param service          The service the request was made to
-     * @return JsonPath
+     * @return Resource
      */
     @ParameterType("each of the (\\S*) in the (?:last|(?:(\\d+)(?:st|nd|rd|th))) (?:\\\"([^\\\"]*)\\\" )?response"
             + FROM_IN_SERVICE)
-    public JsonPath each_of_the_objects_to_test(String resourceName, String responsePosition, String path,
+    public Resource each_resource(String resourceName, String responsePosition, String path,
             String service) {
 
         String targetService = this.scenarioState.trackService(service);
@@ -172,7 +172,7 @@ public class ParameterTypes {
         int responseIndex = getIndex(responsePosition);
         Response response = this.httpResponseManager.getResponse(url, responseIndex);
         var itemsPath = response.getBody().jsonPath().setRootPath("items");
-        return itemsPath;
+        return new Resource(resourceName, itemsPath);
     }
 
     /**

@@ -193,8 +193,20 @@ public class JpaRestApiClient {
      * @param reference The identifier of the resource to be deleted
      * @return JpaRestApiResourceResponse
      */
-    public JpaRestApiResourceResponse Delete(Persona persona, String service, String resource, int reference) {
-        return null;
+    public JpaRestApiResourceResponse Delete(Persona persona, String service, String resource, String reference) {
+        URL url = GetResourceURL(service, resource);
+
+        RequestSpecification spec = given()
+                .baseUri(url.toString())
+                .queryParam("tenantId", "b7e813a2-bb28-11ec-8422-0242ac120002");
+
+        addPersonaAuthToRequestSpecification(spec, persona);
+
+        spec.basePath(reference);
+        URL requestURL = getURL(spec);
+        Response response = spec.delete();
+
+        return new JpaRestApiResourceResponse(url, requestURL, response);
     }
 
     /**

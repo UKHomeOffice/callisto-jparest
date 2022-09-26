@@ -9,6 +9,7 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiClient;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiResourceResponse;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiResponse;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Persona;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
 
 public class ApiSteps {
 
@@ -87,6 +88,24 @@ public class ApiSteps {
             String identifier, String service) {
         JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.RetrieveById(persona, service, resource,
                 identifier);
+
+        this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
+    }
+
+    /**
+     * 
+     * Retrieves the specified resource by identifier from the given service.
+     * 
+     * @param persona    The persona to use for auth context
+     * @param resource   The type of resources to be retrieved
+     * @param identifier The resource identifier
+     * @param service    There service to use
+     */
+    @When("{persona} deletes the {resource}{service}")
+    public void persona_deletes_the_resource(Persona persona, Resource resource, String service) {
+        String reference = resource.getJsonPath().getString("id");
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Delete(persona, service,
+                resource.getResourceType(), reference);
 
         this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
     }
