@@ -36,7 +36,7 @@ steps:
       exclude:
       - pull_request
 
-- name: sonar main
+- name: sonar branch
   image: maven:3.8-openjdk-17
   depends_on:
     - test
