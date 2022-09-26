@@ -8,6 +8,8 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiClient;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiResourceResponse;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiResponse;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.Payload;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Persona;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
 
@@ -15,12 +17,15 @@ public class ApiSteps {
 
     private final HttpResponseManager httpResponseManager;
     private final JpaRestApiClient jpaRestApiClient;
+    private final PayloadManager payloadManager;
 
     @Autowired
     public ApiSteps(@NonNull HttpResponseManager httpResponseManager,
-            @NonNull JpaRestApiClient jpaRestApiClient) {
+            @NonNull JpaRestApiClient jpaRestApiClient,
+            PayloadManager payloadManager) {
         this.httpResponseManager = httpResponseManager;
         this.jpaRestApiClient = jpaRestApiClient;
+        this.payloadManager = payloadManager;
 
     }
 
@@ -39,6 +44,28 @@ public class ApiSteps {
             String fileContents, String service) {
 
         JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Create(persona, service, resource, fileContents);
+
+        this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
+
+    }
+
+    /**
+     * 
+     * Posts the referenced payload to
+     * the the endpoint exposed for the given resource.
+     * 
+     * @param persona      The persona to use for auth context
+     * @param payloadName  The payload to be posted
+     * @param resourceType The resource to create
+     * @param service      There service to use
+     */
+    @When("{persona} creates {word} {word}{service}")
+    public void persona_creates_resource_from_payload_in_the_service(Persona persona, String payloadName,
+            String resourceType, String service) {
+
+        Payload payload = this.payloadManager.getPayload(payloadName, resourceType);
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Create(persona, service, resourceType,
+                payload.getContent());
 
         this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
 

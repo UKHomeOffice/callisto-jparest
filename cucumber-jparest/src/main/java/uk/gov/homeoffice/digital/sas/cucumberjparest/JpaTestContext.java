@@ -78,6 +78,18 @@ public class JpaTestContext {
 
     /**
      * 
+     * PayloadManager per scenario
+     * 
+     * @return PayloadManager
+     */
+    @ScenarioScope
+    @Bean
+    public PayloadManager payloadManager() {
+        return new PayloadManager();
+    }
+
+    /**
+     * 
      * Singleton JpaRestApiClient
      * 
      * @return JpaRestApiClient

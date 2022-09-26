@@ -15,5 +15,6 @@ import org.junit.platform.suite.api.Suite;
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "uk.gov.homeoffice.digital.sas.cucumberjparest")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty,html:target/cucumber-report.html")
 @ConfigurationParameter(key = OBJECT_FACTORY_PROPERTY_NAME, value = "io.cucumber.spring.SpringFactory")
+@ConfigurationParameter(key = io.cucumber.junit.platform.engine.Constants.FILTER_TAGS_PROPERTY_NAME, value =  "@working")
 public class RunCucumberTest {
 }

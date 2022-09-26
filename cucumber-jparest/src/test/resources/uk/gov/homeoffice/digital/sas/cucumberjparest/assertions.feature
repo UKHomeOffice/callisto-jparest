@@ -1,3 +1,4 @@
+@working
 Feature: Assertions
 
     When a request is issued assertions will be made against the returned

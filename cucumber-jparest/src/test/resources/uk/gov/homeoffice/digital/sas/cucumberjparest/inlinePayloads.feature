@@ -21,16 +21,29 @@ Feature: Inline Payloads
     For a small payload you may wish to declare the payload within
     the scenario. 
 
-    When time-entries are created as
+    Given valid profiles are
       """
-      {
-        "personId": "#{users['George']['personId']}",
-        "tenantId": "#{CallistoClient.owner}:tenantId",
-        "startTime": "2022-01-01T09:00Z",
-        "endTime": "2022-01-01T17:00Z"
-      }
+        {
+          "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+          "preferences": "Valid preference",
+          "bio": "Valid bio",
+          "phoneNumber": "0133 3245 392",
+          "dob": "1975-02-29T00:00:00.000+00:00",
+          "firstRelease": "1989-05-21T00:00:00.000+00:00"
+        }
       """
-    Then the time-entries payload should contain
-      | field     | type   | expect | match         |
-      | bookmarks | Array  | to     | have(1).items |
-    And the tester creates the time-entries in the test service
+    And invalid profiles are
+      """
+        {
+          "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+          "preferences": "Valid preference",
+          "bio": "Valid bio",
+          "phoneNumber": "0133 3245 392",
+          "dob": "Invalid date",
+          "firstRelease": "Invalid date"
+        }
+      """
+    When the tester creates valid profiles in the test service
+    Then the last response should have a status code of 200
+    When the tester creates invalid profiles in the test service
+    Then the last response should have a status code of 400
