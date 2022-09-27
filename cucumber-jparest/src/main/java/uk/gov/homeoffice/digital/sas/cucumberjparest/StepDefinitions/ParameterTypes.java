@@ -23,6 +23,7 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.Expectation;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiClient;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaTestContext;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager.PayloadKey;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Persona;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PersonaManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
@@ -63,7 +64,22 @@ public class ParameterTypes {
 
     /**
      * 
-     * Matchs when a file is specified and returns the contents
+     * Matches a "{variable name} {resourceType}"
+     * and creates a PayloadKey for retrieving payloads
+     * from the {@see PayloadManager}
+     * 
+     * @param payloadName  The variable used to reference the resource
+     * @param resourceType The type of resource represented
+     * @return PayloadKey
+     */
+    @ParameterType("(?:the )?(\\w+) (\\w+)")
+    public PayloadKey payload(String payloadName, String resourceType) {
+        return new PayloadKey(resourceType, payloadName);
+    }
+
+    /**
+     * 
+     * Matches when a file is specified and returns the contents
      * of the specified file
      * 
      * @param path The path of the file

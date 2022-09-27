@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import io.cucumber.java.en.Given;
 import lombok.NonNull;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager.PayloadKey;
 
 public class PayloadSteps {
 
@@ -20,12 +21,11 @@ public class PayloadSteps {
      * 
      * Registers a payload that can be used in the scenario
      * 
-     * @param payloadName  The name to give the payload
-     * @param resourceType The resource being represented
-     * @param docString    The content of the payload
+     * @param payloadKey The key for the payload (resource type and name)
+     * @param docString  The content of the payload
      */
-    @Given("{word} {word} are")
-    public void inline_resources_are(String payloadName, String resourceType, String docString) {
-        payloadManager.createPayload(payloadName, resourceType, docString);
+    @Given("{payload} are")
+    public void inline_resources_are(PayloadKey payloadKey, String docString) {
+        payloadManager.createPayload(payloadKey, docString);
     }
 }

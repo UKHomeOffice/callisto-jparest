@@ -35,7 +35,7 @@ Feature: Make requests to endpoints created by JpaRest
 
     Get all resources matching the given filter.
 
-    Given additional profiles are
+    Given the additional profiles are
       """
       {
         "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
@@ -46,7 +46,7 @@ Feature: Make requests to endpoints created by JpaRest
         "firstRelease": "1989-05-21T00:00:00.000+00:00"
       }
       """
-    And Trevor creates additional profiles in the test service
+    And Trevor creates the additional profiles in the test service
     When Trevor retrieves profiles from the test service
     Then the last response body should contain
       | field | type | expectation           |
@@ -100,7 +100,7 @@ Feature: Make requests to endpoints created by JpaRest
 
     Update the specific resource with the given identifier
 
-    Given initial profiles are
+    Given the initial profiles are
       """
       {
         "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
@@ -111,8 +111,8 @@ Feature: Make requests to endpoints created by JpaRest
         "firstRelease": "1989-05-21T00:00:00.000+00:00"
       }
       """
-    And Trevor creates initial profiles in the test service
-    When updated profiles are
+    And Trevor creates the initial profiles in the test service
+    When the updated profiles are
       """
       {
         "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
@@ -123,7 +123,7 @@ Feature: Make requests to endpoints created by JpaRest
         "firstRelease": "1989-05-21T00:00:00.000+00:00"
       }
       """
-    And Trevor updates the 1st of the profiles in the last response with updated profiles
+    And Trevor updates the 1st of the profiles in the last response with the updated profiles
     Then the 1st of the profiles in the last response should contain
       | field        | type    | expectation                                       |
       | tenantId     | String  | isEqualTo("b7e813a2-bb28-11ec-8422-0242ac120002") |

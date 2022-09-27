@@ -10,8 +10,8 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiClient;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiResourceResponse;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiResponse;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.Payload;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager.PayloadKey;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Persona;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
 
@@ -56,18 +56,18 @@ public class ApiSteps {
      * Posts the referenced payload to
      * the the endpoint exposed for the given resource.
      * 
-     * @param persona      The persona to use for auth context
-     * @param payloadName  The payload to be posted
-     * @param resourceType The resource to create
-     * @param service      There service to use
+     * @param persona    The persona to use for auth context
+     * @param payloadKey The key for the payload (resource type and name)
+     * @param service    There service to use
      */
-    @When("{persona} creates {word} {word}{service}")
-    public void persona_creates_resource_from_payload_in_the_service(Persona persona, String payloadName,
-            String resourceType, String service) {
+    @When("{persona} creates {payload}{service}")
+    public void persona_creates_resource_from_payload_in_the_service(Persona persona, PayloadKey payloadKey,
+            String service) {
 
-        Payload payload = this.payloadManager.getPayload(payloadName, resourceType);
-        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Create(persona, service, resourceType,
-                payload.getContent());
+        String payload = this.payloadManager.getPayload(payloadKey);
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Create(persona, service,
+                payloadKey.getResourceType(),
+                payload);
 
         this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
 
@@ -158,21 +158,21 @@ public class ApiSteps {
      * 
      * Updates the specified resource in the given service.
      * 
-     * @param persona      The persona to use for auth context
-     * @param resource     The resource to be updated
-     * @param service      There service to use
-     * @param payloadName  The payload to be used for the update
-     * @param resourceType The resource type being updated
+     * @param persona    The persona to use for auth context
+     * @param resource   The resource to be updated
+     * @param service    There service to use
+     * @param payloadKey The key for the payload (resource type and name)
      */
-    @When("{persona} updates the {resource}{service} with {word} {word}")
+    @When("{persona} updates the {resource}{service} with {payload}")
 
-    public void persona_updates_the_resource(Persona persona, Resource resource, String service, String payloadName,
-            String resourceType) {
+    public void persona_updates_the_resource(Persona persona, Resource resource, String service,
+            PayloadKey payloadKey) {
 
         String reference = resource.getJsonPath().getString("id");
-        Payload payload = this.payloadManager.getPayload(payloadName, resourceType);
-        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Update(persona, service, resourceType, reference,
-                payload.getContent());
+        String payload = this.payloadManager.getPayload(payloadKey);
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Update(persona, service,
+                payloadKey.getResourceType(), reference,
+                payload);
 
         this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
 

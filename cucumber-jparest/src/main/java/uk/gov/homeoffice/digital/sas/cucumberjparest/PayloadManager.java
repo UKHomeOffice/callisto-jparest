@@ -5,60 +5,77 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+
 @Component
 public class PayloadManager {
 
+    @AllArgsConstructor
+    public static class PayloadKey {
+        @NonNull
+        @Getter
+        @Setter
+        private String resourceType;
+
+        @NonNull
+        @Getter
+        @Setter
+        private String name;
+
+        @Override
+        public final int hashCode() {
+            return (resourceType + name).hashCode();
+        }
+
+        @Override
+        public final boolean equals(Object o) {
+            if (o == null) {
+                return false;
+            }
+            if (o.getClass() != PayloadKey.class) {
+                return false;
+            }
+            PayloadKey payloadKey = (PayloadKey) o;
+            return this.name.equals(payloadKey.name) && this.resourceType.equals(payloadKey.resourceType);
+        }
+    }
+
     // Holds that state for payloads
-    private Map<String, Payload> payloads = new HashMap<>();
+    private Map<PayloadKey, String> payloads = new HashMap<>();
 
     /**
      * 
      * Creates a new payload with the given name
      * 
-     * @param name         The name used to reference the payload
-     * @param resourceType The type of resource represented by the payload
-     * @param content      The content of the payload
-     * @return Payload
+     * @param key     The key to use for the payload consisting of resource type and
+     *                name
+     * @param content The content of the payload
      */
-    public Payload createPayload(String name, String resourceType, String content) {
-        String payloadKey = getPayloadKey(name, resourceType);
-        if (payloads.containsKey(payloadKey)) {
-            throw new IllegalArgumentException("A payload with the name \"" + payloadKey + "\" already exists");
+    public void createPayload(PayloadKey key, String content) {
+        if (payloads.containsKey(key)) {
+            throw new IllegalArgumentException("A payload with the name \"" + key.name + "\" already exists");
         }
 
-        Payload payload = new Payload(resourceType, content);
-        payloads.put(payloadKey, payload);
-        return payload;
+        payloads.put(key, content);
     }
 
     /**
      * 
      * Retrieves a payload added by the
-     * {@link #createPayload(String, String, String)} method
+     * {@link #createPayload(PayloadKey, String)} method
      * 
      * @param name The name used to reference the payload
      * @return Payload
      */
-    public Payload getPayload(String name, String resourceType) {
+    public String getPayload(PayloadKey key) {
 
-        String payloadKey = getPayloadKey(name, resourceType);
-
-        if (!payloads.containsKey(payloadKey)) {
-            throw new IllegalArgumentException("A payload with the name \"" + payloadKey + "\" does not exist");
+        if (!payloads.containsKey(key)) {
+            throw new IllegalArgumentException("A payload with the name \"" + key.name + "\" does not exist");
         }
-        return payloads.get(payloadKey);
-    }
-
-    /**
-     * 
-     * Returns a key for the payload
-     * 
-     * @param name         The name given to the payload
-     * @param resourceType The resource type represented
-     * @return String
-     */
-    private String getPayloadKey(String name, String resourceType) {
-        return name + " " + resourceType;
+        return payloads.get(key);
     }
 
 }
