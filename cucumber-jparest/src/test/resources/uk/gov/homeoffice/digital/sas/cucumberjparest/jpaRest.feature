@@ -8,8 +8,6 @@ Feature: Make requests to endpoints created by JpaRest
 
   Background:
     Given Trevor is a user
-    And Trevor creates profiles from the file 'data/profiles2.json' in the test service
-    And Trevor creates profiles from the file 'data/profiles3.json' in the test service
 
   Scenario: Get specific resources by reference
 
@@ -80,7 +78,7 @@ Feature: Make requests to endpoints created by JpaRest
     When Trevor retrieves profiles from the test service with
       | size | 2 |
       | page | 1 |
-    Then the 1st of the profiles in the 4th response should not be equal to the 1st of the profiles in the 5th response
+    Then the 1st of the profiles in the 2nd response should not be equal to the 1st of the profiles in the 3rd response
 
   Scenario: Ordered resources
 
@@ -90,7 +88,7 @@ Feature: Make requests to endpoints created by JpaRest
       | sort | dob,asc |
     When Trevor retrieves profiles from the test service with
       | sort | dob,desc |
-    Then the 1st of the profiles in the 3rd response should not be equal to the 1st of the profiles in the 4th response
+    Then the 1st of the profiles in the 1st response should not be equal to the 1st of the profiles in the 2nd response
 
   Scenario: Create resource
 
