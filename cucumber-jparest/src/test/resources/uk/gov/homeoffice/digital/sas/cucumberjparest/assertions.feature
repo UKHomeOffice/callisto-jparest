@@ -23,12 +23,12 @@ Feature: Assertions
     And the admin is a user
 
   Scenario: Assert response body should not be empty
-    When someone successfully GETs "/swagger-ui/index.html" from the test service
+    When someone GETs "/swagger-ui/index.html" from the test service
     Then the last response should have a status code of 200
     And the last response body should not be empty
 
   Scenario: Assert response body should be empty
-    When someone successfully GETs "/tests/empty.html" from the test service
+    When someone GETs "/tests/empty.html" from the test service
     Then the last response body should be empty
 
   Scenario: Response should contain fields
@@ -50,7 +50,7 @@ Feature: Assertions
       | bio         |
 
   Scenario: Object should contain fields
-    When someone successfully GETs "/resources/profiles" from the test service
+    When someone GETs "/resources/profiles" from the test service
     Then the last of the profiles in the last "/resources/profiles" response from the test service should contain the fields
       | preferences |
       | bio         |

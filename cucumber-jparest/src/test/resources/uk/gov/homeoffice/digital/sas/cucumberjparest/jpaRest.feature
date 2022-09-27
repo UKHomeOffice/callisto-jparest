@@ -55,7 +55,39 @@ Feature: Make requests to endpoints created by JpaRest
 
     Update the specific resource with the given identifier
 
-    When Trevor updates the users "1" from the file './features/data/wip/login/valid-user.json' in the test service
+    Given initial profiles are
+      """
+      {
+        "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+        "preferences": "Valid preference",
+        "bio": "Valid bio",
+        "phoneNumber": "0133 3245 392",
+        "dob": "1975-02-28T00:00:00.000+00:00",
+        "firstRelease": "1989-05-21T00:00:00.000+00:00"
+      }
+      """
+    And Trevor creates initial profiles in the test service
+    When updated profiles are
+      """
+      {
+        "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+        "preferences": "Valid preference",
+        "bio": "Updated bio",
+        "phoneNumber": "0133 3245 392",
+        "dob": "1975-02-28T00:00:00.000+00:00",
+        "firstRelease": "1989-05-21T00:00:00.000+00:00"
+      }
+      """
+    And Trevor updates the 1st of the profiles in the last response with updated profiles
+    Then the 1st of the profiles in the last response should contain
+      | field        | type    | expectation                                       |
+      | tenantId     | String  | isEqualTo("b7e813a2-bb28-11ec-8422-0242ac120002") |
+      | preferences  | String  | isEqualTo("Valid preference")                     |
+      | bio          | String  | isEqualTo("Updated bio")                          |
+      | phoneNumber  | String  | isEqualTo("0133 3245 392")                        |
+      | dob          | Instant | isEqualTo("1975-02-28T00:00:00.000+00:00")        |
+      | firstRelease | Instant | isEqualTo("1989-05-21T00:00:00.000+00:00")        |
+
 
   Scenario: Delete a resource
 

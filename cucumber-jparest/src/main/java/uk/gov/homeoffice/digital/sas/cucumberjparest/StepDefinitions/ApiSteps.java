@@ -94,8 +94,8 @@ public class ApiSteps {
      * @param path    The URL to request
      * @param service There service to use
      */
-    @When("{persona} successfully GETs {string}{service}")
-    public void persona_successfully_gets_url_from_service(Persona persona, String path, String service) {
+    @When("{persona} GETs {string}{service}")
+    public void persona_gets_url_from_service(Persona persona, String path, String service) {
         JpaRestApiResponse apiResponse = this.jpaRestApiClient.Get(persona, service, path);
 
         this.httpResponseManager.addResponse(apiResponse.getUrl(), apiResponse.getResponse());
@@ -121,12 +121,11 @@ public class ApiSteps {
 
     /**
      * 
-     * Retrieves the specified resource by identifier from the given service.
+     * Deletes the specified resource from the given service.
      * 
-     * @param persona    The persona to use for auth context
-     * @param resource   The type of resources to be retrieved
-     * @param identifier The resource identifier
-     * @param service    There service to use
+     * @param persona  The persona to use for auth context
+     * @param resource The resource to be deleted
+     * @param service  There service to use
      */
     @When("{persona} deletes the {resource}{service}")
     public void persona_deletes_the_resource(Persona persona, Resource resource, String service) {
@@ -137,4 +136,27 @@ public class ApiSteps {
         this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
     }
 
+    /**
+     * 
+     * Updates the specified resource in the given service.
+     * 
+     * @param persona      The persona to use for auth context
+     * @param resource     The resource to be updated
+     * @param service      There service to use
+     * @param payloadName  The payload to be used for the update
+     * @param resourceType The resource type being updated
+     */
+    @When("{persona} updates the {resource}{service} with {word} {word}")
+
+    public void persona_updates_the_resource(Persona persona, Resource resource, String service, String payloadName,
+            String resourceType) {
+
+        String reference = resource.getJsonPath().getString("id");
+        Payload payload = this.payloadManager.getPayload(payloadName, resourceType);
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Update(persona, service, resourceType, reference,
+                payload.getContent());
+
+        this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
+
+    }
 }

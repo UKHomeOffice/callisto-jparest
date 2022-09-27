@@ -176,9 +176,22 @@ public class JpaRestApiClient {
      * @param payload   The updated resource
      * @return JpaRestApiResourceResponse
      */
-    public JpaRestApiResourceResponse Update(Persona persona, String service, String resource, int reference,
+    public JpaRestApiResourceResponse Update(Persona persona, String service, String resource, String reference,
             String payload) {
-        return null;
+
+        URL url = GetResourceURL(service, resource);
+        RequestSpecification spec = given()
+                .baseUri(url.toString())
+                .body(payload)
+                .queryParam("tenantId", "b7e813a2-bb28-11ec-8422-0242ac120002");
+
+        addPersonaAuthToRequestSpecification(spec, persona);
+
+        spec.basePath(reference);
+        URL requestURL = getURL(spec);
+        Response response = spec.put();
+
+        return new JpaRestApiResourceResponse(url, requestURL, response);
     }
 
     /**
