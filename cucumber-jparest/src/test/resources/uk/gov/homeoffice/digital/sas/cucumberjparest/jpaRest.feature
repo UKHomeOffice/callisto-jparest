@@ -64,6 +64,34 @@ Feature: Make requests to endpoints created by JpaRest
       | Pref 2     | 1902-05-21T00:00:00.000+00:00 | preferences == "Pref 2"                | hasSize(1)            |
       | Pref 3     | 1903-05-21T00:00:00.000+00:00 | preferences != "Pref 3"                | hasSizeGreaterThan(3) |
 
+  Scenario: Paged resources
+
+    Resource responses can be paged
+
+    When Trevor retrieves profiles from the test service
+    Then the last response body should contain
+      | field | type | expectation           |
+      | items | List | hasSizeGreaterThan(3) |
+    When Trevor retrieves profiles from the test service with
+      | size | 2 |
+    Then the last response body should contain
+      | field | type | expectation |
+      | items | List | hasSize(2)  |
+    When Trevor retrieves profiles from the test service with
+      | size | 2 |
+      | page | 1 |
+    Then the 1st of the profiles in the 4th response should not be equal to the 1st of the profiles in the 5th response
+
+  Scenario: Ordered resources
+
+    Resource responses can be ordered
+
+    When Trevor retrieves profiles from the test service with
+      | sort | dob,asc |
+    When Trevor retrieves profiles from the test service with
+      | sort | dob,desc |
+    Then the 1st of the profiles in the 3rd response should not be equal to the 1st of the profiles in the 4th response
+
   Scenario: Create resource
 
     Create a new resource from the payload in the file.

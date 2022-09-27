@@ -149,8 +149,20 @@ public class AssertionSteps {
      * @param objectToCompareWith The object to compare with
      */
     @Then("the {resource} should equal the {resource}")
-    public void the_object_should_contain(Resource objectToCompare, Resource objectToCompareWith) {
+    public void the_resource_should_match_resource(Resource objectToCompare, Resource objectToCompareWith) {
         assertThat(objectToCompare.getJsonPath().getMap("")).isEqualTo(objectToCompareWith.getJsonPath().getMap(""));
+    }
+
+    /**
+     * 
+     * Compares 2 resources to see if they are not equal
+     * 
+     * @param objectToCompare     The object to be compared
+     * @param objectToCompareWith The object to compare with
+     */
+    @Then("the {resource} should not be equal to the {resource}")
+    public void the_resource_should_not_match_resource(Resource objectToCompare, Resource objectToCompareWith) {
+        assertThat(objectToCompare.getJsonPath().getMap("")).isNotEqualTo(objectToCompareWith.getJsonPath().getMap(""));
     }
 
     /**
