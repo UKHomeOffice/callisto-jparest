@@ -25,9 +25,9 @@ steps:
   - test
   environment:
     SONAR_HOST:
-      from_secret: sonar_host
+      from_secret: sonar_cloud_host
     SONAR_TOKEN:
-      from_secret: sonar_token
+      from_secret: sonar_cloud_token
   commands:
   - "branchName=$(echo $DRONE_BRANCH)"
   - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$${branchName}
