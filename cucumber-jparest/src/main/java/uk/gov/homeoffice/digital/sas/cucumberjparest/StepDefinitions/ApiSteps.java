@@ -1,5 +1,7 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.StepDefinitions;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.When;
@@ -82,6 +84,22 @@ public class ApiSteps {
     @When("{persona} retrieves {word}{service}")
     public void persona_retrieves_resources_from_the_service(Persona persona, String resource, String service) {
         JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Retrieve(persona, service, resource, null);
+
+        this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
+    }
+
+    /**
+     * 
+     * Retrieves the specified resource type from the given service.
+     * 
+     * @param persona  The persona to use for auth context
+     * @param resource The type of resources to be retrieved
+     * @param service  There service to use
+     */
+    @When("{persona} retrieves {word}{service} with")
+    public void persona_retrieves_resources_from_the_service(Persona persona, String resource, String service,
+            Map<String, String> parameters) {
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Retrieve(persona, service, resource, parameters);
 
         this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
     }

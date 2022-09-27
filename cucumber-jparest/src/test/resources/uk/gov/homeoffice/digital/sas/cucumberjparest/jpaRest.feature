@@ -33,17 +33,36 @@ Feature: Make requests to endpoints created by JpaRest
 
     When Trevor retrieves profiles from the test service
 
-  Scenario: Retrieve filtered resources
+  Scenario Outline: Retrieve filtered resources
 
     Get all resources matching the given filter.
-    The response is paged.
-    Additional scenarios might be required to
-    demonstrate how to page results
 
-    When Trevor retrieves users in the test service with
-      | filter   | value |
-      | withName | User1 |
-
+    Given additional profiles are
+      """
+      {
+        "tenantId": "b7e813a2-bb28-11ec-8422-0242ac120002",
+        "preferences": "<Preference>",
+        "bio": "Valid bio",
+        "phoneNumber": "0133 3245 392",
+        "dob": "<Date of birth>",
+        "firstRelease": "1989-05-21T00:00:00.000+00:00"
+      }
+      """
+    And Trevor creates additional profiles in the test service
+    When Trevor retrieves profiles from the test service
+    Then the last response body should contain
+      | field | type | expectation           |
+      | items | List | hasSizeGreaterThan(3) |
+    When Trevor retrieves profiles from the test service with
+      | filter | <Filter> |
+    Then the last response body should contain
+      | field | type | expectation   |
+      | items | List | <Expectation> |
+    Examples:
+      | Preference | Date of birth                 | Filter                                 | Expectation           |
+      | Pref 1     | 1901-05-21T00:00:00.000+00:00 | dob == "1901-05-21T00:00:00.000+00:00" | hasSize(1)            |
+      | Pref 2     | 1902-05-21T00:00:00.000+00:00 | preferences == "Pref 2"                | hasSize(1)            |
+      | Pref 3     | 1903-05-21T00:00:00.000+00:00 | preferences != "Pref 3"                | hasSizeGreaterThan(3) |
 
   Scenario: Create resource
 

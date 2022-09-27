@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.http.HttpHeaders;
@@ -109,20 +110,26 @@ public class JpaRestApiClient {
      * Retrieves resources in the specified service using the
      * provided filter.
      * 
-     * @param persona  The persona making the request.
-     * @param service  The name of the service where the resources will be retrieved
-     *                 from.
-     *                 The service name must exist in the {@Link ServiceRegistry}
-     * @param resource The name of the type of resource to be retrieved
-     * @param filter   The filter to apply to the resources
+     * @param persona    The persona making the request.
+     * @param service    The name of the service where the resources will be
+     *                   retrieved
+     *                   from.
+     *                   The service name must exist in the {@Link ServiceRegistry}
+     * @param resource   The name of the type of resource to be retrieved
+     * @param parameters The query string parameters to add to the requested url
      * @return JpaRestApiResourceResponse
      */
-    public JpaRestApiResourceResponse Retrieve(Persona persona, String service, String resource, String filter) {
+    public JpaRestApiResourceResponse Retrieve(Persona persona, String service, String resource,
+            Map<String, String> parameters) {
         URL url = GetResourceURL(service, resource);
 
         RequestSpecification spec = given()
                 .baseUri(url.toString())
                 .queryParam("tenantId", "b7e813a2-bb28-11ec-8422-0242ac120002");
+
+        if (parameters != null) {
+            spec = spec.queryParams(parameters);
+        }
 
         addPersonaAuthToRequestSpecification(spec, persona);
 
