@@ -40,7 +40,7 @@ Feature: Interpolated payloads
         "firstRelease": "#{T(java.time.Instant).now().toString()}"
       }
       """
-    When the Trevor creates the valid profiles in the test service
+    When Trevor creates the valid profiles in the test service
     Then the last response should have a status code of 200
     Then the 1st of the profiles in the last response should contain
       | field        | type    | expectation                                               |
@@ -55,7 +55,8 @@ Feature: Interpolated payloads
     Trevor.
 
     Given Trevor is a user
-    When Trevor creates profiles from the file 'data/interpolatedProfile.json' in the test service
+    And the valid profiles are loaded from the file 'data/interpolatedProfile.json'
+    When Trevor creates the valid profiles in the test service
     Then the last response should have a status code of 200
     Then the 1st of the profiles in the last response should contain
       | field        | type    | expectation                                               |

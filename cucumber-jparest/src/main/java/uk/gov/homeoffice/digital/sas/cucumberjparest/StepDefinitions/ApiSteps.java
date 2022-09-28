@@ -33,26 +33,6 @@ public class ApiSteps {
 
     /**
      * 
-     * Creates a payload from the specified file and posts it to
-     * the the endpoint exposed for the given resource.
-     * 
-     * @param persona      The persona to use for auth context
-     * @param resource     The type of resource to be created
-     * @param fileContents The file contents of the specified file
-     * @param service      There service to use
-     */
-    @When("{persona} creates {word} from the {filecontents}{service}")
-    public void persona_creates_resource_from_the_file_in_the_service(Persona persona, String resource,
-            String fileContents, String service) {
-
-        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Create(persona, service, resource, fileContents);
-
-        this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
-
-    }
-
-    /**
-     * 
      * Posts the referenced payload to
      * the the endpoint exposed for the given resource.
      * 

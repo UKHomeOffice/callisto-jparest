@@ -19,7 +19,7 @@ Feature: Personas
   Scenario: Defining a persona as a noun
 
     Usually personas are proper nouns but the step also allows the persona
-    name to be prefixed with "the" in order to use a noun instead of a 
+    name to be prefixed with "the" in order to use a noun instead of a
     proper noun
 
     Given the tester is a user
@@ -33,5 +33,6 @@ Feature: Personas
     achieve this a single well known persona exists for making
     annonymous requests. The persona is called `someone`
 
-    When someone creates profiles from the file 'data/profiles.json' in the test service
+    Given the valid profiles are loaded from the file 'data/profiles.json'
+    When someone creates the valid profiles in the test service
     Then the last response should have a status code of 200

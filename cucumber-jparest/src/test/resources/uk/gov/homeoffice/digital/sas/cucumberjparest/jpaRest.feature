@@ -94,7 +94,8 @@ Feature: Make requests to endpoints created by JpaRest
 
     Create a new resource from the payload in the file.
 
-    When Trevor creates profiles from the file 'data/profiles2.json' in the test service
+    Given the valid profiles are loaded from the file 'data/profiles2.json'
+    When Trevor creates the valid profiles in the test service
 
   Scenario: Update a resource
 
@@ -138,7 +139,8 @@ Feature: Make requests to endpoints created by JpaRest
 
     Delete one resource using its identifier
 
-    Given Trevor creates profiles from the file 'data/profiles2.json' in the test service
+    Given the valid profiles are loaded from the file 'data/profiles2.json'
+    And Trevor creates the valid profiles in the test service
     When Trevor deletes the 1st of the profiles in the last response from the test service
     Then the last response should have a status code of 200
 
