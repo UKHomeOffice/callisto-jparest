@@ -21,6 +21,7 @@ import io.restassured.response.Response;
 import lombok.NonNull;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Expectation;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.Interpolation;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiClient;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaTestContext;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager.PayloadKey;
@@ -49,17 +50,18 @@ public class ParameterTypes {
     private final JpaRestApiClient jpaRestApiClient;
     private final ScenarioState scenarioState;
     private final ObjectMapper objectMapper;
+    private final Interpolation interpolation;
 
     @Autowired
     public ParameterTypes(@NonNull PersonaManager personaManager, @NonNull HttpResponseManager httpResponseManager,
             @NonNull JpaRestApiClient jpaRestApiClient, @NonNull ObjectMapper objectMapper,
-            @NonNull ScenarioState scenarioState) {
+            @NonNull ScenarioState scenarioState, Interpolation interpolation) {
         this.personaManager = personaManager;
         this.httpResponseManager = httpResponseManager;
         this.jpaRestApiClient = jpaRestApiClient;
         this.objectMapper = objectMapper;
         this.scenarioState = scenarioState;
-
+        this.interpolation = interpolation;
     }
 
     /**
@@ -91,7 +93,7 @@ public class ParameterTypes {
             ClassLoader classLoader = getClass().getClassLoader();
             File file = new File(classLoader.getResource(path).getFile());
             String data = Files.contentOf(file, "UTF-8");
-            return data;
+            return interpolation.Evaluate(data);
         } catch (RuntimeException ex) {
             throw new IllegalArgumentException("File doesn't exist " + path);
         }

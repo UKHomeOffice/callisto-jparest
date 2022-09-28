@@ -4,16 +4,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Given;
 import lombok.NonNull;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.Interpolation;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager.PayloadKey;
 
 public class PayloadSteps {
 
     private final PayloadManager payloadManager;
+    private final Interpolation interpolation;
 
     @Autowired
-    public PayloadSteps(@NonNull PayloadManager payloadManager) {
+    public PayloadSteps(@NonNull PayloadManager payloadManager, Interpolation interpolation) {
         this.payloadManager = payloadManager;
+        this.interpolation = interpolation;
 
     }
 
@@ -26,6 +29,8 @@ public class PayloadSteps {
      */
     @Given("{payload} are")
     public void inline_resources_are(PayloadKey payloadKey, String docString) {
-        payloadManager.createPayload(payloadKey, docString);
+        String interpolatedPayload = interpolation.Evaluate(docString);
+        payloadManager.createPayload(payloadKey, interpolatedPayload);
     }
+
 }

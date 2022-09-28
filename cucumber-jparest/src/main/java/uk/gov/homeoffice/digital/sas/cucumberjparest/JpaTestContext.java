@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 
 import io.cucumber.spring.ScenarioScope;
@@ -97,6 +98,17 @@ public class JpaTestContext {
     @Bean
     public JpaRestApiClient jpaRestApiClient() {
         return new JpaRestApiClient(JpaTestContext.serviceRegistry);
+    }
+
+    /**
+     * 
+     * Singleton Interpolation
+     * 
+     * @return Interpolation
+     */
+    @Bean
+    public Interpolation innterpolation(ConfigurableBeanFactory beanFactory) {
+        return new Interpolation(beanFactory);
     }
 
 }
