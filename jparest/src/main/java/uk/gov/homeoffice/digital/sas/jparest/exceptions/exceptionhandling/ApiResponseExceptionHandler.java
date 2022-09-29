@@ -13,9 +13,12 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
+import uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper;
 
 import javax.persistence.PersistenceException;
 import java.util.logging.Logger;
+
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.SERVER_ERROR;
 
 @ControllerAdvice(assignableTypes = {ResourceApiController.class})
 public class ApiResponseExceptionHandler {
@@ -42,9 +45,8 @@ public class ApiResponseExceptionHandler {
 
     @ExceptionHandler(PersistenceException.class)
     public ResponseEntity<ApiErrorResponse> handlePersistenceException(PersistenceException ex) {
-        LOGGER.severe("Persistence exception occurred whilst saving a resource. " + ex.getMessage());
-        var msg = "There was an error persisting data.";
-        return createResponseEntity(msg, HttpStatus.BAD_REQUEST);
+        LOGGER.severe(SERVER_ERROR + ex.getMessage());
+        return createResponseEntity(SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
