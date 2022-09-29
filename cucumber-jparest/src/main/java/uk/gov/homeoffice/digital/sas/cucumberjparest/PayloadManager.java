@@ -13,6 +13,14 @@ import lombok.Setter;
 @Component
 public class PayloadManager {
 
+    /**
+     * 
+     * Used to hold a key for a defined payload.
+     * These take the form of the resource type
+     * and a variable that can be used to reference
+     * the payload throughout a scenario
+     * 
+     */
     @AllArgsConstructor
     public static class PayloadKey {
         @NonNull

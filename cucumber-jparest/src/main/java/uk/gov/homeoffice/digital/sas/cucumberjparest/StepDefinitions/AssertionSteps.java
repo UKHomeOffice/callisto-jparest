@@ -20,6 +20,12 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.Expectation;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
 
+/**
+ * 
+ * Provides steps related to making assertions
+ * against responses and the json objects within them
+ * 
+ */
 public class AssertionSteps {
 
     private final HttpResponseManager httpResponseManager;

@@ -6,6 +6,12 @@ import io.cucumber.java.en.Given;
 import lombok.NonNull;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PersonaManager;
 
+/**
+ * 
+ * Provides steps setting up a persona with a name
+ * and any configuration required within the service.
+ * 
+ */
 public class PersonaSteps {
 
     private final PersonaManager personaManager;

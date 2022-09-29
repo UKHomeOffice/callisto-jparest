@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * Manages instances of Personas
  * When new personas are created they can be given any
  * name. This name is used as a variable to reference
- * the persona instance in later steps.
+ * the persona instance in later steps within a scenario.
  * 
  */
 @Component
@@ -28,8 +28,7 @@ public class PersonaManager {
         this.createPersona("someone");
     }
 
-    
-    /** 
+    /**
      * 
      * Creates a new persona with the given name
      * 
@@ -37,7 +36,7 @@ public class PersonaManager {
      * @return Persona The new persona
      */
     public Persona createPersona(String name) {
-        if (personas.containsKey(name)){
+        if (personas.containsKey(name)) {
             throw new IllegalArgumentException(name + " already exists");
         }
         Persona persona = new Persona();
@@ -45,16 +44,16 @@ public class PersonaManager {
         return persona;
     }
 
-    
-    /** 
+    /**
      * 
-     * Retrieves a persona instance added by the {@link #createPersona(String)} method
+     * Retrieves a persona instance added by the {@link #createPersona(String)}
+     * method
      * 
      * @param name The name used to reference the persona
      * @return Persona The persona for the given persona name
      */
     public Persona getPersona(String name) {
-        if (!personas.containsKey(name)){
+        if (!personas.containsKey(name)) {
             throw new IllegalArgumentException(name + " does not exist");
         }
         return personas.get(name);

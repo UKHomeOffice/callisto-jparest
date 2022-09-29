@@ -8,6 +8,15 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.Interpolation;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager.PayloadKey;
 
+/**
+ * 
+ * Provides steps to enable payloads to
+ * be defined that are used by other steps
+ * when making POST, PUT requests or
+ * the create (POST) and update(PUT) resource
+ * requests.
+ * 
+ */
 public class PayloadSteps {
 
     private final PayloadManager payloadManager;

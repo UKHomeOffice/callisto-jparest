@@ -15,6 +15,12 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager.PayloadKey;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Persona;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
 
+/**
+ * 
+ * Provides steps related to making API requests to
+ * endpoints exposed by the JpaRest package
+ * 
+ */
 public class ApiSteps {
 
     private final HttpResponseManager httpResponseManager;

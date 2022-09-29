@@ -5,6 +5,12 @@ import java.net.URL;
 import io.restassured.response.Response;
 import lombok.Getter;
 
+/**
+ * 
+ * Returns the response associated with the provided
+ * url.
+ * 
+ */
 public class JpaRestApiResponse {
 
     @Getter

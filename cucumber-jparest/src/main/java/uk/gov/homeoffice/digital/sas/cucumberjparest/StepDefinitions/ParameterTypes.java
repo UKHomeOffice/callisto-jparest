@@ -33,7 +33,8 @@ import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
 
 /**
  * 
- * Step definitions to be included in the published cucumber-jparest package
+ * Common parameter types used to convert expressions
+ * into the types required by the step definitions
  * 
  */
 @CucumberContextConfiguration

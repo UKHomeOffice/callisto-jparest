@@ -23,6 +23,12 @@ import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import lombok.NonNull;
 
+/**
+ * 
+ * Provides methods used to assert expectations against
+ * given objects
+ * 
+ */
 public class ExpectationUtils {
     private ExpectationUtils() {
     }
