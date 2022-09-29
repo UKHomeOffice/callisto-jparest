@@ -8,14 +8,15 @@ Feature: Assertions
   expectations to be assert for a specified object.
 
   The object to assert expectations against can be specified for
-  resourceful and business endpoints alike and back referencing
+  resource and business endpoints alike and back referencing
   to previous requests in the same scenario is supported.
 
   Once the object to assert against is specified a table can be provided
   to specify the field to assert against, it's type and an expectation.
 
   For more details on expectations and how they can be specified and
-  customised see the Expectations supplement in the documentation.
+  customised see the documentation for AssertJ
+  https://assertj.github.io/doc/#assertj-core-assertions-guide
 
   Background:
     Given the tester is a user
