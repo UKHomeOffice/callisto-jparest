@@ -19,12 +19,13 @@ steps:
   commands:
   - mvn clean install
 
-- name: branch name
+- name: branch_name
   image: maven:3.8-openjdk-17
   depends_on:
     - test
   commands:
-    - "branchName=$(echo $DRONE_BRANCH)"
+    - echo $DRONE_BRANCH
+    - mvn -DbranchName=$DRONE_BRANCH
   when:
     branch:
       exclude:
