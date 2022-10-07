@@ -28,7 +28,7 @@ steps:
     - test
   commands:
     - echo $DRONE_BRANCH
-    - export BRANCHNAME=test
+    - export BRANCHNAME=$DRONE_BRANCH
     - echo $BRANCHNAME
   when:
     branch:
