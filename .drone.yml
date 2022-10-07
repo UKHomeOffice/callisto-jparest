@@ -13,6 +13,9 @@ trigger:
     - push
     - pull_request
 
+environment:
+  BRANCHNAME:
+
 steps:
 - name: test
   image: maven:3.8-openjdk-17
@@ -25,7 +28,8 @@ steps:
     - test
   commands:
     - echo $DRONE_BRANCH
-    - mvn -DbranchName=$DRONE_BRANCH -Dmaven.main.skip -DskipTests package
+    - export BRANCHNAME=test
+    - echo $BRANCHNAME
   when:
     branch:
       exclude:
@@ -41,7 +45,7 @@ steps:
     SONAR_TOKEN:
       from_secret: sonar_cloud_token
   commands:
-  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=${branchName} -Dsonar.projectName=callisto-jparest
+  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$BRANCHNAME -Dsonar.projectName=callisto-jparest
   when:
     event:
       exclude:
