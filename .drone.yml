@@ -25,7 +25,7 @@ steps:
     - test
   commands:
     - echo $DRONE_BRANCH
-    - mvn -DbranchName=$DRONE_BRANCH -Dmaven.main.skip -DskipTests
+    - mvn -DbranchName=$DRONE_BRANCH -Dmaven.main.skip -DskipTests package
   when:
     branch:
       exclude:
