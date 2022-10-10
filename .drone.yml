@@ -47,6 +47,7 @@ steps:
   commands:
   - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.projectName=callisto-jparest
   when:
+    branch: main
     event:
       exclude:
       - pull_request
