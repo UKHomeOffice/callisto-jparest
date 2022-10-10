@@ -13,29 +13,29 @@ trigger:
     - push
     - pull_request
 
-environment:
-  BRANCHNAME:
-
 steps:
 - name: test
   image: maven:3.8-openjdk-17
   commands:
   - mvn clean install
 
-- name: branch_name
+- name: sonar branch
   image: maven:3.8-openjdk-17
   depends_on:
     - test
+  environment:
+    SONAR_HOST:
+      from_secret: sonar_cloud_host
+    SONAR_TOKEN:
+      from_secret: sonar_cloud_token
   commands:
-    - echo $DRONE_BRANCH
-    - export BRANCHNAME=$DRONE_BRANCH
-    - echo $BRANCHNAME
+  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$DRONE_BRANCH -Dsonar.projectName=callisto-jparest
   when:
     branch:
       exclude:
         - main
 
-- name: sonar
+- name: sonar main
   image: maven:3.8-openjdk-17
   depends_on:
   - test
@@ -45,8 +45,7 @@ steps:
     SONAR_TOKEN:
       from_secret: sonar_cloud_token
   commands:
-  - echo $BRANCHNAME
-  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$BRANCHNAME -Dsonar.projectName=callisto-jparest
+  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.projectName=callisto-jparest
   when:
     event:
       exclude:
