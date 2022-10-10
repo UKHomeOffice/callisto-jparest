@@ -19,7 +19,7 @@ steps:
   commands:
   - mvn clean install
 
-- name: sonar branch
+- name: sonar_branch
   image: maven:3.8-openjdk-17
   depends_on:
     - test
@@ -35,7 +35,7 @@ steps:
       exclude:
       - main
 
-- name: sonar main
+- name: sonar_main
   image: maven:3.8-openjdk-17
   depends_on:
     - test
@@ -54,7 +54,7 @@ steps:
 - name: publish
   image: maven:3.8-openjdk-17
   depends_on:
-    - sonar
+    - sonar_main
   environment:
     ARTIFACTORY_TOKEN:
         from_secret: artifactory_token
@@ -87,7 +87,7 @@ steps:
 - name: snapshot
   image: maven:3.8-openjdk-17
   depends_on:
-    - sonar
+    - sonar_branch
   environment:
     ARTIFACTORY_TOKEN:
       from_secret: artifactory_token
