@@ -33,7 +33,7 @@ steps:
   when:
     branch:
       exclude:
-        - main
+      - main
 
 - name: sonar main
   image: maven:3.8-openjdk-17
@@ -49,7 +49,7 @@ steps:
   when:
     event:
       exclude:
-        - pull_request
+      - pull_request
 
 - name: publish
   image: maven:3.8-openjdk-17
