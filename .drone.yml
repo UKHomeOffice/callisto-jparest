@@ -38,7 +38,7 @@ steps:
 - name: sonar main
   image: maven:3.8-openjdk-17
   depends_on:
-  - test
+    - test
   environment:
     SONAR_HOST:
       from_secret: sonar_cloud_host
@@ -49,7 +49,7 @@ steps:
   when:
     event:
       exclude:
-      - pull_request
+        - pull_request
 
 - name: publish
   image: maven:3.8-openjdk-17
