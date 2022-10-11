@@ -22,7 +22,7 @@ steps:
 - name: sonar
   image: maven:3.8-openjdk-17
   depends_on:
-  - test
+    - test
   environment:
     SONAR_HOST:
       from_secret: sonar_cloud_host
@@ -31,9 +31,9 @@ steps:
   commands:
   - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$DRONE_BRANCH
   when:
-    event:
+    branch:
       exclude:
-      - pull_request
+      - main
 
 - name: publish
   image: maven:3.8-openjdk-17
