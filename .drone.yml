@@ -19,17 +19,6 @@ steps:
   commands:
   - mvn clean install
 
-- name: branch name
-  image: maven:3.8-openjdk-17
-  depends_on:
-    - test
-  commands:
-    - "branchName=$(echo $DRONE_BRANCH)"
-  when:
-    branch:
-      exclude:
-        - main
-
 - name: sonar
   image: maven:3.8-openjdk-17
   depends_on:
@@ -40,7 +29,7 @@ steps:
     SONAR_TOKEN:
       from_secret: sonar_cloud_token
   commands:
-  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$${branchName}
+  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$DRONE_BRANCH
   when:
     event:
       exclude:
@@ -95,6 +84,44 @@ steps:
     branch:
       exclude:
       - main
+
+# - name: sonar pr decoration
+#   image: maven:3.8-openjdk-17
+#   depends_on:
+#   - sonar
+#   environment:
+#     SONAR_HOST:
+#       from_secret: sonar_host
+#     SONAR_TOKEN:
+#       from_secret: sonar_token
+#   commands:
+#   - echo this is where I run the pull request decoration
+#   when:
+#     event:
+#       include:
+#       - pull_request
+
+---
+kind: pipeline
+type: kubernetes
+name: sonar housekeeping
+
+trigger:
+  event:
+  - cron
+  cron:
+    include:
+    - nightly
+
+steps:
+- name: SonarQube housekeeping
+  image: quay.io/ukhomeofficedigital/cicd-actions-sonarqube-housekeeping:v1
+  settings:
+    sonarqube_host: https://sonarqube.digital.homeoffice.gov.uk/
+    sonarqube_token:
+      from_secret: sonar_token
+    sonarqube_project_prefix: 'callisto-jparest'
+    jira_project_key: 'eahw'
 
 ---
 kind: pipeline
