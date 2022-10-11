@@ -88,6 +88,28 @@ steps:
 ---
 kind: pipeline
 type: kubernetes
+name: sonar housekeeping
+
+trigger:
+  event:
+    - cron
+  cron:
+    include:
+      - nightly
+
+steps:
+  - name: SonarQube housekeeping
+    image: quay.io/ukhomeofficedigital/cicd-actions-sonarqube-housekeeping:v1
+    settings:
+      sonarqube_host: https://sonarcloud.io
+      sonarqube_token:
+        from_secret: sonar_cloud_token
+      sonarqube_project_prefix: 'callisto-jparest'
+      jira_project_key: 'eahw'
+
+---
+kind: pipeline
+type: kubernetes
 name: build notifications
 
 trigger:
