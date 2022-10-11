@@ -19,21 +19,21 @@ steps:
   commands:
   - mvn clean install
 
-#- name: sonar
-#  image: maven:3.8-openjdk-17
-#  depends_on:
-#  - test
-#  environment:
-#    SONAR_HOST:
-#      from_secret: sonar_cloud_host
-#    SONAR_TOKEN:
-#      from_secret: sonar_cloud_token
-#  commands:
-#  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$DRONE_BRANCH -Dsonar.projectName=callisto-jparest
-#  when:
-#    event:
-#      exclude:
-#      - pull_request
+- name: sonar
+  image: maven:3.8-openjdk-17
+  depends_on:
+  - test
+  environment:
+    SONAR_HOST:
+      from_secret: sonar_cloud_host
+    SONAR_TOKEN:
+      from_secret: sonar_cloud_token
+  commands:
+  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$DRONE_BRANCH -Dsonar.projectName=callisto-jparest
+  when:
+    event:
+      exclude:
+      - pull_request
 
 - name: publish
   image: maven:3.8-openjdk-17
