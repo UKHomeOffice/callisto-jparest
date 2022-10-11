@@ -35,22 +35,22 @@ steps:
       exclude:
       - pull_request
 
-- name: publish
-  image: maven:3.8-openjdk-17
-  depends_on:
-    - sonar
-  environment:
-    ARTIFACTORY_TOKEN:
-        from_secret: artifactory_token
-  commands:
-  - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
-  - versionExtract=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-  - sed -i "/^version=/{s|.$|"=$versionExtract"|}" git_tag.sh
-  when:
-    branch: main
-    event:
-      exclude:
-      - pull_request
+#- name: publish
+#  image: maven:3.8-openjdk-17
+#  depends_on:
+#    - sonar
+#  environment:
+#    ARTIFACTORY_TOKEN:
+#        from_secret: artifactory_token
+#  commands:
+#  - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
+#  - versionExtract=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+#  - sed -i "/^version=/{s|.$|"=$versionExtract"|}" git_tag.sh
+#  when:
+#    branch: main
+#    event:
+#      exclude:
+#      - pull_request
 
 - name: git tag
   image: alpine/git
