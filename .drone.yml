@@ -19,17 +19,6 @@ steps:
   commands:
   - mvn clean install
 
-- name: branch name
-  image: maven:3.8-openjdk-17
-  depends_on:
-    - test
-  commands:
-    - "branchName=$(echo $DRONE_BRANCH)"
-  when:
-    branch:
-      exclude:
-        - main
-
 - name: sonar
   image: maven:3.8-openjdk-17
   depends_on:
@@ -40,7 +29,7 @@ steps:
     SONAR_TOKEN:
       from_secret: sonar_cloud_token
   commands:
-  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$${branchName}
+  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$DRONE_BRANCH -Dsonar.projectName=callisto-jparest
   when:
     event:
       exclude:
