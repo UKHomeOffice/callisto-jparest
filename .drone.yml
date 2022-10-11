@@ -19,17 +19,6 @@ steps:
   commands:
   - mvn clean install
 
-- name: branch name
-  image: maven:3.8-openjdk-17
-  depends_on:
-    - test
-  commands:
-    - "branchName=$(echo $DRONE_BRANCH)"
-  when:
-    branch:
-      exclude:
-        - main
-
 - name: sonar
   image: maven:3.8-openjdk-17
   depends_on:
