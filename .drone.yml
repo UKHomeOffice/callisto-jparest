@@ -37,8 +37,8 @@ steps:
 
 - name: publish
   image: maven:3.8-openjdk-17
-  depends_on:
-    - sonar
+#  depends_on:
+#    - sonar
   environment:
     ARTIFACTORY_TOKEN:
         from_secret: artifactory_token
