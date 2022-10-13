@@ -1,22 +1,21 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorErrorCode;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @Component
 public class ResourceEndpoint {
-
     public static final String RESOURCE_ALREADY_ADDED = "Resource has already been added";
     public static final String CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES = "You can only call AddRelated on resources already passed to the Add method";
     public static final String RELATED_RESOURCE_ALREADY_ADDED = "Related resource has already been added";
+
     public static final String PATH_ALREADY_EXISTS = "Path has already been used";
 
     @Getter

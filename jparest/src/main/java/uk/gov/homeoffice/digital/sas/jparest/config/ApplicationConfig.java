@@ -11,9 +11,9 @@ import uk.gov.homeoffice.digital.sas.jparest.swagger.ResourceOpenApiCustomiser;
 
 @Configuration
 @Import({
-        ObjectMapperConfig.class,
-        JpaRestMvcConfig.class,
-        HandlerMappingConfig.class,
+    ObjectMapperConfig.class,
+    JpaRestMvcConfig.class,
+    HandlerMappingConfig.class,
 })
 public class ApplicationConfig {
 

@@ -26,12 +26,12 @@ public class ApiResponseExceptionHandler {
     private static final Logger LOGGER = Logger.getLogger(ApiResponseExceptionHandler.class.getName());
 
     @ExceptionHandler({
-            IllegalArgumentException.class,
-            JsonProcessingException.class,
-            InvalidFilterException.class,
-            ResourceConstraintViolationException.class,
-            UnknownResourcePropertyException.class,
-            TenantIdMismatchException.class
+        IllegalArgumentException.class,
+        JsonProcessingException.class,
+        InvalidFilterException.class,
+        ResourceConstraintViolationException.class,
+        UnknownResourcePropertyException.class,
+        TenantIdMismatchException.class
     })
     public ResponseEntity<ApiErrorResponse> handleException(Exception ex) {
         return createResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
