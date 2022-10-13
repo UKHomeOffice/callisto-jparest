@@ -35,20 +35,24 @@ public class ValidatorUtils {
             var constraintViolations = this.validator.validate(objectToValidate);
 
             if (!constraintViolations.isEmpty()) {
-                throw new ResourceConstraintViolationException(createResourceConstraintViolationMessage(constraintViolations));
+                throw new ResourceConstraintViolationException(
+                    createResourceConstraintViolationMessage(constraintViolations));
             }
         }
     }
 
-
-    private static String createResourceConstraintViolationMessage(Set<ConstraintViolation<Object>> constraintViolations) {
+    private static String createResourceConstraintViolationMessage(
+        Set<ConstraintViolation<Object>> constraintViolations) {
 
         return constraintViolations.stream()
                 .collect(groupingBy(ConstraintViolation::getPropertyPath))
                 .entrySet().stream()
                 .map(entry -> {
-                    var propertyErrors = entry.getValue().stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(", "));
-                    return String.format("%s has the following error(s): %s", entry.getKey().toString(), propertyErrors);
+                    var propertyErrors = entry.getValue().stream()
+                        .map(ConstraintViolation::getMessage)
+                        .collect(Collectors.joining(", "));
+                    return String.format("%s has the following error(s): %s",
+                        entry.getKey().toString(), propertyErrors);
                 })
                 .collect(Collectors.joining(". "));
     }

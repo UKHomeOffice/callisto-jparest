@@ -37,7 +37,8 @@ public class PathItemCreator {
     private static final Parameter PAGEABLE_PARAMETER = getParameter(RequestParameter.PAGEABLE);
     private static final Parameter TENANT_ID_PARAMETER = getParameter(RequestParameter.TENANT_ID);
 
-    private static final Map<String, RequestParameter> PARAM_NAME_TO_ENUM_MAP = RequestParameter.getParamNameToEnumMap();
+    private static final Map<String, RequestParameter> PARAM_NAME_TO_ENUM_MAP
+        = RequestParameter.getParamNameToEnumMap();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PathItemCreator.class);
 
@@ -233,8 +234,8 @@ public class PathItemCreator {
     private static Parameter getParameter(RequestParameter requestParameter) {
 
         var parameter = new Parameter();
-
-        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(null, requestParameter.getParamDataType(), null, null);
+        Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(
+            null, requestParameter.getParamDataType(),  null, null);
 
         parameter.schema(schema);
         parameter.setIn(requestParameter.getParamType());
@@ -334,8 +335,10 @@ public class PathItemCreator {
 
     private void addParametersToOperation(Operation operation, Parameter... parameters) {
         Arrays.stream(parameters)
-                .sorted(Comparator.comparing(param -> Optional.of(PARAM_NAME_TO_ENUM_MAP.get(param.getName())).orElseThrow(() ->
-                                new IllegalArgumentException(String.format("No %s enum constant found for parameter name: %s ",
+                .sorted(Comparator.comparing(param -> Optional.of(PARAM_NAME_TO_ENUM_MAP.get(
+                    param.getName())).orElseThrow(() ->
+                                new IllegalArgumentException(
+                                    String.format("No %s enum constant found for parameter name: %s ",
                                         RequestParameter.class.getCanonicalName(), param.getName()))).getOrder()))
                 .forEach(operation::addParametersItem);
     }

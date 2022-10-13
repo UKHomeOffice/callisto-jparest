@@ -26,7 +26,8 @@ public abstract class BaseEntity {
     @GenericGenerator(
             name = "UUID",
             strategy = "org.hibernate.id.UUIDGenerator",
-            parameters = @Parameter(name = "uuid_gen_strategy_class", value = "org.hibernate.id.uuid.CustomVersionOneStrategy"))
+            parameters = @Parameter(name = "uuid_gen_strategy_class",
+                                    value = "org.hibernate.id.uuid.CustomVersionOneStrategy"))
     @Type(type="uuid-char")
     private UUID id;
 

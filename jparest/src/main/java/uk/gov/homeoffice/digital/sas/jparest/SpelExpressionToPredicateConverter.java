@@ -233,7 +233,8 @@ public class SpelExpressionToPredicateConverter {
     private static Comparable<Object>[] getLiteralValues(SpelNode node, int startPos, Class<?> clazz) {
         ArrayList<Comparable<Object>> items = new ArrayList<>();
         for (int i = startPos; i < node.getChildCount(); i++) {
-            Comparable<Object> rightValue = (Comparable<Object>) convertTo(((Literal) node.getChild(i)).getLiteralValue().getValue(), clazz);
+            Comparable<Object> rightValue =
+                (Comparable<Object>) convertTo(((Literal) node.getChild(i)).getLiteralValue().getValue(), clazz);
             items.add(rightValue);
         }
         var result = new Comparable[node.getChildCount() - 1];

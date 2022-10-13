@@ -216,7 +216,8 @@ public class ResourceApiController<T extends BaseEntity> {
 
         var payloadEntityId = (UUID) this.persistenceUnitUtil.getIdentifier(r2);
         if (payloadEntityId != null && !id.equals(payloadEntityId)) {
-            throw new IllegalArgumentException("The supplied payload resource id value must match the url id path parameter value");
+            throw new IllegalArgumentException(
+                "The supplied payload resource id value must match the url id path parameter value");
         }
 
         this.validatorUtils.validateAndThrowIfErrorsExist(r2);
@@ -401,8 +402,10 @@ public class ResourceApiController<T extends BaseEntity> {
         var relatedRoot = query.from(this.entityUtils.getRelatedType(relation));
         var relatedIdPredicate = relatedRoot.get(EntityUtils.ID_FIELD_NAME).in(relatedIds);
         var relatedTenantPredicate = builder.equal(relatedRoot.get(TENANT_ID.getParamName()), tenantId);
-        var relatedSelect = query.select(builder.count(relatedRoot)).where(builder.and(relatedIdPredicate, relatedTenantPredicate));
-        var tenantIdMatchesRelatedResources = this.entityManager.createQuery(relatedSelect).getSingleResult() == relatedIds.size();
+        var relatedSelect =
+            query.select(builder.count(relatedRoot)).where(builder.and(relatedIdPredicate, relatedTenantPredicate));
+        var tenantIdMatchesRelatedResources =
+            this.entityManager.createQuery(relatedSelect).getSingleResult() == relatedIds.size();
         if (!tenantIdMatchesRelatedResources) {
             throw new ResourceNotFoundException(relatedResourcesMessage(relatedIds));
         }

@@ -7,8 +7,10 @@ import java.util.stream.Collectors;
 public final class ResourceNotFoundExceptionMessageUtil {
 
 
-    private static final String RESOURCES_NOT_FOUND_ERROR_FORMAT = "Not all related resources could be found for the following Ids:[%s]";
-    private static final String DELETABLE_RELATED_RESOURCES_NOT_FOUND_ERROR_FORMAT = "No related %s resources removed as the following related resources could not be found. Ids:[%s]";
+    private static final String RESOURCES_NOT_FOUND_ERROR_FORMAT =
+        "Not all related resources could be found for the following Ids:[%s]";
+    private static final String DELETABLE_RELATED_RESOURCES_NOT_FOUND_ERROR_FORMAT =
+        "No related %s resources removed as the following related resources could not be found. Ids:[%s]";
 
 
     private ResourceNotFoundExceptionMessageUtil() {}
@@ -20,7 +22,8 @@ public final class ResourceNotFoundExceptionMessageUtil {
 
 
     public static String deletableRelatedResourcesMessage(Class<?> resourceType, Collection<UUID> ids) {
-        return String.format(DELETABLE_RELATED_RESOURCES_NOT_FOUND_ERROR_FORMAT, resourceType.getSimpleName(), formatIdsToCsv(ids));
+        return String.format(DELETABLE_RELATED_RESOURCES_NOT_FOUND_ERROR_FORMAT,
+            resourceType.getSimpleName(), formatIdsToCsv(ids));
     }
 
 

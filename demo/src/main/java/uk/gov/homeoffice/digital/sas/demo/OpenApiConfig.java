@@ -18,7 +18,8 @@ public class OpenApiConfig {
                         .title("Example API")
                         .version(appVersion)
                         .description(
-                                "This is a sample API server created using springdocs - a library for OpenAPI 3 with spring boot.")
+                                "This is a sample API server created using springdocs "
+                                   + "- a library for OpenAPI 3 with spring boot.")
                         .termsOfService("http://swagger.io/terms/")
                         .license(new License().name("Apache 2.0")
                                 .url("http://springdoc.org")));

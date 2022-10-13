@@ -173,12 +173,14 @@ public class HandlerMappingConfig {
                     path + createIdAndRelationParams(relation), RequestMethod.GET);
 
             register(controller, "deleteRelated", getControllerMethodArgs(
-                    RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION, RequestParameter.RELATED_IDS),
-                    path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM,
+                    RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION,
+                    RequestParameter.RELATED_IDS),
+                path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM,
                     RequestMethod.DELETE);
 
             register(controller, "addRelated", getControllerMethodArgs(
-                    RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION, RequestParameter.RELATED_IDS),
+                    RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION,
+                    RequestParameter.RELATED_IDS),
                     path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM, RequestMethod.PUT);
         }
     }
@@ -196,7 +198,8 @@ public class HandlerMappingConfig {
     }
 
     private static String createIdAndRelationParams(String relation) {
-        return URL_ID_PATH_PARAM + "/{" + RequestParameter.RELATION.getParamName() + ":" + Pattern.quote(relation) + "}";
+        return String.format(URL_ID_PATH_PARAM + "/{%s:%s}",
+            RequestParameter.RELATION.getParamName(), Pattern.quote(relation));
     }
 
     /**

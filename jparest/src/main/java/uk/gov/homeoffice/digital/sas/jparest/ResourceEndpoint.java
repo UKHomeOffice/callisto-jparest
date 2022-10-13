@@ -13,7 +13,9 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 @Component
 public class ResourceEndpoint {
     public static final String RESOURCE_ALREADY_ADDED = "Resource has already been added";
-    public static final String CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES = "You can only call AddRelated on resources already passed to the Add method";
+    public static final String CALL_ADD_RELATED_ONLY_ON_EXISTING_RESOURCES = "You can only call AddRelated on "
+        +  "resources already passed to the Add method";
+
     public static final String RELATED_RESOURCE_ALREADY_ADDED = "Related resource has already been added";
 
     public static final String PATH_ALREADY_EXISTS = "Path has already been used";

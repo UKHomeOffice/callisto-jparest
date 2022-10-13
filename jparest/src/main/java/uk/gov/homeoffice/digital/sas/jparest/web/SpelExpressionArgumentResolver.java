@@ -24,7 +24,8 @@ public class SpelExpressionArgumentResolver implements HandlerMethodArgumentReso
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws MethodArgumentTypeMismatchException {
+                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
+        throws MethodArgumentTypeMismatchException {
 
         String parameterName = Objects.requireNonNull(parameter.getParameterName());
         String paramValue = webRequest.getParameter(parameterName);
@@ -33,7 +34,8 @@ public class SpelExpressionArgumentResolver implements HandlerMethodArgumentReso
             try {
                 return expressionParser.parseExpression(paramValue);
             } catch (ParseException ex) {
-                throw new MethodArgumentTypeMismatchException(paramValue, parameter.getParameterType(), parameterName, parameter, ex.getCause());
+                throw new MethodArgumentTypeMismatchException(
+                    paramValue, parameter.getParameterType(), parameterName, parameter, ex.getCause());
             }
         }
         return null;

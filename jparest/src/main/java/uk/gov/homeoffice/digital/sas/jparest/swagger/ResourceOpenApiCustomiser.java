@@ -81,8 +81,11 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
      * Ensures the ApiResponse schema is registered along with the metadata schema
      */
     private static Schema<?> registerSchema(Components components) {
-        var apiResponseSchema = ensureSchema(components, "ApiResponse", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
-        ensureSchema(components, "Metadata", uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
+        var apiResponseSchema = ensureSchema(components, "ApiResponse",
+            uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
+        ensureSchema(components, "Metadata",
+            uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
+
         var pageableSchema = ensureSchema(components, "Pageable", Pageable.class);
         var value = new Pageable(0, DEFAULT_PAGE_SIZE, null);
         pageableSchema.setExample(value);
@@ -105,7 +108,8 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
     }
 
 
-    private void setParentResourcePaths(OpenAPI openApi, ResourceEndpoint.RootDescriptor rootDescriptor, Class<?> clazz, String tag) {
+    private void setParentResourcePaths(OpenAPI openApi, ResourceEndpoint.RootDescriptor rootDescriptor,
+                                        Class<?> clazz, String tag) {
         var resourceRootPath = pathItemCreator.createRootPath(tag, clazz);
         openApi.path(rootDescriptor.getPath(), resourceRootPath);
         var resourceItemPath = pathItemCreator.createItemPath(tag, clazz);
