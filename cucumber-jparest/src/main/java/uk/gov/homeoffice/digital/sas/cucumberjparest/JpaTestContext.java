@@ -107,7 +107,7 @@ public class JpaTestContext {
      * @return Interpolation
      */
     @Bean
-    public Interpolation innterpolation(ConfigurableBeanFactory beanFactory) {
+    public Interpolation interpolation(ConfigurableBeanFactory beanFactory) {
         return new Interpolation(beanFactory);
     }
 
