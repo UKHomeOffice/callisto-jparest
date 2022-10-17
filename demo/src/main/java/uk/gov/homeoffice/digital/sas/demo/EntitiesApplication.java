@@ -5,9 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class EntitiesApplication {
-    public static void main(String[] args) {
-        Class<?>[] primarySources = {EntitiesApplication.class};
-        SpringApplication.run(primarySources, args);
-    }
+  public static void main(String[] args) {
+    Class<?>[] primarySources = {EntitiesApplication.class};
+    SpringApplication.run(primarySources, args);
+  }
 
 }

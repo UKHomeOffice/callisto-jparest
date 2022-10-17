@@ -2,7 +2,6 @@ package uk.gov.homeoffice.digital.sas.jparest.web;
 
 import java.net.URL;
 import java.util.List;
-
 import lombok.Getter;
 
 /**
@@ -10,28 +9,28 @@ import lombok.Getter;
  */
 public class ApiResponse<T> {
 
-    public class Metadata {
-        private URL next;
+  public class Metadata {
+    private URL next;
 
-        public URL getNext() {
-            return this.next;
-        }
-
-        public void setNext(URL next) {
-            this.next = next;
-        }
-
+    public URL getNext() {
+      return this.next;
     }
 
-    @Getter
-    private Metadata meta = new Metadata();
-
-    @Getter
-    private List<T> items;
-
-    public ApiResponse(List<T> items) {
-        this.items = items;
+    public void setNext(URL next) {
+      this.next = next;
     }
+
+  }
+
+  @Getter
+  private Metadata meta = new Metadata();
+
+  @Getter
+  private List<T> items;
+
+  public ApiResponse(List<T> items) {
+    this.items = items;
+  }
 
 
 }
