@@ -4,7 +4,6 @@ import static org.assertj.core.api.Fail.fail;
 
 import java.io.File;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -42,9 +41,6 @@ import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
 public class ParameterTypes {
 
     private static final String FROM_IN_SERVICE = "(?: (?:from|in) the (\\S*) service)?";
-
-    class ObjectObjectMap extends HashMap<Object, Object> {
-    }
 
     private final PersonaManager personaManager;
     private final HttpResponseManager httpResponseManager;
@@ -266,7 +262,6 @@ public class ParameterTypes {
      * 
      * Converts positional string last, 1st, 2nd, 23rd, 30th etc
      * to a zero based ordinal integer.
-     * 
      * The word last is converted to a -1
      * 
      * @param responsePosition

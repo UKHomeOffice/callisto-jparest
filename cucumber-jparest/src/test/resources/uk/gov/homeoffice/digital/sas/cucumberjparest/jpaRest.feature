@@ -47,11 +47,13 @@ Feature: Make requests to endpoints created by JpaRest
       }
       """
     And Trevor creates the additional profiles in the test service
-    When Trevor retrieves profiles from the test service
+    When Trevor retrieves profiles from the test service with
+      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
     Then the last response body should contain
       | field | type | expectation           |
       | items | List | hasSizeGreaterThan(3) |
     When Trevor retrieves profiles from the test service with
+      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
       | filter | <Filter> |
     Then the last response body should contain
       | field | type | expectation   |
@@ -66,16 +68,19 @@ Feature: Make requests to endpoints created by JpaRest
 
     Resource responses can be paged
 
-    When Trevor retrieves profiles from the test service
+    When Trevor retrieves profiles from the test service with
+      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
     Then the last response body should contain
       | field | type | expectation           |
       | items | List | hasSizeGreaterThan(3) |
     When Trevor retrieves profiles from the test service with
+      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
       | size | 2 |
     Then the last response body should contain
       | field | type | expectation |
       | items | List | hasSize(2)  |
     When Trevor retrieves profiles from the test service with
+      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
       | size | 2 |
       | page | 1 |
     Then the 1st of the profiles in the 2nd response should not be equal to the 1st of the profiles in the 3rd response
@@ -85,8 +90,10 @@ Feature: Make requests to endpoints created by JpaRest
     Resource responses can be ordered
 
     When Trevor retrieves profiles from the test service with
+      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
       | sort | dob,asc |
     When Trevor retrieves profiles from the test service with
+      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
       | sort | dob,desc |
     Then the 1st of the profiles in the 1st response should not be equal to the 1st of the profiles in the 2nd response
 

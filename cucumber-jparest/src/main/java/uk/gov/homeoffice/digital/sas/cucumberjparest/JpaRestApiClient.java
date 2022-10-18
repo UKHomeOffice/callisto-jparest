@@ -24,7 +24,6 @@ import lombok.NonNull;
 /**
  * The purpose of this class is to understand the protocol
  * implemented by the JpaRest library.
- * 
  * At this moment in time it knows how to perform CRUD
  * operations on the endpoints exposed but when authorisation
  * is implemented in the API this class will be updated to
@@ -85,7 +84,7 @@ public class JpaRestApiClient {
      * 
      * @param persona  The persona making the request.
      * @param service  The name of the service where the resources will be created.
-     *                 The service name must exist in the {@Link ServiceRegistry}
+     *                 The service name must exist in the {@link ServiceRegistry}
      * @param resource The name of the type of resource to create
      * @param payload  The resource to create
      * @return JpaRestApiResourceResponse
@@ -114,7 +113,7 @@ public class JpaRestApiClient {
      * @param service    The name of the service where the resources will be
      *                   retrieved
      *                   from.
-     *                   The service name must exist in the {@Link ServiceRegistry}
+     *                   The service name must exist in the {@link ServiceRegistry}
      * @param resource   The name of the type of resource to be retrieved
      * @param parameters The query string parameters to add to the requested url
      * @return JpaRestApiResourceResponse
@@ -124,8 +123,7 @@ public class JpaRestApiClient {
         URL url = GetResourceURL(service, resource);
 
         RequestSpecification spec = given()
-                .baseUri(url.toString())
-                .queryParam("tenantId", "b7e813a2-bb28-11ec-8422-0242ac120002");
+                .baseUri(url.toString());
 
         if (parameters != null) {
             spec = spec.queryParams(parameters);
@@ -148,7 +146,7 @@ public class JpaRestApiClient {
      * @param persona   The persona making the request.
      * @param service   The name of the service where the resource will be retrieved
      *                  from.
-     *                  The service name must exist in the {@Link ServiceRegistry}
+     *                  The service name must exist in the {@link ServiceRegistry}
      * @param resource  The name of the type of resource to be retrieved
      * @param reference The identifier of the resource to be retrieved
      * @return JpaRestApiResourceResponse
@@ -177,7 +175,7 @@ public class JpaRestApiClient {
      * 
      * @param persona   The persona making the request.
      * @param service   The name of the service where the resources will be updated.
-     *                  The service name must exist in the {@Link ServiceRegistry}
+     *                  The service name must exist in the {@link ServiceRegistry}
      * @param resource  The name of the type of resource to update
      * @param reference The identifier of the resource to be updated
      * @param payload   The updated resource
@@ -208,7 +206,7 @@ public class JpaRestApiClient {
      * 
      * @param persona   The persona making the request.
      * @param service   The name of the service where the resources will be deleted.
-     *                  The service name must exist in the {@Link ServiceRegistry}
+     *                  The service name must exist in the {@link ServiceRegistry}
      * @param resource  The name of the type of resource to deleted
      * @param reference The identifier of the resource to be deleted
      * @return JpaRestApiResourceResponse
@@ -237,9 +235,7 @@ public class JpaRestApiClient {
      * @param persona  The persona making the request.
      * @param service  The name of the service where the resources will be retrieved
      *                 from.
-     *                 The service name must exist in the {@Link ServiceRegistry}
-     * @param resource The name of the type of resource to be retrieved
-     * @param filter   The filter to apply to the resources
+     *                 The service name must exist in the {@link ServiceRegistry}
      * @return JpaRestApiResponse
      */
     public JpaRestApiResponse Get(Persona persona, String service, String path) {

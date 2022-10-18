@@ -1,6 +1,10 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
-import java.util.HashMap;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.stereotype.Component;
+
 import java.util.Map;
 
 /**
@@ -8,34 +12,18 @@ import java.util.Map;
  * Registry for services and their location
  * 
  */
+@Getter
+@Setter
+@Component
+@AllArgsConstructor
 public class ServiceRegistry {
-    private Map<String, String> services = new HashMap<>();
+    private Map<String, String> services;
 
-    public ServiceRegistry() {
-    }
-
-    
-    /** 
-     * 
-     * Adds the location for the given service
-     * 
-     * @param name The name of the service
-     * @param url The URL of the location
-     * @return String
-     */
-    public void addService(String name, String url) {
-        if (services.containsKey(name)){
-            throw new IllegalArgumentException(name + " already exists");
-        }
-        services.put(name, url);
-    }
-
-    
-    /** 
-     * 
+    /**
+     *
      * Retrieves the URL for the given service.
-     * 
-     * @param name The name of the regsitered service to return the URL of.
+     *
+     * @param name The name of the registered service to return the URL of.
      * @return String The URL for the given service
      */
     public String getService(String name) {

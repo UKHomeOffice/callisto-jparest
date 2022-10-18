@@ -6,30 +6,37 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 
 import io.cucumber.spring.ScenarioScope;
+import org.springframework.context.annotation.Configuration;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.utils.SerialisationUtil;
 
 /**
- * 
  * Class used by the {Link ContextConfiguration} annotation
  * to configure an {@link org.springframework.context.ApplicationContext
  * ApplicationContext} for integration tests. In this case for
  * the cucumber tests.
  */
+@Configuration
+@AllArgsConstructor
 public class JpaTestContext {
 
     /**
      * The service registry needs to be accessed to by the
      * Cucumber context and the test runner so that the
-     * test runner can spin up an api and pass it's address
-     * to the serice registry. As cucumber controls how the context
-     * is created for step definitions it was difficult to scope this
-     * to one instance for the entire test fixture and so a static
-     * reference was used.
+     * test runner can spin up an api and pass its address
+     * to the service registry.
      */
-    public static final ServiceRegistry serviceRegistry = new ServiceRegistry();
+    @Bean
+    public ServiceRegistry serviceRegistry() {
+        String serialisedMap = System.getProperty("services");
+        Map<String, String> servicesMap = SerialisationUtil.stringToMap(serialisedMap);
+        return new ServiceRegistry(servicesMap);
+    }
+
 
     public static final Map<String, Class<?>> classSimpleStrings = Map.ofEntries(
             entry("String", String.class),
@@ -42,9 +49,8 @@ public class JpaTestContext {
             entry("Instant", Instant.class));
 
     /**
-     * 
      * PersonaManager per scenario
-     * 
+     *
      * @return PersonaManager
      */
     @ScenarioScope
@@ -54,9 +60,8 @@ public class JpaTestContext {
     }
 
     /**
-     * 
      * HttpResponseManager per scenario
-     * 
+     *
      * @return HttpResponseManager
      */
     @ScenarioScope
@@ -66,9 +71,8 @@ public class JpaTestContext {
     }
 
     /**
-     * 
      * ScenarioState per scenario
-     * 
+     *
      * @return ScenarioState
      */
     @ScenarioScope
@@ -78,9 +82,8 @@ public class JpaTestContext {
     }
 
     /**
-     * 
      * PayloadManager per scenario
-     * 
+     *
      * @return PayloadManager
      */
     @ScenarioScope
@@ -90,20 +93,18 @@ public class JpaTestContext {
     }
 
     /**
-     * 
      * Singleton JpaRestApiClient
-     * 
+     *
      * @return JpaRestApiClient
      */
     @Bean
     public JpaRestApiClient jpaRestApiClient() {
-        return new JpaRestApiClient(JpaTestContext.serviceRegistry);
+        return new JpaRestApiClient(serviceRegistry());
     }
 
     /**
-     * 
      * Singleton Interpolation
-     * 
+     *
      * @return Interpolation
      */
     @Bean
