@@ -22,7 +22,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 /**
  * Extends the OpenApi model to include the endpoints added by the resource
- * annotation
+ * annotation.
  */
 @Component
 public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
@@ -41,7 +41,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
   /**
    * Customises the generated openApi for the endpoints exposed by the
-   * ResourceApiController
+   * ResourceApiController.
    */
   public void customise(OpenAPI openApi) {
 
@@ -77,7 +77,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
 
   /**
-   * Ensures the ApiResponse schema is registered along with the metadata schema
+   * Ensures the ApiResponse schema is registered along with the metadata schema.
    */
   private static Schema<?> registerSchema(Components components) {
     var apiResponseSchema = ensureSchema(components, "ApiResponse",
@@ -94,7 +94,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
   /**
    * Gets the schema for the response object and then extends the items
-   * property to be one of the entities exposed by the controller
+   * property to be one of the entities exposed by the controller.
    */
   private void setResponseSchema(Schema<?> apiResponseSchema, Components components) {
     var composedSchema = new ComposedSchema();
@@ -129,7 +129,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
 
 
   /**
-   * Util function to get or create schema
+   * Util function to get or create schema.
    */
   private static Schema<?> ensureSchema(Components components, String schemaName,
                                         Class<?> clazz) {

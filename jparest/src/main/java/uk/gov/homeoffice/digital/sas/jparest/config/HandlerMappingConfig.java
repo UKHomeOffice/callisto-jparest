@@ -121,7 +121,9 @@ public class HandlerMappingConfig {
   private boolean classHasBaseEntityParent(Class<?> childClass) {
     var superType = childClass.getSuperclass();
     while (!superType.equals(Object.class)) {
-      if (superType.equals(BaseEntity.class)) return true;
+      if (superType.equals(BaseEntity.class)) {
+        return true;
+      }
       superType = superType.getSuperclass();
     }
     return false;

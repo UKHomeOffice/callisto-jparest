@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.Getter;
 
 /**
- * Used to return responses from the {@link ResourceApiController}
+ * <p>Used to return responses from the.</p> {@link ResourceApiController}
  */
 public class ApiResponse<T> {
 

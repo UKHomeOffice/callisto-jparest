@@ -117,6 +117,8 @@ public class ResourceApiController<T extends BaseEntity> {
   }
 
   /**
+   * <p>create response with SpelExpression filter. </p>
+   *
    * @Param tenantId
    * @Param pageable
    * @Parm filter
@@ -191,9 +193,10 @@ public class ResourceApiController<T extends BaseEntity> {
 
     this.validatorUtils.validateAndThrowIfErrorsExist(r2);
 
-    if (Objects.nonNull(r2.getId()))
+    if (Objects.nonNull(r2.getId())) {
       throw new IllegalArgumentException(
         "A resource id should not be provided when creating a new resource.");
+    }
 
     var transactionDefinition = new DefaultTransactionDefinition();
     var transactionStatus =
@@ -225,8 +228,11 @@ public class ResourceApiController<T extends BaseEntity> {
       query.where(builder.and(tenantPredicate, idPredicate));
 
       var updatedItems = this.entityManager.createQuery(query).executeUpdate();
-      if (updatedItems == 0) throw new EmptyResultDataAccessException(1);
-      else if (updatedItems > 1) throw new UnexpectedQueryResultException(id);
+      if (updatedItems == 0) {
+        throw new EmptyResultDataAccessException(1);
+      } else if (updatedItems > 1) {
+        throw new UnexpectedQueryResultException(id);
+      }
 
       transactionManager.commit(transactionStatus);
     } catch (EmptyResultDataAccessException ex) {

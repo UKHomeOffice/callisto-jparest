@@ -41,7 +41,7 @@ public class EntityUtils<T extends BaseEntity, Y extends BaseEntity> {
   private Set<String> relatedResources = relations.keySet();
 
   /**
-   * Creates a utility class for the specified entityType
+   * <p>Creates a utility class for the specified entityType.</p>
    *
    * @param entityType           The JPA entity class
    * @param isBaseEntitySubclass A predicate that tests if a given class is a subclass of BaseEntity
@@ -134,7 +134,7 @@ public class EntityUtils<T extends BaseEntity, Y extends BaseEntity> {
   }
 
   /**
-   * Provides the type of the entity accessed by the specified relation
+   * Provides the type of the entity accessed by the specified relation.
    */
   public Class<Y> getRelatedType(String relation) {
     return this.relations.get(relation).entityType;

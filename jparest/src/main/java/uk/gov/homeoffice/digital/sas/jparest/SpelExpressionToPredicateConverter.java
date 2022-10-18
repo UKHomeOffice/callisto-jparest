@@ -27,7 +27,7 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 import uk.gov.homeoffice.digital.sas.jparest.utils.WebDataBinderFactory;
 
 /**
- * Used to convert SpelExpression into a JPA predicate
+ * <p>sed to convert SpelExpression into a JPA predicate.</p>
  */
 public class SpelExpressionToPredicateConverter {
 
@@ -40,7 +40,7 @@ public class SpelExpressionToPredicateConverter {
   private static WebDataBinder binder = WebDataBinderFactory.getWebDataBinder();
 
   /**
-   * Converts SpelExpression to a JPA predicate
+   * <p>Converts SpelExpression to a JPA predicate.</p>
    *
    * @param from    The source SpelExpression
    * @param builder The CriteriaBuilder to use to create the predicate, must not be {@literal null}.
@@ -197,8 +197,8 @@ public class SpelExpressionToPredicateConverter {
   }
 
   /**
-   * Converts Spel Method reference to predicate
-   * Possible methods are
+   * <p>Converts Spel Method reference to predicate
+   * Possible methods are.</p>
    * <ul><li>In
    * <li>Between</ul>
    */
@@ -236,7 +236,7 @@ public class SpelExpressionToPredicateConverter {
   }
 
   /**
-   * Gets literal values from the spel expression as the given type
+   * <p>Gets literal values from the spel expression as the given type.</p>
    */
   @SuppressWarnings("unchecked")
   private static Comparable<Object>[] getLiteralValues(

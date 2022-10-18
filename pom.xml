@@ -61,7 +61,8 @@
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>true</failsOnError>
                     <violationSeverity>warning</violationSeverity>
-                    <configLocation>jparest/src/main/resources/checkstyle_custom_config.xml</configLocation>
+                    <configLocation>google_checks.xml</configLocation>
+                    <suppressionsLocation>checkstyle_suppressions.xml</suppressionsLocation>
                 </configuration>
             </plugin>
 

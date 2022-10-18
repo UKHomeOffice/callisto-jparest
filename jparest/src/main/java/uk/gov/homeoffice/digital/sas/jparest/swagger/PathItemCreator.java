@@ -44,7 +44,7 @@ public class PathItemCreator {
 
   /**
    * Creates documentation for the endpoints of the resource
-   * covers get many and post
+   * covers get many and post.
    *
    * @param tag   The tag to group the endpoints together. Expected to be the
    *              simplename of the resource
@@ -78,7 +78,7 @@ public class PathItemCreator {
 
   /**
    * Creates documentation for the endpoints of the resource
-   * covers get and put (update) individual resource
+   * covers get and put (update) individual resource.
    *
    * @param tag   The tag to group the endpoints together. Expected to be the
    *              simplename of the resource
@@ -117,8 +117,8 @@ public class PathItemCreator {
   }
 
   /**
-   * Creates documentation for the endpoints of the resource
-   * covers get related resources for an individual resource
+   * Creates documentation for the endpoints of the resource.
+   * covers get related resources for an individual resource.
    *
    * @param tag   The tag to group the endpoints together. Expected to be the
    *              simplename of the parent resource
@@ -143,11 +143,13 @@ public class PathItemCreator {
   }
 
   /**
+   * <p>Creates documentation for the endpoints of the resource.
+   * covers delete and put related resources for an individual resource</p>
+   *
    * @param tag The tag to group the endpoints together. Expected to be
    *            the simplename of the parent resource
    * @return PathItem documenting the DELETE/PUT many related items
-   * @Summary Creates documentation for the endpoints of the resource
-   * covers delete and put related resources for an individual resource
+   *
    */
   public PathItem createRelatedItemPath(String tag) {
 
@@ -196,9 +198,11 @@ public class PathItemCreator {
   }
 
   /**
+   * <p>generates a schema for the ApiResponse.</p>
+   *
    * @param clazz The type to generate a schema for
    * @return Schema for the ApiResponse
-   * @Summary Returns a schema for the
+   * Returns a schema for the
    * {@link uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse ApiResponse}
    * class with the items property containing a schema for the given class
    */
@@ -224,10 +228,12 @@ public class PathItemCreator {
   }
 
   /**
+   * <p>Generates a parameter for the specified class
+   *based on the given RequestParameter type.</p>
+   *
    * @param requestParameter the parameter information used to create the Swagger Parameter
    * @return A Parameter with a schema for the given class
-   * @Summary Generates a parameter for the specified class
-   * based on the given RequestParameter type
+   *
    */
   private static Parameter getParameter(RequestParameter requestParameter) {
 
@@ -245,7 +251,7 @@ public class PathItemCreator {
 
   /**
    * Generates a parameter for an array of the specified class
-   * based on the given RequestParameter type
+   * based on the given RequestParameter type.
    *
    * @param clazz            The parameter type
    * @param requestParameter the parameter information used to create the Swagger Parameter
@@ -268,8 +274,8 @@ public class PathItemCreator {
   }
 
   /**
-   * This method returns a swagger RequestBody that
-   * contains a schema for the specified class
+   * <p>>This method returns a swagger RequestBody that
+   *    * contains a schema for the specified class.</p>
    *
    * @param clazz The type of item to describe in the schema
    * @return RequestBody
@@ -290,7 +296,7 @@ public class PathItemCreator {
   }
 
   /**
-   * Generates an empty/unspecified response.
+   * <p>Generates an empty/unspecified response.</p>
    *
    * @return An empty ApiResponse
    *
@@ -310,7 +316,8 @@ public class PathItemCreator {
   }
 
   /**
-   * @Summary defines parameter representing SpelExpression
+   * <p>defines parameter representing SpelExpression.</p>
+   *
    * @return Parameter representing SpelExpression
    *
    */

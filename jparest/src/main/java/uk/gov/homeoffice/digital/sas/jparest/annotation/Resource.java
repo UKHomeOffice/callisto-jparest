@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 
 
 /**
- * Specifies that this class is to be exposed as a resource by the
+ * <p>Specifies that this class is to be exposed as a resource by the.</p>
  * {@link uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController}
  */
 @Documented
