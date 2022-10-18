@@ -4,19 +4,12 @@
     <parent>
         <groupId>uk.gov.homeoffice.digital.sas</groupId>
         <artifactId>parentpom</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.10</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>cucumber-jparest</artifactId>
-    <version>${project.version}</version>
-
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -158,19 +151,6 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>net.serenity-bdd</groupId>
-            <artifactId>serenity-core</artifactId>
-            <version>3.3.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.serenity-bdd</groupId>
-            <artifactId>serenity-cucumber</artifactId>
-            <version>${serenity.version}</version>
-            <scope>test</scope>
-        </dependency>-->
     </dependencies>
     <build>
         <plugins>
@@ -178,6 +158,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M7</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <cucumber.jparest.tenantId>b7e813a2-bb28-11ec-8422-0242ac120002</cucumber.jparest.tenantId>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

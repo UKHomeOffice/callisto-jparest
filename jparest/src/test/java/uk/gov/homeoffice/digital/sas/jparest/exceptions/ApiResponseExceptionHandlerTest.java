@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiErrorResponse;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
+import uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper;
 
 import javax.persistence.PersistenceException;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.SERVER_ERROR;
 
 
 class ApiResponseExceptionHandlerTest {
@@ -41,13 +43,12 @@ class ApiResponseExceptionHandlerTest {
     }
 
     @Test
-    void handlePersistenceException_badRequestWithErrorDataIsReturned() {
+    void handlePersistenceException_internalServerErrorWithErrorDataIsReturned() {
 
         var apiResponseExceptionHandler = new ApiResponseExceptionHandler();
         var exception = new PersistenceException(ERROR_MESSAGE);
         var response = apiResponseExceptionHandler.handlePersistenceException(exception);
-        var msg = "There was an error persisting data.";
-        assertResponseData(response, msg, HttpStatus.BAD_REQUEST);
+        assertResponseData(response, SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Test

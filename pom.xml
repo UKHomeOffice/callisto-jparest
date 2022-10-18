@@ -6,24 +6,24 @@
 
     <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>parentpom</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.10</version>
     <packaging>pom</packaging>
 
     <properties>
-        <project.version>0.0.1${snapshotSuffix}</project.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.version>0.0.10${snapshotSuffix}</project.version>
         <snapshotSuffix></snapshotSuffix>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
         <!-- JaCoCo Properties -->
         <jacoco.version>0.8.7</jacoco.version>
+        <checkstyle-maven-plugin.version>3.2.0</checkstyle-maven-plugin.version>
         <!-- Sonar Properties -->
-        <projectKeySuffix></projectKeySuffix>
-        <sonar.projectKey>callisto-JpaRest${projectKeySuffix}</sonar.projectKey>
-        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
-        <sonar.projectName>callisto-JpaRest${projectKeySuffix}</sonar.projectName>
         <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.organization>ukhomeoffice</sonar.organization>
+        <sonar.projectName>callisto-jparest</sonar.projectName>
     </properties>
 
     <distributionManagement>
@@ -55,24 +55,48 @@
 
     <build>
         <plugins>
-          <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>prepare-agent</id>
-                <goals>
-                  <goal>prepare-agent</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>report</id>
-                <goals>
-                  <goal>report</goal>
-                </goals>
-              </execution>
-            </executions>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.2.0</version>
+                    <goals>
+                        <goal>check</goal>
+                    </goals>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                <configuration>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <violationSeverity>warning</violationSeverity>
+                    <configLocation>google_checks.xml</configLocation>
+                    <suppressionsLocation>checkstyle_suppressions.xml</suppressionsLocation>
+                </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.8</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
       </build>
 </project>

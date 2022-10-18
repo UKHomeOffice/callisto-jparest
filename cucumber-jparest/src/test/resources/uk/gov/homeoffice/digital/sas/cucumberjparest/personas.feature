@@ -28,10 +28,10 @@ Feature: Personas
 
   Scenario: Anonymous access
 
-    Sometimes scenarios will need to be performed for unuthenticated
+    Sometimes scenarios will need to be performed for unauthenticated
     resources or to test authentication/authorisation. In order to
     achieve this a single well known persona exists for making
-    annonymous requests. The persona is called `someone`
+    anonymous requests. The persona is called `someone`
 
     Given the valid profiles are loaded from the file 'data/profiles.json'
     When someone creates the valid profiles in the test service

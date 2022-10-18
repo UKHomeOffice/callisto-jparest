@@ -2,26 +2,26 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
 import java.util.Objects;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import io.cucumber.java.Before;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import io.cucumber.java.AfterAll;
-import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.Then;
 import uk.gov.homeoffice.digital.sas.cucumberjparesttestapi.TestApiRunner;
 
 /**
  * 
- * Step definitions required to fullfil the features
+ * Step definitions required to fulfill the features
  * for testing the library but will not be packaged
  * for use in the cucumber-jparest package
  * 
  */
-public class StepDefinitionsTest {
+public class StepDefinitionsTest { //NOSONAR
 
     /**
      * Holds a reference to the application context
@@ -29,12 +29,15 @@ public class StepDefinitionsTest {
      * completes
      */
     private static ConfigurableApplicationContext context = null;
+    private static boolean initialised = false;
 
     private final PersonaManager personaManager;
 
-    @Autowired
-    public StepDefinitionsTest(PersonaManager personaManager) {
+    private final ServiceRegistry serviceRegistry;
+
+    public StepDefinitionsTest(PersonaManager personaManager, ServiceRegistry serviceRegistry) {
         this.personaManager = Objects.requireNonNull(personaManager, "personas must not be null");
+        this.serviceRegistry = serviceRegistry;
     }
 
     /**
@@ -43,19 +46,22 @@ public class StepDefinitionsTest {
      * This creates a Test API service to run tests against
      * 
      */
-    @BeforeAll
-    public static void before_all() {
-        Class<?>[] primarySources = { TestApiRunner.class };
-        String[] args = new String[0];
-        context = SpringApplication.run(primarySources, args);
+    @Before
+    public void before_all() {
+        if (!initialised) {
 
-        // The port is set to be ephemeral so we need to retrieve the
-        // port number and then set the address of the service
-        // in the service registry.
-        int port = ((ServletWebServerApplicationContext) context).getWebServer().getPort();
+            Class<?>[] primarySources = { TestApiRunner.class };
+            String[] args = new String[0];
+            context = SpringApplication.run(primarySources, args);
 
-        JpaTestContext.serviceRegistry.addService("test", "http://localhost:" + port);
+            // The port is set to be ephemeral, so we need to retrieve the
+            // port number and then set the address of the service
+            // in the service registry.
+            int port = ((ServletWebServerApplicationContext) context).getWebServer().getPort();
 
+            serviceRegistry.setServices(Map.of("test", "http://localhost:" + port));
+            initialised = true;
+        }
     }
 
     /**

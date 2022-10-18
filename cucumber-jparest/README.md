@@ -50,6 +50,25 @@ This approach could be used when testing services that use the JpaRest
 library or the service could be deployed and then the test run against the
 deployed endpoint.
 
+#### How to specify the service URL(s) against which the tests will be executed
+
+Cucumber-jparest expects the target service URL(s) to be provided via a system property named: 
+`cucumber.jparest.serviceRegistry`. It is up to the project using the library to supply that 
+system property.
+
+For example:
+- If you want to execute tests against a `timecard` service running on `http://localhost:9090`,
+you will need to provide this JVM option: `-Dcucumber.jparest.serviceRegistry=timecard=http://localhost:9090`
+- If you have a scenario which requires two services: `timecard` running on `http://localhost:9090` and `scheduler` running on `http://localhost:9091`
+  you will need to provide this JVM option: `-Dcucumber.jparest.serviceRegistry=timecard=http://localhost:9090,scheduler=http://localhost:9091`
+
+#### The tenantId request parameter temporary workaround
+
+Although the long term view is that `tenantId` should be extracted from the authenticated user
+details, the current implementation expects `tenantId` as a request parameter. To avoid the
+overhead of having to specify `tenantId` as a request parameter for each BDD test scenario, you 
+only have to specify it once, as a JVM option: `-Dcucumber.jparest.tenantId=b7e813a2-bb28-11ec-8422-0242ac120002`
+
 ### If using VSCode
 
 Please note that calling lifecycle commands on projects doesn't work correctly for a multi module project.

@@ -6,10 +6,9 @@ import lombok.NonNull;
 import lombok.Setter;
 
 /**
- * 
  * Represents an entry in a scenario table that
  * expresses an expectation of a field existing
- * to be of a given type and match a value
+ * to be of a given type and match a value.
  * 
  */
 @Getter
@@ -17,10 +16,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Expectation {
 
-    @NonNull
-    private String field;
-    @NonNull
-    private Class<?> type;
-    @NonNull
-    private String expectation;
+  @NonNull
+  private String field;
+  @NonNull
+  private Class<?> type;
+  @NonNull
+  private String expectedValue;
 }

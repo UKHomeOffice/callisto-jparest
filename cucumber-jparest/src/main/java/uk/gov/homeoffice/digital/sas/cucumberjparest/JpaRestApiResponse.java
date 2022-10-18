@@ -1,26 +1,22 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
-import java.net.URL;
-
 import io.restassured.response.Response;
+import java.net.URI;
 import lombok.Getter;
 
 /**
- * 
- * Returns the response associated with the provided
- * url.
- * 
+ * Returns the response associated with the provided url.
  */
 public class JpaRestApiResponse {
 
-    @Getter
-    private final Response response;
+  @Getter
+  private final Response response;
 
-    @Getter
-    private final URL url;
+  @Getter
+  private final URI uri;
 
-    public JpaRestApiResponse(URL url, Response response) {
-        this.url = url;
-        this.response = response;
-    }
+  public JpaRestApiResponse(URI uri, Response response) {
+    this.uri = uri;
+    this.response = response;
+  }
 }

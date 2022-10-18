@@ -14,8 +14,15 @@ trigger:
     - pull_request
 
 steps:
+- name: fetch
+  image: alpine/git
+  commands:
+    - "git fetch origin +refs/heads/main:"
+
 - name: test
   image: maven:3.8-openjdk-17
+  depends_on:
+    - fetch
   commands:
   - mvn clean install
 
@@ -25,12 +32,16 @@ steps:
   - test
   environment:
     SONAR_HOST:
-      from_secret: sonar_host
+      from_secret: sonar_cloud_host
     SONAR_TOKEN:
-      from_secret: sonar_token
+      from_secret: sonar_cloud_token
   commands:
-  - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && projectSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
-  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -DprojectKeySuffix=$${projectSuffix}
+  - mvn -X sonar:sonar
+    -Dsonar.host.url=$${SONAR_HOST}
+    -Dsonar.login=$${SONAR_TOKEN}
+    -Dsonar.branch.name=$DRONE_BRANCH
+    -Dsonar.projectKey=callisto-jparest
+    -Dsonar.qualitygate.wait=true
   when:
     event:
       exclude:
@@ -53,7 +64,7 @@ steps:
       exclude:
       - pull_request
 
-- name: Git Tag
+- name: git tag
   image: alpine/git
   depends_on:
     - publish
@@ -85,44 +96,6 @@ steps:
     branch:
       exclude:
       - main
-
-# - name: sonar pr decoration
-#   image: maven:3.8-openjdk-17
-#   depends_on:
-#   - sonar
-#   environment:
-#     SONAR_HOST:
-#       from_secret: sonar_host
-#     SONAR_TOKEN:
-#       from_secret: sonar_token
-#   commands:
-#   - echo this is where I run the pull request decoration
-#   when:
-#     event:
-#       include:
-#       - pull_request
-
----
-kind: pipeline
-type: kubernetes
-name: sonar housekeeping
-
-trigger:
-  event:
-  - cron
-  cron:
-    include:
-    - nightly
-
-steps:
-- name: SonarQube housekeeping
-  image: quay.io/ukhomeofficedigital/cicd-actions-sonarqube-housekeeping:v1
-  settings:
-    sonarqube_host: https://sonarqube.digital.homeoffice.gov.uk/
-    sonarqube_token:
-      from_secret: sonar_token
-    sonarqube_project_prefix: 'callisto-jparest'
-    jira_project_key: 'eahw'
 
 ---
 kind: pipeline

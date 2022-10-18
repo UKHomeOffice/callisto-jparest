@@ -1,7 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.web;
 
 import java.util.Objects;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.expression.ParseException;
@@ -15,28 +14,30 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 public class SpelExpressionArgumentResolver implements HandlerMethodArgumentResolver {
 
-    SpelExpressionParser expressionParser = new SpelExpressionParser();
+  SpelExpressionParser expressionParser = new SpelExpressionParser();
 
-    @Override
-    public boolean supportsParameter(MethodParameter parameter) {
-        return SpelExpression.class.isAssignableFrom(parameter.getParameterType());
+  @Override
+  public boolean supportsParameter(MethodParameter parameter) {
+    return SpelExpression.class.isAssignableFrom(parameter.getParameterType());
+  }
+
+  @Override
+  public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
+      throws MethodArgumentTypeMismatchException {
+
+    String parameterName = Objects.requireNonNull(parameter.getParameterName());
+    String paramValue = webRequest.getParameter(parameterName);
+
+    if (!StringUtils.isBlank(paramValue)) {
+      try {
+        return expressionParser.parseExpression(paramValue);
+      } catch (ParseException ex) {
+        throw new MethodArgumentTypeMismatchException(
+          paramValue, parameter.getParameterType(), parameterName, parameter, ex.getCause());
+      }
     }
-
-    @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws MethodArgumentTypeMismatchException {
-
-        String parameterName = Objects.requireNonNull(parameter.getParameterName());
-        String paramValue = webRequest.getParameter(parameterName);
-
-        if (!StringUtils.isBlank(paramValue)) {
-            try {
-                return expressionParser.parseExpression(paramValue);
-            } catch (ParseException ex) {
-                throw new MethodArgumentTypeMismatchException(paramValue, parameter.getParameterType(), parameterName, parameter, ex.getCause());
-            }
-        }
-        return null;
-    }
+    return null;
+  }
 
 }
