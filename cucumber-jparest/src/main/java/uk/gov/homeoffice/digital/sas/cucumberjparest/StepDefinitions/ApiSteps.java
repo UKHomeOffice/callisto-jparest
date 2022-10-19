@@ -40,7 +40,7 @@ public class ApiSteps {
     /**
      * 
      * Posts the referenced payload to
-     * the the endpoint exposed for the given resource.
+     * the endpoint exposed for the given resource.
      * 
      * @param persona    The persona to use for auth context
      * @param payloadKey The key for the payload (resource type and name)
