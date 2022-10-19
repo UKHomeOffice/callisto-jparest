@@ -28,11 +28,12 @@ Feature: Personas
 
   Scenario: Anonymous access
 
-    Sometimes scenarios will need to be performed for unuthenticated
+    Sometimes scenarios will need to be performed for unauthenticated
     resources or to test authentication/authorisation. In order to
     achieve this a single well known persona exists for making
-    annonymous requests. The persona is called `someone`
+    anonymous requests. The persona is called `someone`
 
     Given the valid profiles are loaded from the file 'data/profiles.json'
-    When someone creates the valid profiles in the test service
+    When someone creates the valid profiles in the test service with
+      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
     Then the last response should have a status code of 200

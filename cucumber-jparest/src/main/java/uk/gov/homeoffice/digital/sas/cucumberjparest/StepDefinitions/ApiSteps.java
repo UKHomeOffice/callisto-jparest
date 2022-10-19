@@ -51,12 +51,23 @@ public class ApiSteps {
             String service) {
 
         String payload = this.payloadManager.getPayload(payloadKey);
-        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Create(persona, service,
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.create(persona, service,
                 payloadKey.getResourceType(),
-                payload);
+                payload, null);
 
         this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
+    }
 
+    @When("{persona} creates {payload}{service} with")
+    public void persona_creates_resource_from_payload_in_the_service(Persona persona, PayloadKey payloadKey,
+                                                                     String service, Map<String, String> parameters) {
+
+        String payload = this.payloadManager.getPayload(payloadKey);
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.create(persona, service,
+                payloadKey.getResourceType(),
+                payload, parameters);
+
+        this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
     }
 
     /**
@@ -69,7 +80,7 @@ public class ApiSteps {
      */
     @When("{persona} retrieves {word}{service}")
     public void persona_retrieves_resources_from_the_service(Persona persona, String resource, String service) {
-        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Retrieve(persona, service, resource, null);
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieve(persona, service, resource, null);
 
         this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
     }
@@ -85,7 +96,7 @@ public class ApiSteps {
     @When("{persona} retrieves {word}{service} with")
     public void persona_retrieves_resources_from_the_service(Persona persona, String resource, String service,
             Map<String, String> parameters) {
-        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Retrieve(persona, service, resource, parameters);
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieve(persona, service, resource, parameters);
 
         this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
     }
@@ -100,7 +111,7 @@ public class ApiSteps {
      */
     @When("{persona} GETs {string}{service}")
     public void persona_gets_url_from_service(Persona persona, String path, String service) {
-        JpaRestApiResponse apiResponse = this.jpaRestApiClient.Get(persona, service, path);
+        JpaRestApiResponse apiResponse = this.jpaRestApiClient.get(persona, service, path);
 
         this.httpResponseManager.addResponse(apiResponse.getUrl(), apiResponse.getResponse());
     }
@@ -117,8 +128,18 @@ public class ApiSteps {
     @When("{persona} gets the {word} {string}{service}")
     public void persona_retrieves_specific_resources_from_the_service(Persona persona, String resource,
             String identifier, String service) {
-        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.RetrieveById(persona, service, resource,
-                identifier);
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieveById(persona, service, resource,
+                identifier, null);
+
+        this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
+    }
+
+    @When("{persona} gets the {word} {string}{service} with")
+    public void persona_retrieves_specific_resources_from_the_service(Persona persona, String resource,
+                                                                      String identifier, String service,
+                                                                      Map<String, String> parameters) {
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieveById(persona, service, resource,
+                identifier, parameters);
 
         this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
     }
@@ -134,8 +155,18 @@ public class ApiSteps {
     @When("{persona} deletes the {resource}{service}")
     public void persona_deletes_the_resource(Persona persona, Resource resource, String service) {
         String reference = resource.getJsonPath().getString("id");
-        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Delete(persona, service,
-                resource.getResourceType(), reference);
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.delete(persona, service,
+                resource.getResourceType(), reference, null);
+
+        this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
+    }
+
+    @When("{persona} deletes the {resource}{service} with")
+    public void persona_deletes_the_resource(Persona persona, Resource resource, String service,
+                                             Map<String, String> parameters) {
+        String reference = resource.getJsonPath().getString("id");
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.delete(persona, service,
+                resource.getResourceType(), reference, parameters);
 
         this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
     }
@@ -150,17 +181,28 @@ public class ApiSteps {
      * @param payloadKey The key for the payload (resource type and name)
      */
     @When("{persona} updates the {resource}{service} with {payload}")
-
     public void persona_updates_the_resource(Persona persona, Resource resource, String service,
             PayloadKey payloadKey) {
 
         String reference = resource.getJsonPath().getString("id");
         String payload = this.payloadManager.getPayload(payloadKey);
-        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.Update(persona, service,
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.update(persona, service,
                 payloadKey.getResourceType(), reference,
-                payload);
+                payload, null);
 
         this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
+    }
 
+    @When("{persona} updates the {resource}{service} with {payload} and")
+    public void persona_updates_the_resource(Persona persona, Resource resource, String service,
+            PayloadKey payloadKey, Map<String, String> parameters) {
+
+        String reference = resource.getJsonPath().getString("id");
+        String payload = this.payloadManager.getPayload(payloadKey);
+        JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.update(persona, service,
+                payloadKey.getResourceType(), reference,
+                payload, parameters);
+
+        this.httpResponseManager.addResponse(apiResponse.getBaseResourceURL(), apiResponse.getResponse());
     }
 }

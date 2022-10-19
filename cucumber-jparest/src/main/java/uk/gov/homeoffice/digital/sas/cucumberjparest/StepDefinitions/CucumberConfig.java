@@ -126,9 +126,9 @@ public class CucumberConfig {
 
         URL url;
         if (path == null || path.isEmpty()) {
-            url = this.jpaRestApiClient.GetResourceURL(targetService, resourceName);
+            url = this.jpaRestApiClient.getResourceURL(targetService, resourceName);
         } else {
-            url = this.jpaRestApiClient.GetServiceURL(targetService, path);
+            url = this.jpaRestApiClient.getServiceURL(targetService, path);
         }
 
         int responseIndex = getIndex(responsePosition);
