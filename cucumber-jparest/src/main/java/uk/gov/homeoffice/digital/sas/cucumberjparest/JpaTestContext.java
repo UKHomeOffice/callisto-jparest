@@ -23,8 +23,8 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.utils.SerialisationUtil;
 @Configuration
 public class JpaTestContext {
 
-    @Value("#{systemProperties['serviceRegistry']}")
-    private String serialisedMap;
+    @Value("#{systemProperties[T(uk.gov.homeoffice.digital.sas.cucumberjparest.ServiceRegistry).SERVICE_REGISTRY_PROPERTY_NAME]}")
+    private String serviceRegistryString;
 
     /**
      * The service registry needs to be accessed to by the
@@ -34,7 +34,7 @@ public class JpaTestContext {
      */
     @Bean
     public ServiceRegistry serviceRegistry() {
-        Map<String, String> servicesMap = SerialisationUtil.stringToMap(serialisedMap);
+        Map<String, String> servicesMap = SerialisationUtil.stringToMap(serviceRegistryString);
         return new ServiceRegistry(servicesMap);
     }
 
