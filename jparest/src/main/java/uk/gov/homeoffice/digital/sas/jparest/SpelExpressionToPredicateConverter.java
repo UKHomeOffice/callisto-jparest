@@ -60,12 +60,6 @@ public class SpelExpressionToPredicateConverter {
     return getPredicate(from.getAST(), builder, root);
   }
 
-  /*  Builds predicate recursively.
-   *  Allows AND/OR/NOT as logical operators
-   *  Allows Field comparison with literals or other fields
-   *  Allows methods where method is supported by {
-   * @link #getMethodPredicate(SpelNode, CriteriaBuilder, From<?, ?>)
-   */
   private static Predicate getPredicate(SpelNode node, CriteriaBuilder builder, From<?, ?> root) {
 
     // Handle logical operators
