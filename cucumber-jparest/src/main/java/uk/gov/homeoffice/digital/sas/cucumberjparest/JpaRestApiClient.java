@@ -35,6 +35,11 @@ public class JpaRestApiClient {
 
     public static final String API_ROOT_PATH = "/resources/";
 
+    /**
+     * Injecting tenantId parameter as a system property to avoid verbosity in BDD features.
+     * This is a temporary workaround, as in the long term, tenantId would be part of the authenticated user object
+     * and would not have to be supplied as a request parameter
+     */
     @Value("#{systemProperties['tenantId']}")
     private String tenantId;
 
