@@ -4,7 +4,7 @@
     <parent>
         <groupId>uk.gov.homeoffice.digital.sas</groupId>
         <artifactId>parentpom</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.5</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -157,19 +157,6 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>net.serenity-bdd</groupId>
-            <artifactId>serenity-core</artifactId>
-            <version>3.3.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.serenity-bdd</groupId>
-            <artifactId>serenity-cucumber</artifactId>
-            <version>${serenity.version}</version>
-            <scope>test</scope>
-        </dependency>-->
     </dependencies>
     <build>
         <plugins>
