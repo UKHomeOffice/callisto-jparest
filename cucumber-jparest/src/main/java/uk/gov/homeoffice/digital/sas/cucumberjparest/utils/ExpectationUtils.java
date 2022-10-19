@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import lombok.NonNull;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.Expectation;
 
 /**
  * 
