@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Objects;
 
+import io.restassured.path.json.JsonPath;
 import org.assertj.core.util.Files;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,7 +39,7 @@ import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
  */
 @CucumberContextConfiguration
 @ContextConfiguration(classes = { JpaTestContext.class, ObjectMapperConfig.class })
-public class ParameterTypes {
+public class CucumberConfig {
 
     private static final String FROM_IN_SERVICE = "(?: (?:from|in) the (\\S*) service)?";
 
@@ -50,9 +51,9 @@ public class ParameterTypes {
     private final Interpolation interpolation;
 
     @Autowired
-    public ParameterTypes(@NonNull PersonaManager personaManager, @NonNull HttpResponseManager httpResponseManager,
-            @NonNull JpaRestApiClient jpaRestApiClient, @NonNull ObjectMapper objectMapper,
-            @NonNull ScenarioState scenarioState, Interpolation interpolation) {
+    public CucumberConfig(@NonNull PersonaManager personaManager, @NonNull HttpResponseManager httpResponseManager,
+                          @NonNull JpaRestApiClient jpaRestApiClient, @NonNull ObjectMapper objectMapper,
+                          @NonNull ScenarioState scenarioState, Interpolation interpolation) {
         this.personaManager = personaManager;
         this.httpResponseManager = httpResponseManager;
         this.jpaRestApiClient = jpaRestApiClient;
@@ -85,7 +86,7 @@ public class ParameterTypes {
      * @return String The contents of the file
      */
     @ParameterType("file '([^']*)'")
-    public String filecontents(String path) {
+    public String fileContents(String path) {
         try {
             ClassLoader classLoader = getClass().getClassLoader();
             File file = new File(classLoader.getResource(path).getFile());
@@ -120,6 +121,21 @@ public class ParameterTypes {
         return this.scenarioState.trackService(name);
     }
 
+    private JsonPath getItemsPath(String resourceName, String responsePosition, String path, String service){
+        String targetService = this.scenarioState.trackService(service);
+
+        URL url;
+        if (path == null || path.isEmpty()) {
+            url = this.jpaRestApiClient.GetResourceURL(targetService, resourceName);
+        } else {
+            url = this.jpaRestApiClient.GetServiceURL(targetService, path);
+        }
+
+        int responseIndex = getIndex(responsePosition);
+        Response response = this.httpResponseManager.getResponse(url, responseIndex);
+        return response.getBody().jsonPath().setRootPath("items");
+    }
+
     /**
      * 
      * Extracts a specific object from a specific response
@@ -138,18 +154,7 @@ public class ParameterTypes {
     public Resource resource(String objectPosition,
             String resourceName, String responsePosition, String path, String service) {
 
-        String targetService = this.scenarioState.trackService(service);
-
-        URL url;
-        if (path == null || path.isEmpty()) {
-            url = this.jpaRestApiClient.GetResourceURL(targetService, resourceName);
-        } else {
-            url = this.jpaRestApiClient.GetServiceURL(targetService, path);
-        }
-
-        int responseIndex = getIndex(responsePosition);
-        Response response = this.httpResponseManager.getResponse(url, responseIndex);
-        var itemsPath = response.getBody().jsonPath().setRootPath("items");
+        var itemsPath = getItemsPath(resourceName, responsePosition, path, service);
         int objectIndex = getIndex(objectPosition);
         if (objectIndex == -1) {
             objectIndex = itemsPath.getInt("size()") - 1;
@@ -175,18 +180,7 @@ public class ParameterTypes {
     public Resource each_resource(String resourceName, String responsePosition, String path,
             String service) {
 
-        String targetService = this.scenarioState.trackService(service);
-
-        URL url;
-        if (path == null || path.isEmpty()) {
-            url = this.jpaRestApiClient.GetResourceURL(targetService, resourceName);
-        } else {
-            url = this.jpaRestApiClient.GetServiceURL(targetService, path);
-        }
-
-        int responseIndex = getIndex(responsePosition);
-        Response response = this.httpResponseManager.getResponse(url, responseIndex);
-        var itemsPath = response.getBody().jsonPath().setRootPath("items");
+        var itemsPath = getItemsPath(resourceName, responsePosition, path, service);
         return new Resource(resourceName, itemsPath);
     }
 

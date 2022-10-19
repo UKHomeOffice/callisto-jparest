@@ -36,7 +36,7 @@ public class PayloadSteps {
      * @param payloadKey The key for the payload (resource type and name)
      * @param docString  The content of the payload
      */
-    @Given("{payload} are loaded from the {filecontents}")
+    @Given("{payload} are loaded from the {fileContents}")
     @Given("{payload} are")
     public void inline_resources_are(PayloadKey payloadKey, String docString) {
         String interpolatedPayload = interpolation.Evaluate(docString);
