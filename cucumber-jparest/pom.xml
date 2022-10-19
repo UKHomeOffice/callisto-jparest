@@ -164,6 +164,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M7</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <tenantId>b7e813a2-bb28-11ec-8422-0242ac120002</tenantId>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>
