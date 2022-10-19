@@ -6,11 +6,11 @@
 
     <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>parentpom</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.5</version>
     <packaging>pom</packaging>
 
     <properties>
-        <project.version>0.0.1${snapshotSuffix}</project.version>
+        <project.version>0.0.5${snapshotSuffix}</project.version>
         <snapshotSuffix></snapshotSuffix>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -18,10 +18,6 @@
         <!-- JaCoCo Properties -->
         <jacoco.version>0.8.7</jacoco.version>
         <!-- Sonar Properties -->
-        <projectKeySuffix></projectKeySuffix>
-        <sonar.projectKey>callisto-JpaRest${projectKeySuffix}</sonar.projectKey>
-        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
-        <sonar.projectName>callisto-JpaRest${projectKeySuffix}</sonar.projectName>
         <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     </properties>

@@ -11,5 +11,6 @@ public class ConstantHelper {
     @SuppressWarnings("squid:S1075") // URIs should not be hardcoded
     public static final String API_ROOT_PATH = "/resources";
     public static final String PATH_DELIMITER = "/";
+    public static final String SERVER_ERROR = "Server Error: Unable to process the request.";
 
 }
