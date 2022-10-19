@@ -32,7 +32,7 @@ public class JpaTestContext {
      */
     @Bean
     public ServiceRegistry serviceRegistry() {
-        String serialisedMap = System.getProperty("services");
+        String serialisedMap = System.getProperty(ServiceRegistry.SERVICE_REGISTRY_PROPERTY_NAME);
         Map<String, String> servicesMap = SerialisationUtil.stringToMap(serialisedMap);
         return new ServiceRegistry(servicesMap);
     }

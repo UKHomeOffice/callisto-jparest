@@ -17,6 +17,8 @@ import java.util.Map;
 @Component
 @AllArgsConstructor
 public class ServiceRegistry {
+
+    public static final String SERVICE_REGISTRY_PROPERTY_NAME = "serviceRegistry";
     private Map<String, String> services;
 
     /**

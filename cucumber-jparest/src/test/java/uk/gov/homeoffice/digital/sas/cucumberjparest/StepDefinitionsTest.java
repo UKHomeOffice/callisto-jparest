@@ -12,7 +12,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import io.cucumber.java.AfterAll;
 import io.cucumber.java.en.Then;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.utils.SerialisationUtil;
 import uk.gov.homeoffice.digital.sas.cucumberjparesttestapi.TestApiRunner;
 
 /**
@@ -59,11 +58,6 @@ public class StepDefinitionsTest {
             // port number and then set the address of the service
             // in the service registry.
             int port = ((ServletWebServerApplicationContext) context).getWebServer().getPort();
-
-            System.out.println("example: " + System.getProperty("example"));
-            String serialisedMap = System.getProperty("services");
-            System.out.println("serialisedMap: " + serialisedMap);
-            System.out.println("services: " + SerialisationUtil.stringToMap(serialisedMap));
 
             serviceRegistry.setServices(Map.of("test", "http://localhost:" + port));
             initialised = true;
