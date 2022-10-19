@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 
@@ -21,8 +21,10 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.utils.SerialisationUtil;
  * the cucumber tests.
  */
 @Configuration
-@AllArgsConstructor
 public class JpaTestContext {
+
+    @Value("#{systemProperties['serviceRegistry']}")
+    private String serialisedMap;
 
     /**
      * The service registry needs to be accessed to by the
@@ -32,7 +34,6 @@ public class JpaTestContext {
      */
     @Bean
     public ServiceRegistry serviceRegistry() {
-        String serialisedMap = System.getProperty(ServiceRegistry.SERVICE_REGISTRY_PROPERTY_NAME);
         Map<String, String> servicesMap = SerialisationUtil.stringToMap(serialisedMap);
         return new ServiceRegistry(servicesMap);
     }
