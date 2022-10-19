@@ -34,6 +34,5 @@ Feature: Personas
     anonymous requests. The persona is called `someone`
 
     Given the valid profiles are loaded from the file 'data/profiles.json'
-    When someone creates the valid profiles in the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When someone creates the valid profiles in the test service
     Then the last response should have a status code of 200

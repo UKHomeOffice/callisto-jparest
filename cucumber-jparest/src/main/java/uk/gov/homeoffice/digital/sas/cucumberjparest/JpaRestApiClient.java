@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.restassured.response.Response;
@@ -33,6 +34,9 @@ import lombok.NonNull;
 public class JpaRestApiClient {
 
     public static final String API_ROOT_PATH = "/resources/";
+
+    @Value("#{systemProperties['tenantId']}")
+    private String tenantId;
 
     /**
      * @param requestSpecification
@@ -89,16 +93,12 @@ public class JpaRestApiClient {
      * @param payload  The resource to create
      * @return JpaRestApiResourceResponse
      */
-    public JpaRestApiResourceResponse create(Persona persona, String service, String resource, String payload,
-                                             Map<String, String> parameters) {
+    public JpaRestApiResourceResponse create(Persona persona, String service, String resource, String payload) {
         URL url = getResourceURL(service, resource);
         RequestSpecification spec = given()
                 .baseUri(url.toString())
-                .body(payload);
-
-        if (parameters != null) {
-            spec = spec.queryParams(parameters);
-        }
+                .body(payload)
+                .queryParam("tenantId", tenantId);
 
         addPersonaAuthToRequestSpecification(spec, persona);
 
@@ -123,11 +123,12 @@ public class JpaRestApiClient {
      * @return JpaRestApiResourceResponse
      */
     public JpaRestApiResourceResponse retrieve(Persona persona, String service, String resource,
-                                               Map<String, String> parameters) {
+            Map<String, String> parameters) {
         URL url = getResourceURL(service, resource);
 
         RequestSpecification spec = given()
-                .baseUri(url.toString());
+                .baseUri(url.toString())
+                .queryParam("tenantId", tenantId);
 
         if (parameters != null) {
             spec = spec.queryParams(parameters);
@@ -155,16 +156,12 @@ public class JpaRestApiClient {
      * @param reference The identifier of the resource to be retrieved
      * @return JpaRestApiResourceResponse
      */
-    public JpaRestApiResourceResponse retrieveById(Persona persona, String service, String resource, String reference,
-                                                   Map<String, String> parameters) {
+    public JpaRestApiResourceResponse retrieveById(Persona persona, String service, String resource, String reference) {
         URL url = getResourceURL(service, resource);
 
         RequestSpecification spec = given()
-                .baseUri(url.toString());
-
-        if (parameters != null) {
-            spec = spec.queryParams(parameters);
-        }
+                .baseUri(url.toString())
+                .queryParam("tenantId", tenantId);
 
         addPersonaAuthToRequestSpecification(spec, persona);
 
@@ -190,16 +187,13 @@ public class JpaRestApiClient {
      * @return JpaRestApiResourceResponse
      */
     public JpaRestApiResourceResponse update(Persona persona, String service, String resource, String reference,
-                                             String payload, Map<String, String> parameters) {
+            String payload) {
 
         URL url = getResourceURL(service, resource);
         RequestSpecification spec = given()
                 .baseUri(url.toString())
-                .body(payload);
-
-        if (parameters != null) {
-            spec = spec.queryParams(parameters);
-        }
+                .body(payload)
+                .queryParam("tenantId", tenantId);
 
         addPersonaAuthToRequestSpecification(spec, persona);
 
@@ -222,16 +216,12 @@ public class JpaRestApiClient {
      * @param reference The identifier of the resource to be deleted
      * @return JpaRestApiResourceResponse
      */
-    public JpaRestApiResourceResponse delete(Persona persona, String service, String resource, String reference,
-                                             Map<String, String> parameters) {
+    public JpaRestApiResourceResponse delete(Persona persona, String service, String resource, String reference) {
         URL url = getResourceURL(service, resource);
 
         RequestSpecification spec = given()
-                .baseUri(url.toString());
-
-        if (parameters != null) {
-            spec = spec.queryParams(parameters);
-        }
+                .baseUri(url.toString())
+                .queryParam("tenantId", tenantId);
 
         addPersonaAuthToRequestSpecification(spec, persona);
 
@@ -257,7 +247,8 @@ public class JpaRestApiClient {
         URL url = getServiceURL(service, path);
 
         RequestSpecification spec = given()
-                .baseUri(url.toString());
+                .baseUri(url.toString())
+                .queryParam("tenantId", tenantId);
 
         addPersonaAuthToRequestSpecification(spec, persona);
 

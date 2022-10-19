@@ -32,22 +32,19 @@ Feature: Assertions
     Then the last response body should be empty
 
   Scenario: Response should contain fields
-    When someone retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When someone retrieves profiles from the test service
     Then the last response body should contain the fields
       | items |
       | meta  |
 
   Scenario: Response should not contain fields
-    When someone retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When someone retrieves profiles from the test service
     Then the last response body should not contain the fields
       | made_up |
       | missing |
 
   Scenario: Object should contain fields
-    When the admin retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When the admin retrieves profiles from the test service
     Then the last of the profiles in the last response from the test service should contain the fields
       | preferences |
       | bio         |
@@ -59,8 +56,7 @@ Feature: Assertions
       | bio         |
 
   Scenario: Object should not contain fields
-    When the admin retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When the admin retrieves profiles from the test service
     Then the 1st of the profiles in the last response from the test service should not contain the fields
       | field   |
       | help_me |
@@ -72,10 +68,8 @@ Feature: Assertions
     a specific response.
     This step enables two objects to be directly compared.
 
-    When someone retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
-    And someone retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When someone retrieves profiles from the test service
+    And someone retrieves profiles from the test service
     Then the 1st of the profiles in the 1st response from the test service should equal the 1st of the profiles in the last response from the test service
 
   Scenario: Property expectations
@@ -85,8 +79,7 @@ Feature: Assertions
 
     It can also be specified as a specific resource in a response
 
-    When someone retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When someone retrieves profiles from the test service
     Then the last response body should contain
       | field | type | expectation           |
       | items | List | hasSizeGreaterThan(1) |
@@ -97,8 +90,7 @@ Feature: Assertions
 
   Scenario: Property expectations for each object
 
-    When someone retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When someone retrieves profiles from the test service
     Then the last response body should contain
       | field | type | expectation           |
       | items | List | hasSizeGreaterThan(1) |
@@ -113,8 +105,7 @@ Feature: Assertions
     Assertions against an object can test nested properties
     This is done by specifying the path to the nested property
 
-    When someone retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When someone retrieves profiles from the test service
     Then the last response body should contain
       | field | type | expectation           |
       | items | List | hasSizeGreaterThan(1) |
@@ -135,7 +126,6 @@ Feature: Assertions
 
     Assertions can be made against headers of the response object.
 
-    When someone retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When someone retrieves profiles from the test service
     Then the last response should contain the headers
       | content-type | isEqualTo("application/json") |

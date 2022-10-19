@@ -43,8 +43,7 @@ Feature: Inline Payloads
         "firstRelease": "Invalid date"
       }
       """
-    When the tester creates the valid profiles in the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When the tester creates the valid profiles in the test service
     Then the last response should have a status code of 200
     When the tester creates the invalid profiles in the test service
     Then the last response should have a status code of 400

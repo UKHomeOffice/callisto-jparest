@@ -15,8 +15,7 @@ Feature: Make requests to endpoints created by JpaRest
     its identifier
     e.g. "/resources/profiles/17e813a2-bb28-11ec-8422-0242ac120001"
 
-    When Trevor gets the profiles '17e813a2-bb28-11ec-8422-0242ac120001' from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When Trevor gets the profiles '17e813a2-bb28-11ec-8422-0242ac120001' from the test service
     Then the last response body should contain
       | field | type | expectation |
       | items | List | hasSize(1)  |
@@ -47,15 +46,12 @@ Feature: Make requests to endpoints created by JpaRest
         "firstRelease": "1989-05-21T00:00:00.000+00:00"
       }
       """
-    And Trevor creates the additional profiles in the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
-    When Trevor retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    And Trevor creates the additional profiles in the test service
+    When Trevor retrieves profiles from the test service
     Then the last response body should contain
       | field | type | expectation           |
       | items | List | hasSizeGreaterThan(3) |
     When Trevor retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
       | filter | <Filter> |
     Then the last response body should contain
       | field | type | expectation   |
@@ -70,19 +66,16 @@ Feature: Make requests to endpoints created by JpaRest
 
     Resource responses can be paged
 
-    When Trevor retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When Trevor retrieves profiles from the test service
     Then the last response body should contain
       | field | type | expectation           |
       | items | List | hasSizeGreaterThan(3) |
     When Trevor retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
       | size | 2 |
     Then the last response body should contain
       | field | type | expectation |
       | items | List | hasSize(2)  |
     When Trevor retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
       | size | 2 |
       | page | 1 |
     Then the 1st of the profiles in the 2nd response should not be equal to the 1st of the profiles in the 3rd response
@@ -92,10 +85,8 @@ Feature: Make requests to endpoints created by JpaRest
     Resource responses can be ordered
 
     When Trevor retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
       | sort | dob,asc |
     When Trevor retrieves profiles from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
       | sort | dob,desc |
     Then the 1st of the profiles in the 1st response should not be equal to the 1st of the profiles in the 2nd response
 
@@ -121,8 +112,7 @@ Feature: Make requests to endpoints created by JpaRest
         "firstRelease": "1989-05-21T00:00:00.000+00:00"
       }
       """
-    And Trevor creates the initial profiles in the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    And Trevor creates the initial profiles in the test service
     When the updated profiles are
       """
       {
@@ -134,8 +124,7 @@ Feature: Make requests to endpoints created by JpaRest
         "firstRelease": "1989-05-21T00:00:00.000+00:00"
       }
       """
-    And Trevor updates the 1st of the profiles in the last response with the updated profiles and
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    And Trevor updates the 1st of the profiles in the last response with the updated profiles
     Then the 1st of the profiles in the last response should contain
       | field        | type    | expectation                                       |
       | tenantId     | String  | isEqualTo("b7e813a2-bb28-11ec-8422-0242ac120002") |
@@ -151,10 +140,8 @@ Feature: Make requests to endpoints created by JpaRest
     Delete one resource using its identifier
 
     Given the valid profiles are loaded from the file 'data/profiles2.json'
-    And Trevor creates the valid profiles in the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
-    When Trevor deletes the 1st of the profiles in the last response from the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    And Trevor creates the valid profiles in the test service
+    When Trevor deletes the 1st of the profiles in the last response from the test service
     Then the last response should have a status code of 200
 
 # Need to think about related resources too

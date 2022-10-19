@@ -40,8 +40,7 @@ Feature: Interpolated payloads
         "firstRelease": "#{T(java.time.Instant).now().toString()}"
       }
       """
-    When Trevor creates the valid profiles in the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When Trevor creates the valid profiles in the test service
     Then the last response should have a status code of 200
     Then the 1st of the profiles in the last response should contain
       | field        | type    | expectation                                               |
@@ -57,8 +56,7 @@ Feature: Interpolated payloads
 
     Given Trevor is a user
     And the valid profiles are loaded from the file 'data/interpolatedProfile.json'
-    When Trevor creates the valid profiles in the test service with
-      | tenantId | b7e813a2-bb28-11ec-8422-0242ac120002 |
+    When Trevor creates the valid profiles in the test service
     Then the last response should have a status code of 200
     Then the 1st of the profiles in the last response should contain
       | field        | type    | expectation                                               |
