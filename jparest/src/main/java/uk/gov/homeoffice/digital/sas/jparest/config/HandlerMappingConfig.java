@@ -34,6 +34,7 @@ import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 /**
  * Discovers JPA entities annotated with {@link Resource}
@@ -50,6 +51,7 @@ public class HandlerMappingConfig {
   private final ApplicationContext context;
   private RequestMappingHandlerMapping requestMappingHandlerMapping;
   private BuilderConfiguration builderOptions;
+  private final EntityValidator entityValidator;
   private final ObjectMapper objectMapper;
 
   public HandlerMappingConfig(
@@ -57,11 +59,13 @@ public class HandlerMappingConfig {
       PlatformTransactionManager transactionManager,
       ApplicationContext context,
       ResourceEndpoint resourceEndpoint,
+      EntityValidator entityValidator,
       ObjectMapper objectMapper) {
     this.entityManager = entityManager;
     this.transactionManager = transactionManager;
     this.context = context;
     this.resourceEndpoint = resourceEndpoint;
+    this.entityValidator = entityValidator;
     this.objectMapper = objectMapper;
   }
 
@@ -76,10 +80,10 @@ public class HandlerMappingConfig {
 
     Map<Class<?>, EntityType<?>> baseEntitySubClassesMap =
         entityManager.getMetamodel().getEntities()
-        .stream()
-        .filter(entityType -> entityType.getJavaType().isAnnotationPresent(Resource.class)
-          && classHasBaseEntityParent(entityType.getJavaType()))
-        .collect(Collectors.toMap(EntityType::getJavaType, Function.identity()));
+            .stream()
+            .filter(entityType -> entityType.getJavaType().isAnnotationPresent(Resource.class)
+                && classHasBaseEntityParent(entityType.getJavaType()))
+            .collect(Collectors.toMap(EntityType::getJavaType, Function.identity()));
 
     Predicate<Class<?>> isBaseEntitySubclass = baseEntitySubClassesMap::containsKey;
 
@@ -87,8 +91,8 @@ public class HandlerMappingConfig {
     // find the id field , build the request mapping path and register the controller
     for (var entityClassEntry : baseEntitySubClassesMap.entrySet()) {
 
-      Class<? extends BaseEntity> resource =
-          (Class<? extends BaseEntity>) entityClassEntry.getKey();
+      Class<? extends BaseEntity> resource = (
+          Class<? extends BaseEntity>) entityClassEntry.getKey();
       LOGGER.fine("Processing resource" + resource.getName());
       var resourceAnnotation = resource.getAnnotation(Resource.class);
       String resourcePath = resourceAnnotation.path();
@@ -106,7 +110,7 @@ public class HandlerMappingConfig {
       EntityUtils<?, ?> entityUtils = new EntityUtils<>(resource, isBaseEntitySubclass);
       ResourceApiController<?> controller = new ResourceApiController<>(
           resource, entityManager,
-          transactionManager, entityUtils, objectMapper);
+          transactionManager, entityUtils, entityValidator, objectMapper);
 
       // Map the CRUD operations to the controllers methods
       mapRestOperationsToController(resource, path, controller);
@@ -138,7 +142,7 @@ public class HandlerMappingConfig {
 
     register(controller, "list",
         getControllerMethodArgs(RequestParameter.TENANT_ID,
-        RequestParameter.PAGEABLE, RequestParameter.FILTER),
+            RequestParameter.PAGEABLE, RequestParameter.FILTER),
         path, RequestMethod.GET);
     register(controller, "get",
         getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.ID),
@@ -151,7 +155,7 @@ public class HandlerMappingConfig {
         path + URL_ID_PATH_PARAM, RequestMethod.DELETE);
     register(controller, "update",
         getControllerMethodArgs(RequestParameter.TENANT_ID,
-        RequestParameter.ID, RequestParameter.BODY),
+            RequestParameter.ID, RequestParameter.BODY),
         path + URL_ID_PATH_PARAM, RequestMethod.PUT);
     resourceEndpoint.add(resource, path);
   }
@@ -171,31 +175,31 @@ public class HandlerMappingConfig {
 
       register(controller, "getRelated",
           getControllerMethodArgs(
-          RequestParameter.TENANT_ID,
-          RequestParameter.ID,
-          RequestParameter.RELATION,
-          RequestParameter.FILTER,
-          RequestParameter.PAGEABLE),
+              RequestParameter.TENANT_ID,
+              RequestParameter.ID,
+              RequestParameter.RELATION,
+              RequestParameter.FILTER,
+              RequestParameter.PAGEABLE),
           path + createIdAndRelationParams(relation), RequestMethod.GET);
 
       register(controller, "deleteRelated", getControllerMethodArgs(
-          RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION,
-          RequestParameter.RELATED_IDS),
+              RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION,
+              RequestParameter.RELATED_IDS),
           path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM,
           RequestMethod.DELETE);
 
       register(controller, "addRelated", getControllerMethodArgs(
-          RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION,
-          RequestParameter.RELATED_IDS),
-            path + createIdAndRelationParams(relation)
+              RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION,
+              RequestParameter.RELATED_IDS),
+          path + createIdAndRelationParams(relation)
               + URL_RELATED_ID_PATH_PARAM, RequestMethod.PUT);
     }
   }
 
   private Class<?>[] getControllerMethodArgs(RequestParameter... requestParameters) {
     return Stream.of(requestParameters)
-      .sorted(Comparator.comparing(RequestParameter::getOrder))
-      .map(RequestParameter::getParamDataType).toArray(Class<?>[]::new);
+        .sorted(Comparator.comparing(RequestParameter::getOrder))
+        .map(RequestParameter::getParamDataType).toArray(Class<?>[]::new);
   }
 
   private void createBuilderOptions() {
@@ -206,7 +210,7 @@ public class HandlerMappingConfig {
 
   private static String createIdAndRelationParams(String relation) {
     return String.format(URL_ID_PATH_PARAM + "/{%s:%s}",
-      RequestParameter.RELATION.getParamName(), Pattern.quote(relation));
+        RequestParameter.RELATION.getParamName(), Pattern.quote(relation));
   }
 
   /**

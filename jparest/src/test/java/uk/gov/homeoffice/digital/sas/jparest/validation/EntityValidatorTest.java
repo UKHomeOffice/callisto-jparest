@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest.utils;
+package uk.gov.homeoffice.digital.sas.jparest.validation;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import javax.validation.Validation;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
-class ValidatorUtilsTest {
+class EntityValidatorTest {
 
     @AfterAll
     static void clearInlineMocks() {
@@ -24,8 +24,8 @@ class ValidatorUtilsTest {
         var validationMockedStatic = Mockito.mockStatic(Validation.class);
         validationMockedStatic.when(Validation::buildDefaultValidatorFactory).thenReturn(null);
 
-        var validatorUtils =  new ValidatorUtils();
-        assertThatNoException().isThrownBy(() -> validatorUtils.validateAndThrowIfErrorsExist(entity));
+        var entityValidator =  new EntityValidator();
+        assertThatNoException().isThrownBy(() -> entityValidator.validateAndThrowIfErrorsExist(entity));
         validationMockedStatic.close();
     }
 
@@ -33,9 +33,9 @@ class ValidatorUtilsTest {
     void validateAndThrowIfErrorsExist_constraintViolationsExists_resourceConstraintViolationExceptionThrown() {
         var entity = new DummyEntityD();
 
-        var validatorUtils =  new ValidatorUtils();
+        var entityValidator =  new EntityValidator();
         assertThatExceptionOfType(ResourceConstraintViolationException.class)
-            .isThrownBy(() -> validatorUtils.validateAndThrowIfErrorsExist(entity));
+            .isThrownBy(() -> entityValidator.validateAndThrowIfErrorsExist(entity));
     }
 
     @Test
@@ -44,10 +44,10 @@ class ValidatorUtilsTest {
         var entity = new DummyEntityD();
         entity.setTelephone("-123456");
 
-        var validatorUtils = new ValidatorUtils();
+        var entityValidator = new EntityValidator();
 
         assertThatExceptionOfType(ResourceConstraintViolationException.class)
-            .isThrownBy(() -> validatorUtils.validateAndThrowIfErrorsExist(entity))
+            .isThrownBy(() -> entityValidator.validateAndThrowIfErrorsExist(entity))
             .withMessageContainingAll(
                 "description has the following error(s): must not be empty",
                 "telephone has the following error(s): ",
