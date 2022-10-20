@@ -2,6 +2,7 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Fail.fail;
+import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.TENANT_ID;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -103,7 +104,7 @@ public class JpaRestApiClient {
         RequestSpecification spec = given()
                 .baseUri(url.toString())
                 .body(payload)
-                .queryParam("tenantId", tenantId);
+                .queryParam(TENANT_ID.getParamName(), tenantId);
 
         addPersonaAuthToRequestSpecification(spec, persona);
 
@@ -133,7 +134,7 @@ public class JpaRestApiClient {
 
         RequestSpecification spec = given()
                 .baseUri(url.toString())
-                .queryParam("tenantId", tenantId);
+                .queryParam(TENANT_ID.getParamName(), tenantId);
 
         if (parameters != null) {
             spec = spec.queryParams(parameters);
@@ -166,7 +167,7 @@ public class JpaRestApiClient {
 
         RequestSpecification spec = given()
                 .baseUri(url.toString())
-                .queryParam("tenantId", tenantId);
+                .queryParam(TENANT_ID.getParamName(), tenantId);
 
         addPersonaAuthToRequestSpecification(spec, persona);
 
@@ -198,7 +199,7 @@ public class JpaRestApiClient {
         RequestSpecification spec = given()
                 .baseUri(url.toString())
                 .body(payload)
-                .queryParam("tenantId", tenantId);
+                .queryParam(TENANT_ID.getParamName(), tenantId);
 
         addPersonaAuthToRequestSpecification(spec, persona);
 
@@ -226,7 +227,7 @@ public class JpaRestApiClient {
 
         RequestSpecification spec = given()
                 .baseUri(url.toString())
-                .queryParam("tenantId", tenantId);
+                .queryParam(TENANT_ID.getParamName(), tenantId);
 
         addPersonaAuthToRequestSpecification(spec, persona);
 
@@ -253,7 +254,7 @@ public class JpaRestApiClient {
 
         RequestSpecification spec = given()
                 .baseUri(url.toString())
-                .queryParam("tenantId", tenantId);
+                .queryParam(TENANT_ID.getParamName(), tenantId);
 
         addPersonaAuthToRequestSpecification(spec, persona);
 
