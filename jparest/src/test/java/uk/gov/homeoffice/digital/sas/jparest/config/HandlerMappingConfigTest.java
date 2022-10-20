@@ -22,6 +22,7 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityH;
+import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -56,6 +57,9 @@ class HandlerMappingConfigTest {
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
     @MockBean
+    private EntityValidator entityValidator;
+
+    @MockBean
     private ObjectMapper objectMapper;
 
     private HandlerMappingConfig handlerMappingConfig;
@@ -72,7 +76,7 @@ class HandlerMappingConfigTest {
     public void setup() {
         when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
         handlerMappingConfig = new HandlerMappingConfig(entityManager, transactionManager, context,
-                resourceEndpoint, objectMapper);
+                resourceEndpoint, entityValidator, objectMapper);
     }
 
     @Test
