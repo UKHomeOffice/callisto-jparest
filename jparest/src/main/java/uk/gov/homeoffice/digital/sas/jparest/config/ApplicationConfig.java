@@ -8,12 +8,11 @@ import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.PathItemCreator;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.ResourceOpenApiCustomiser;
-import uk.gov.homeoffice.digital.sas.jparest.utils.EntityValidator;
+import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 @Configuration
 @Import({
         ObjectMapperConfig.class,
-        EntityValidator.class,
         JpaRestMvcConfig.class,
         HandlerMappingConfig.class,
 })

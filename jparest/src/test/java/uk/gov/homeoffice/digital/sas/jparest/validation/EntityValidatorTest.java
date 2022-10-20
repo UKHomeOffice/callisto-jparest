@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest.utils;
+package uk.gov.homeoffice.digital.sas.jparest.validation;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;

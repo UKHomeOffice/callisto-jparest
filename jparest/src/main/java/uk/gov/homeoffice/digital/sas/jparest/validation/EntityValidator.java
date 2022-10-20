@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest.utils;
+package uk.gov.homeoffice.digital.sas.jparest.validation;
 
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;

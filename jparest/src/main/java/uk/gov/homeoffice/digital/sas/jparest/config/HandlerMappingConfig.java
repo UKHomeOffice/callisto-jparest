@@ -16,7 +16,7 @@ import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
-import uk.gov.homeoffice.digital.sas.jparest.utils.EntityValidator;
+import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;

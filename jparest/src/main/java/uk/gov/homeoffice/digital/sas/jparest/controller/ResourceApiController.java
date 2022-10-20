@@ -26,7 +26,7 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
-import uk.gov.homeoffice.digital.sas.jparest.utils.EntityValidator;
+import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
 import javax.persistence.EntityGraph;

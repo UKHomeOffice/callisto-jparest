@@ -22,7 +22,7 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityH;
-import uk.gov.homeoffice.digital.sas.jparest.utils.EntityValidator;
+import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
