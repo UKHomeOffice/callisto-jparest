@@ -18,7 +18,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class ServiceRegistry {
 
-    public static final String SERVICE_REGISTRY_PROPERTY_NAME = "cucumber.jparest.serviceRegistry";
+    public static final String SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME = "cucumber.jparest.serviceRegistry";
     private Map<String, String> services;
 
     /**

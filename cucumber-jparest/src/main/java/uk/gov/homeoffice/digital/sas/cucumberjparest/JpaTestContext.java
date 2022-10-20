@@ -23,7 +23,7 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.utils.SerialisationUtil;
 @Configuration
 public class JpaTestContext {
 
-    @Value("#{systemProperties[T(uk.gov.homeoffice.digital.sas.cucumberjparest.ServiceRegistry).SERVICE_REGISTRY_PROPERTY_NAME]}")
+    @Value("#{systemProperties[T(uk.gov.homeoffice.digital.sas.cucumberjparest.ServiceRegistry).SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME]}")
     private String serviceRegistryString;
 
     /**
