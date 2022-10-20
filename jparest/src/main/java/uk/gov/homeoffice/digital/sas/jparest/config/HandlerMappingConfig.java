@@ -16,6 +16,7 @@ import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.utils.EntityValidator;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -51,6 +52,7 @@ public class HandlerMappingConfig {
     private final ApplicationContext context;
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
     private BuilderConfiguration builderOptions;
+    private final EntityValidator entityValidator;
     private final ObjectMapper objectMapper;
 
     public HandlerMappingConfig(
@@ -58,11 +60,13 @@ public class HandlerMappingConfig {
             PlatformTransactionManager transactionManager,
             ApplicationContext context,
             ResourceEndpoint resourceEndpoint,
+            EntityValidator entityValidator,
             ObjectMapper objectMapper) {
         this.entityManager = entityManager;
         this.transactionManager = transactionManager;
         this.context = context;
         this.resourceEndpoint = resourceEndpoint;
+        this.entityValidator = entityValidator;
         this.objectMapper = objectMapper;
     }
 
@@ -106,7 +110,7 @@ public class HandlerMappingConfig {
             EntityUtils<?, ?> entityUtils = new EntityUtils<>(resource, isBaseEntitySubclass);
             ResourceApiController<?> controller = new ResourceApiController<>(
                     resource, entityManager,
-                    transactionManager, entityUtils, objectMapper);
+                    transactionManager, entityUtils, entityValidator, objectMapper);
 
             // Map the CRUD operations to the controllers methods
             mapRestOperationsToController(resource, path, controller);

@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,6 +34,7 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.utils.EntityValidator;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -47,6 +50,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Named.named;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -59,6 +64,9 @@ class ResourceApiControllerTest {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    private EntityValidator entityValidator;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -500,6 +508,34 @@ class ResourceApiControllerTest {
         assertThat(dummy.getTenantId()).isEqualTo(TENANT_ID);
     }
 
+    @Test
+    @Transactional
+    void update_idExistsOnRequestPathAndDoesNotExistOnBody_verifyPayloadIsValidatedWithIdPresent() throws JsonProcessingException {
+
+        var payload = "{" +
+                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
+                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
+                "            \"" + INDEX_FIELD_NAME + "\": 1" +
+                "        }";
+
+        var entityUtils = new EntityUtils<>(DummyEntityC.class, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
+        var mockedEntityValidator = Mockito.mock(EntityValidator.class);
+        var controller = new ResourceApiController<>(
+                DummyEntityC.class,
+                entityManager,
+                transactionManager,
+                entityUtils,
+                mockedEntityValidator,
+                objectMapper);
+
+        var resource = createResource(controller, payload, TENANT_ID);
+        controller.update(TENANT_ID, resource.getId(), payload);
+
+        ArgumentCaptor<DummyEntityC> payloadCaptor = ArgumentCaptor.forClass(DummyEntityC.class);
+        verify(mockedEntityValidator, times(2)).validateAndThrowIfErrorsExist(payloadCaptor.capture());
+        assertThat(payloadCaptor.getAllValues()).hasSize(2);
+        assertThat(payloadCaptor.getAllValues().get(1).getId()).isEqualTo(resource.getId());
+    }
 
     // endregion
 
@@ -886,13 +922,13 @@ class ResourceApiControllerTest {
 
     private <T extends BaseEntity, U> ResourceApiController<T> getResourceApiController(Class<T> clazz) {
         var entityUtils = new EntityUtils<>(clazz, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
-        return new ResourceApiController<>(clazz, entityManager, transactionManager, entityUtils, objectMapper);
+        return new ResourceApiController<>(clazz, entityManager, transactionManager, entityUtils, entityValidator, objectMapper);
     }
 
     private <T extends BaseEntity> T createResource(ResourceApiController<T> controller,
-                                                       String payload,
-                                                       UUID tenantId) throws JsonProcessingException {
-        
+                                                    String payload,
+                                                    UUID tenantId) throws JsonProcessingException {
+
         var response = controller.create(tenantId, payload);
         assertThat(response).isNotNull();
         assertThat(response.getItems()).isNotEmpty();

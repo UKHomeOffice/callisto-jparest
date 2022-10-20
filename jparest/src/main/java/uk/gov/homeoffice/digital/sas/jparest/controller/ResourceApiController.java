@@ -26,7 +26,7 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
-import uk.gov.homeoffice.digital.sas.jparest.utils.ValidatorUtils;
+import uk.gov.homeoffice.digital.sas.jparest.utils.EntityValidator;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
 import javax.persistence.EntityGraph;
@@ -74,7 +74,7 @@ public class ResourceApiController<T extends BaseEntity> {
     private final PlatformTransactionManager transactionManager;
     private final JpaRepository<T, Serializable> repository;
     private final EntityUtils<T, ?> entityUtils;
-    private final ValidatorUtils validatorUtils = new ValidatorUtils();
+    private final EntityValidator entityValidator;
     private final ObjectMapper objectMapper;
 
     private static final String QUERY_HINT = "javax.persistence.fetchgraph";
@@ -84,6 +84,7 @@ public class ResourceApiController<T extends BaseEntity> {
     @SuppressWarnings("unchecked")
     public ResourceApiController(Class<T> entityType, EntityManager entityManager,
                                  PlatformTransactionManager transactionManager, EntityUtils<?, ?> entityUtils,
+                                 EntityValidator entityValidator,
                                  ObjectMapper objectMapper) {
         this.entityType = entityType;
         this.entityManager = entityManager;
@@ -91,6 +92,7 @@ public class ResourceApiController<T extends BaseEntity> {
         this.repository = new SimpleJpaRepository<>(entityType, entityManager);
         this.entityUtils = (EntityUtils<T, ?>) entityUtils;
         this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
+        this.entityValidator = entityValidator;
         this.objectMapper = objectMapper;
     }
 
@@ -160,7 +162,7 @@ public class ResourceApiController<T extends BaseEntity> {
         T r2 = readPayload(body);
         validateAndSetTenantIdPayloadMatch(tenantId, r2);
 
-        this.validatorUtils.validateAndThrowIfErrorsExist(r2);
+        this.entityValidator.validateAndThrowIfErrorsExist(r2);
 
         if (Objects.nonNull(r2.getId()))
             throw new IllegalArgumentException("A resource id should not be provided when creating a new resource.");
@@ -211,15 +213,16 @@ public class ResourceApiController<T extends BaseEntity> {
                                  @PathVariable UUID id,
                                  @RequestBody String body) throws JsonProcessingException {
 
-        T r2 = readPayload(body);
-        validateAndSetTenantIdPayloadMatch(tenantId, r2);
+        T payload = readPayload(body);
+        validateAndSetTenantIdPayloadMatch(tenantId, payload);
 
-        var payloadEntityId = (UUID) this.persistenceUnitUtil.getIdentifier(r2);
+        var payloadEntityId = (UUID) this.persistenceUnitUtil.getIdentifier(payload);
         if (payloadEntityId != null && !id.equals(payloadEntityId)) {
             throw new IllegalArgumentException("The supplied payload resource id value must match the url id path parameter value");
         }
 
-        this.validatorUtils.validateAndThrowIfErrorsExist(r2);
+        payload.setId(id);
+        this.entityValidator.validateAndThrowIfErrorsExist(payload);
 
         var transactionDefinition = new DefaultTransactionDefinition();
         var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
@@ -229,7 +232,7 @@ public class ResourceApiController<T extends BaseEntity> {
 
         validateResourceTenantId(tenantId, orig, id);
 
-        BeanUtils.copyProperties(r2, orig, EntityUtils.ID_FIELD_NAME);
+        BeanUtils.copyProperties(payload, orig, EntityUtils.ID_FIELD_NAME);
 
         try {
             repository.saveAndFlush(orig);

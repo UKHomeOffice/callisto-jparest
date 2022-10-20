@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.utils;
 
+import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 
 import javax.validation.ConstraintViolation;
@@ -13,12 +14,13 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 
-public class ValidatorUtils {
+@Component
+public class EntityValidator {
 
-    private static final Logger LOGGER = Logger.getLogger(ValidatorUtils.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(EntityValidator.class.getName());
     private Validator validator = null;
 
-    public ValidatorUtils() {
+    public EntityValidator() {
         try {
             var factory = Validation.buildDefaultValidatorFactory();
             if (factory != null) {
@@ -41,7 +43,7 @@ public class ValidatorUtils {
     }
 
 
-    private static String createResourceConstraintViolationMessage(Set<ConstraintViolation<Object>> constraintViolations) {
+    private String createResourceConstraintViolationMessage(Set<ConstraintViolation<Object>> constraintViolations) {
 
         return constraintViolations.stream()
                 .collect(groupingBy(ConstraintViolation::getPropertyPath))
