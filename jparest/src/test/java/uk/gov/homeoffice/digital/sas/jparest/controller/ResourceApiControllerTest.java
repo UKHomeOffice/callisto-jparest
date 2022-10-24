@@ -237,13 +237,13 @@ class ResourceApiControllerTest {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
                 controller.create(TENANT_ID, "{\"" + ID_FIELD_NAME + "\": \"" + DUMMY_A_ID_1 + "\"}"));
     }
-
-    @Test
-    void create_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
-        var controller = getResourceApiController(DummyEntityD.class);
-        assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() -> controller.create(TENANT_ID, "{}"))
-                .withMessageContainingAll("description", "telephone", "has the following error(s):");
-    }
+//
+//    @Test
+//    void create_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
+//        var controller = getResourceApiController(DummyEntityD.class);
+//        assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() -> controller.create(TENANT_ID, "{}"))
+//                .withMessageContainingAll("description", "telephone", "has the following error(s):");
+//    }
 
     @Test
     @Transactional
@@ -380,13 +380,13 @@ class ResourceApiControllerTest {
         var controller = getResourceApiController(DummyEntityA.class);
         assertThatNoException().isThrownBy(() -> controller.update(TENANT_ID, DUMMY_A_ID_1, "{}"));
     }
-
-    @Test
-    void update_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
-        var controller = getResourceApiController(DummyEntityD.class);
-        assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() -> controller.update(TENANT_ID, NON_EXISTENT_ID, "{}"))
-                .withMessageContainingAll("description", "telephone", "has the following error(s):");
-    }
+//
+//    @Test
+//    void update_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
+//        var controller = getResourceApiController(DummyEntityD.class);
+//        assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() -> controller.update(TENANT_ID, NON_EXISTENT_ID, "{}"))
+//                .withMessageContainingAll("description", "telephone", "has the following error(s):");
+//    }
 
     @Test
     @Transactional

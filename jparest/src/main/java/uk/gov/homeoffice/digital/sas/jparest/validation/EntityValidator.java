@@ -10,6 +10,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.NoProviderFoundException;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 
@@ -41,20 +42,27 @@ public class EntityValidator {
     }
   }
 
-  private static String createResourceConstraintViolationMessage(
-      Set<ConstraintViolation<Object>> constraintViolations) {
+  private static Object[] createResourceConstraintViolationMessage(
+          Set<ConstraintViolation<Object>> constraintViolations) {
 
-    return constraintViolations.stream()
-        .collect(groupingBy(ConstraintViolation::getPropertyPath))
-        .entrySet().stream()
-        .map(entry -> {
-          var propertyErrors = entry.getValue().stream()
-              .map(ConstraintViolation::getMessage)
-              .collect(Collectors.joining(", "));
+    var constraintViolation = constraintViolations.iterator().next();
+    var payload = constraintViolation.getConstraintDescriptor().getPayload();
 
-          return String.format("%s has the following error(s): %s",
-              entry.getKey().toString(), propertyErrors);
-        })
-        .collect(Collectors.joining(". "));
+    var result = constraintViolations.stream()
+            .collect(groupingBy(ConstraintViolation::getPropertyPath))
+            .entrySet().stream()
+            .map(entry -> {
+              var propertyErrors = entry.getValue().stream()
+                      .map(ConstraintViolation::getMessage)
+                      .collect(Collectors.joining(", "));
+
+              JSONObject constraintViolationErrors = new JSONObject();
+              constraintViolationErrors.put("field", entry.getKey().toString());
+              constraintViolationErrors.put("message", propertyErrors);
+              constraintViolationErrors.put("data", payload);
+
+              return constraintViolationErrors;
+            }).toArray();
+    return result;
   }
 }

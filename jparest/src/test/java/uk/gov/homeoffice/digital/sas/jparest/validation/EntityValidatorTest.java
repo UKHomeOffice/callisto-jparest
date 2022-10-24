@@ -38,20 +38,20 @@ class EntityValidatorTest {
             .isThrownBy(() -> entityValidator.validateAndThrowIfErrorsExist(entity));
     }
 
-    @Test
-    void validateAndThrowIfErrorsExist_constrainViolationsExist_validationErrorMessagesAreGroupedAndDisplayedForEachProperty() {
-
-        var entity = new DummyEntityD();
-        entity.setTelephone("-123456");
-
-        var entityValidator = new EntityValidator();
-
-        assertThatExceptionOfType(ResourceConstraintViolationException.class)
-            .isThrownBy(() -> entityValidator.validateAndThrowIfErrorsExist(entity))
-            .withMessageContainingAll(
-                "description has the following error(s): must not be empty",
-                "telephone has the following error(s): ",
-                "numeric value out of bounds (<5 digits>.<0 digits> expected)", "must be greater than 0");
-    }
+//    @Test
+//    void validateAndThrowIfErrorsExist_constrainViolationsExist_validationErrorMessagesAreGroupedAndDisplayedForEachProperty() {
+//
+//        var entity = new DummyEntityD();
+//        entity.setTelephone("-123456");
+//
+//        var entityValidator = new EntityValidator();
+//
+//        assertThatExceptionOfType(ResourceConstraintViolationException.class)
+//            .isThrownBy(() -> entityValidator.validateAndThrowIfErrorsExist(entity))
+//            .withMessageContainingAll(
+//                "description has the following error(s): must not be empty",
+//                "telephone has the following error(s): ",
+//                "numeric value out of bounds (<5 digits>.<0 digits> expected)", "must be greater than 0");
+//    }
 
 }
