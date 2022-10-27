@@ -82,7 +82,7 @@ The assigned version number will be used to create a version release in artifact
 JpaRest supports the use of filtering data during retrieval for certain get endpoints. These filters should be constructed in accordance with Spring Expression Language (SpEL) as they will then be converted into predicates used to query the database.
 
 ### Supported Endpoints
-You can provide a filter as a request parameter for `GET` endpoints that return multiple resources. The filter expression should be assigned to a request parameter named `filter`.
+You can provide a filter as a request parameter for `GET` endpoints that return multiple resources. The filter expression should be assigned to a request parameter named `filter`.  
 Examples of supported endpoints for providing a filter parameter are as follows:
 - Getting multiple resources endpoint - `http://localhost:5000/resources/artists`
 - Getting multiple related resources for a parent resource - `http://localhost:5000/resources/concerts/37e813a2-bb28-11ec-8422-0242ac120001/artists`
@@ -93,7 +93,6 @@ Filter expressions can be formed through the use of logical operators or SpEL me
 
 #### Logical Operators
 When forming a filter expression using logical operators the following conditions must be met:
-- You must provide exactly two operands, 1 on the left side and one on the right side of the operator.
 - The left side operand must be a reference to a field on the entity. Literal values are not supported here.
 - The right side operand can be a field reference or a literal value, however the data type of the right  
   side operand must match the data type of the left side operand.
@@ -115,24 +114,27 @@ When forming a filter expression using SpEL method invocation the following cond
 An example of the filter request parameter using method references is as follows:
 `filter=in(id, '27e813a2-bb28-11ec-8422-0242ac120001', '27e813a2-bb28-11ec-8422-0242ac120003')`
 
-#### Comparison Table
-| Operator |Textual Version| No. LHS Operands | LHS Operand Type| No. RHS Operands | RHS Operand Type|
-|--|--|--|--|--|--|
-| == | eq| 1 | Field Reference | 1 | Field Ref / Literal |
-| != | ne| 1 | Field Reference | 1 | Field Ref / Literal |
-| >= | ge| 1 | Field Reference | 1 | Field Ref / Literal |
-| >  | gt| 1 | Field Reference | 1 | Field Ref / Literal |
-| <= | le| 1 | Field Reference | 1 | Field Ref / Literal |
-| <  | lt| 1 | Field Reference | 1 | Field Ref / Literal |
-| IN | | 1 | Field Reference | >=1 | Literal |
-| BETWEEN  | | 1 | Field Reference | 2 | Literal |
-
 
 ### Combining Conditions
 There are a few additional logical operators that can be applied and also used to build a filter expression made up of multiple conditions.
-- This can be applied with any of the following operators: `and, or, !`
-- The `and, or` operators require an expression on the left side and on the right side.
-- The `!` operator only requires an expression on the right side.
+- This can be applied with any of the following operators: `&&, ||, !`
+- The operators can also be provided in the equivalent textual form such as: `and, or, not`
 
 An example of the filter request parameter using additional logical operators is as follows:
 `filter=!in(id, '27e813a2-bb28-11ec-8422-0242ac120001', '27e813a2-bb28-11ec-8422-0242ac120003')`
+
+
+### Comparison Table
+| Operator |Textual Version| LHS Operand Type| RHS Operand Type|  
+|--|--|--|--|  
+| == | eq| Field Reference | Field Ref / Literal |  
+| != | ne| Field Reference | Field Ref / Literal |  
+| >= | ge| Field Reference | Field Ref / Literal |  
+| >  | gt| Field Reference | Field Ref / Literal |  
+| <= | le| Field Reference | Field Ref / Literal |  
+| <  | lt| Field Reference | Field Ref / Literal |  
+| IN |   | Field Reference | Literal |  
+| BETWEEN  | | Field Reference | Literal |  
+| && | and| Expression | Expression |  
+| \|\| | or| Expression  | Expression |  
+| !| not|  | Expression  |  
