@@ -2,6 +2,7 @@ package uk.gov.homeoffice.digital.sas.jparest.validation;
 
 import static java.util.stream.Collectors.groupingBy;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,6 +11,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.NoProviderFoundException;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import org.hibernate.validator.engine.HibernateConstraintViolation;
 import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
@@ -46,7 +48,11 @@ public class EntityValidator {
           Set<ConstraintViolation<Object>> constraintViolations) {
 
     var constraintViolation = constraintViolations.iterator().next();
-    var payload = constraintViolation.getConstraintDescriptor().getPayload();
+    @SuppressWarnings("unchecked")
+    var hibernateConstraintViolation = constraintViolation.unwrap(
+        HibernateConstraintViolation.class
+    );
+    var payload = hibernateConstraintViolation.getDynamicPayload(ArrayList.class);
 
     var result = constraintViolations.stream()
             .collect(groupingBy(ConstraintViolation::getPropertyPath))
