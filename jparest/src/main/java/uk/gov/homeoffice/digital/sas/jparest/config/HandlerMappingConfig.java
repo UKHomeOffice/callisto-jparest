@@ -34,6 +34,7 @@ import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 /**
@@ -54,19 +55,22 @@ public class HandlerMappingConfig {
   private final EntityValidator entityValidator;
   private final ObjectMapper objectMapper;
 
+  private final ResourceApiService service;
+
   public HandlerMappingConfig(
       EntityManager entityManager,
       PlatformTransactionManager transactionManager,
       ApplicationContext context,
       ResourceEndpoint resourceEndpoint,
       EntityValidator entityValidator,
-      ObjectMapper objectMapper) {
+      ObjectMapper objectMapper, ResourceApiService service) {
     this.entityManager = entityManager;
     this.transactionManager = transactionManager;
     this.context = context;
     this.resourceEndpoint = resourceEndpoint;
     this.entityValidator = entityValidator;
     this.objectMapper = objectMapper;
+    this.service = service;
   }
 
   @PostConstruct
@@ -108,9 +112,8 @@ public class HandlerMappingConfig {
       // Create a controller for the resource
       LOGGER.fine("Creating controller");
       EntityUtils<?, ?> entityUtils = new EntityUtils<>(resource, isBaseEntitySubclass);
-      ResourceApiController<?> controller = new ResourceApiController<>(
-          resource, entityManager,
-          transactionManager, entityUtils, entityValidator, objectMapper);
+      ResourceApiController<?> controller = new ResourceApiController<>(entityType, service, objectMapper,
+          entityUtils);
 
       // Map the CRUD operations to the controllers methods
       mapRestOperationsToController(resource, path, controller);

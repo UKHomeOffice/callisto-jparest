@@ -37,6 +37,7 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 import javax.persistence.EntityManager;
@@ -73,6 +74,9 @@ class ResourceApiControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ResourceApiService service;
 
     public static final UUID NON_EXISTENT_ID = UUID.fromString("7a7c7da4-bb29-11ec-1000-0242ac120001");
     public static final UUID NON_EXISTENT_ID_2 = UUID.fromString("7a7c7da4-bb29-11ec-1001-0242ac120002");
@@ -573,12 +577,10 @@ class ResourceApiControllerTest {
         var entityUtils = new EntityUtils<>(DummyEntityC.class, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
         var mockedEntityValidator = Mockito.mock(EntityValidator.class);
         var controller = new ResourceApiController<>(
-                DummyEntityC.class,
-                entityManager,
-                transactionManager,
-                entityUtils,
-                mockedEntityValidator,
-                objectMapper);
+                DummyEntity.class,
+                service,
+                objectMapper,
+                entityManager,);
 
         var resource = createResource(controller, payload, TENANT_ID);
         controller.update(TENANT_ID, resource.getId(), payload);

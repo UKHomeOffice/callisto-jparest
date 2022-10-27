@@ -53,7 +53,9 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 
 /**
@@ -75,17 +77,21 @@ public class ResourceApiController<T extends BaseEntity> {
   private final EntityUtils<T, ?> entityUtils;
   private final EntityValidator entityValidator;
   private final ObjectMapper objectMapper;
+  private final ResourceApiService service;
 
   private static final String QUERY_HINT = "javax.persistence.fetchgraph";
 
 
   @SuppressWarnings("unchecked")
-  public ResourceApiController(Class<T> entityType, EntityManager entityManager,
+  public ResourceApiController(Class<T> entityType, 
+                               ResourceApiService service,
+                               EntityManager entityManager,
                                PlatformTransactionManager transactionManager,
                                EntityUtils<?, ?> entityUtils,
                                EntityValidator entityValidator,
                                ObjectMapper objectMapper) {
     this.entityType = entityType;
+    this.service = service;
     this.entityManager = entityManager;
     this.transactionManager = transactionManager;
     this.repository = new SimpleJpaRepository<>(entityType, entityManager);
@@ -94,7 +100,6 @@ public class ResourceApiController<T extends BaseEntity> {
     this.entityValidator = entityValidator;
     this.objectMapper = objectMapper;
   }
-
 
   public ApiResponse<T> list(
       @RequestParam UUID tenantId, Pageable pageable, SpelExpression filter) {
@@ -121,7 +126,8 @@ public class ResourceApiController<T extends BaseEntity> {
     typedQuery.setMaxResults(pageable.getPageSize());
     typedQuery.setHint(QUERY_HINT, entityGraph);
     List<T> result = typedQuery.getResultList();
-    return new ApiResponse<>(result);
+//    return new ApiResponse<>(result);
+    return new ApiResponse<>(service.list(tenantId, pageable, filter));
   }
 
   private T getById(UUID id, String include, UUID tenantId) {
@@ -155,12 +161,14 @@ public class ResourceApiController<T extends BaseEntity> {
 
   public ApiResponse<T> get(@RequestParam UUID tenantId, @PathVariable UUID id) {
     var result = getById(id, null, tenantId);
-    return new ApiResponse<>(List.of(result));
+//    return new ApiResponse<>(List.of(result)); 
+    return new ApiResponse<>(service.get(tenantId, id));
   }
 
   public ApiResponse<T> create(@RequestParam UUID tenantId, @RequestBody String body)
       throws JsonProcessingException {
 
+    T t = readPayload(body);
     T r2 = readPayload(body);
     validateAndSetTenantIdPayloadMatch(tenantId, r2);
 
@@ -181,7 +189,8 @@ public class ResourceApiController<T extends BaseEntity> {
       transactionManager.rollback(transactionStatus);
       throw ex;
     }
-    return new ApiResponse<>(List.of(result));
+//    return new ApiResponse<>(List.of(result));
+    return new ApiResponse<>(service.create(tenantId, t));
   }
 
   public void delete(@RequestParam UUID tenantId, @PathVariable UUID id) {
@@ -215,6 +224,7 @@ public class ResourceApiController<T extends BaseEntity> {
       transactionManager.rollback(transactionStatus);
       throw ex;
     }
+    service.delete(tenantId, id);
   }
 
   public ApiResponse<T> update(@RequestParam UUID tenantId, @PathVariable UUID id,
@@ -245,7 +255,8 @@ public class ResourceApiController<T extends BaseEntity> {
       throw ex;
     }
 
-    return new ApiResponse<>(List.of(orig));
+//    return new ApiResponse<>(List.of(orig));
+    return new ApiResponse(service.update(tenantId, id, payload));
   }
 
   @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters
@@ -282,7 +293,9 @@ public class ResourceApiController<T extends BaseEntity> {
     typedQuery.setHint(QUERY_HINT, entityGraph);
 
     List<?> result = typedQuery.getResultList();
-    return new ApiResponse<>(result);
+//    return new ApiResponse<>(result);
+    return new ApiResponse<>(service.getRelated(tenantId, id, relation, pageable, filter));
+
   }
 
   public void deleteRelated(
@@ -324,6 +337,7 @@ public class ResourceApiController<T extends BaseEntity> {
       transactionManager.rollback(transactionStatus);
       throw ex;
     }
+    service.deleteRelated(tenantId, id, relation, relatedIds);
   }
 
   public void addRelated(
@@ -365,6 +379,7 @@ public class ResourceApiController<T extends BaseEntity> {
       transactionManager.rollback(transactionStatus);
       throw ex;
     }
+    service.addRelated(tenantId, id, relation, relatedIds);
 
   }
 
