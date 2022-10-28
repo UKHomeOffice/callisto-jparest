@@ -31,6 +31,7 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
@@ -64,6 +65,7 @@ import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
  * <p>Resources for ManyToMany relationships can also be queried.
  */
 @ResponseBody
+@Slf4j
 public class ResourceApiController<T extends BaseEntity> {
 
   @Getter
@@ -440,6 +442,12 @@ public class ResourceApiController<T extends BaseEntity> {
 
     } else if (payloadTenantId == null) {
       payload.setTenantId(requestTenantId);
+    }
+  }
+
+  private void methodToTestSonar() {
+    for (int i =0; i < 5; i++) {
+      log.info("for loop is running");
     }
   }
 
