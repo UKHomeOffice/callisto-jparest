@@ -440,4 +440,88 @@ public class Sonar<T extends BaseEntity> {
     }
   }
 
+  private void methodToTestSonar2(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar3(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar4(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar5(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar6(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar7(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar8(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar9(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar10(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar11(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar12(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar13(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar14(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  private void methodToTestSonar15(UUID tenantId, T resource) {
+    if (tenantId.equals(resource.getTenantId())) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
 }
