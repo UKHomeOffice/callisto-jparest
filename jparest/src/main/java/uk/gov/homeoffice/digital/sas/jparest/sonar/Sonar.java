@@ -1,5 +1,10 @@
 package uk.gov.homeoffice.digital.sas.jparest.sonar;
 
+import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.ID;
+import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.TENANT_ID;
+import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage;
+import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
@@ -50,11 +55,6 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyE
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
-
-import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.ID;
-import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.TENANT_ID;
-import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage;
-import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage;
 
 @AllArgsConstructor
 public class Sonar<T extends BaseEntity> {
