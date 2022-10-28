@@ -446,7 +446,7 @@ public class ResourceApiController<T extends BaseEntity> {
   }
 
   private void methodToTestSonar(UUID tenantId, T resource) {
-    if (tenantId.equals(resource.getTenantId())){
+    if (tenantId.equals(resource.getTenantId())) {
       throw new ResourceNotFoundException();
     }
   }
