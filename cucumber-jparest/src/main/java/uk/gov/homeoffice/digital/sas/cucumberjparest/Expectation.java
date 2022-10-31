@@ -17,10 +17,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Expectation {
 
-    @NonNull
-    private String field;
-    @NonNull
-    private Class<?> type;
-    @NonNull
-    private String expectation;
+  @NonNull
+  private String field;
+  @NonNull
+  private Class<?> type;
+  @NonNull
+  private String expectation;
 }
