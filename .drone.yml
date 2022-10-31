@@ -29,10 +29,25 @@ steps:
     SONAR_TOKEN:
       from_secret: sonar_cloud_token
   commands:
-  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.pullrequest.base=$${DRONE_TARGET_BRANCH} -Dsonar.pullrequest.branch=$${DRONE_SOURCE_BRANCH} -Dsonar.pullrequest.key=$${DRONE_PULL_REQUEST} -Dsonar.branch.name=$DRONE_BRANCH -Dsonar.projectName=callisto-jparest -Dsonar.qualitygate.wait=true
+  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$DRONE_BRANCH -Dsonar.projectName=callisto-jparest -Dsonar.qualitygate.wait=true
   when:
     event:
       exclude:
+      - pull_request
+
+- name: sonar pr
+  image: maven:3.8-openjdk-17
+  depends_on:
+    - test
+  environment:
+    SONAR_HOST:
+      from_secret: sonar_cloud_host
+    SONAR_TOKEN:
+      from_secret: sonar_cloud_token
+  commands:
+  - mvn sonar-scanner -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$${SONAR_TOKEN} -Dsonar.projectKey=callisto-ui -Dsonar.organization=ukhomeoffice -Dsonar.projectName=callisto-jparest -Dsonar.pullrequest.base=$${DRONE_TARGET_BRANCH} -Dsonar.pullrequest.branch=$${DRONE_SOURCE_BRANCH} -Dsonar.pullrequest.key=$${DRONE_PULL_REQUEST} -Dsonar.qualitygate.wait=true
+  when:
+      event:
       - pull_request
 
 - name: publish
