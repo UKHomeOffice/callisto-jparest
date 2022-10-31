@@ -45,7 +45,7 @@ steps:
     SONAR_TOKEN:
       from_secret: sonar_cloud_token
   commands:
-  - mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$${SONAR_TOKEN} -Dsonar.projectKey=callisto-ui -Dsonar.organization=ukhomeoffice -Dsonar.projectName=callisto-jparest -Dsonar.pullrequest.base=$${DRONE_TARGET_BRANCH} -Dsonar.pullrequest.branch=$${DRONE_SOURCE_BRANCH} -Dsonar.pullrequest.key=$${DRONE_PULL_REQUEST} -Dsonar.qualitygate.wait=true
+  - mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$${SONAR_TOKEN} -Dsonar.projectKey=callisto-jparest -Dsonar.organization=ukhomeoffice -Dsonar.projectName=callisto-jparest -Dsonar.pullrequest.base=$${DRONE_TARGET_BRANCH} -Dsonar.pullrequest.branch=$${DRONE_SOURCE_BRANCH} -Dsonar.pullrequest.key=$${DRONE_PULL_REQUEST} -Dsonar.qualitygate.wait=true
   when:
       event:
       - pull_request
