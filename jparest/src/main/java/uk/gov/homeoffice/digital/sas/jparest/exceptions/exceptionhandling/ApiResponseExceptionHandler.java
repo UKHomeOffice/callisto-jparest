@@ -28,7 +28,6 @@ public class ApiResponseExceptionHandler {
     IllegalArgumentException.class,
     JsonProcessingException.class,
     InvalidFilterException.class,
-    ResourceConstraintViolationException.class,
     UnknownResourcePropertyException.class,
     TenantIdMismatchException.class
   })
@@ -58,6 +57,13 @@ public class ApiResponseExceptionHandler {
   public ResponseEntity<ApiErrorResponse> handleUnexpectedQueryResultException(
       UnexpectedQueryResultException ex) {
     return createResponseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(ResourceConstraintViolationException.class)
+  public ResponseEntity<Object[]> handleResourceConstraintViolationException(
+          ResourceConstraintViolationException ex) {
+
+    return new ResponseEntity<>(ex.getErrorResponse(), HttpStatus.BAD_REQUEST);
   }
 
   private static ResponseEntity<ApiErrorResponse> createResponseEntity(

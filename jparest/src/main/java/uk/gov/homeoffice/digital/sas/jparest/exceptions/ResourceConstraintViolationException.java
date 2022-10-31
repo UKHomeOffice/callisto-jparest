@@ -1,20 +1,18 @@
 package uk.gov.homeoffice.digital.sas.jparest.exceptions;
 
-import java.util.Arrays;
+import lombok.Getter;
 
 public class ResourceConstraintViolationException extends RuntimeException {
 
-  public ResourceConstraintViolationException() {
-    super();
-  }
+  @Getter
+  private Object[] errorResponse = {};
 
   public ResourceConstraintViolationException(String s) {
     super(s);
   }
 
   public ResourceConstraintViolationException(Object[] o) {
-    super(
-            Arrays.toString(o));
+    this.errorResponse = o;
   }
 
 }
