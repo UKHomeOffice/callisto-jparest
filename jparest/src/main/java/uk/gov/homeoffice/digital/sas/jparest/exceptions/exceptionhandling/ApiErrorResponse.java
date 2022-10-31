@@ -5,12 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * A class to hold information relating to an error thrown by the API
+ * <p>A class to hold information relating to an error thrown by the API.</p>
  */
 @Getter
 @AllArgsConstructor
 public class ApiErrorResponse {
 
-    private final String message;
+  private final String message;
 
 }
