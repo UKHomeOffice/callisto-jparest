@@ -5,11 +5,7 @@ import lombok.Getter;
 public class ResourceConstraintViolationException extends RuntimeException {
 
   @Getter
-  private Object[] errorResponse = {};
-
-  public ResourceConstraintViolationException(String s) {
-    super(s);
-  }
+  private final Object[] errorResponse;
 
   public ResourceConstraintViolationException(Object[] o) {
     this.errorResponse = o;
