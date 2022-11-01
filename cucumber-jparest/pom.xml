@@ -12,7 +12,6 @@
     <artifactId>cucumber-jparest</artifactId>
     <version>${project.version}</version>
 
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
