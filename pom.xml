@@ -21,6 +21,8 @@
         <!-- Sonar Properties -->
         <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <!--suppress UnresolvedMavenProperty -->
+        <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/cucumber-jparest/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <distributionManagement>
@@ -46,8 +48,8 @@
 
     <modules>
         <module>jparest</module>
-        <module>cucumber-jparest</module>
         <module>demo</module>
+        <module>cucumber-jparest</module>
     </modules>
 
     <build>
@@ -82,12 +84,6 @@
                         <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <goals>
-                            <goal>report</goal>
                         </goals>
                     </execution>
                 </executions>
