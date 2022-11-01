@@ -12,6 +12,8 @@ import java.io.File;
 import java.net.URL;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.NonNull;
 import org.assertj.core.util.Files;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,8 @@ import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
 public class CucumberConfig {
 
   private static final String FROM_IN_SERVICE = "(?: (?:from|in) the (\\S*) service)?";
+
+  private final Logger logger = Logger.getLogger(CucumberConfig.class.getName());
 
   private final PersonaManager personaManager;
   private final HttpResponseManager httpResponseManager;
@@ -222,6 +226,7 @@ public class CucumberConfig {
       try {
         clazz = Class.forName(type);
       } catch (ClassNotFoundException e) {
+        logger.log(Level.SEVERE, "Could not resolve type: " + type, e);
       }
     } else {
       clazz = JpaTestContext.classSimpleStrings.get(type);

@@ -32,13 +32,15 @@ public class JpaRestApiClient {
 
   public static final String API_ROOT_PATH = "/resources/";
   public static final String TENANT_ID_SYSTEM_PROPERTY_NAME = "cucumber.jparest.tenantId";
+  private static final String TENANT_ID_SYSTEM_PROPERTY_EL
+      = "#{systemProperties['" + TENANT_ID_SYSTEM_PROPERTY_NAME + "']}";
 
   /**
    * Injecting tenantId parameter as a system property to avoid verbosity in BDD features. This is a
    * temporary workaround, as in the long term, tenantId would be part of the authenticated user
    * object and would not have to be supplied as a request parameter
    */
-  @Value("#{systemProperties[T(uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiClient).TENANT_ID_SYSTEM_PROPERTY_NAME]}")
+  @Value(TENANT_ID_SYSTEM_PROPERTY_EL)
   private String tenantId;
 
   /**

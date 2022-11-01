@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
 import static java.util.Map.entry;
+import static uk.gov.homeoffice.digital.sas.cucumberjparest.ServiceRegistry.SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME;
 
 import io.cucumber.spring.ScenarioScope;
 import java.time.Instant;
@@ -29,7 +30,10 @@ public class JpaTestContext {
       entry("Map", Map.class),
       entry("List", List.class),
       entry("Instant", Instant.class));
-  @Value("#{systemProperties[T(uk.gov.homeoffice.digital.sas.cucumberjparest.ServiceRegistry).SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME]}")
+  private static final String SERVICE_REGISTRY_SYSTEM_PROPERTY_EL
+      = "#{systemProperties['" + SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME + "']}";
+
+  @Value(SERVICE_REGISTRY_SYSTEM_PROPERTY_EL)
   private String serviceRegistryString;
 
   /**
