@@ -13,7 +13,7 @@ class SerialisationUtilTest {
 
     @ParameterizedTest
     @MethodSource("stringToMapTestData")
-    public void GIVEN_serialised_map_WHEN_converted_to_map_THEN_produces_the_expected_map(String serialisedMap, int expectedMapSize, Map<String, String> expectedMap) {
+    void GIVEN_serialised_map_WHEN_converted_to_map_THEN_produces_the_expected_map(String serialisedMap, int expectedMapSize, Map<String, String> expectedMap) {
         Map<String, String> actualMap = SerialisationUtil.stringToMap(serialisedMap);
         assertEquals(expectedMapSize, actualMap.size());
         expectedMap.forEach((key, value) -> assertEquals(value, actualMap.get(key)));
