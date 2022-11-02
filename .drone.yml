@@ -33,7 +33,6 @@ steps:
   - ls -l ./coverage-report-aggregator/target/site/jacoco-aggregate/jacoco.xml
   - ls -l ./target/site/jacoco-aggregate/jacoco.xml
   - ls -l ./target/site/jacoco/jacoco.xml
-  - more ./target/site/jacoco/jacoco.xml
   - mvn -X sonar:sonar 
     -Dsonar.host.url=$${SONAR_HOST} 
     -Dsonar.login=$${SONAR_TOKEN} 
