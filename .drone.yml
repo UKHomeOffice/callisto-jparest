@@ -31,7 +31,7 @@ steps:
   commands:
   - pwd
   - ls -l ./coverage-report-aggregator/target/site/jacoco-aggregate/jacoco.xml
-  - cp --parents ./coverage-report-aggregator/target/site/jacoco-aggregate/jacoco.xml target/site/jacoco/jacoco.xml
+  - cp --parents ./coverage-report-aggregator/target/site/jacoco-aggregate/jacoco.xml target/site/jacoco
   - mvn -X sonar:sonar 
     -Dsonar.host.url=$${SONAR_HOST} 
     -Dsonar.login=$${SONAR_TOKEN} 
