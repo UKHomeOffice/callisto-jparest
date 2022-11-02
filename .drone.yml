@@ -39,6 +39,7 @@ steps:
     -Dsonar.branch.name=$DRONE_BRANCH 
     -Dsonar.projectName=callisto-jparest 
     -Dsonar.qualitygate.wait=true
+    -Dsonar.coverage.jacoco.xmlReportPaths=./coverage-report-aggregator/target/site/jacoco-aggregate/jacoco.xml
   when:
     event:
       exclude:
