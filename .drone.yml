@@ -29,10 +29,6 @@ steps:
     SONAR_TOKEN:
       from_secret: sonar_cloud_token
   commands:
-  - pwd
-  - ls -l ./coverage-report-aggregator/target/site/jacoco-aggregate/jacoco.xml
-  - mkdir -p ./target/site/jacoco
-  - cp ./coverage-report-aggregator/target/site/jacoco-aggregate/jacoco.xml ./target/site/jacoco
   - mvn -X sonar:sonar 
     -Dsonar.host.url=$${SONAR_HOST} 
     -Dsonar.login=$${SONAR_TOKEN} 
