@@ -22,7 +22,11 @@
         <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <!--suppress UnresolvedMavenProperty -->
-        <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/cucumber-jparest/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.basedir}/../cucumber-jparest/target/site/jacoco-aggregate/jacoco.xml,
+            <!-- the next extra directory is not strictly necessary, but suppresses a warning when running on the parent pom -->
+            ${project.basedir}/cucumber-jparest/target/site/jacoco-aggregate/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <distributionManagement>
@@ -75,7 +79,6 @@
                     <suppressionsLocation>checkstyle_suppressions.xml</suppressionsLocation>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
