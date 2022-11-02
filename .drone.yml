@@ -29,9 +29,8 @@ steps:
     SONAR_TOKEN:
       from_secret: sonar_cloud_token
   commands:
-  - echo "Drone sonar step working directory:"
   - pwd
-  - ls -l
+  - ls -l ./coverage-report-aggregator/target/site/jacoco-aggregate/jacoco.xml
   - mvn -X sonar:sonar 
     -Dsonar.host.url=$${SONAR_HOST} 
     -Dsonar.login=$${SONAR_TOKEN} 
