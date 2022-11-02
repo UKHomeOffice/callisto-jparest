@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>parentpom</artifactId>
+    <groupId>uk.gov.homeoffice.digital.sas</groupId>
+    <version>0.0.9</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>covergae-report-aggregator</artifactId>
+  <version>${project.version}</version>
+  <description>Sub-module responsible for aggregating other sub-modules coverage reports</description>
+
+  <properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>uk.gov.homeoffice.digital.sas</groupId>
+      <artifactId>jparest</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>uk.gov.homeoffice.digital.sas</groupId>
+      <artifactId>cucumber-jparest</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>report-aggregate</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report-aggregate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
