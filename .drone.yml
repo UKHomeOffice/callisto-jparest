@@ -37,6 +37,7 @@ steps:
     -Dsonar.branch.name=$DRONE_BRANCH 
     -Dsonar.projectName=callisto-jparest 
     -Dsonar.qualitygate.wait=true
+    -Dsonar.coverage.exclusions=**/Interpolation.java
   when:
     event:
       exclude:
