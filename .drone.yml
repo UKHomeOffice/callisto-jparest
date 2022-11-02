@@ -29,7 +29,7 @@ steps:
     SONAR_TOKEN:
       from_secret: sonar_cloud_token
   commands:
-  - mvn -X sonar:sonar 
+  - mvn -X verify sonar:sonar 
     -Dsonar.host.url=$${SONAR_HOST} 
     -Dsonar.login=$${SONAR_TOKEN}
     -Dsonar.organization=ukhomeoffice 
