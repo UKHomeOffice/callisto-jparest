@@ -29,15 +29,14 @@ steps:
     SONAR_TOKEN:
       from_secret: sonar_cloud_token
   commands:
-  - mvn -X sonar:sonar -DskipTests
+  - mvn -X sonar:sonar 
     -Dsonar.host.url=$${SONAR_HOST} 
-    -Dsonar.login=$${SONAR_TOKEN} 
+    -Dsonar.login=$${SONAR_TOKEN}
     -Dsonar.organization=ukhomeoffice 
     -Dsonar.projectKey=callisto-jparest 
-    -Dsonar.branch.name=$DRONE_BRANCH 
+    -Dsonar.branch.name=$DRONE_BRANCH
     -Dsonar.projectName=callisto-jparest 
     -Dsonar.qualitygate.wait=true
-    -Dsonar.coverage.exclusions=**/Interpolation.java
   when:
     event:
       exclude:
