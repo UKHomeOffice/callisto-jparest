@@ -6,11 +6,11 @@
 
     <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>parentpom</artifactId>
-    <version>0.0.9</version>
+    <version>0.0.10</version>
     <packaging>pom</packaging>
 
     <properties>
-        <project.version>0.0.9${snapshotSuffix}</project.version>
+        <project.version>0.0.10${snapshotSuffix}</project.version>
         <snapshotSuffix></snapshotSuffix>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
