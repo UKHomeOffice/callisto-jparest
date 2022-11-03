@@ -33,9 +33,9 @@ steps:
     -Dsonar.host.url=$${SONAR_HOST}
     -Dsonar.login=$${SONAR_TOKEN}
     -Dsonar.organization=ukhomeoffice
-    -Dsonar.projectKey=callisto-jparest
+    -Dsonar.projectKey=callisto-jparest-2
     -Dsonar.branch.name=$DRONE_BRANCH
-    -Dsonar.projectName=callisto-jparest
+    -Dsonar.projectName=callisto-jparest-2
     -Dsonar.qualitygate.wait=true
   when:
     event:
