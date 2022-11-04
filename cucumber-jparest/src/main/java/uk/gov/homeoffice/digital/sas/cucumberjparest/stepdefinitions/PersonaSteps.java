@@ -19,7 +19,7 @@ public class PersonaSteps {
   }
 
   /**
-   * Creates a new persona for the given name
+   * Creates a new persona for the given name.
    *
    * @param name The name of the persona to create
    */

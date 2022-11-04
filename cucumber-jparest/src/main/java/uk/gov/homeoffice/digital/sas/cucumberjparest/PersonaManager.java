@@ -5,7 +5,6 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
- * 
  * Manages instances of Personas
  * When new personas are created they can be given any
  * name. This name is used as a variable to reference
@@ -28,7 +27,7 @@ public class PersonaManager {
   }
 
   /**
-   * Creates a new persona with the given name
+   * Creates a new persona with the given name.
    *
    * @param name The name used to reference the persona
    * @return Persona The new persona
@@ -43,7 +42,7 @@ public class PersonaManager {
   }
 
   /**
-   * Retrieves a persona instance added by the {@link #createPersona(String)} method
+   * Retrieves a persona instance added by the {@link PersonaManager#createPersona(String)} method.
    *
    * @param name The name used to reference the persona
    * @return Persona The persona for the given persona name

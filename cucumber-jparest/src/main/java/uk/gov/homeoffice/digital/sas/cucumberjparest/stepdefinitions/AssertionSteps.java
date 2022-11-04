@@ -18,7 +18,7 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
 
 /**
- * Provides steps related to making assertions against responses and the json objects within them
+ * Provides steps related to making assertions against responses and the json objects within them.
  */
 public class AssertionSteps {
 
@@ -33,7 +33,7 @@ public class AssertionSteps {
   }
 
   /**
-   * Validates the last responses status code against the given value
+   * Validates the last responses status code against the given value.
    *
    * @param expectedCode The expected status code of the last response
    */
@@ -57,7 +57,7 @@ public class AssertionSteps {
   }
 
   /**
-   * Checks that the response contains the given fields
+   * Checks that the response contains the given fields.
    *
    * @param fields The fields to check the response for
    */
@@ -68,7 +68,7 @@ public class AssertionSteps {
   }
 
   /**
-   * Checks that the response does not contains the given fields
+   * Checks that the response does not contain the given fields.
    *
    * @param fields The fields to check the response for
    */
@@ -79,7 +79,7 @@ public class AssertionSteps {
   }
 
   /**
-   * Assert expectations against the last response
+   * Assert expectations against the last response.
    *
    * @param expectations A table of expectations to assert
    */
@@ -90,7 +90,7 @@ public class AssertionSteps {
   }
 
   /**
-   * Assert expectations against the last response's headers
+   * Assert expectations against the last response's headers.
    *
    * @param expectations A table of expectations to assert
    */
@@ -101,7 +101,7 @@ public class AssertionSteps {
   }
 
   /**
-   * Checks that a resource contains the given fields
+   * Checks that a resource contains the given fields.
    *
    * @param objectUnderTest The object to test
    * @param fields          The fields to check the response for
@@ -112,7 +112,7 @@ public class AssertionSteps {
   }
 
   /**
-   * Checks that a resource does not contains the given fields
+   * Checks that a resource does not contain the given fields.
    *
    * @param objectUnderTest The object to test
    * @param fields          The fields to check the response for
@@ -135,7 +135,7 @@ public class AssertionSteps {
   }
 
   /**
-   * Compares 2 resources to see if they are equal
+   * Compares 2 resources to see if they are equal.
    *
    * @param objectToCompare     The object to be compared
    * @param objectToCompareWith The object to compare with
@@ -148,7 +148,7 @@ public class AssertionSteps {
   }
 
   /**
-   * Compares 2 resources to see if they are not equal
+   * Compares 2 resources to see if they are not equal.
    *
    * @param objectToCompare     The object to be compared
    * @param objectToCompareWith The object to compare with

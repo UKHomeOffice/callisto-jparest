@@ -7,7 +7,7 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 /**
- * Registry for services and their location
+* Registry for services and their location.
  */
 @Getter
 @Setter

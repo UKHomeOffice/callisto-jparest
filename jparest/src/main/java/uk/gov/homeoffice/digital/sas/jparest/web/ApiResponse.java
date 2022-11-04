@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.jparest.web;
 import java.net.URL;
 import java.util.List;
 import lombok.Getter;
+import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 
 /**
  * <p>Used to return responses from the.</p> {@link ResourceApiController}

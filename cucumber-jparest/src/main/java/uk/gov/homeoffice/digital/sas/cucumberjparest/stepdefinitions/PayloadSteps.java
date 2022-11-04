@@ -24,7 +24,7 @@ public class PayloadSteps {
   }
 
   /**
-   * Registers a payload that can be used in the scenario
+   * Registers a payload that can be used in the scenario.
    *
    * @param payloadKey The key for the payload (resource type and name)
    * @param docString  The content of the payload

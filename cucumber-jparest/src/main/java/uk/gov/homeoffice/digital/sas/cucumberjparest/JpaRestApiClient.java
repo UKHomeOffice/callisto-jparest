@@ -58,7 +58,7 @@ public class JpaRestApiClient {
   }
 
   /**
-   * Retrieves the full URL called as a result of the specification
+   * Retrieves the full URL called as a result of the specification.
    *
    * @param requestSpecification The specification to retrieve the URL from
    * @return URL
@@ -251,7 +251,7 @@ public class JpaRestApiClient {
   }
 
   /**
-   * Gets the base path to a resource endpoint
+   * Gets the base path to a resource endpoint.
    *
    * @param service  The service hosting the resources
    * @param resource The resource to return the URL for
@@ -273,7 +273,7 @@ public class JpaRestApiClient {
   }
 
   /**
-   * Gets the URL for a service for the given relative path
+   * Gets the URL for a service for the given relative path.
    *
    * @param service The target service
    * @param path    The relative URL

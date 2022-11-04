@@ -15,7 +15,7 @@ public class PayloadManager {
   private final Map<PayloadKey, String> payloads = new HashMap<>();
 
   /**
-   * Creates a new payload with the given name
+   * Creates a new payload with the given name.
    *
    * @param key     The key to use for the payload consisting of resource type and name
    * @param content The content of the payload
@@ -30,7 +30,8 @@ public class PayloadManager {
   }
 
   /**
-   * Retrieves a payload added by the {@link #createPayload(PayloadKey, String)} method
+   * Retrieves a payload added by
+   *     the {@link PayloadManager#createPayload(PayloadKey, String)} method.
    *
    * @param key The name used to reference the payload
    * @return Payload

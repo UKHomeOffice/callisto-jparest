@@ -23,6 +23,7 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Interpolation;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiClient;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaTestContext;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager.PayloadKey;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Persona;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PersonaManager;
@@ -32,7 +33,7 @@ import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
 
 /**
  * Common parameter types used to convert expressions into the types required by the step
- * definitions
+ * definitions.
  */
 @CucumberContextConfiguration
 @ContextConfiguration(classes = {JpaTestContext.class, ObjectMapperConfig.class})
@@ -64,7 +65,7 @@ public class CucumberConfig {
 
   /**
    * Matches a "{variable name} {resourceType}" and creates a PayloadKey for retrieving payloads
-   * from the {@see PayloadManager}
+   * from the {@link PayloadManager}.
    *
    * @param payloadName  The variable used to reference the resource
    * @param resourceType The type of resource represented
@@ -76,7 +77,7 @@ public class CucumberConfig {
   }
 
   /**
-   * Matches when a file is specified and returns the contents of the specified file
+   * Matches when a file is specified and returns the contents of the specified file.
    *
    * @param path The path of the file
    * @return String The contents of the file
@@ -94,7 +95,7 @@ public class CucumberConfig {
   }
 
   /**
-   * Gets the persona for the given name
+   * Gets the persona for the given name.
    *
    * @param name The name of the persona
    * @return Persona The persona associated with the given name
@@ -132,7 +133,7 @@ public class CucumberConfig {
   }
 
   /**
-   * Extracts a specific object from a specific response
+   * Extracts a specific object from a specific response.
    *
    * @param objectPosition   The position of the resource to return
    * @param resourceName     The name of the type of resource to extract
@@ -159,7 +160,7 @@ public class CucumberConfig {
   }
 
   /**
-   * Extracts all resources from a specific response
+   * Extracts all resources from a specific response.
    *
    * @param resourceName     The name of the type of resource to extract
    * @param responsePosition The ordinal of the response to retrieve the resource from
@@ -180,10 +181,10 @@ public class CucumberConfig {
   }
 
   /**
-   * DataTable conversion for expectations. Converts tables with the columns field, type, and
+   * DataTable conversion for expectations. It converts tables with the columns field, type, and
    * expectation. The field is a property name on the object and the type defines the class of the
    * field. The type can be a fully qualified name or be a short version added to
-   * {@see JpaTestContext#classSimpleStrings}
+   * {@link JpaTestContext#classSimpleStrings}
    *
    * @param entry The table row to be converted
    * @return Expectation
@@ -212,9 +213,9 @@ public class CucumberConfig {
 
   /**
    * Resolves a specified type. If a simple name is used it is first looked up in
-   * {@see JpaTestContext#classSimpleStrings} Otherwise it will be resolved using
-   * {@see Class#forName(String)} If neither method returns a result an attempt is made to resolve
-   * the class from the {@see ObjectMapper#getTypeFactory()}
+   * {@link JpaTestContext#classSimpleStrings}, otherwise it will be resolved using
+   * {@link Class#forName(String)}. If neither method returns a result an attempt is made to resolve
+   * the class from the {@link  ObjectMapper#getTypeFactory()}
    *
    * @param type The name of the class to find
    * @return Class<?>
@@ -226,7 +227,7 @@ public class CucumberConfig {
       try {
         clazz = Class.forName(type);
       } catch (ClassNotFoundException e) {
-        logger.log(Level.SEVERE, "Could not resolve type: " + type, e);
+        logger.log(Level.SEVERE, "Could not resolve type: {0}", type);
       }
     } else {
       clazz = JpaTestContext.classSimpleStrings.get(type);

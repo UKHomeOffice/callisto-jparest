@@ -13,7 +13,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
 /**
- * Supports interpolation with a {@See StandardEvaluationContext} and provides access to bean
+ * Supports interpolation with a {@link StandardEvaluationContext} and provides access to bean.
  * expressions
  */
 @Component

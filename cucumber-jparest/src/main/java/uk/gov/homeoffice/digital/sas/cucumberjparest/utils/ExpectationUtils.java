@@ -22,7 +22,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Expectation;
 
 /**
- * Provides methods used to assert expectations against given objects
+ * Provides methods used to assert expectations against given objects.
  */
 public class ExpectationUtils {
 
@@ -33,7 +33,7 @@ public class ExpectationUtils {
   }
 
   /**
-   * Checks that the objectUnderTest contains the given fields
+   * Checks that the objectUnderTest contains the given fields.
    *
    * @param objectUnderTest The object to check
    * @param fields          The fields the objectUnderTest should contain
@@ -41,17 +41,17 @@ public class ExpectationUtils {
   public static void objectContainsFields(Map<Object, Object> objectUnderTest,
       List<String> fields) {
     SoftAssertions softly = new SoftAssertions();
-    fields.forEach((field) -> {
-      softly
-          .assertThat(objectUnderTest)
-          .withFailMessage("Expected the object to contain the field '%s'", field)
-          .containsKey(field);
-    });
+    fields.forEach(field ->
+        softly
+            .assertThat(objectUnderTest)
+            .withFailMessage("Expected the object to contain the field '%s'", field)
+            .containsKey(field)
+    );
     softly.assertAll();
   }
 
   /**
-   * Checks that the objectUnderTest does not contain the given fields
+   * Checks that the objectUnderTest does not contain the given fields.
    *
    * @param objectUnderTest The object to check
    * @param fields          The fields the objectUnderTest should not contain
@@ -59,19 +59,19 @@ public class ExpectationUtils {
   public static void objectDoesNotContainFields(Map<Object, Object> objectUnderTest,
       List<String> fields) {
     SoftAssertions softly = new SoftAssertions();
-    fields.forEach((field) -> {
-      softly
+    fields.forEach(field ->
+        softly
           .assertThat(objectUnderTest)
           .withFailMessage("Expected the object to not contain the field '%s'", field)
-          .doesNotContainKey(field);
-    });
+          .doesNotContainKey(field));
     softly.assertAll();
   }
 
   /**
-   * A convenience method for {@see #objectMeetsExpectations(SoftAssertions, JsonPath, List)}
-   * Creates an instance of SoftAssertions and calls the wrapped method then calles
-   * {@see SoftAssertions#assertAll()}
+   * A convenience method for
+   * {@link ExpectationUtils#objectMeetsExpectations(JsonPath, List, ObjectMapper, SoftAssertions)}.
+   * It creates an instance of SoftAssertions and calls the wrapped method then calls
+   * {@link SoftAssertions#assertAll()}
    *
    * @param objectUnderTest JsonPath pointing to the object to assert against
    * @param expectations    A table of expectations to assert
@@ -85,7 +85,7 @@ public class ExpectationUtils {
   }
 
   /**
-   * Softly asserts that the objectUnderTests meets the provided expectations
+   * Softly asserts that the objectUnderTests meets the provided expectations.
    *
    * @param objectUnderTest JsonPath pointing to the object to assert against
    * @param expectations    A table of expectations to assert
@@ -94,7 +94,7 @@ public class ExpectationUtils {
   public static void objectMeetsExpectations(JsonPath objectUnderTest,
       List<Expectation> expectations, ObjectMapper objectMapper, @NonNull SoftAssertions softly) {
 
-    expectations.forEach((expect) -> {
+    expectations.forEach(expect -> {
       var field = expect.getField();
 
       /**
@@ -125,8 +125,9 @@ public class ExpectationUtils {
           pathCheck = FIELD_PATH.matcher(field).replaceAll("$1$2containsKey('$3')");
         }
         assertThat(objectUnderTest.getBoolean(pathCheck)).isTrue();
-      }).withFailMessage("Expected the object to contain the field '%s'", field)
-        .doesNotThrowAnyException();
+      })
+          .withFailMessage("Expected the object to contain the field '%s'", field)
+          .doesNotThrowAnyException();
 
       // Assert the expectation
       try {
@@ -146,7 +147,7 @@ public class ExpectationUtils {
   }
 
   /**
-   * Asserts that the provider headers contains the provided expectations
+   * Asserts that the provider headers contains the provided expectations.
    *
    * @param headers      The headers from a response
    * @param expectations The expectations to assert against the headers
@@ -162,7 +163,7 @@ public class ExpectationUtils {
   }
 
   /**
-   * Softly evaluates the expectation against the provided test subject
+   * Softly evaluates the expectation against the provided test subject.
    *
    * @param testSubject The object to assert against
    * @param expectation The expectation

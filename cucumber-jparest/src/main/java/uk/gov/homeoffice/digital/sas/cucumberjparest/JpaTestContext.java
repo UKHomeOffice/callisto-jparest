@@ -47,7 +47,7 @@ public class JpaTestContext {
   }
 
   /**
-   * PersonaManager per scenario
+   * PersonaManager per scenario.
    *
    * @return PersonaManager
    */
@@ -58,7 +58,7 @@ public class JpaTestContext {
   }
 
   /**
-   * HttpResponseManager per scenario
+   * HttpResponseManager per scenario.
    *
    * @return HttpResponseManager
    */
@@ -69,7 +69,7 @@ public class JpaTestContext {
   }
 
   /**
-   * ScenarioState per scenario
+   * ScenarioState per scenario.
    *
    * @return ScenarioState
    */
@@ -80,7 +80,7 @@ public class JpaTestContext {
   }
 
   /**
-   * PayloadManager per scenario
+   * PayloadManager per scenario.
    *
    * @return PayloadManager
    */
@@ -91,7 +91,7 @@ public class JpaTestContext {
   }
 
   /**
-   * Singleton JpaRestApiClient
+   * Singleton JpaRestApiClient.
    *
    * @return JpaRestApiClient
    */
@@ -101,7 +101,7 @@ public class JpaTestContext {
   }
 
   /**
-   * Singleton Interpolation
+   * Singleton Interpolation.
    *
    * @return Interpolation
    */

@@ -14,7 +14,7 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.Persona;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
 
 /**
- * Provides steps related to making API requests to endpoints exposed by the JpaRest package
+ * Provides steps related to making API requests to endpoints exposed by the JpaRest package.
  */
 public class ApiSteps {
 
@@ -37,7 +37,7 @@ public class ApiSteps {
    *
    * @param persona    The persona to use for auth context
    * @param payloadKey The key for the payload (resource type and name)
-   * @param service    There service to use
+   * @param service    The service to use
    */
   @When("{persona} creates {payload}{service}")
   public void persona_creates_resource_from_payload_in_the_service(Persona persona,
@@ -89,7 +89,7 @@ public class ApiSteps {
   }
 
   /**
-   * Makes a GET request to the service with the given path
+   * Makes a GET request to the service with the given path.
    *
    * @param persona The persona to use for auth context
    * @param path    The URL to request

@@ -6,10 +6,9 @@ import lombok.NonNull;
 import lombok.Setter;
 
 /**
- * 
  * Represents an entry in a scenario table that
  * expresses an expectation of a field existing
- * to be of a given type and match a value
+ * to be of a given type and match a value.
  * 
  */
 @Getter

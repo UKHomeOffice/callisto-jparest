@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 public class SerialisationUtil {
 
+  private SerialisationUtil() {}
+
   public static Map<String, String> stringToMap(String serialisedMap) {
     return stringToMap(serialisedMap, ",", "=");
   }

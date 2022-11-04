@@ -1,11 +1,9 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +12,7 @@ import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 /**
- * Class used for tracking Responses to requests made to a specific path
+ * Class used for tracking Responses to requests made to a specific path.
  */
 @Component
 public class HttpResponseManager {
@@ -29,8 +27,8 @@ public class HttpResponseManager {
    * Tracks the response for the given path. The path is used as a key for an array of responses for
    * the given path. This means that responses to GET, PUT, POST and delete methods will not be
    * distinguishable but this is intentional.
-   * <p>
-   * The response for a specific path, regadless of verb is retrieved by it's ordinal.
+   *
+   * <p>The response for a specific path, regardless of verb is retrieved by its ordinal.
    *
    * @param url      The path the response was received from
    * @param response The response received
@@ -40,9 +38,7 @@ public class HttpResponseManager {
 
     // If this is the first time the path has been used
     // initialise an ArrayList for storing the responses
-    if (!responses.containsKey(url)) {
-      responses.put(url, new ArrayList<>());
-    }
+    responses.computeIfAbsent(url, k -> new ArrayList<>());
 
     ArrayList<Response> pathResponses = responses.get(url);
     assertThat(pathResponses.add(response)).isTrue();
