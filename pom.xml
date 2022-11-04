@@ -50,7 +50,6 @@
         <module>jparest</module>
         <module>demo</module>
         <module>cucumber-jparest</module>
-        <module>coverage-report-aggregator</module>
     </modules>
 
     <build>
