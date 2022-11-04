@@ -14,8 +14,15 @@ trigger:
     - pull_request
 
 steps:
+- name: fetch
+  image: alpine/git
+  commands:
+    - "git fetch origin +refs/heads/main:"
+
 - name: test
   image: maven:3.8-openjdk-17
+  depends_on:
+    - fetch
   commands:
   - mvn clean install
 
