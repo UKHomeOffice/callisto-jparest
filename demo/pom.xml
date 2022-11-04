@@ -12,9 +12,7 @@
 		<sonar.skip>true</sonar.skip>
 	</properties>
 
-	<groupId>uk.gov.homeoffice.digital.sas</groupId>
 	<artifactId>demo</artifactId>
-	<version>${project.version}</version>
 	<packaging>jar</packaging>
 
 	<dependencies>
