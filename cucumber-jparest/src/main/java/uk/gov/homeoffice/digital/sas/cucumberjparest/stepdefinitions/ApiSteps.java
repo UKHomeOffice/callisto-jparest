@@ -40,7 +40,7 @@ public class ApiSteps {
    * @param service    The service to use
    */
   @When("{persona} creates {payload}{service}")
-  public void persona_creates_resource_from_payload_in_the_service(Persona persona,
+  public void personaCreatesResourceFromPayloadInTheService(Persona persona,
       PayloadKey payloadKey,
       String service) {
 
@@ -61,7 +61,7 @@ public class ApiSteps {
    * @param service  There service to use
    */
   @When("{persona} retrieves {word}{service}")
-  public void persona_retrieves_resources_from_the_service(Persona persona, String resource,
+  public void personaRetrievesResourcesFromTheService(Persona persona, String resource,
       String service) {
     JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieve(persona, service,
         resource, null);
@@ -78,7 +78,7 @@ public class ApiSteps {
    * @param service  There service to use
    */
   @When("{persona} retrieves {word}{service} with")
-  public void persona_retrieves_resources_from_the_service(Persona persona, String resource,
+  public void personaRetrievesResourcesFromTheService(Persona persona, String resource,
       String service,
       Map<String, String> parameters) {
     JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieve(persona, service,
@@ -96,7 +96,7 @@ public class ApiSteps {
    * @param service There service to use
    */
   @When("{persona} GETs {string}{service}")
-  public void persona_gets_url_from_service(Persona persona, String path, String service) {
+  public void personaGetsUrlFromService(Persona persona, String path, String service) {
     JpaRestApiResponse apiResponse = this.jpaRestApiClient.get(persona, service, path);
 
     this.httpResponseManager.addResponse(apiResponse.getUri(), apiResponse.getResponse());
@@ -111,7 +111,7 @@ public class ApiSteps {
    * @param service    There service to use
    */
   @When("{persona} gets the {word} {string}{service}")
-  public void persona_retrieves_specific_resources_from_the_service(Persona persona,
+  public void personaRetrieveSpecificResourcesFromThService(Persona persona,
       String resource,
       String identifier, String service) {
     JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieveById(persona, service,
@@ -130,7 +130,7 @@ public class ApiSteps {
    * @param service  There service to use
    */
   @When("{persona} deletes the {resource}{service}")
-  public void persona_deletes_the_resource(Persona persona, Resource resource, String service) {
+  public void personaDeletesTheResource(Persona persona, Resource resource, String service) {
     String reference = resource.getJsonPath().getString("id");
     JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.delete(persona, service,
         resource.getResourceType(), reference);
@@ -148,7 +148,7 @@ public class ApiSteps {
    * @param payloadKey The key for the payload (resource type and name)
    */
   @When("{persona} updates the {resource}{service} with {payload}")
-  public void persona_updates_the_resource(Persona persona, Resource resource, String service,
+  public void personaUpdatesTheResource(Persona persona, Resource resource, String service,
       PayloadKey payloadKey) {
 
     String reference = resource.getJsonPath().getString("id");

@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +20,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 @Getter
 @Setter
 @AllArgsConstructor
+@EqualsAndHashCode
 public class Profile extends BaseEntity {
 
   @NotEmpty

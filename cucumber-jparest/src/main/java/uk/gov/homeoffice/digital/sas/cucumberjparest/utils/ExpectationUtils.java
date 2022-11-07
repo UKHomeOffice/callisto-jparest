@@ -61,9 +61,9 @@ public class ExpectationUtils {
     SoftAssertions softly = new SoftAssertions();
     fields.forEach(field ->
         softly
-          .assertThat(objectUnderTest)
-          .withFailMessage("Expected the object to not contain the field '%s'", field)
-          .doesNotContainKey(field));
+            .assertThat(objectUnderTest)
+            .withFailMessage("Expected the object to not contain the field '%s'", field)
+            .doesNotContainKey(field));
     softly.assertAll();
   }
 
@@ -118,7 +118,7 @@ public class ExpectationUtils {
        *
        */
       softly.assertThatCode(() -> {
-        String pathCheck = null;
+        String pathCheck;
         if (field.endsWith("]")) {
           pathCheck = FIELD_PATH_IS_AN_ARRAY.matcher(field).replaceAll("$1.size() > $2");
         } else {
@@ -177,7 +177,7 @@ public class ExpectationUtils {
       StandardEvaluationContext context = new StandardEvaluationContext();
       context.setVariable("objectToTest", testSubject);
 
-      // The assertThat functiion has to be reflected because of type erasure
+      // The assertThat function has to be reflected because of type erasure
       // otherwise we would only be able to assert against objects
       Method assertThatMethod = MethodUtils.getMatchingAccessibleMethod(Assertions.class,
           "assertThat",
@@ -187,6 +187,8 @@ public class ExpectationUtils {
             "Unable to verify expectation. The org.assertj.core.api.Assertions class "
                 + "contains no matching assertThat method for the type %s",
             testSubject.getClass());
+      } else {
+        context.registerFunction("assertThat", assertThatMethod);
       }
 
       // Construct an expression from the provided expectation using a reference
@@ -195,8 +197,6 @@ public class ExpectationUtils {
       ExpressionParser expressionParser = new SpelExpressionParser();
       Expression expression = expressionParser
           .parseExpression("#assertThat(#objectToTest)." + expectation);
-
-      context.registerFunction("assertThat", assertThatMethod);
 
       // Execute the expression and capture any EvaluationException to determine
       // how the expectation failed

@@ -12,6 +12,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotEmpty;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,6 +28,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 @NoArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 public class Artist extends BaseEntity {
 
   @Type(type = "uuid-char")

@@ -173,7 +173,7 @@ public class CucumberConfig {
       "each of the (\\S*) in the (?:last|(?:(\\d+)(?:st|nd|rd|th))) "
           + "(?:\\\"([^\\\"]*)\\\" )?response"
           + FROM_IN_SERVICE)
-  public Resource each_resource(String resourceName, String responsePosition, String path,
+  public Resource eachResource(String resourceName, String responsePosition, String path,
       String service) {
 
     var itemsPath = getItemsPath(resourceName, responsePosition, path, service);

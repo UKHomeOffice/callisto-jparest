@@ -38,20 +38,20 @@ public class AssertionSteps {
    * @param expectedCode The expected status code of the last response
    */
   @Then("the last response should have a status code of {int}")
-  public void the_last_response_should_have_a_status_code_of(Integer expectedCode) {
+  public void theLastResponseShouldHaveStatusCodeOf(Integer expectedCode) {
     assertThat(this.httpResponseManager.getLastResponse().statusCode()) //NOSONAR
         .isEqualTo(expectedCode);
   }
 
   @Then("the last response body should not be empty")
-  public void the_last_response_body_should_not_be_empty() {
+  public void theLastResponseBodyShouldNotBeEmpty() {
     assertThat(this.httpResponseManager.getLastResponse().body().asString()) //NOSONAR
         .isNotNull()
         .isNotEqualTo("");
   }
 
   @Then("the last response body should be empty")
-  public void the_last_response_body_should_be_empty() {
+  public void theLastResponseBodyShouldBeEmpty() {
     assertThat(this.httpResponseManager.getLastResponse().body().asString())
         .isNotNull()
         .isEqualTo("");
@@ -63,7 +63,7 @@ public class AssertionSteps {
    * @param fields The fields to check the response for
    */
   @Then("the last response body should contain the fields")
-  public void the_last_response_should_contain_fields(List<String> fields) {
+  public void theLastResponseShouldContainFields(List<String> fields) {
     var root = this.httpResponseManager.getLastResponse().getBody().jsonPath().getMap("");
     objectContainsFields(root, fields);
   }
@@ -74,7 +74,7 @@ public class AssertionSteps {
    * @param fields The fields to check the response for
    */
   @Then("the last response body should not contain the fields")
-  public void the_last_response_should_not_contain_fields(List<String> fields) {
+  public void theLastResponseShouldNotContainFields(List<String> fields) {
     var root = this.httpResponseManager.getLastResponse().getBody().jsonPath().getMap("");
     objectDoesNotContainFields(root, fields);
   }
@@ -85,7 +85,7 @@ public class AssertionSteps {
    * @param expectations A table of expectations to assert
    */
   @Then("the last response body should contain")
-  public void the_last_response_should_contain(List<Expectation> expectations) {
+  public void theLastResponseShouldContain(List<Expectation> expectations) {
     var root = this.httpResponseManager.getLastResponse().getBody().jsonPath();
     objectMeetsExpectations(root, expectations, this.objectMapper);
   }
@@ -96,7 +96,7 @@ public class AssertionSteps {
    * @param expectations A table of expectations to assert
    */
   @Then("the last response should contain the headers")
-  public void the_last_response_should_contain_the_headers(Map<String, String> expectations) {
+  public void theLastResponseShouldContainTheHeaders(Map<String, String> expectations) {
     var response = this.httpResponseManager.getLastResponse();
     headersMeetsExpectations(response.getHeaders(), expectations);
   }
@@ -108,7 +108,7 @@ public class AssertionSteps {
    * @param fields          The fields to check the response for
    */
   @Then("the {resource} should contain the fields")
-  public void the_object_should_contain_fields(Resource objectUnderTest, List<String> fields) {
+  public void theObjectShouldContainFields(Resource objectUnderTest, List<String> fields) {
     objectContainsFields(objectUnderTest.getJsonPath().getMap(""), fields);
   }
 
@@ -119,7 +119,7 @@ public class AssertionSteps {
    * @param fields          The fields to check the response for
    */
   @Then("the {resource} should not contain the fields")
-  public void the_object_should_not_contain_fields(Resource objectUnderTest, List<String> fields) {
+  public void theObjectShouldNotContainFields(Resource objectUnderTest, List<String> fields) {
     objectDoesNotContainFields(objectUnderTest.getJsonPath().getMap(""), fields);
   }
 
@@ -131,7 +131,7 @@ public class AssertionSteps {
    * @param expectations    A table of expectations to assert
    */
   @Then("the {resource} should contain")
-  public void the_object_should_contain(Resource objectUnderTest, List<Expectation> expectations) {
+  public void theObjectShouldContain(Resource objectUnderTest, List<Expectation> expectations) {
     objectMeetsExpectations(objectUnderTest.getJsonPath(), expectations, this.objectMapper);
   }
 
@@ -142,7 +142,7 @@ public class AssertionSteps {
    * @param objectToCompareWith The object to compare with
    */
   @Then("the {resource} should equal the {resource}")
-  public void the_resource_should_match_resource(Resource objectToCompare,
+  public void theResourceShouldMatchResource(Resource objectToCompare,
       Resource objectToCompareWith) {
     assertThat(objectToCompare.getJsonPath().getMap("")).isEqualTo(
         objectToCompareWith.getJsonPath().getMap(""));
@@ -155,7 +155,7 @@ public class AssertionSteps {
    * @param objectToCompareWith The object to compare with
    */
   @Then("the {resource} should not be equal to the {resource}")
-  public void the_resource_should_not_match_resource(Resource objectToCompare,
+  public void theResourceShouldNotMatchResource(Resource objectToCompare,
       Resource objectToCompareWith) {
     assertThat(objectToCompare.getJsonPath().getMap("")).isNotEqualTo(
         objectToCompareWith.getJsonPath().getMap(""));
@@ -168,8 +168,8 @@ public class AssertionSteps {
    * @param objectsUnderTest The object to test
    * @param expectations     A table of expectations to assert against each resource
    */
-  @Then("{each_resource} should contain")
-  public void the_objects_should_contain(Resource objectsUnderTest,
+  @Then("{eachResource} should contain")
+  public void theObjectsShouldContain(Resource objectsUnderTest,
       List<Expectation> expectations) {
 
     SoftAssertions softly = new SoftAssertions();

@@ -24,7 +24,7 @@ public class PersonaSteps {
    * @param name The name of the persona to create
    */
   @Given("^(?:the )?(\\S*) is a user$")
-  public void persona_is_a_user(String name) {
+  public void personaIsUser(String name) {
     personaManager.createPersona(name);
   }
 

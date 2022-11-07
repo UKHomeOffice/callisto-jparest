@@ -31,7 +31,7 @@ public class PayloadSteps {
    */
   @Given("{payload} are loaded from the {fileContents}")
   @Given("{payload} are")
-  public void inline_resources_are(PayloadKey payloadKey, String docString) {
+  public void inlineResourcesAre(PayloadKey payloadKey, String docString) {
     String interpolatedPayload = interpolation.evaluate(docString);
     payloadManager.createPayload(payloadKey, interpolatedPayload);
   }
