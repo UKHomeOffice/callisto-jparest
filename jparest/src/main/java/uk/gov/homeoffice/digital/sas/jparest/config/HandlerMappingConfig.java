@@ -209,7 +209,7 @@ public class HandlerMappingConfig {
   }
 
   private static String createIdAndRelationParams(String relation) {
-    return String.format(URL_ID_PATH_PARAM + "/{%s:%s}",
+    return String.format(URL_ID_PATH_PARAM.concat("/{%s:%s}"),
         RequestParameter.RELATION.getParamName(), Pattern.quote(relation));
   }
 

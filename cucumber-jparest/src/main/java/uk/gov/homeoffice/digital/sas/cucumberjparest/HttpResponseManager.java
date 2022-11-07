@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 
 import io.restassured.response.Response;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class HttpResponseManager {
 
-  private final Map<URL, ArrayList<Response>> responses = new HashMap<>();
+  private final Map<URI, ArrayList<Response>> responses = new HashMap<>();
 
   // Provides quick access to the last response added
   @Getter
@@ -30,28 +30,28 @@ public class HttpResponseManager {
    *
    * <p>The response for a specific path, regardless of verb is retrieved by its ordinal.
    *
-   * @param url      The path the response was received from
+   * @param uri      The path the response was received from
    * @param response The response received
    * @return Response
    */
-  public Response addResponse(URL url, Response response) {
+  public Response addResponse(URI uri, Response response) {
 
     // If this is the first time the path has been used
     // initialise an ArrayList for storing the responses
-    responses.computeIfAbsent(url, k -> new ArrayList<>());
+    responses.computeIfAbsent(uri, k -> new ArrayList<>());
 
-    ArrayList<Response> pathResponses = responses.get(url);
-    assertThat(pathResponses.add(response)).isTrue();
+    ArrayList<Response> pathResponses = responses.get(uri);
+    assertThat(pathResponses.add(response)).isTrue(); //NOSONAR
     this.lastResponse = response;
     return response;
   }
 
-  public Response getResponse(URL url, int position) {
-    if (!responses.containsKey(url)) {
-      fail("No responses where logged for %s", url);
+  public Response getResponse(URI uri, int position) {
+    if (!responses.containsKey(uri)) {
+      fail("No responses where logged for %s", uri);
     }
 
-    ArrayList<Response> pathResponses = responses.get(url);
+    ArrayList<Response> pathResponses = responses.get(uri);
 
     // Treat -1 as last index. As keys are only added when
     // responses are added. The array list will at least have a size
@@ -64,10 +64,10 @@ public class HttpResponseManager {
     try {
       response = pathResponses.get(position);
     } catch (IndexOutOfBoundsException ex) {
-      // In the messaging bare in mind that indexes are zero based so
+      // In the messaging bear in mind that indexes are zero based so
       // the position needs adjusting to match the order the uer will have
       // asked for.
-      fail("Only %i responses were logged for %s but you asked for %i", pathResponses.size(), url,
+      fail("Only %i responses were logged for %s but you asked for %i", pathResponses.size(), uri,
           position + 1);
     }
     return response;

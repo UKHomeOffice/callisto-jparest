@@ -21,5 +21,5 @@ public class Expectation {
   @NonNull
   private Class<?> type;
   @NonNull
-  private String expectation;
+  private String expectedValue;
 }

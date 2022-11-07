@@ -124,7 +124,7 @@ public class ExpectationUtils {
         } else {
           pathCheck = FIELD_PATH.matcher(field).replaceAll("$1$2containsKey('$3')");
         }
-        assertThat(objectUnderTest.getBoolean(pathCheck)).isTrue();
+        assertThat(objectUnderTest.getBoolean(pathCheck)).isTrue(); //NOSONAR
       })
           .withFailMessage("Expected the object to contain the field '%s'", field)
           .doesNotThrowAnyException();
@@ -138,7 +138,7 @@ public class ExpectationUtils {
         // Skip this if test subject doesn't exist, this will be caught in previous
         // assertion
         if (testSubject != null) {
-          evaluateExpectation(testSubject, expect.getExpectation(), softly);
+          evaluateExpectation(testSubject, expect.getExpectedValue(), softly);
         }
       } catch (IllegalArgumentException ex) {
         softly.fail("Expected value to be of type '%s'", expect.getType());

@@ -39,12 +39,13 @@ public class AssertionSteps {
    */
   @Then("the last response should have a status code of {int}")
   public void the_last_response_should_have_a_status_code_of(Integer expectedCode) {
-    assertThat(this.httpResponseManager.getLastResponse().statusCode()).isEqualTo(expectedCode);
+    assertThat(this.httpResponseManager.getLastResponse().statusCode()) //NOSONAR
+        .isEqualTo(expectedCode);
   }
 
   @Then("the last response body should not be empty")
   public void the_last_response_body_should_not_be_empty() {
-    assertThat(this.httpResponseManager.getLastResponse().body().asString())
+    assertThat(this.httpResponseManager.getLastResponse().body().asString()) //NOSONAR
         .isNotNull()
         .isNotEqualTo("");
   }

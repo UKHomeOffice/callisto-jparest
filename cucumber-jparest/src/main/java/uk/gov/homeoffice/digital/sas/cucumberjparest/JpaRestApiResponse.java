@@ -1,7 +1,7 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
 import io.restassured.response.Response;
-import java.net.URL;
+import java.net.URI;
 import lombok.Getter;
 
 /**
@@ -13,10 +13,10 @@ public class JpaRestApiResponse {
   private final Response response;
 
   @Getter
-  private final URL url;
+  private final URI uri;
 
-  public JpaRestApiResponse(URL url, Response response) {
-    this.url = url;
+  public JpaRestApiResponse(URI uri, Response response) {
+    this.uri = uri;
     this.response = response;
   }
 }

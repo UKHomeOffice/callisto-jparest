@@ -13,7 +13,7 @@ public class ScenarioState {
       service = this.service;
     }
 
-    assertThat(service)
+    assertThat(service) //NOSONAR
       .withFailMessage(
           "A service name must be provided because no service has previously been referenced.")
         .isNotEmpty();

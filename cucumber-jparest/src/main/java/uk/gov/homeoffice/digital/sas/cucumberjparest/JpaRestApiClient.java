@@ -8,10 +8,8 @@ import io.restassured.response.Response;
 import io.restassured.specification.QueryableRequestSpecification;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.SpecificationQuerier;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Map;
 import java.util.Objects;
 import lombok.Getter;
@@ -58,23 +56,23 @@ public class JpaRestApiClient {
   }
 
   /**
-   * Retrieves the full URL called as a result of the specification.
+   * Retrieves the full URI called as a result of the specification.
    *
    * @param requestSpecification The specification to retrieve the URL from
-   * @return URL
+   * @return URI
    */
-  private static URL getUrl(@NonNull RequestSpecification requestSpecification) {
+  private static URI getUri(@NonNull RequestSpecification requestSpecification) {
     QueryableRequestSpecification queryRequest = SpecificationQuerier.query(requestSpecification);
 
     String absoluteUri = queryRequest.getURI();
-    URL requestUrl = null;
+    URI requestUri = null;
     try {
-      requestUrl = (new URI(absoluteUri)).toURL();
-    } catch (MalformedURLException | URISyntaxException e) {
-      fail(e.getMessage());
+      requestUri = new URI(absoluteUri);
+    } catch (URISyntaxException e) {
+      fail(e.getMessage()); //NOSONAR
     }
 
-    return requestUrl;
+    return requestUri;
   }
 
   @Getter
@@ -98,18 +96,18 @@ public class JpaRestApiClient {
    */
   public JpaRestApiResourceResponse create(Persona persona, String service, String resource,
       String payload) {
-    URL url = getResourceUrl(service, resource);
+    URI uri = getResourceUri(service, resource);
     RequestSpecification spec = given()
-        .baseUri(url.toString())
+        .baseUri(uri.toString())
         .body(payload)
         .queryParam(TENANT_ID.getParamName(), tenantId);
 
     addPersonaAuthToRequestSpecification(spec, persona);
 
-    URL requestUrl = getUrl(spec);
+    URI requestUri = getUri(spec);
     Response response = spec.post();
 
-    return new JpaRestApiResourceResponse(url, requestUrl, response);
+    return new JpaRestApiResourceResponse(uri, requestUri, response);
   }
 
   /**
@@ -124,10 +122,10 @@ public class JpaRestApiClient {
    */
   public JpaRestApiResourceResponse retrieve(Persona persona, String service, String resource,
       Map<String, String> parameters) {
-    URL url = getResourceUrl(service, resource);
+    URI uri = getResourceUri(service, resource);
 
     RequestSpecification spec = given()
-        .baseUri(url.toString())
+        .baseUri(uri.toString())
         .queryParam(TENANT_ID.getParamName(), tenantId);
 
     if (parameters != null) {
@@ -136,10 +134,10 @@ public class JpaRestApiClient {
 
     addPersonaAuthToRequestSpecification(spec, persona);
 
-    URL requestUrl = getUrl(spec);
+    URI requestUri = getUri(spec);
     Response response = spec.get();
 
-    return new JpaRestApiResourceResponse(url, requestUrl, response);
+    return new JpaRestApiResourceResponse(uri, requestUri, response);
 
   }
 
@@ -155,19 +153,19 @@ public class JpaRestApiClient {
    */
   public JpaRestApiResourceResponse retrieveById(Persona persona, String service, String resource,
       String reference) {
-    URL url = getResourceUrl(service, resource);
+    URI uri = getResourceUri(service, resource);
 
     RequestSpecification spec = given()
-        .baseUri(url.toString())
+        .baseUri(uri.toString())
         .queryParam(TENANT_ID.getParamName(), tenantId);
 
     addPersonaAuthToRequestSpecification(spec, persona);
 
     spec.basePath(reference);
-    URL requestUrl = getUrl(spec);
+    URI requestUri = getUri(spec);
     Response response = spec.get();
 
-    return new JpaRestApiResourceResponse(url, requestUrl, response);
+    return new JpaRestApiResourceResponse(uri, requestUri, response);
 
   }
 
@@ -186,19 +184,19 @@ public class JpaRestApiClient {
       String reference,
       String payload) {
 
-    URL url = getResourceUrl(service, resource);
+    URI uri = getResourceUri(service, resource);
     RequestSpecification spec = given()
-        .baseUri(url.toString())
+        .baseUri(uri.toString())
         .body(payload)
         .queryParam(TENANT_ID.getParamName(), tenantId);
 
     addPersonaAuthToRequestSpecification(spec, persona);
 
     spec.basePath(reference);
-    URL requestUrl = getUrl(spec);
+    URI requestUri = getUri(spec);
     Response response = spec.put();
 
-    return new JpaRestApiResourceResponse(url, requestUrl, response);
+    return new JpaRestApiResourceResponse(uri, requestUri, response);
   }
 
   /**
@@ -213,19 +211,19 @@ public class JpaRestApiClient {
    */
   public JpaRestApiResourceResponse delete(Persona persona, String service, String resource,
       String reference) {
-    URL url = getResourceUrl(service, resource);
+    URI uri = getResourceUri(service, resource);
 
     RequestSpecification spec = given()
-        .baseUri(url.toString())
+        .baseUri(uri.toString())
         .queryParam(TENANT_ID.getParamName(), tenantId);
 
     addPersonaAuthToRequestSpecification(spec, persona);
 
     spec.basePath(reference);
-    URL requestUrl = getUrl(spec);
+    URI requestUri = getUri(spec);
     Response response = spec.delete();
 
-    return new JpaRestApiResourceResponse(url, requestUrl, response);
+    return new JpaRestApiResourceResponse(uri, requestUri, response);
   }
 
   /**
@@ -237,7 +235,7 @@ public class JpaRestApiClient {
    * @return JpaRestApiResponse
    */
   public JpaRestApiResponse get(Persona persona, String service, String path) {
-    URL url = getServiceUrl(service, path);
+    URI url = getServiceUrl(service, path);
 
     RequestSpecification spec = given()
         .baseUri(url.toString())
@@ -257,19 +255,19 @@ public class JpaRestApiClient {
    * @param resource The resource to return the URL for
    * @return URL
    */
-  public URL getResourceUrl(String service, String resource) {
+  public URI getResourceUri(String service, String resource) {
 
-    String baseUrl = this.serviceRegistry.getService(service);
-    String url = baseUrl + API_ROOT_PATH + resource;
+    String baseUri = this.serviceRegistry.getService(service);
+    String uri = baseUri + API_ROOT_PATH + resource;
 
-    URL resourceUrl = null;
+    URI resourceUri = null;
     try {
-      resourceUrl = new URL(url);
-    } catch (MalformedURLException e) {
+      resourceUri = new URI(uri);
+    } catch (URISyntaxException e) {
       fail(e.getMessage());
     }
 
-    return resourceUrl;
+    return resourceUri;
   }
 
   /**
@@ -277,20 +275,20 @@ public class JpaRestApiClient {
    *
    * @param service The target service
    * @param path    The relative URL
-   * @return URL
+   * @return URI
    */
-  public URL getServiceUrl(String service, String path) {
+  public URI getServiceUrl(String service, String path) {
 
     String baseUrl = this.serviceRegistry.getService(service);
     String url = baseUrl + path;
 
-    URL resourceUrl = null;
+    URI resourceUri = null;
     try {
-      resourceUrl = new URL(url);
-    } catch (MalformedURLException e) {
+      resourceUri = new URI(url);
+    } catch (URISyntaxException e) {
       fail(e.getMessage());
     }
 
-    return resourceUrl;
+    return resourceUri;
   }
 }

@@ -51,13 +51,11 @@ public class Interpolation {
    */
   public String evaluate(String content) {
 
-    var value = interpolationPattern
+    return interpolationPattern
         .matcher(content)
-        .replaceAll((mr) -> {
+        .replaceAll(mr -> {
           Expression expression = parser.parseExpression(mr.group(1));
           return expression.getValue(context, rootObject, String.class);
         });
-
-    return value;
   }
 }

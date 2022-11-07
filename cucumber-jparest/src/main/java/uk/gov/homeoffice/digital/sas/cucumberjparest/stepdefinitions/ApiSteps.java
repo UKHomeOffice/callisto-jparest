@@ -49,7 +49,7 @@ public class ApiSteps {
         payloadKey.getResourceType(),
         payload);
 
-    this.httpResponseManager.addResponse(apiResponse.getBaseResourceUrl(),
+    this.httpResponseManager.addResponse(apiResponse.getBaseResourceUri(),
         apiResponse.getResponse());
   }
 
@@ -66,7 +66,7 @@ public class ApiSteps {
     JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieve(persona, service,
         resource, null);
 
-    this.httpResponseManager.addResponse(apiResponse.getBaseResourceUrl(),
+    this.httpResponseManager.addResponse(apiResponse.getBaseResourceUri(),
         apiResponse.getResponse());
   }
 
@@ -84,7 +84,7 @@ public class ApiSteps {
     JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieve(persona, service,
         resource, parameters);
 
-    this.httpResponseManager.addResponse(apiResponse.getBaseResourceUrl(),
+    this.httpResponseManager.addResponse(apiResponse.getBaseResourceUri(),
         apiResponse.getResponse());
   }
 
@@ -99,7 +99,7 @@ public class ApiSteps {
   public void persona_gets_url_from_service(Persona persona, String path, String service) {
     JpaRestApiResponse apiResponse = this.jpaRestApiClient.get(persona, service, path);
 
-    this.httpResponseManager.addResponse(apiResponse.getUrl(), apiResponse.getResponse());
+    this.httpResponseManager.addResponse(apiResponse.getUri(), apiResponse.getResponse());
   }
 
   /**
@@ -118,7 +118,7 @@ public class ApiSteps {
         resource,
         identifier);
 
-    this.httpResponseManager.addResponse(apiResponse.getBaseResourceUrl(),
+    this.httpResponseManager.addResponse(apiResponse.getBaseResourceUri(),
         apiResponse.getResponse());
   }
 
@@ -135,7 +135,7 @@ public class ApiSteps {
     JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.delete(persona, service,
         resource.getResourceType(), reference);
 
-    this.httpResponseManager.addResponse(apiResponse.getBaseResourceUrl(),
+    this.httpResponseManager.addResponse(apiResponse.getBaseResourceUri(),
         apiResponse.getResponse());
   }
 
@@ -157,7 +157,7 @@ public class ApiSteps {
         payloadKey.getResourceType(), reference,
         payload);
 
-    this.httpResponseManager.addResponse(apiResponse.getBaseResourceUrl(),
+    this.httpResponseManager.addResponse(apiResponse.getBaseResourceUri(),
         apiResponse.getResponse());
   }
 }

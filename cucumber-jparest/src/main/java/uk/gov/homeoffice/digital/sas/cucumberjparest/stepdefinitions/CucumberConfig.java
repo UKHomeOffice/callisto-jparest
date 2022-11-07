@@ -9,7 +9,7 @@ import io.cucumber.spring.CucumberContextConfiguration;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import java.io.File;
-import java.net.URL;
+import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -120,15 +120,15 @@ public class CucumberConfig {
       String service) {
     String targetService = this.scenarioState.trackService(service);
 
-    URL url;
+    URI uri;
     if (path == null || path.isEmpty()) {
-      url = this.jpaRestApiClient.getResourceUrl(targetService, resourceName);
+      uri = this.jpaRestApiClient.getResourceUri(targetService, resourceName);
     } else {
-      url = this.jpaRestApiClient.getServiceUrl(targetService, path);
+      uri = this.jpaRestApiClient.getServiceUrl(targetService, path);
     }
 
     int responseIndex = getIndex(responsePosition);
-    Response response = this.httpResponseManager.getResponse(url, responseIndex);
+    Response response = this.httpResponseManager.getResponse(uri, responseIndex);
     return response.getBody().jsonPath().setRootPath("items");
   }
 
@@ -203,7 +203,7 @@ public class CucumberConfig {
           clazz,
           entry.get("expectation"));
     } catch (NullPointerException exx) {
-      fail(
+      fail(//NOSONAR
           "Expectation tables are expected to contain the fields 'field', 'type', "
               + "and 'expectation'. Each field requires a valid value");
     }
@@ -240,7 +240,7 @@ public class CucumberConfig {
         fail(
             "Unknown type '%s'. To configure use "
                 + "JpaTestContext.put(\"%<s\", FullyQualifiedTypeName.class);",
-            type);
+            type); //NOSONAR
       }
     }
 
