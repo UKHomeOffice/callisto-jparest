@@ -21,7 +21,7 @@ import uk.gov.homeoffice.digital.sas.cucumberjparesttestapi.TestApiRunner;
  * for use in the cucumber-jparest package
  * 
  */
-public class StepDefinitionsTest {
+public class StepDefinitionsTest { //NOSONAR
 
     /**
      * Holds a reference to the application context
