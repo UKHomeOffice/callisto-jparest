@@ -40,7 +40,7 @@ steps:
     -Dsonar.host.url=$${SONAR_HOST}
     -Dsonar.login=$${SONAR_TOKEN}
     -Dsonar.organization=ukhomeoffice
-    -Dsonar.projectKey=callisto-jparest
+    -Dsonar.projectKey=callisto-jparest-out-of-date
     -Dsonar.branch.name=$DRONE_BRANCH
     -Dsonar.projectName=callisto-jparest
     -Dsonar.qualitygate.wait=true
