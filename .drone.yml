@@ -40,6 +40,7 @@ steps:
     -Dsonar.host.url=$${SONAR_HOST}
     -Dsonar.login=$${SONAR_TOKEN}
     -Dsonar.branch.name=$DRONE_BRANCH
+    -Dsonar.projectKey=callisto-jparest
     -Dsonar.qualitygate.wait=true
   when:
     event:

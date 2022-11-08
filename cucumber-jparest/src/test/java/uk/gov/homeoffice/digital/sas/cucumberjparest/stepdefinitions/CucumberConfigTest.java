@@ -53,21 +53,8 @@ class CucumberConfigTest {
 
   }
 
-//  void renameMe1() {
-//    String type = "";
-//    AssertionError thrown = assertThrows(
-//        AssertionError.class,
-//        () -> cucumberConfig.resolveType(type),
-//        "Expected resolveType() to throw an exception, but it didn't"
-//    );
-//    assertThat(thrown.getMessage(),
-//        is("Unknown type ''. To configure use JpaTestContext.put(\"\", FullyQualifiedTypeName.class);"));
-//  }
-
   @Test
-  void renameMe2() {
-
-
+  void shouldThrowAnErrorIfTypeCannotBeResolved() {
     String type = "package.UnknownClass";
     AssertionError thrown = assertThrows(
         AssertionError.class,
