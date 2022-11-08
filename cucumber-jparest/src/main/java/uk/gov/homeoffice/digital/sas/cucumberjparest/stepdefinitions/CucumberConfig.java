@@ -220,7 +220,7 @@ public class CucumberConfig {
    * @param type The name of the class to find
    * @return Class<?>
    */
-  private Class<?> resolveType(String type) {
+  Class<?> resolveType(String type) {
 
     Class<?> clazz = null;
     if (type.contains(".")) {
