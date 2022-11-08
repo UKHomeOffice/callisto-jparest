@@ -22,7 +22,9 @@
         <!-- Sonar Properties -->
         <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-        <!--suppress UnresolvedMavenProperty -->
+        <sonar.organization>ukhomeoffice</sonar.organization>
+        <sonar.projectKey>callisto-jparest</sonar.projectKey>
+        <sonar.projectName>callisto-jparest</sonar.projectName>
     </properties>
 
     <distributionManagement>
