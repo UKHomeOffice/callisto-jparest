@@ -267,7 +267,6 @@ class ResourceApiControllerTest {
         assertThat(descriptionError.get("message")).isEqualTo("must not be empty");
     }
 
-
     @Test
     @Transactional
     void create_requestTenantIdMatchesPayloadTenantId_resourceIsCreatedWithTenantId() throws JsonProcessingException {
