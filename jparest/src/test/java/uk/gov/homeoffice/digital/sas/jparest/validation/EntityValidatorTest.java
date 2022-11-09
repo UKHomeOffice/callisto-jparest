@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.validation;
 
+import org.json.simple.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -8,8 +9,10 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolat
 
 import javax.validation.Validation;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 
 class EntityValidatorTest {
 
@@ -46,12 +49,18 @@ class EntityValidatorTest {
 
         var entityValidator = new EntityValidator();
 
-        assertThatExceptionOfType(ResourceConstraintViolationException.class)
-            .isThrownBy(() -> entityValidator.validateAndThrowIfErrorsExist(entity))
-            .withMessageContainingAll(
-                "description has the following error(s): must not be empty",
-                "telephone has the following error(s): ",
-                "numeric value out of bounds (<5 digits>.<0 digits> expected)", "must be greater than 0");
+        Throwable thrown = catchThrowable(() -> entityValidator.validateAndThrowIfErrorsExist(entity));
+
+        assertThat(thrown).isInstanceOf(ResourceConstraintViolationException.class);
+        var errorResponse = ((ResourceConstraintViolationException) thrown).getErrorResponse();
+
+        var firstError = (JSONObject) errorResponse[0];
+        assertThat(firstError.get("field")).isEqualTo("telephone");
+        assertThat(firstError.get("message")).isEqualTo("numeric value out of bounds (<5 digits>.<0 digits> expected), must be greater than 0");
+
+        var secondError = (JSONObject) errorResponse[1];
+        assertThat(secondError.get("field")).isEqualTo("description");
+        assertThat(secondError.get("message")).isEqualTo("must not be empty");
     }
 
 }
