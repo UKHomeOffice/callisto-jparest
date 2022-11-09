@@ -2,6 +2,7 @@ package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -246,16 +247,26 @@ class ResourceApiControllerTest {
         Throwable thrown = catchThrowable(() -> controller.create(TENANT_ID, "{}"));
 
         assertThat(thrown).isInstanceOf(ResourceConstraintViolationException.class);
-        var errorResponse = ((ResourceConstraintViolationException) thrown).getErrorResponse();
+        var errorResponse = (((ResourceConstraintViolationException) thrown).getErrorResponse());
 
-        var firstError = (JSONObject) errorResponse[0];
-        assertThat(firstError.get("field")).isEqualTo("telephone");
-        assertThat(firstError.get("message")).isEqualTo("must not be empty");
+        JSONObject telephoneError = null;
+        JSONObject descriptionError = null;
+        for(var i = 0 ; i < errorResponse.length ; i++) {
+            var error = (JSONObject) errorResponse[i];
+            if (error.get("field").equals("telephone")) {
+                telephoneError = error;
+            } else {
+                descriptionError = error;
+            }
+        }
 
-        var secondError = (JSONObject) errorResponse[1];
-        assertThat(secondError.get("field")).isEqualTo("description");
-        assertThat(secondError.get("message")).isEqualTo("must not be empty");
+        assertThat(telephoneError.get("field")).isEqualTo("telephone");
+        assertThat(telephoneError.get("message")).isEqualTo("must not be empty");
+
+        assertThat(descriptionError.get("field")).isEqualTo("description");
+        assertThat(descriptionError.get("message")).isEqualTo("must not be empty");
     }
+
 
     @Test
     @Transactional
@@ -401,9 +412,19 @@ class ResourceApiControllerTest {
         assertThat(thrown).isInstanceOf(ResourceConstraintViolationException.class);
         var errorResponse = ((ResourceConstraintViolationException) thrown).getErrorResponse();
 
-        var firstError = (JSONObject) errorResponse[0];
-        assertThat(firstError.get("field")).isEqualTo("telephone");
-        assertThat(firstError.get("message")).isEqualTo("must not be empty");
+        JSONObject telephoneError = null;
+        JSONObject descriptionError = null;
+        for(var i = 0 ; i < errorResponse.length ; i++) {
+            var error = (JSONObject) errorResponse[i];
+            if (error.get("field").equals("telephone")) {
+                telephoneError = error;
+            } else {
+                descriptionError = error;
+            }
+        }
+
+        assertThat(telephoneError.get("field")).isEqualTo("telephone");
+        assertThat(telephoneError.get("message")).isEqualTo("must not be empty");
     }
 
     @Test

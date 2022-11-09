@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 class EntityValidatorTest {
 
@@ -54,13 +55,24 @@ class EntityValidatorTest {
         assertThat(thrown).isInstanceOf(ResourceConstraintViolationException.class);
         var errorResponse = ((ResourceConstraintViolationException) thrown).getErrorResponse();
 
-        var firstError = (JSONObject) errorResponse[0];
-        assertThat(firstError.get("field")).isEqualTo("telephone");
-        assertThat(firstError.get("message")).isEqualTo("numeric value out of bounds (<5 digits>.<0 digits> expected), must be greater than 0");
+        JSONObject telephoneError = null;
+        JSONObject descriptionError = null;
+        for(var i = 0 ; i < errorResponse.length ; i++) {
+            var error = (JSONObject) errorResponse[i];
+            if (error.get("field").equals("telephone")) {
+                telephoneError = error;
+            } else {
+                descriptionError = error;
+            }
+        }
 
-        var secondError = (JSONObject) errorResponse[1];
-        assertThat(secondError.get("field")).isEqualTo("description");
-        assertThat(secondError.get("message")).isEqualTo("must not be empty");
+
+        assertThat(telephoneError.get("field")).isEqualTo("telephone");
+        assertThat(((String)telephoneError.get("message")).contains("numeric value out of bounds (<5 digits>.<0 digits> expected)")).isTrue();
+        assertThat(((String)telephoneError.get("message")).contains("must be greater than 0")).isTrue();
+
+        assertThat(descriptionError.get("field")).isEqualTo("description");
+        assertThat(descriptionError.get("message")).isEqualTo("must not be empty");
     }
 
 }
