@@ -48,7 +48,7 @@ public class HttpResponseManager {
 
   public Response getResponse(URI uri, int position) {
     if (!responses.containsKey(uri)) {
-      fail("No responses where logged for %s", uri);
+      fail("No responses were logged for %s", uri);
     }
 
     ArrayList<Response> pathResponses = responses.get(uri);

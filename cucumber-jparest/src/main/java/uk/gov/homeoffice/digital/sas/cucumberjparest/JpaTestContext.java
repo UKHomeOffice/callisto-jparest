@@ -1,9 +1,9 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
-import static java.util.Map.entry;
 import static uk.gov.homeoffice.digital.sas.cucumberjparest.ServiceRegistry.SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME;
 
 import io.cucumber.spring.ScenarioScope;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -21,15 +21,15 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.utils.SerialisationUtil;
 @Configuration
 public class JpaTestContext {
 
-  public static final Map<String, Class<?>> classSimpleStrings = Map.ofEntries(
-      entry("String", String.class),
-      entry("Object", Object.class),
-      entry("Integer", Integer.class),
-      entry("Boolean", Boolean.class),
-      entry("Decimal", Double.class),
-      entry("Map", Map.class),
-      entry("List", List.class),
-      entry("Instant", Instant.class));
+  public static final Map<String, Class<?>> classSimpleStrings = Map.of(
+      String.class.getSimpleName(), String.class,
+      Object.class.getSimpleName(), Object.class,
+      Integer.class.getSimpleName(), Integer.class,
+      Boolean.class.getSimpleName(), Boolean.class,
+      BigDecimal.class.getSimpleName(), Double.class,
+      Map.class.getSimpleName(), Map.class,
+      List.class.getSimpleName(), List.class,
+      Instant.class.getSimpleName(), Instant.class);
   private static final String SERVICE_REGISTRY_SYSTEM_PROPERTY_EL
       = "#{systemProperties['" + SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME + "']}";
 
