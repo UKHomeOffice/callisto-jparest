@@ -2,6 +2,7 @@ package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.junit.jupiter.api.Named.named;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -237,13 +239,23 @@ class ResourceApiControllerTest {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
                 controller.create(TENANT_ID, "{\"" + ID_FIELD_NAME + "\": \"" + DUMMY_A_ID_1 + "\"}"));
     }
-//
-//    @Test
-//    void create_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
-//        var controller = getResourceApiController(DummyEntityD.class);
-//        assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() -> controller.create(TENANT_ID, "{}"))
-//                .withMessageContainingAll("description", "telephone", "has the following error(s):");
-//    }
+
+    @Test
+    void create_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityD.class);
+        Throwable thrown = catchThrowable(() -> controller.create(TENANT_ID, "{}"));
+
+        assertThat(thrown).isInstanceOf(ResourceConstraintViolationException.class);
+        var errorResponse = ((ResourceConstraintViolationException) thrown).getErrorResponse();
+
+        var firstError = (JSONObject) errorResponse[0];
+        assertThat(firstError.get("field")).isEqualTo("telephone");
+        assertThat(firstError.get("message")).isEqualTo("must not be empty");
+
+        var secondError = (JSONObject) errorResponse[1];
+        assertThat(secondError.get("field")).isEqualTo("description");
+        assertThat(secondError.get("message")).isEqualTo("must not be empty");
+    }
 
     @Test
     @Transactional
@@ -380,13 +392,19 @@ class ResourceApiControllerTest {
         var controller = getResourceApiController(DummyEntityA.class);
         assertThatNoException().isThrownBy(() -> controller.update(TENANT_ID, DUMMY_A_ID_1, "{}"));
     }
-//
-//    @Test
-//    void update_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
-//        var controller = getResourceApiController(DummyEntityD.class);
-//        assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() -> controller.update(TENANT_ID, NON_EXISTENT_ID, "{}"))
-//                .withMessageContainingAll("description", "telephone", "has the following error(s):");
-//    }
+
+    @Test
+    void update_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityD.class);
+        Throwable thrown = catchThrowable(() -> controller.create(TENANT_ID, "{}"));
+
+        assertThat(thrown).isInstanceOf(ResourceConstraintViolationException.class);
+        var errorResponse = ((ResourceConstraintViolationException) thrown).getErrorResponse();
+
+        var firstError = (JSONObject) errorResponse[0];
+        assertThat(firstError.get("field")).isEqualTo("telephone");
+        assertThat(firstError.get("message")).isEqualTo("must not be empty");
+    }
 
     @Test
     @Transactional
