@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.jparest.validation;
 import static java.util.stream.Collectors.groupingBy;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,9 +13,9 @@ import javax.validation.NoProviderFoundException;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import org.hibernate.validator.engine.HibernateConstraintViolation;
-import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.StructuredError;
 
 @Component
 public class EntityValidator {
@@ -39,22 +40,21 @@ public class EntityValidator {
 
       if (!constraintViolations.isEmpty()) {
         throw new ResourceConstraintViolationException(
-            createResourceConstraintViolationMessage(constraintViolations));
+            createStructuredErrors(constraintViolations));
       }
     }
   }
 
-  private static Object[] createResourceConstraintViolationMessage(
+  private static List<StructuredError> createStructuredErrors(
           Set<ConstraintViolation<Object>> constraintViolations) {
 
     var constraintViolation = constraintViolations.iterator().next();
-    @SuppressWarnings("unchecked")
     var hibernateConstraintViolation = constraintViolation.unwrap(
         HibernateConstraintViolation.class
     );
     var payload = hibernateConstraintViolation.getDynamicPayload(ArrayList.class);
 
-    var result = constraintViolations.stream()
+    return constraintViolations.stream()
             .collect(groupingBy(ConstraintViolation::getPropertyPath))
             .entrySet().stream()
             .map(entry -> {
@@ -62,13 +62,9 @@ public class EntityValidator {
                       .map(ConstraintViolation::getMessage)
                       .collect(Collectors.joining(", "));
 
-              JSONObject constraintViolationErrors = new JSONObject();
-              constraintViolationErrors.put("field", entry.getKey().toString());
-              constraintViolationErrors.put("message", propertyErrors);
-              constraintViolationErrors.put("data", payload);
-
-              return constraintViolationErrors;
-            }).toArray();
-    return result;
+              return new StructuredError(entry.getKey().toString(),
+                  propertyErrors,
+                  payload);
+            }).collect(Collectors.toList());
   }
 }

@@ -2,8 +2,6 @@ package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,6 +30,7 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.StructuredError;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
@@ -247,24 +246,23 @@ class ResourceApiControllerTest {
         Throwable thrown = catchThrowable(() -> controller.create(TENANT_ID, "{}"));
 
         assertThat(thrown).isInstanceOf(ResourceConstraintViolationException.class);
-        var errorResponse = (((ResourceConstraintViolationException) thrown).getErrorResponse());
+        var errorResponse = ((ResourceConstraintViolationException) thrown).getErrorResponse();
 
-        JSONObject telephoneError = null;
-        JSONObject descriptionError = null;
-        for(var i = 0 ; i < errorResponse.length ; i++) {
-            var error = (JSONObject) errorResponse[i];
-            if (error.get("field").equals("telephone")) {
-                telephoneError = error;
+        StructuredError telephoneError = null;
+        StructuredError descriptionError = null;
+        for (StructuredError structuredError : errorResponse) {
+            if (structuredError.getField().equals("telephone")) {
+                telephoneError = structuredError;
             } else {
-                descriptionError = error;
+                descriptionError = structuredError;
             }
         }
 
-        assertThat(telephoneError.get("field")).isEqualTo("telephone");
-        assertThat(telephoneError.get("message")).isEqualTo("must not be empty");
+        assertThat(telephoneError.getField()).isEqualTo("telephone");
+        assertThat(telephoneError.getMessage()).isEqualTo("must not be empty");
 
-        assertThat(descriptionError.get("field")).isEqualTo("description");
-        assertThat(descriptionError.get("message")).isEqualTo("must not be empty");
+        assertThat(descriptionError.getField()).isEqualTo("description");
+        assertThat(descriptionError.getMessage()).isEqualTo("must not be empty");
     }
 
     @Test
@@ -406,24 +404,20 @@ class ResourceApiControllerTest {
     @Test
     void update_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
         var controller = getResourceApiController(DummyEntityD.class);
-        Throwable thrown = catchThrowable(() -> controller.create(TENANT_ID, "{}"));
+        Throwable thrown = catchThrowable(() -> controller.update(TENANT_ID, NON_EXISTENT_ID, "{}"));
 
         assertThat(thrown).isInstanceOf(ResourceConstraintViolationException.class);
         var errorResponse = ((ResourceConstraintViolationException) thrown).getErrorResponse();
 
-        JSONObject telephoneError = null;
-        JSONObject descriptionError = null;
-        for(var i = 0 ; i < errorResponse.length ; i++) {
-            var error = (JSONObject) errorResponse[i];
-            if (error.get("field").equals("telephone")) {
-                telephoneError = error;
-            } else {
-                descriptionError = error;
+        StructuredError telephoneError = null;
+        for (StructuredError structuredError : errorResponse) {
+            if (structuredError.getField().equals("telephone")) {
+                telephoneError = structuredError;
             }
         }
 
-        assertThat(telephoneError.get("field")).isEqualTo("telephone");
-        assertThat(telephoneError.get("message")).isEqualTo("must not be empty");
+        assertThat(telephoneError.getField()).isEqualTo("telephone");
+        assertThat(telephoneError.getMessage()).isEqualTo("must not be empty");
     }
 
     @Test

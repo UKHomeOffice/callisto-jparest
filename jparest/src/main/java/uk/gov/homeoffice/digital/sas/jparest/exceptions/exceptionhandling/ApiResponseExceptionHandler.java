@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.SERVER_ERROR;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.List;
 import java.util.logging.Logger;
 import javax.persistence.PersistenceException;
 import org.springframework.beans.TypeMismatchException;
@@ -14,6 +15,7 @@ import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.StructuredError;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
@@ -60,7 +62,7 @@ public class ApiResponseExceptionHandler {
   }
 
   @ExceptionHandler(ResourceConstraintViolationException.class)
-  public ResponseEntity<Object[]> handleResourceConstraintViolationException(
+  public ResponseEntity<List<StructuredError>> handleResourceConstraintViolationException(
           ResourceConstraintViolationException ex) {
 
     return new ResponseEntity<>(ex.getErrorResponse(), HttpStatus.BAD_REQUEST);

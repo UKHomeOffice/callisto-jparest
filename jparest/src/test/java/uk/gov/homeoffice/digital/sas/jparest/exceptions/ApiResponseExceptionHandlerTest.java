@@ -1,8 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest.exceptions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -71,20 +71,18 @@ class ApiResponseExceptionHandlerTest {
     }
 
     @Test
-    void handleResourceConstraintViolationException_badRequestWithErrorDataIsReturned() throws JSONException {
-        var error = new JSONObject();
-        error.put("field", "foo");
-        error.put("message", "bar");
-        error.put("data", null);
-        var errorResponse = new JSONObject[]{error};
+    void handleResourceConstraintViolationException_badRequestWithErrorDataIsReturned() {
+        var error = new StructuredError("foo", "bar", null);
+
+        List<StructuredError> errorResponse = new ArrayList<>();
+        errorResponse.add(error);
 
         var apiResponseExceptionHandler = new ApiResponseExceptionHandler();
         var exception = new ResourceConstraintViolationException(errorResponse);
         var response = apiResponseExceptionHandler.handleResourceConstraintViolationException(exception);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody()).isEqualTo(errorResponse);
+        assertThat(response.getBody()).isNotNull().isEqualTo(errorResponse);
     }
 
 
