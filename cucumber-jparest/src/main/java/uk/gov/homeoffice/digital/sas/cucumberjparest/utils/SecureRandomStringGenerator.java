@@ -6,7 +6,7 @@ public class SecureRandomStringGenerator {
 
   private SecureRandomStringGenerator() {}
 
-  static final String ALPHABET_SET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  private static final String ALPHABET_SET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   private static final SecureRandom secureRandom = new SecureRandom();
 
   public static String randomAlphabetic(int size) {

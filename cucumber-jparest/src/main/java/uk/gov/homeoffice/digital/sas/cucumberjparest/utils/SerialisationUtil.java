@@ -15,7 +15,7 @@ public class SerialisationUtil {
 
   public static Map<String, String> stringToMap(String serialisedMap, String entrySeparator,
       String keyValueSeparator) {
-    if (serialisedMap == null || serialisedMap.trim().isEmpty()) {
+    if (serialisedMap == null || serialisedMap.isBlank()) {
       return new LinkedHashMap<>();
     }
     return Arrays.stream(serialisedMap.split(entrySeparator))
