@@ -74,7 +74,7 @@ Feature: Assertions
 
   Scenario: Property expectations
 
-    Objects can be sepcified as either a last response or an indexed response
+    Objects can be specified as either a last response or an indexed response
     to a business/resourceful endpoint.
 
     It can also be specified as a specific resource in a response
