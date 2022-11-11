@@ -48,7 +48,7 @@ Feature: Interpolated payloads
       | bio          | String  | isNotEqualTo("#{personaManager.getPersona('Trevor').id}") |
       | firstRelease | Instant | isNotNull()                                               |
 
-  Scenario: Reference a persona in an file payload
+  Scenario: Reference a persona in a file payload
 
     In this scenario we will read a resource from a file and
     populate one of the fields with the identifier from
