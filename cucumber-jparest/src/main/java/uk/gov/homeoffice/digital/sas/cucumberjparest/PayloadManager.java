@@ -50,7 +50,7 @@ public class PayloadManager {
    * variable that can be used to reference the payload throughout a scenario
    */
   @AllArgsConstructor
-  public static class PayloadKey {
+  public static final class PayloadKey {
 
     @NonNull
     @Getter
