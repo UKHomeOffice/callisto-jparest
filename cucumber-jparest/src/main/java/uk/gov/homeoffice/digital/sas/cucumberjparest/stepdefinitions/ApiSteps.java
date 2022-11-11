@@ -109,7 +109,7 @@ public class ApiSteps {
    * @param service    There service to use
    */
   @When("{persona} gets the {word} {string}{service}")
-  public void personaRetrieveSpecificResourcesFromThService(Persona persona,
+  public void personaRetrieveSpecificResourcesFromTheService(Persona persona,
       String resource,
       String identifier, String service) {
     JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieveById(persona, service,
