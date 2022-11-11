@@ -73,7 +73,8 @@ public class ApiSteps {
    *
    * @param persona  The persona to use for auth context
    * @param resource The type of resources to be retrieved
-   * @param service  There service to use
+   * @param service  The service to use
+   * @param parameters The request parameters
    */
   @When("{persona} retrieves {word}{service} with")
   public void personaRetrievesResourcesFromTheService(Persona persona, String resource,
