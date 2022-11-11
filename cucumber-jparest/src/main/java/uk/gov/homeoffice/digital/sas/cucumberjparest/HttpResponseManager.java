@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
  * Class used for tracking Responses to requests made to a specific path.
  */
 @Component
+@SuppressWarnings("squid:S5960")// Assertions are needed in this test library
 public class HttpResponseManager {
 
   private final Map<URI, ArrayList<Response>> responses = new HashMap<>();
@@ -41,7 +42,7 @@ public class HttpResponseManager {
     responses.computeIfAbsent(uri, k -> new ArrayList<>());
 
     ArrayList<Response> pathResponses = responses.get(uri);
-    assertThat(pathResponses.add(response)).isTrue(); //NOSONAR
+    assertThat(pathResponses.add(response)).isTrue();
     this.lastResponse = response;
     return response;
   }

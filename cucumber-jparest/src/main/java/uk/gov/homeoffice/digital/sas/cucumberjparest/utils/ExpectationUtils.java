@@ -91,6 +91,7 @@ public class ExpectationUtils {
    * @param expectations    A table of expectations to assert
    * @param softly          The SoftAssertions instance
    */
+  @SuppressWarnings("squid:S5960")// Assertions are needed in this test library
   public static void objectMeetsExpectations(JsonPath objectUnderTest,
       List<Expectation> expectations, ObjectMapper objectMapper, @NonNull SoftAssertions softly) {
 
@@ -124,7 +125,7 @@ public class ExpectationUtils {
         } else {
           pathCheck = FIELD_PATH.matcher(field).replaceAll("$1$2containsKey('$3')");
         }
-        assertThat(objectUnderTest.getBoolean(pathCheck)).isTrue(); //NOSONAR
+        assertThat(objectUnderTest.getBoolean(pathCheck)).isTrue();
       })
           .withFailMessage("Expected the object to contain the field '%s'", field)
           .doesNotThrowAnyException();

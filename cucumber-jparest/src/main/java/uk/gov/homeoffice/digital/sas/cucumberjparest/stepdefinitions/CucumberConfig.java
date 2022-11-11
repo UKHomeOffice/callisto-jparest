@@ -37,6 +37,7 @@ import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
  */
 @CucumberContextConfiguration
 @ContextConfiguration(classes = {JpaTestContext.class, ObjectMapperConfig.class})
+@SuppressWarnings("squid:S5960")// Assertions are needed in this test library
 public class CucumberConfig {
 
   private static final String FROM_IN_SERVICE = "(?: (?:from|in) the (\\S*) service)?";
@@ -203,7 +204,7 @@ public class CucumberConfig {
           clazz,
           entry.get("expectation"));
     } catch (NullPointerException exx) {
-      fail(//NOSONAR
+      fail(
           "Expectation tables are expected to contain the fields 'field', 'type', "
               + "and 'expectation'. Each field requires a valid value");
     }
@@ -240,7 +241,7 @@ public class CucumberConfig {
         fail(
             "Unknown type '%s'. To configure use "
                 + "JpaTestContext.put(\"%<s\", FullyQualifiedTypeName.class);",
-            type); //NOSONAR
+            type);
       }
     }
 

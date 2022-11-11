@@ -61,6 +61,7 @@ public class JpaRestApiClient {
    * @param requestSpecification The specification to retrieve the URL from
    * @return URI
    */
+  @SuppressWarnings("squid:S5960")// Assertions are needed in this test library
   private static URI getUri(@NonNull RequestSpecification requestSpecification) {
     QueryableRequestSpecification queryRequest = SpecificationQuerier.query(requestSpecification);
 
@@ -69,7 +70,7 @@ public class JpaRestApiClient {
     try {
       requestUri = new URI(absoluteUri);
     } catch (URISyntaxException e) {
-      fail(e.getMessage()); //NOSONAR
+      fail(e.getMessage());
     }
 
     return requestUri;

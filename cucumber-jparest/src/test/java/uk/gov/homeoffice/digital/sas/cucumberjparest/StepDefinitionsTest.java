@@ -21,7 +21,8 @@ import uk.gov.homeoffice.digital.sas.cucumberjparesttestapi.TestApiRunner;
  * for use in the cucumber-jparest package
  * 
  */
-public class StepDefinitionsTest { //NOSONAR
+@SuppressWarnings("squid:S2187")//Actual tests are BDD features under resources folder
+public class StepDefinitionsTest {
 
     /**
      * Holds a reference to the application context
