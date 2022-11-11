@@ -12,7 +12,7 @@ Feature: Assertions
   to previous requests in the same scenario is supported.
 
   Once the object to assert against is specified a table can be provided
-  to specify the field to assert against, it's type and an expectation.
+  to specify the field to assert against, its type and an expectation.
 
   For more details on expectations and how they can be specified and
   customised see the documentation for AssertJ
