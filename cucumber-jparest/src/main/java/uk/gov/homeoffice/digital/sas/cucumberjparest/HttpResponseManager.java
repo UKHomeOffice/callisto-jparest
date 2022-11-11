@@ -66,7 +66,7 @@ public class HttpResponseManager {
       response = pathResponses.get(position);
     } catch (IndexOutOfBoundsException ex) {
       // In the messaging bear in mind that indexes are zero based so
-      // the position needs adjusting to match the order the uer will have
+      // the position needs adjusting to match the order the user will have
       // asked for.
       fail("Only %i responses were logged for %s but you asked for %i", pathResponses.size(), uri,
           position + 1);
