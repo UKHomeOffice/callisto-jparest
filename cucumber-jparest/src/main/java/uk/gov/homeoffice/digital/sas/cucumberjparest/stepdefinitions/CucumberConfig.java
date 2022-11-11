@@ -16,7 +16,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.NonNull;
 import org.assertj.core.util.Files;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Expectation;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
@@ -51,7 +50,6 @@ public class CucumberConfig {
   private final ObjectMapper objectMapper;
   private final Interpolation interpolation;
 
-  @Autowired
   public CucumberConfig(@NonNull PersonaManager personaManager,
       @NonNull HttpResponseManager httpResponseManager,
       @NonNull JpaRestApiClient jpaRestApiClient, @NonNull ObjectMapper objectMapper,

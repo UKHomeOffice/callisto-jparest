@@ -2,7 +2,6 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest.stepdefinitions;
 
 import io.cucumber.java.en.Given;
 import lombok.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.PersonaManager;
 
 /**
@@ -13,7 +12,6 @@ public class PersonaSteps {
 
   private final PersonaManager personaManager;
 
-  @Autowired
   public PersonaSteps(@NonNull PersonaManager personaManager) {
     this.personaManager = personaManager;
   }

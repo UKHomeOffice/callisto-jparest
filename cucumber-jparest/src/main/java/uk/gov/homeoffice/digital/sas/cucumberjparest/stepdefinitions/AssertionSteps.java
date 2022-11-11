@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
 import org.assertj.core.api.SoftAssertions;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Expectation;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
@@ -26,7 +25,6 @@ public class AssertionSteps {
   private final HttpResponseManager httpResponseManager;
   private final ObjectMapper objectMapper;
 
-  @Autowired
   public AssertionSteps(@NonNull HttpResponseManager httpResponseManager,
       @NonNull ObjectMapper objectMapper) {
     this.httpResponseManager = httpResponseManager;

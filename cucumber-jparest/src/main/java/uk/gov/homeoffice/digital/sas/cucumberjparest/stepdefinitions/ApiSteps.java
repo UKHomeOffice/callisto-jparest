@@ -3,7 +3,6 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest.stepdefinitions;
 import io.cucumber.java.en.When;
 import java.util.Map;
 import lombok.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiClient;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiResourceResponse;
@@ -22,7 +21,6 @@ public class ApiSteps {
   private final JpaRestApiClient jpaRestApiClient;
   private final PayloadManager payloadManager;
 
-  @Autowired
   public ApiSteps(@NonNull HttpResponseManager httpResponseManager,
       @NonNull JpaRestApiClient jpaRestApiClient,
       PayloadManager payloadManager) {
