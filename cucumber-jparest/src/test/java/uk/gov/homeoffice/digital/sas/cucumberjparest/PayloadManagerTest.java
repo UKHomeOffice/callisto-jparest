@@ -1,9 +1,6 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,16 +24,14 @@ class PayloadManagerTest {
 
   @Test
   void shouldReturnPayloadWhenExists() {
-    assertThat(payloadManager.getPayload(payloadKey1), is("Some content"));
+    assertThat(payloadManager.getPayload(payloadKey1)).isEqualTo("Some content");
   }
 
   @Test
   void shouldComparePayloadKeysAsExpected() {
-    assertThat(payloadKey1.getResourceType(), is(equalTo(payloadKey2.getResourceType())));
-    assertThat(payloadKey1.getName(), is(not(equalTo(payloadKey2.getName()))));
-    assertThat(payloadKey1, is(not(equalTo(payloadKey2))));
-    assertThat(payloadKey1, is(not(equalTo(null))));
-    assertThat(payloadKey1, is(not(equalTo("profiles"))));
+    assertThat(payloadKey1.getResourceType()).isEqualTo(payloadKey2.getResourceType());
+    assertThat(payloadKey1.getName()).isNotEqualTo(payloadKey2.getName());
+    assertThat(payloadKey1).isNotEqualTo(payloadKey2).isNotNull();
   }
 
   @Test
@@ -47,8 +42,10 @@ class PayloadManagerTest {
         "Expected createPayload() to throw an exception, but it didn't"
     );
 
-    assertThat(thrown.getMessage(),
-        is("A payload with the name \"" + payloadKey2.getName() + "\" does not exist"));
+    assertThat(thrown.getMessage())
+        .isEqualTo(
+            "A payload with the name \"" + payloadKey2.getName() + "\" does not exist"
+        );
   }
 
   @Test
@@ -59,7 +56,9 @@ class PayloadManagerTest {
         "Expected createPayload() to throw an exception, but it didn't"
     );
 
-    assertThat(thrown.getMessage(),
-        is("A payload with the name \"" + payloadKey1.getName() + "\" already exists"));
+    assertThat(thrown.getMessage())
+        .isEqualTo(
+            "A payload with the name \"" + payloadKey1.getName() + "\" already exists"
+        );
   }
 }

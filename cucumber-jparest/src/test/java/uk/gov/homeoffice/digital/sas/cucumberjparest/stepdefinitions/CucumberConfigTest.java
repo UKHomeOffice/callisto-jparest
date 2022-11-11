@@ -1,7 +1,6 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.stepdefinitions;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -62,7 +61,9 @@ class CucumberConfigTest {
         "Expected resolveType() to throw an exception, but it didn't"
     );
 
-    assertThat(thrown.getMessage(),
-        is("Unknown type 'package.UnknownClass'. To configure use JpaTestContext.put(\"package.UnknownClass\", FullyQualifiedTypeName.class);"));
+    assertThat(thrown.getMessage())
+        .isEqualTo(
+            "Unknown type 'package.UnknownClass'. To configure use JpaTestContext.put(\"package.UnknownClass\", FullyQualifiedTypeName.class);"
+        );
   }
 }

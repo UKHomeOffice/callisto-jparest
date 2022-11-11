@@ -1,6 +1,6 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.utils;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,10 +19,10 @@ class SecureRandomStringGeneratorTest {
 
   @ParameterizedTest
   @MethodSource("stringToMapTestData")
-  void GIVEN_string_size_WHEN_generating_random_string_THEN_produces_the_expected_string(
+  void randomAlphabetic_stringSizeProvided_generateRandomStringAsExpected(
       int stringSize) {
     String generatedString = SecureRandomStringGenerator.randomAlphabetic(stringSize);
-    assertEquals(generatedString.length(), stringSize);
-    assertTrue(generatedString.matches("[a-zA-Z]{" + stringSize + "}"));
+    assertThat(generatedString).hasSize(stringSize)
+        .matches("[a-zA-Z]{" + stringSize + "}");
   }
 }

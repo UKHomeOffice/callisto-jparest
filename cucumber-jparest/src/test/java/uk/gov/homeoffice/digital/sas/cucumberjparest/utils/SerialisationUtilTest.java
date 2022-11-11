@@ -7,16 +7,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SerialisationUtilTest {
 
     @ParameterizedTest
     @MethodSource("stringToMapTestData")
-    void GIVEN_serialised_map_WHEN_converted_to_map_THEN_produces_the_expected_map(String serialisedMap, int expectedMapSize, Map<String, String> expectedMap) {
+    void stringToMap_serialisedMapStringProvided_produceExpectedMapObject(String serialisedMap, int expectedMapSize, Map<String, String> expectedMap) {
         Map<String, String> actualMap = SerialisationUtil.stringToMap(serialisedMap);
-        assertEquals(expectedMapSize, actualMap.size());
-        expectedMap.forEach((key, value) -> assertEquals(value, actualMap.get(key)));
+        assertThat(actualMap).hasSize(expectedMapSize);
+        expectedMap.forEach((key, value) -> assertThat(actualMap).containsEntry(key,value));
     }
 
     private static Stream<Arguments> stringToMapTestData() {

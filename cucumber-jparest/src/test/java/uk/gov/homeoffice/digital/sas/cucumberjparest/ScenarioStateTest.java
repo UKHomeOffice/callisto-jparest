@@ -1,7 +1,6 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.stream.Stream;
@@ -18,17 +17,16 @@ class ScenarioStateTest {
 
   @ParameterizedTest
   @MethodSource("serviceData")
-  void GIVEN_nullOrEmptyServiceName_WHEN_trackingService_THEN_throwAssertionError(String serviceName) {
+  void trackService_nullOrEmptyServiceNameProvided_throwsAssertionError(String serviceName) {
     AssertionError thrown = assertThrows(
         AssertionError.class,
         () -> scenarioState.trackService(serviceName),
         "Expected createPayload() to throw an exception, but it didn't"
     );
     assertThat(
-        thrown.getMessage(),
-        is(
+        thrown.getMessage())
+        .isEqualTo(
             "A service name must be provided because no service has previously been referenced."
-        )
-    );
+        );
   }
 }
