@@ -7,9 +7,12 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 
 import javax.validation.Validation;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.StructuredError;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 
 class EntityValidatorTest {
 
@@ -46,12 +49,27 @@ class EntityValidatorTest {
 
         var entityValidator = new EntityValidator();
 
-        assertThatExceptionOfType(ResourceConstraintViolationException.class)
-            .isThrownBy(() -> entityValidator.validateAndThrowIfErrorsExist(entity))
-            .withMessageContainingAll(
-                "description has the following error(s): must not be empty",
-                "telephone has the following error(s): ",
-                "numeric value out of bounds (<5 digits>.<0 digits> expected)", "must be greater than 0");
+        Throwable thrown = catchThrowable(() -> entityValidator.validateAndThrowIfErrorsExist(entity));
+
+        assertThat(thrown).isInstanceOf(ResourceConstraintViolationException.class);
+        var errorResponse = ((ResourceConstraintViolationException) thrown).getErrorResponse();
+
+        StructuredError telephoneError = null;
+        StructuredError descriptionError = null;
+        for (StructuredError structuredError : errorResponse) {
+            if (structuredError.getField().equals("telephone")) {
+                telephoneError = structuredError;
+            } else {
+                descriptionError = structuredError;
+            }
+        }
+
+        assertThat(telephoneError.getField()).isEqualTo("telephone");
+        assertThat(telephoneError.getMessage()).contains("numeric value out of bounds (<5 digits>.<0 digits> expected)");
+        assertThat(telephoneError.getMessage()).contains("must be greater than 0");
+
+        assertThat(descriptionError.getField()).isEqualTo("description");
+        assertThat(descriptionError.getMessage()).isEqualTo("must not be empty");
     }
 
 }

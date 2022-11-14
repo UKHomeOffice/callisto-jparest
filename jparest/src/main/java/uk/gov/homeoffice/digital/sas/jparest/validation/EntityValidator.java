@@ -1,7 +1,9 @@
 package uk.gov.homeoffice.digital.sas.jparest.validation;
 
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toCollection;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,8 +12,10 @@ import javax.validation.ConstraintViolation;
 import javax.validation.NoProviderFoundException;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import org.hibernate.validator.engine.HibernateConstraintViolation;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.StructuredError;
 
 @Component
 public class EntityValidator {
@@ -36,25 +40,30 @@ public class EntityValidator {
 
       if (!constraintViolations.isEmpty()) {
         throw new ResourceConstraintViolationException(
-            createResourceConstraintViolationMessage(constraintViolations));
+            createStructuredErrors(constraintViolations));
       }
     }
   }
 
-  private static String createResourceConstraintViolationMessage(
-      Set<ConstraintViolation<Object>> constraintViolations) {
+  private static ArrayList<StructuredError> createStructuredErrors(
+          Set<ConstraintViolation<Object>> constraintViolations) {
+
+    var constraintViolation = constraintViolations.iterator().next();
+    var hibernateConstraintViolation = constraintViolation.unwrap(
+        HibernateConstraintViolation.class
+    );
 
     return constraintViolations.stream()
-        .collect(groupingBy(ConstraintViolation::getPropertyPath))
-        .entrySet().stream()
-        .map(entry -> {
-          var propertyErrors = entry.getValue().stream()
-              .map(ConstraintViolation::getMessage)
-              .collect(Collectors.joining(", "));
+            .collect(groupingBy(ConstraintViolation::getPropertyPath))
+            .entrySet().stream()
+            .map(entry -> {
+              var propertyErrors = entry.getValue().stream()
+                      .map(ConstraintViolation::getMessage)
+                      .collect(Collectors.joining(", "));
 
-          return String.format("%s has the following error(s): %s",
-              entry.getKey().toString(), propertyErrors);
-        })
-        .collect(Collectors.joining(". "));
+              return new StructuredError(entry.getKey().toString(),
+                  propertyErrors,
+                  hibernateConstraintViolation.getDynamicPayload(ArrayList.class));
+            }).collect(toCollection(ArrayList::new));
   }
 }
