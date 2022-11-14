@@ -1,6 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest.exceptions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -11,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiErrorResponse;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
-import uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper;
 
 import javax.persistence.PersistenceException;
 import java.util.UUID;
@@ -69,6 +70,21 @@ class ApiResponseExceptionHandlerTest {
         assertResponseData(response, exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @Test
+    void handleResourceConstraintViolationException_badRequestWithErrorDataIsReturned() {
+        var error = new StructuredError("foo", "bar", null);
+
+        List<StructuredError> errorResponse = new ArrayList<>();
+        errorResponse.add(error);
+
+        var apiResponseExceptionHandler = new ApiResponseExceptionHandler();
+        var exception = new ResourceConstraintViolationException(errorResponse);
+        var response = apiResponseExceptionHandler.handleResourceConstraintViolationException(exception);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull().isEqualTo(errorResponse);
+    }
+
 
     private void assertResponseData(ResponseEntity<ApiErrorResponse> response, String message, HttpStatus httpStatus) {
         assertThat(response.getStatusCode()).isEqualTo(httpStatus);
@@ -84,7 +100,6 @@ class ApiResponseExceptionHandlerTest {
                 Arguments.of(new IllegalArgumentException(ERROR_MESSAGE)),
                 Arguments.of(jsonProcessingException),
                 Arguments.of(new InvalidFilterException(ERROR_MESSAGE)),
-                Arguments.of(new ResourceConstraintViolationException(ERROR_MESSAGE)),
                 Arguments.of(new UnknownResourcePropertyException("unknownProperty", "resourceName")),
                 Arguments.of(new TenantIdMismatchException())
         );

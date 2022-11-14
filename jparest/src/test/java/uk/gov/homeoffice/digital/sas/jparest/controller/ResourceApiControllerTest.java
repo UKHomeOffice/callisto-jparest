@@ -30,6 +30,7 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.StructuredError;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
@@ -49,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.junit.jupiter.api.Named.named;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -241,8 +243,26 @@ class ResourceApiControllerTest {
     @Test
     void create_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
         var controller = getResourceApiController(DummyEntityD.class);
-        assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() -> controller.create(TENANT_ID, "{}"))
-                .withMessageContainingAll("description", "telephone", "has the following error(s):");
+        Throwable thrown = catchThrowable(() -> controller.create(TENANT_ID, "{}"));
+
+        assertThat(thrown).isInstanceOf(ResourceConstraintViolationException.class);
+        var errorResponse = ((ResourceConstraintViolationException) thrown).getErrorResponse();
+
+        StructuredError telephoneError = null;
+        StructuredError descriptionError = null;
+        for (StructuredError structuredError : errorResponse) {
+            if (structuredError.getField().equals("telephone")) {
+                telephoneError = structuredError;
+            } else {
+                descriptionError = structuredError;
+            }
+        }
+
+        assertThat(telephoneError.getField()).isEqualTo("telephone");
+        assertThat(telephoneError.getMessage()).isEqualTo("must not be empty");
+
+        assertThat(descriptionError.getField()).isEqualTo("description");
+        assertThat(descriptionError.getMessage()).isEqualTo("must not be empty");
     }
 
     @Test
@@ -384,8 +404,20 @@ class ResourceApiControllerTest {
     @Test
     void update_payloadViolatesEntityConstraints_resourceConstraintViolationExceptionThrown() {
         var controller = getResourceApiController(DummyEntityD.class);
-        assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() -> controller.update(TENANT_ID, NON_EXISTENT_ID, "{}"))
-                .withMessageContainingAll("description", "telephone", "has the following error(s):");
+        Throwable thrown = catchThrowable(() -> controller.update(TENANT_ID, NON_EXISTENT_ID, "{}"));
+
+        assertThat(thrown).isInstanceOf(ResourceConstraintViolationException.class);
+        var errorResponse = ((ResourceConstraintViolationException) thrown).getErrorResponse();
+
+        StructuredError telephoneError = null;
+        for (StructuredError structuredError : errorResponse) {
+            if (structuredError.getField().equals("telephone")) {
+                telephoneError = structuredError;
+            }
+        }
+
+        assertThat(telephoneError.getField()).isEqualTo("telephone");
+        assertThat(telephoneError.getMessage()).isEqualTo("must not be empty");
     }
 
     @Test
