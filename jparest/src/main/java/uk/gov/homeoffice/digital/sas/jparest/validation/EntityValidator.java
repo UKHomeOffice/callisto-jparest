@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.validation;
 
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toCollection;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -52,7 +53,7 @@ public class EntityValidator {
         HibernateConstraintViolation.class
     );
 
-    var structuredErrors =  constraintViolations.stream()
+    return constraintViolations.stream()
             .collect(groupingBy(ConstraintViolation::getPropertyPath))
             .entrySet().stream()
             .map(entry -> {
@@ -63,7 +64,6 @@ public class EntityValidator {
               return new StructuredError(entry.getKey().toString(),
                   propertyErrors,
                   hibernateConstraintViolation.getDynamicPayload(ArrayList.class));
-            }).toList();
-    return new ArrayList<>(structuredErrors);
+            }).collect(toCollection(ArrayList::new));
   }
 }
