@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,12 +14,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class Expectation {
+public class FieldExpectation {
 
   @NonNull
   private String field;
   @NonNull
   private Class<?> type;
   @NonNull
-  private String expectedValue;
+  private String expectation;
 }

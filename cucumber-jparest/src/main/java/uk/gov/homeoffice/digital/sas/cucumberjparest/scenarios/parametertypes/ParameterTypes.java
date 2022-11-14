@@ -1,11 +1,10 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest.stepdefinitions;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.parametertypes;
 
 import static org.assertj.core.api.Fail.fail;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.ParameterType;
-import io.cucumber.spring.CucumberContextConfiguration;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import java.io.File;
@@ -16,32 +15,28 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.NonNull;
 import org.assertj.core.util.Files;
-import org.springframework.test.context.ContextConfiguration;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.Expectation;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.Interpolation;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiClient;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaTestContext;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager.PayloadKey;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.Persona;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.PersonaManager;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.ScenarioState;
-import uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.HttpResponseManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.JpaRestApiClient;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.PayloadManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.PayloadManager.PayloadKey;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.Resource;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.config.JpaTestContext;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.Persona;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.PersonaManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.ScenarioState;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.FieldExpectation;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.interpolation.Interpolation;
 
 /**
  * Common parameter types used to convert expressions into the types required by the step
  * definitions.
  */
-@CucumberContextConfiguration
-@ContextConfiguration(classes = {JpaTestContext.class, ObjectMapperConfig.class})
 @SuppressWarnings("squid:S5960")// Assertions are needed in this test library
-public class CucumberConfig {
+public class ParameterTypes {
 
   private static final String FROM_IN_SERVICE = "(?: (?:from|in) the (\\S*) service)?";
 
-  private final Logger logger = Logger.getLogger(CucumberConfig.class.getName());
+  private final Logger logger = Logger.getLogger(ParameterTypes.class.getName());
 
   private final PersonaManager personaManager;
   private final HttpResponseManager httpResponseManager;
@@ -50,7 +45,7 @@ public class CucumberConfig {
   private final ObjectMapper objectMapper;
   private final Interpolation interpolation;
 
-  public CucumberConfig(@NonNull PersonaManager personaManager,
+  public ParameterTypes(@NonNull PersonaManager personaManager,
       @NonNull HttpResponseManager httpResponseManager,
       @NonNull JpaRestApiClient jpaRestApiClient, @NonNull ObjectMapper objectMapper,
       @NonNull ScenarioState scenarioState, Interpolation interpolation) {
@@ -189,15 +184,15 @@ public class CucumberConfig {
    * @return Expectation
    */
   @DataTableType
-  public Expectation expectationEntry(Map<String, String> entry) {
+  public FieldExpectation expectationEntry(Map<String, String> entry) {
     String type = entry.get("type");
     Objects.requireNonNull(type, "A type must be specified for the expectation");
 
     Class<?> clazz = resolveType(type);
 
-    Expectation expectation = null;
+    FieldExpectation fieldExpectation = null;
     try {
-      expectation = new Expectation(
+      fieldExpectation = new FieldExpectation(
           entry.get("field"),
           clazz,
           entry.get("expectation"));
@@ -207,7 +202,7 @@ public class CucumberConfig {
               + "and 'expectation'. Each field requires a valid value");
     }
 
-    return expectation;
+    return fieldExpectation;
   }
 
   /**

@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest.stepdefinitions;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.stepdefinitions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.homeoffice.digital.sas.cucumberjparest.utils.ExpectationUtils.headersMeetsExpectations;
@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
 import org.assertj.core.api.SoftAssertions;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.Expectation;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.HttpResponseManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.Resource;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.FieldExpectation;
 
 /**
  * Provides steps related to making assertions against responses and the json objects within them.
@@ -81,12 +81,12 @@ public class AssertionSteps {
   /**
    * Assert expectations against the last response.
    *
-   * @param expectations A table of expectations to assert
+   * @param fieldExpectations A table of expectations to assert
    */
   @Then("the last response body should contain")
-  public void theLastResponseShouldContain(List<Expectation> expectations) {
+  public void theLastResponseShouldContain(List<FieldExpectation> fieldExpectations) {
     var root = this.httpResponseManager.getLastResponse().getBody().jsonPath();
-    objectMeetsExpectations(root, expectations, this.objectMapper);
+    objectMeetsExpectations(root, fieldExpectations, this.objectMapper);
   }
 
   /**
@@ -127,11 +127,12 @@ public class AssertionSteps {
    * the given expectations to that resource.
    *
    * @param objectUnderTest The object to test
-   * @param expectations    A table of expectations to assert
+   * @param fieldExpectations    A table of expectations to assert
    */
   @Then("the {resource} should contain")
-  public void theObjectShouldContain(Resource objectUnderTest, List<Expectation> expectations) {
-    objectMeetsExpectations(objectUnderTest.getJsonPath(), expectations, this.objectMapper);
+  public void theObjectShouldContain(Resource objectUnderTest,
+      List<FieldExpectation> fieldExpectations) {
+    objectMeetsExpectations(objectUnderTest.getJsonPath(), fieldExpectations, this.objectMapper);
   }
 
   /**
@@ -165,18 +166,18 @@ public class AssertionSteps {
    * resource.
    *
    * @param objectsUnderTest The object to test
-   * @param expectations     A table of expectations to assert against each resource
+   * @param fieldExpectations     A table of expectations to assert against each resource
    */
   @Then("{eachResource} should contain")
   public void theObjectsShouldContain(Resource objectsUnderTest,
-      List<Expectation> expectations) {
+      List<FieldExpectation> fieldExpectations) {
 
     SoftAssertions softly = new SoftAssertions();
 
     var itemsSize = objectsUnderTest.getJsonPath().getInt("size()");
     for (int i = 0; i < itemsSize; i++) {
       objectsUnderTest.getJsonPath().setRootPath("items[" + i + "]");
-      objectMeetsExpectations(objectsUnderTest.getJsonPath(), expectations, this.objectMapper,
+      objectMeetsExpectations(objectsUnderTest.getJsonPath(), fieldExpectations, this.objectMapper,
           softly);
     }
 

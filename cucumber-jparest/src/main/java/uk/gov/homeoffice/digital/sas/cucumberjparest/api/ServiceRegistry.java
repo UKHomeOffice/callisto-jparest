@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.api;
 
 import java.util.Map;
 import lombok.AllArgsConstructor;

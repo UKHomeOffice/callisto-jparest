@@ -1,10 +1,10 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest.stepdefinitions;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.stepdefinitions;
 
 import io.cucumber.java.en.Given;
 import lombok.NonNull;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.Interpolation;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager.PayloadKey;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.PayloadManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.PayloadManager.PayloadKey;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.interpolation.Interpolation;
 
 /**
  * Provides steps to enable payloads to be defined that are used by other steps when making POST,

@@ -19,7 +19,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.Expectation;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.FieldExpectation;
 
 /**
  * Provides methods used to assert expectations against given objects.
@@ -74,13 +74,13 @@ public class ExpectationUtils {
    * {@link SoftAssertions#assertAll()}
    *
    * @param objectUnderTest JsonPath pointing to the object to assert against
-   * @param expectations    A table of expectations to assert
+   * @param fieldExpectations    A table of expectations to assert
    */
   public static void objectMeetsExpectations(JsonPath objectUnderTest,
-      List<Expectation> expectations,
+      List<FieldExpectation> fieldExpectations,
       ObjectMapper objectMapper) {
     SoftAssertions softly = new SoftAssertions();
-    objectMeetsExpectations(objectUnderTest, expectations, objectMapper, softly);
+    objectMeetsExpectations(objectUnderTest, fieldExpectations, objectMapper, softly);
     softly.assertAll();
   }
 
@@ -88,14 +88,15 @@ public class ExpectationUtils {
    * Softly asserts that the objectUnderTests meets the provided expectations.
    *
    * @param objectUnderTest JsonPath pointing to the object to assert against
-   * @param expectations    A table of expectations to assert
+   * @param fieldExpectations    A table of expectations to assert
    * @param softly          The SoftAssertions instance
    */
   @SuppressWarnings("squid:S5960")// Assertions are needed in this test library
   public static void objectMeetsExpectations(JsonPath objectUnderTest,
-      List<Expectation> expectations, ObjectMapper objectMapper, @NonNull SoftAssertions softly) {
+      List<FieldExpectation> fieldExpectations, ObjectMapper objectMapper,
+      @NonNull SoftAssertions softly) {
 
-    expectations.forEach(expect -> {
+    fieldExpectations.forEach(expect -> {
       var field = expect.getField();
 
       /**
@@ -139,7 +140,7 @@ public class ExpectationUtils {
         // Skip this if test subject doesn't exist, this will be caught in previous
         // assertion
         if (testSubject != null) {
-          evaluateExpectation(testSubject, expect.getExpectedValue(), softly);
+          evaluateExpectation(testSubject, expect.getExpectation(), softly);
         }
       } catch (IllegalArgumentException ex) {
         softly.fail("Expected value to be of type '%s'", expect.getType());

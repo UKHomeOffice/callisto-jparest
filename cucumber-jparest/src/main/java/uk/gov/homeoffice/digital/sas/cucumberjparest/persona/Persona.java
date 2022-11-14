@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.persona;
 
 import static uk.gov.homeoffice.digital.sas.cucumberjparest.utils.SecureRandomStringGenerator.randomAlphabetic;
 

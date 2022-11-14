@@ -1,6 +1,6 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.config;
 
-import static uk.gov.homeoffice.digital.sas.cucumberjparest.ServiceRegistry.SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME;
+import static uk.gov.homeoffice.digital.sas.cucumberjparest.api.ServiceRegistry.SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME;
 
 import io.cucumber.spring.ScenarioScope;
 import java.math.BigDecimal;
@@ -11,6 +11,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.HttpResponseManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.JpaRestApiClient;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.PayloadManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.ServiceRegistry;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.PersonaManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.ScenarioState;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.interpolation.Interpolation;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.utils.SerialisationUtil;
 
 /**

@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.api;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Fail.fail;
@@ -18,6 +18,7 @@ import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.Persona;
 
 /**
  * The purpose of this class is to understand the protocol implemented by the JpaRest library. At
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JpaRestApiClient {
 
+  @SuppressWarnings("squid:S1075") // URIs should not be hardcoded
   public static final String API_ROOT_PATH = "/resources/";
   public static final String TENANT_ID_SYSTEM_PROPERTY_NAME = "cucumber.jparest.tenantId";
   private static final String TENANT_ID_SYSTEM_PROPERTY_EL
@@ -228,11 +230,13 @@ public class JpaRestApiClient {
   }
 
   /**
-   * Retrieves resources in the specified service using the provided filter.
+   * Makes the GET request to the specified service using the provided path. The path could be a
+   * resource path or any other endpoint (e.g. openAPI)
    *
    * @param persona The persona making the request.
    * @param service The name of the service where the resources will be retrieved from. The service
    *                name must exist in the {@link ServiceRegistry}
+   * @param path The relative path to make the GET request to
    * @return JpaRestApiResponse
    */
   public JpaRestApiResponse get(Persona persona, String service, String path) {

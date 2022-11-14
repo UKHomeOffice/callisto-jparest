@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.api;
 
 import io.restassured.path.json.JsonPath;
 import lombok.AllArgsConstructor;

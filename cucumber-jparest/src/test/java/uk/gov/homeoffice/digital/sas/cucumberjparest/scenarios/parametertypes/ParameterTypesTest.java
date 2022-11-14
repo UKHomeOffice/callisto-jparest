@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest.stepdefinitions;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.parametertypes;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,14 +12,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.Interpolation;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiClient;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.PersonaManager;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.ScenarioState;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.HttpResponseManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.JpaRestApiClient;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.PersonaManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.ScenarioState;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.interpolation.Interpolation;
 
 @ExtendWith(MockitoExtension.class)
-class CucumberConfigTest {
+class ParameterTypesTest {
 
   @Mock
   private PersonaManager personaManager;
@@ -36,11 +36,11 @@ class CucumberConfigTest {
   @Mock
   private TypeFactory typeFactory;
 
-  private CucumberConfig cucumberConfig;
+  private ParameterTypes parameterTypes;
 
   @BeforeEach
   void setup() throws ClassNotFoundException {
-    cucumberConfig = new CucumberConfig(personaManager,
+    parameterTypes = new ParameterTypes(personaManager,
         httpResponseManager,
         jpaRestApiClient,
         objectMapper,
@@ -57,7 +57,7 @@ class CucumberConfigTest {
     String type = "package.UnknownClass";
     AssertionError thrown = assertThrows(
         AssertionError.class,
-        () -> cucumberConfig.resolveType(type),
+        () -> parameterTypes.resolveType(type),
         "Expected resolveType() to throw an exception, but it didn't"
     );
 

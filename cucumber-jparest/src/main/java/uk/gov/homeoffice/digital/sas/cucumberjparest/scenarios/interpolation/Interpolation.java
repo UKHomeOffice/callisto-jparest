@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.interpolation;
 
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;

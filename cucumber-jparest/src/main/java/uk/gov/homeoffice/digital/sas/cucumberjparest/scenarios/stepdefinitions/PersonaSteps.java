@@ -1,8 +1,8 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest.stepdefinitions;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.stepdefinitions;
 
 import io.cucumber.java.en.Given;
 import lombok.NonNull;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.PersonaManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.PersonaManager;
 
 /**
  * Provides steps setting up a persona with a name and any configuration required within the

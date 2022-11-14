@@ -1,16 +1,16 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest.stepdefinitions;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.stepdefinitions;
 
 import io.cucumber.java.en.When;
 import java.util.Map;
 import lombok.NonNull;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.HttpResponseManager;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiClient;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiResourceResponse;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.JpaRestApiResponse;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager.PayloadKey;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.Persona;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.Resource;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.HttpResponseManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.JpaRestApiClient;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.JpaRestApiResourceResponse;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.JpaRestApiResponse;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.PayloadManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.PayloadManager.PayloadKey;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.Resource;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.Persona;
 
 /**
  * Provides steps related to making API requests to endpoints exposed by the JpaRest package.

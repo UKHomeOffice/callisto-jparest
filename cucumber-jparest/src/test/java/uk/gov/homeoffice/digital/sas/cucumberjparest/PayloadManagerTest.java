@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.PayloadManager.PayloadKey;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.PayloadManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.PayloadManager.PayloadKey;
 
 class PayloadManagerTest {
 
