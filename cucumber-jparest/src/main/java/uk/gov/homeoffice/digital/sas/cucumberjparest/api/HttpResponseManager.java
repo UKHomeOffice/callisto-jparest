@@ -47,6 +47,14 @@ public class HttpResponseManager {
     return response;
   }
 
+  /**
+   * Returns the response for the specified {@code uri}, at the specified {@code position}
+   *
+   * @param uri The path the response to be retrieved from
+   * @param position The 0-based ordinal of the response to retrieve the resource from. -1 should be
+   *                 used to get the last element
+   * @return Response
+   */
   public Response getResponse(URI uri, int position) {
     if (!responses.containsKey(uri)) {
       fail("No responses were logged for %s", uri);
