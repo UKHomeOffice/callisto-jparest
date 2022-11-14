@@ -2,7 +2,6 @@ package uk.gov.homeoffice.digital.sas.jparest.exceptions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -74,7 +73,7 @@ class ApiResponseExceptionHandlerTest {
     void handleResourceConstraintViolationException_badRequestWithErrorDataIsReturned() {
         var error = new StructuredError("foo", "bar", null);
 
-        List<StructuredError> errorResponse = new ArrayList<>();
+        ArrayList<StructuredError> errorResponse = new ArrayList<>();
         errorResponse.add(error);
 
         var apiResponseExceptionHandler = new ApiResponseExceptionHandler();

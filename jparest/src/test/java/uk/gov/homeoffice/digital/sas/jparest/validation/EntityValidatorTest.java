@@ -65,8 +65,8 @@ class EntityValidatorTest {
         }
 
         assertThat(telephoneError.getField()).isEqualTo("telephone");
-        assertThat((telephoneError.getMessage()).contains("numeric value out of bounds (<5 digits>.<0 digits> expected)")).isTrue();
-        assertThat((telephoneError.getMessage()).contains("must be greater than 0")).isTrue();
+        assertThat(telephoneError.getMessage()).contains("numeric value out of bounds (<5 digits>.<0 digits> expected)");
+        assertThat(telephoneError.getMessage()).contains("must be greater than 0");
 
         assertThat(descriptionError.getField()).isEqualTo("description");
         assertThat(descriptionError.getMessage()).isEqualTo("must not be empty");

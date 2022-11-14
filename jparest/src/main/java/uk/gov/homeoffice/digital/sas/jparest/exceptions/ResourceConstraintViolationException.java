@@ -1,14 +1,14 @@
 package uk.gov.homeoffice.digital.sas.jparest.exceptions;
 
-import java.util.List;
+import java.util.ArrayList;
 import lombok.Getter;
 
 public class ResourceConstraintViolationException extends RuntimeException {
 
   @Getter
-  private final List<StructuredError> errorResponse;
+  private final ArrayList<StructuredError> errorResponse;
 
-  public ResourceConstraintViolationException(List<StructuredError> o) {
+  public ResourceConstraintViolationException(ArrayList<StructuredError> o) {
     this.errorResponse = o;
   }
 
