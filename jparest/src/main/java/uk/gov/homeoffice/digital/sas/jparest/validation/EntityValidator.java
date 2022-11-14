@@ -52,7 +52,6 @@ public class EntityValidator {
     var hibernateConstraintViolation = constraintViolation.unwrap(
         HibernateConstraintViolation.class
     );
-    var payload = hibernateConstraintViolation.getDynamicPayload(ArrayList.class);
 
     return constraintViolations.stream()
             .collect(groupingBy(ConstraintViolation::getPropertyPath))
@@ -64,7 +63,7 @@ public class EntityValidator {
 
               return new StructuredError(entry.getKey().toString(),
                   propertyErrors,
-                  payload);
+                  hibernateConstraintViolation.getDynamicPayload(ArrayList.class));
             }).collect(Collectors.toList());
   }
 }
