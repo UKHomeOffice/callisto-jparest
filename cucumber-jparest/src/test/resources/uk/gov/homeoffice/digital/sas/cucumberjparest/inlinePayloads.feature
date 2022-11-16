@@ -50,7 +50,7 @@ Feature: Inline Payloads
 
   Scenario: Kebab case resource type should be allowed
 
-    If resource type is composed of more than one word, the convention is to use Kebab Case.
+    If resource type is composed of more than one word, the convention is to use kebab-case.
 
     Given the valid person-profiles are
       """
