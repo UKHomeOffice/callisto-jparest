@@ -8,6 +8,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotEmpty;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,6 +21,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 @NoArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 public class Concert extends BaseEntity {
 
   @NotEmpty

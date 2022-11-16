@@ -14,8 +14,15 @@ trigger:
     - pull_request
 
 steps:
+- name: fetch
+  image: alpine/git
+  commands:
+    - "git fetch origin +refs/heads/main:"
+
 - name: test
   image: maven:3.8-openjdk-17
+  depends_on:
+    - fetch
   commands:
   - mvn clean install
 
@@ -29,7 +36,12 @@ steps:
     SONAR_TOKEN:
       from_secret: sonar_cloud_token
   commands:
-  - mvn sonar:sonar -Dsonar.host.url=$${SONAR_HOST} -Dsonar.login=$${SONAR_TOKEN} -Dsonar.organization=ukhomeoffice -Dsonar.projectKey=callisto-jparest -Dsonar.branch.name=$DRONE_BRANCH -Dsonar.projectName=callisto-jparest -Dsonar.qualitygate.wait=true
+  - mvn -X sonar:sonar
+    -Dsonar.host.url=$${SONAR_HOST}
+    -Dsonar.login=$${SONAR_TOKEN}
+    -Dsonar.branch.name=$DRONE_BRANCH
+    -Dsonar.projectKey=callisto-jparest
+    -Dsonar.qualitygate.wait=true
   when:
     event:
       exclude:

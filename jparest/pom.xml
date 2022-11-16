@@ -4,14 +4,12 @@
     <parent>
         <groupId>uk.gov.homeoffice.digital.sas</groupId>
         <artifactId>parentpom</artifactId>
-        <version>0.0.10</version>
+        <version>0.0.11</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>jparest</artifactId>
-    <version>${project.version}</version>
 
     <dependencyManagement>
         <dependencies>
@@ -72,19 +70,6 @@
             <artifactId>mockito-all</artifactId>
             <version>1.10.19</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-            <!-- exclude junit 4 -->
-            <exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>

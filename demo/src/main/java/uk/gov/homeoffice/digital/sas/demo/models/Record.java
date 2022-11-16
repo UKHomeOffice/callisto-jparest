@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 @NoArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 public class Record extends BaseEntity {
 
   @NotNull

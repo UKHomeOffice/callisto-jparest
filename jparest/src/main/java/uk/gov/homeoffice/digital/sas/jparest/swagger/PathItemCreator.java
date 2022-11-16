@@ -174,11 +174,8 @@ public class PathItemCreator {
   }
 
   /**
-   * The {@link uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse ApiResponse}
-   * can return any type of resource in its items
-   * property. This method returns a swagger ApiResponse that
-   * contains a schema for the
-   * {@link uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse ApiResponse}
+   * The {@link ApiResponse} can return any type of resource in its items property.
+   * This method returns a swagger ApiResponse that contains a schema for the {@link ApiResponse}
    * with its items set to the specified class
    *
    * @param clazz The type of items to describe in the schema
@@ -201,10 +198,8 @@ public class PathItemCreator {
    * <p>generates a schema for the ApiResponse.</p>
    *
    * @param clazz The type to generate a schema for
-   * @return Schema for the ApiResponse
-   * Returns a schema for the
-   * {@link uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse ApiResponse}
-   * class with the items property containing a schema for the given class
+   * @return a schema for the {@link ApiResponse} class with the items property containing
+   *     a schema for the given class
    */
   private static Schema<?> getTypedApiResponseSchema(Class<?> clazz) {
 
@@ -298,10 +293,8 @@ public class PathItemCreator {
   /**
    * <p>Generates an empty/unspecified response.</p>
    *
-   * @return An empty ApiResponse
-   *
-   * This will be replaced as the ResourceApiController
-   * is refined to define all expected response
+   * @return An empty ApiResponse. This will be replaced as the ResourceApiController
+   *     is refined to define all expected response
    */
   private static ApiResponse emptyResponse() {
     var deleteResponse = new ApiResponse();

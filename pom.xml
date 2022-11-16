@@ -6,11 +6,12 @@
 
     <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>parentpom</artifactId>
-    <version>0.0.10</version>
+    <version>0.0.11</version>
     <packaging>pom</packaging>
 
     <properties>
-        <project.version>0.0.10${snapshotSuffix}</project.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.version>0.0.11${snapshotSuffix}</project.version>
         <snapshotSuffix></snapshotSuffix>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -21,6 +22,8 @@
         <!-- Sonar Properties -->
         <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.organization>ukhomeoffice</sonar.organization>
+        <sonar.projectName>callisto-jparest</sonar.projectName>
     </properties>
 
     <distributionManagement>
@@ -47,6 +50,7 @@
     <modules>
         <module>jparest</module>
         <module>demo</module>
+        <module>cucumber-jparest</module>
     </modules>
 
     <build>
@@ -54,6 +58,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.2.0</version>
                     <goals>
                         <goal>check</goal>
                     </goals>
@@ -72,10 +77,10 @@
                     <suppressionsLocation>checkstyle_suppressions.xml</suppressionsLocation>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.8</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -91,7 +96,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
       </build>
 </project>
