@@ -47,3 +47,12 @@ Feature: Inline Payloads
     Then the last response should have a status code of 200
     When the tester creates the invalid profiles in the test service
     Then the last response should have a status code of 400
+
+  Scenario: Kebab case resource type should be allowed
+
+    If resource type is composed of more than one word, the convention is to use Kebab Case.
+
+    Given the valid person-profiles are
+      """
+      {}
+      """
