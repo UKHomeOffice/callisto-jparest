@@ -65,7 +65,7 @@ public class ParameterTypes {
    * @param resourceType The type of resource represented
    * @return PayloadKey
    */
-  @ParameterType("(?:the )?(\\w+) ([\\w-]*)")
+  @ParameterType("(?:the )?(\\w+) ([\\w-]+)")
   public PayloadKey payload(String payloadName, String resourceType) {
     return new PayloadKey(resourceType, payloadName);
   }
