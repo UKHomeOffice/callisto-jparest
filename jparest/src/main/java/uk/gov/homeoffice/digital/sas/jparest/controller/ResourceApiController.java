@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
@@ -77,6 +78,7 @@ public class ResourceApiController<T extends BaseEntity> {
   private final ObjectMapper objectMapper;
 
   private static final String QUERY_HINT = "javax.persistence.fetchgraph";
+  private static final Logger LOGGER = Logger.getLogger(EntityUtils.class.getName());
 
 
   @SuppressWarnings("unchecked")
@@ -179,6 +181,8 @@ public class ResourceApiController<T extends BaseEntity> {
       result = repository.saveAndFlush(r2);
       transactionManager.commit(transactionStatus);
     } catch (RuntimeException ex) {
+      LOGGER.severe(
+              "An exception occurred while trying to create an object" + ex.getMessage());
       transactionManager.rollback(transactionStatus);
       throw ex;
     }
@@ -209,10 +213,14 @@ public class ResourceApiController<T extends BaseEntity> {
 
       transactionManager.commit(transactionStatus);
     } catch (EmptyResultDataAccessException ex) {
+      LOGGER.severe(
+              "An exception occurred while trying to delete an object" + ex.getMessage());
       transactionManager.rollback(transactionStatus);
       throw new ResourceNotFoundException(id);
 
     } catch (RuntimeException ex) {
+      LOGGER.severe(
+              "An exception occurred while trying to delete an object" + ex.getMessage());
       transactionManager.rollback(transactionStatus);
       throw ex;
     }
@@ -247,6 +255,8 @@ public class ResourceApiController<T extends BaseEntity> {
       repository.saveAndFlush(orig);
       transactionManager.commit(transactionStatus);
     } catch (RuntimeException ex) {
+      LOGGER.severe(
+              "An exception occurred while trying to update an object" + ex.getMessage());
       transactionManager.rollback(transactionStatus);
       throw ex;
     }
@@ -365,9 +375,13 @@ public class ResourceApiController<T extends BaseEntity> {
       repository.saveAndFlush(originalEntity);
       transactionManager.commit(transactionStatus);
     } catch (EntityNotFoundException ex) {
+      LOGGER.severe(
+              "An exception occurred while trying to add an object" + ex.getMessage());
       transactionManager.rollback(transactionStatus);
       throw new ResourceNotFoundException(id);
     } catch (RuntimeException ex) {
+      LOGGER.severe(
+              "An exception occurred while trying to add an object" + ex.getMessage());
       transactionManager.rollback(transactionStatus);
       throw ex;
     }
@@ -403,6 +417,8 @@ public class ResourceApiController<T extends BaseEntity> {
     try {
       return objectMapper.readValue(body, this.entityUtils.getEntityType());
     } catch (UnrecognizedPropertyException ex) {
+      LOGGER.severe(
+              "An exception occurred while trying to read the payload" + ex.getMessage());
       throw new UnknownResourcePropertyException(
         ex.getPropertyName(), ex.getReferringClass().getSimpleName());
     }
