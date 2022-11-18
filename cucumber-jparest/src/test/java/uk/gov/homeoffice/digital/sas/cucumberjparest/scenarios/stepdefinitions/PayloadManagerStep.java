@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparesttestapi.stepdefinitions;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.stepdefinitions;
 
 import static org.assertj.core.api.Assertions.*;
 
