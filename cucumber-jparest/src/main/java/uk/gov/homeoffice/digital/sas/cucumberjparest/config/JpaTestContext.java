@@ -5,6 +5,7 @@ import static uk.gov.homeoffice.digital.sas.cucumberjparest.api.ServiceRegistry.
 import io.cucumber.spring.ScenarioScope;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
@@ -117,4 +118,8 @@ public class JpaTestContext {
     return new Interpolation(beanFactory);
   }
 
+  @Bean
+  public Map<String, String> sharedVariables() {
+    return new HashMap<>();
+  }
 }
