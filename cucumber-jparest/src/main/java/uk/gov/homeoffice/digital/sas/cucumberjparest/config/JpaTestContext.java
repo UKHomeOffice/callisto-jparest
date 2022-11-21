@@ -93,7 +93,6 @@ public class JpaTestContext {
    *
    * @return JpaRestApiClient
    */
-  // @ScenarioScope
   @Bean
   public JpaRestApiClient jpaRestApiClient() {
     return new JpaRestApiClient(serviceRegistry());
