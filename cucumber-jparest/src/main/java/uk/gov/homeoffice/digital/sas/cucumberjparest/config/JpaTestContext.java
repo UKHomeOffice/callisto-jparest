@@ -5,7 +5,6 @@ import static uk.gov.homeoffice.digital.sas.cucumberjparest.api.ServiceRegistry.
 import io.cucumber.spring.ScenarioScope;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.HttpResponseManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.JpaRestApiClient;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.PayloadManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.ResourceHelper;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.ServiceRegistry;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.PersonaManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.ScenarioState;
@@ -103,6 +103,7 @@ public class JpaTestContext {
    *
    * @return JpaRestApiClient
    */
+  // @ScenarioScope
   @Bean
   public JpaRestApiClient jpaRestApiClient() {
     return new JpaRestApiClient(serviceRegistry());
@@ -119,7 +120,7 @@ public class JpaTestContext {
   }
 
   @Bean
-  public Map<String, String> sharedVariables() {
-    return new HashMap<>();
+  public ResourceHelper resourceHelper() {
+    return new ResourceHelper(jpaRestApiClient(), personaManager());
   }
 }

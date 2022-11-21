@@ -2,6 +2,7 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest.persona;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,8 +24,13 @@ public class PersonaManager {
    * requests.
    */
   public PersonaManager() {
+    this.tenantId = System.getProperty(TENANT_ID_SYSTEM_PROPERTY_NAME);
     this.createPersona("someone");
   }
+
+  public static final String TENANT_ID_SYSTEM_PROPERTY_NAME = "cucumber.jparest.tenantId";
+
+  private final String tenantId;
 
   /**
    * Creates a new persona with the given name.
@@ -37,6 +43,7 @@ public class PersonaManager {
       throw new IllegalArgumentException(name + " already exists");
     }
     Persona persona = new Persona();
+    persona.setTenantId(UUID.fromString(tenantId));
     personas.put(name, persona);
     return persona;
   }

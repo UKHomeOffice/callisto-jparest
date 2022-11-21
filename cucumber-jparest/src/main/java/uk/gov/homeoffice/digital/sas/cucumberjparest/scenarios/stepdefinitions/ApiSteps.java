@@ -43,7 +43,7 @@ public class ApiSteps {
       String service) {
 
     String payload = this.payloadManager.getPayload(payloadKey);
-    JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.create(persona, null,
+    JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.create(persona,
         service, payloadKey.getResourceType(), payload);
 
     this.httpResponseManager.addResponse(apiResponse.getBaseResourceUri(),
@@ -60,7 +60,7 @@ public class ApiSteps {
   @When("{persona} retrieves {word}{service}")
   public void personaRetrievesResourcesFromTheService(Persona persona, String resource,
       String service) {
-    JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieve(persona, null, service,
+    JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieve(persona, service,
         resource, null);
 
     this.httpResponseManager.addResponse(apiResponse.getBaseResourceUri(),
@@ -79,7 +79,7 @@ public class ApiSteps {
   public void personaRetrievesResourcesFromTheService(Persona persona, String resource,
       String service,
       Map<String, String> parameters) {
-    JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieve(persona, null, service,
+    JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieve(persona, service,
         resource, parameters);
 
     this.httpResponseManager.addResponse(apiResponse.getBaseResourceUri(),
@@ -95,7 +95,7 @@ public class ApiSteps {
    */
   @When("{persona} GETs {string}{service}")
   public void personaGetsUrlFromService(Persona persona, String path, String service) {
-    JpaRestApiResponse apiResponse = this.jpaRestApiClient.get(persona, null, service, path);
+    JpaRestApiResponse apiResponse = this.jpaRestApiClient.get(persona, service, path);
 
     this.httpResponseManager.addResponse(apiResponse.getUri(), apiResponse.getResponse());
   }
@@ -113,7 +113,7 @@ public class ApiSteps {
       String resource,
       String identifier, String service) {
     JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.retrieveById(persona,
-        null, service, resource, identifier);
+        service, resource, identifier);
 
     this.httpResponseManager.addResponse(apiResponse.getBaseResourceUri(),
         apiResponse.getResponse());
@@ -129,7 +129,7 @@ public class ApiSteps {
   @When("{persona} deletes the {resource}{service}")
   public void personaDeletesTheResource(Persona persona, Resource resource, String service) {
     String reference = resource.getJsonPath().getString("id");
-    JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.delete(persona, null,
+    JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.delete(persona,
         service, resource.getResourceType(), reference);
 
     this.httpResponseManager.addResponse(apiResponse.getBaseResourceUri(),
@@ -150,7 +150,7 @@ public class ApiSteps {
 
     String reference = resource.getJsonPath().getString("id");
     String payload = this.payloadManager.getPayload(payloadKey);
-    JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.update(persona, null, service,
+    JpaRestApiResourceResponse apiResponse = this.jpaRestApiClient.update(persona, service,
         payloadKey.getResourceType(), reference, payload);
 
     this.httpResponseManager.addResponse(apiResponse.getBaseResourceUri(),
