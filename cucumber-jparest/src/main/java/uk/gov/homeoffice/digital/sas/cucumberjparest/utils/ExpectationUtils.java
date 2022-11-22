@@ -207,7 +207,7 @@ public class ExpectationUtils {
     } catch (SpelParseException ex) {
       softly.fail("Invalid expectation: " + expectation);
     } catch (EvaluationException ex) {
-      // If an expectation exectued correctly but failed retrieve the underlying cause
+      // If an expectation executed correctly but failed retrieve the underlying cause
       // to expose the failed expectation
       var cause = ex.getCause();
       if (cause != null) {

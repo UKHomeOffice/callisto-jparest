@@ -1,8 +1,9 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
 
-import io.restassured.response.ResponseBody;
+import io.restassured.path.json.JsonPath;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,10 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.PersonaManager;
 @Component
 @SuppressWarnings("squid:S5960")
 public class ResourceHelper {
+
+  static final String ITEMS_SIZE_JSON_PATH = "items.size()";
+  static final String ITEM_ID_JSON_PATH = "items[0].id";
+  static final String RESOURCE_MUST_BE_UNIQUE = "Expected one resource but got {0} instead";
 
   private final JpaRestApiClient jpaRestApiClient;
 
@@ -37,19 +42,19 @@ public class ResourceHelper {
       String filter) {
     Persona persona = personaManager.getPersona(personaName);
     Map<String, String> params = new HashMap<>();
-    params.put("filter", filter);
+    if (filter != null) {
+      params.put("filter", filter);
+    }
 
-    ResponseBody responseBody = jpaRestApiClient.retrieve(persona, service, resourceType, params)
-        .getResponse().getBody();
+    JsonPath jsonPath = jpaRestApiClient.retrieve(persona, service, resourceType, params)
+        .getResponse().getBody().jsonPath();
 
-    Integer numberOfItems = responseBody.jsonPath().get("items.size()");
+    Integer numberOfItems = jsonPath.get(ITEMS_SIZE_JSON_PATH);
     // Response must have one and only one item
-    assertThat(numberOfItems).isEqualTo(1);
+    if (!Integer.valueOf(1).equals(numberOfItems)) {
+      fail(MessageFormat.format(RESOURCE_MUST_BE_UNIQUE, numberOfItems));
+    }
 
-    String resourceId = responseBody.jsonPath().get("items[0].id");
-    // Item must have a non-empty id
-    assertThat(resourceId).isNotBlank();
-
-    return resourceId;
+    return jsonPath.get(ITEM_ID_JSON_PATH);
   }
 }
