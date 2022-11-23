@@ -17,6 +17,7 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.api.PayloadManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.ServiceRegistry;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.PersonaManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.ScenarioState;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.Assertions;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.interpolation.Interpolation;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.utils.SerialisationUtil;
 
@@ -115,6 +116,16 @@ public class JpaTestContext {
   @Bean
   public Interpolation interpolation(ConfigurableBeanFactory beanFactory) {
     return new Interpolation(beanFactory);
+  }
+
+    /**
+   * Singleton Assertions.
+   *
+   * @return Assertions
+   */
+  @Bean
+  public Assertions assertions(ConfigurableBeanFactory beanFactory) {
+    return new Assertions(beanFactory);
   }
 
 }
