@@ -17,7 +17,7 @@ public class PersonaManager {
 
   public static final String TENANT_ID_SYSTEM_PROPERTY_NAME = "cucumber.jparest.tenantId";
 
-  private final String tenantId;
+  private final UUID tenantId;
 
   // Holds that state for Personas against the provide persona name
   private final Map<String, Persona> personas = new HashMap<>();
@@ -28,7 +28,7 @@ public class PersonaManager {
    * requests.
    */
   public PersonaManager() {
-    this.tenantId = System.getProperty(TENANT_ID_SYSTEM_PROPERTY_NAME);
+    this.tenantId = UUID.fromString(System.getProperty(TENANT_ID_SYSTEM_PROPERTY_NAME));
     this.createPersona("someone");
   }
 
@@ -43,7 +43,7 @@ public class PersonaManager {
       throw new IllegalArgumentException(name + " already exists");
     }
     Persona persona = new Persona();
-    persona.setTenantId(UUID.fromString(tenantId));
+    persona.setTenantId(tenantId);
     personas.put(name, persona);
     return persona;
   }
