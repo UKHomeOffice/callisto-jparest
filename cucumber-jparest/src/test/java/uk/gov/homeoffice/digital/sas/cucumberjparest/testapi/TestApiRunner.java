@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparesttestapi;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.testapi;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

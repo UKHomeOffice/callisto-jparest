@@ -15,7 +15,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.Persona;
 
@@ -31,21 +30,19 @@ public class JpaRestApiClient {
   @SuppressWarnings("squid:S1075") // URIs should not be hardcoded
   public static final String API_ROOT_PATH = "/resources/";
   public static final String TENANT_ID_PARAM_NAME = "tenantId";
-  public static final String TENANT_ID_SYSTEM_PROPERTY_NAME = "cucumber.jparest.tenantId";
-  private static final String TENANT_ID_SYSTEM_PROPERTY_EL
-      = "#{systemProperties['" + TENANT_ID_SYSTEM_PROPERTY_NAME + "']}";
 
-  /**
-   * Injecting tenantId parameter as a system property to avoid verbosity in BDD features. This is a
-   * temporary workaround, as in the long term, tenantId would be part of the authenticated user
-   * object and would not have to be supplied as a request parameter
-   */
-  @Value(TENANT_ID_SYSTEM_PROPERTY_EL)
-  private String tenantId;
+  @Getter
+  private final ServiceRegistry serviceRegistry;
+
+  @Autowired
+  public JpaRestApiClient(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = Objects.requireNonNull(serviceRegistry,
+        "serviceRegistry must not be null");
+  }
 
   /**
    * @param requestSpecification Request Specification
-   * @param persona Persona
+   * @param persona              Persona
    * @return RequestSpecification
    */
   private static RequestSpecification addPersonaAuthToRequestSpecification(
@@ -78,15 +75,6 @@ public class JpaRestApiClient {
     return requestUri;
   }
 
-  @Getter
-  private final ServiceRegistry serviceRegistry;
-
-  @Autowired
-  public JpaRestApiClient(ServiceRegistry serviceRegistry) {
-    this.serviceRegistry = Objects.requireNonNull(serviceRegistry,
-        "serviceRegistry must not be null");
-  }
-
   /**
    * Creates resources in the specified service using the provided payload.
    *
@@ -97,13 +85,13 @@ public class JpaRestApiClient {
    * @param payload  The resource to create
    * @return JpaRestApiResourceResponse
    */
-  public JpaRestApiResourceResponse create(Persona persona, String service, String resource,
-      String payload) {
+  public JpaRestApiResourceResponse create(Persona persona, String service,
+      String resource, String payload) {
     URI uri = getResourceUri(service, resource);
     RequestSpecification spec = given()
         .baseUri(uri.toString())
         .body(payload)
-        .queryParam(TENANT_ID_PARAM_NAME, tenantId);
+        .queryParam(TENANT_ID_PARAM_NAME, persona.getTenantId().toString());
 
     addPersonaAuthToRequestSpecification(spec, persona);
 
@@ -123,13 +111,13 @@ public class JpaRestApiClient {
    * @param parameters The query string parameters to add to the requested url
    * @return JpaRestApiResourceResponse
    */
-  public JpaRestApiResourceResponse retrieve(Persona persona, String service, String resource,
-      Map<String, String> parameters) {
+  public JpaRestApiResourceResponse retrieve(Persona persona, String service,
+      String resource, Map<String, String> parameters) {
     URI uri = getResourceUri(service, resource);
 
     RequestSpecification spec = given()
         .baseUri(uri.toString())
-        .queryParam(TENANT_ID_PARAM_NAME, tenantId);
+        .queryParam(TENANT_ID_PARAM_NAME, persona.getTenantId().toString());
 
     if (parameters != null) {
       spec = spec.queryParams(parameters);
@@ -154,13 +142,13 @@ public class JpaRestApiClient {
    * @param reference The identifier of the resource to be retrieved
    * @return JpaRestApiResourceResponse
    */
-  public JpaRestApiResourceResponse retrieveById(Persona persona, String service, String resource,
-      String reference) {
+  public JpaRestApiResourceResponse retrieveById(Persona persona, String service,
+      String resource, String reference) {
     URI uri = getResourceUri(service, resource);
 
     RequestSpecification spec = given()
         .baseUri(uri.toString())
-        .queryParam(TENANT_ID_PARAM_NAME, tenantId);
+        .queryParam(TENANT_ID_PARAM_NAME, persona.getTenantId().toString());
 
     addPersonaAuthToRequestSpecification(spec, persona);
 
@@ -183,15 +171,14 @@ public class JpaRestApiClient {
    * @param payload   The updated resource
    * @return JpaRestApiResourceResponse
    */
-  public JpaRestApiResourceResponse update(Persona persona, String service, String resource,
-      String reference,
-      String payload) {
+  public JpaRestApiResourceResponse update(Persona persona, String service,
+      String resource, String reference, String payload) {
 
     URI uri = getResourceUri(service, resource);
     RequestSpecification spec = given()
         .baseUri(uri.toString())
         .body(payload)
-        .queryParam(TENANT_ID_PARAM_NAME, tenantId);
+        .queryParam(TENANT_ID_PARAM_NAME, persona.getTenantId().toString());
 
     addPersonaAuthToRequestSpecification(spec, persona);
 
@@ -212,13 +199,13 @@ public class JpaRestApiClient {
    * @param reference The identifier of the resource to be deleted
    * @return JpaRestApiResourceResponse
    */
-  public JpaRestApiResourceResponse delete(Persona persona, String service, String resource,
-      String reference) {
+  public JpaRestApiResourceResponse delete(Persona persona, String service,
+      String resource, String reference) {
     URI uri = getResourceUri(service, resource);
 
     RequestSpecification spec = given()
         .baseUri(uri.toString())
-        .queryParam(TENANT_ID_PARAM_NAME, tenantId);
+        .queryParam(TENANT_ID_PARAM_NAME, persona.getTenantId().toString());
 
     addPersonaAuthToRequestSpecification(spec, persona);
 
@@ -233,10 +220,10 @@ public class JpaRestApiClient {
    * Makes the GET request to the specified service using the provided path. The path could be a
    * resource path or any other endpoint (e.g. openAPI)
    *
-   * @param persona The persona making the request.
-   * @param service The name of the service where the resources will be retrieved from. The service
-   *                name must exist in the {@link ServiceRegistry}
-   * @param path The relative path to make the GET request to
+   * @param persona  The persona making the request.
+   * @param service  The name of the service where the resources will be retrieved from. The service
+   *                 name must exist in the {@link ServiceRegistry}
+   * @param path     The relative path to make the GET request to
    * @return JpaRestApiResponse
    */
   public JpaRestApiResponse get(Persona persona, String service, String path) {
@@ -244,7 +231,7 @@ public class JpaRestApiClient {
 
     RequestSpecification spec = given()
         .baseUri(url.toString())
-        .queryParam(TENANT_ID_PARAM_NAME, tenantId);
+        .queryParam(TENANT_ID_PARAM_NAME, persona.getTenantId().toString());
 
     addPersonaAuthToRequestSpecification(spec, persona);
 

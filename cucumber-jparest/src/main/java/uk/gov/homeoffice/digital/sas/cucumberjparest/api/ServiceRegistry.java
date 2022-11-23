@@ -1,10 +1,10 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.api;
 
 import java.util.Map;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.utils.SerialisationUtil;
 
 /**
 * Registry for services and their location.
@@ -12,11 +12,16 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-@AllArgsConstructor
 public class ServiceRegistry {
 
   public static final String SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME
       = "cucumber.jparest.serviceRegistry";
+
+  public ServiceRegistry() {
+    String serviceRegistryString = System.getProperty(SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME);
+    this.services = SerialisationUtil.stringToMap(serviceRegistryString);
+  }
+
   private Map<String, String> services;
 
   /**

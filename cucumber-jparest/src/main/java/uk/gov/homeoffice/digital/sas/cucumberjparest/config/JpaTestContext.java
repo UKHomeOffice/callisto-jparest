@@ -1,24 +1,21 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.config;
 
-import static uk.gov.homeoffice.digital.sas.cucumberjparest.api.ServiceRegistry.SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME;
-
 import io.cucumber.spring.ScenarioScope;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.HttpResponseManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.JpaRestApiClient;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.PayloadManager;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.api.ResourceHelper;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.ServiceRegistry;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.PersonaManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.ScenarioState;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.interpolation.Interpolation;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.utils.SerialisationUtil;
 
 /**
  * Class used by the {Link ContextConfiguration} annotation to configure an
@@ -37,11 +34,6 @@ public class JpaTestContext {
       Map.class.getSimpleName(), Map.class,
       List.class.getSimpleName(), List.class,
       Instant.class.getSimpleName(), Instant.class);
-  private static final String SERVICE_REGISTRY_SYSTEM_PROPERTY_EL
-      = "#{systemProperties['" + SERVICE_REGISTRY_SYSTEM_PROPERTY_NAME + "']}";
-
-  @Value(SERVICE_REGISTRY_SYSTEM_PROPERTY_EL)
-  private String serviceRegistryString;
 
   /**
    * The service registry needs to be accessed to by the Cucumber context and the test runner so
@@ -49,8 +41,7 @@ public class JpaTestContext {
    */
   @Bean
   public ServiceRegistry serviceRegistry() {
-    Map<String, String> servicesMap = SerialisationUtil.stringToMap(serviceRegistryString);
-    return new ServiceRegistry(servicesMap);
+    return new ServiceRegistry();
   }
 
   /**
@@ -117,4 +108,8 @@ public class JpaTestContext {
     return new Interpolation(beanFactory);
   }
 
+  @Bean
+  public ResourceHelper resourceHelper() {
+    return new ResourceHelper(jpaRestApiClient(), personaManager());
+  }
 }

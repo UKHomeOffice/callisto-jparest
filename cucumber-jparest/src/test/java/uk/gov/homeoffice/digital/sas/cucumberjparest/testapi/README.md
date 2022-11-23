@@ -1,4 +1,4 @@
-# cucumberjparesttestapi
+# cucumberjparest.testapi
 
 This package exists to isolate code used to launch a
 test SpringBootApplication that uses the jparest package

@@ -2,6 +2,7 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest.persona;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,10 +10,14 @@ import org.springframework.stereotype.Component;
  * When new personas are created they can be given any
  * name. This name is used as a variable to reference
  * the persona instance in later steps within a scenario.
- * 
+ *
  */
 @Component
 public class PersonaManager {
+
+  public static final String TENANT_ID_SYSTEM_PROPERTY_NAME = "cucumber.jparest.tenantId";
+
+  private final UUID tenantId;
 
   // Holds that state for Personas against the provide persona name
   private final Map<String, Persona> personas = new HashMap<>();
@@ -23,6 +28,7 @@ public class PersonaManager {
    * requests.
    */
   public PersonaManager() {
+    this.tenantId = UUID.fromString(System.getProperty(TENANT_ID_SYSTEM_PROPERTY_NAME));
     this.createPersona("someone");
   }
 
@@ -37,6 +43,7 @@ public class PersonaManager {
       throw new IllegalArgumentException(name + " already exists");
     }
     Persona persona = new Persona();
+    persona.setTenantId(tenantId);
     personas.put(name, persona);
     return persona;
   }

@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparesttestapi.models;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.testapi.models;
 
 import java.util.Date;
 import java.util.HashMap;

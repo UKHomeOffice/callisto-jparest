@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparesttestapi.controllers;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.testapi.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,7 @@ public class TestsController {
     
     @GetMapping("empty.html")
     public @ResponseBody ResponseEntity<String> getEmptyResponse() {
-        return new ResponseEntity<String>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

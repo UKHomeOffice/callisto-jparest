@@ -13,9 +13,13 @@ JpaRest library.
 The tests for this library are themselves written in gherkin and
 executed by cucumber.
 
-Therefore the living documentation of what features the cucumber-jparest
-supports are the [feature files](src/test/resources/uk/gov/homeoffice/digital/sas/cucumberjparest/)
+Therefore, the living documentation of what features the cucumber-jparest
+supports are the [feature files](src/test/resources/uk/gov/homeoffice/digital/sas/cucumberjparest)
 themselves.
+
+Note that the features under [test folder](src/test/resources/test) are used as internal tests 
+for cucumber-jparest itself and should not be regarded as an example of how cucumber-jparest is 
+supposed to be used by third party projects
 
 ## Getting Started
 

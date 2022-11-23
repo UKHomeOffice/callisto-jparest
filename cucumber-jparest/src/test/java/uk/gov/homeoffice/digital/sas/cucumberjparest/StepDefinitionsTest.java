@@ -15,7 +15,7 @@ import io.cucumber.java.en.Then;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.ServiceRegistry;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.Persona;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.PersonaManager;
-import uk.gov.homeoffice.digital.sas.cucumberjparesttestapi.TestApiRunner;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.testapi.TestApiRunner;
 
 /**
  * 
