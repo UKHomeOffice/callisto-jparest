@@ -1,10 +1,10 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.stepdefinitions;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.homeoffice.digital.sas.cucumberjparest.utils.ExpectationUtils.headersMeetsExpectations;
-import static uk.gov.homeoffice.digital.sas.cucumberjparest.utils.ExpectationUtils.objectContainsFields;
-import static uk.gov.homeoffice.digital.sas.cucumberjparest.utils.ExpectationUtils.objectDoesNotContainFields;
-import static uk.gov.homeoffice.digital.sas.cucumberjparest.utils.ExpectationUtils.objectMeetsExpectations;
+import static uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.ExpectationUtils.headersMeetsExpectations;
+import static uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.ExpectationUtils.objectContainsFields;
+import static uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.ExpectationUtils.objectDoesNotContainFields;
+import static uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.ExpectationUtils.objectMeetsExpectations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Then;

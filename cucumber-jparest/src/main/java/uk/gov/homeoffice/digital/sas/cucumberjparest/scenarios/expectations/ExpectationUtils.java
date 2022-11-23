@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.cucumberjparest.utils;
+package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,7 +19,6 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.FieldExpectation;
 
 /**
  * Provides methods used to assert expectations against given objects.
