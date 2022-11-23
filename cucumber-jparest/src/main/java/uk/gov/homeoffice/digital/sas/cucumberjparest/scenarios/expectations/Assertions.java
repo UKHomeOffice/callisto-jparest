@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import java.lang.reflect.Method;
@@ -11,8 +12,12 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import lombok.NonNull;
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.expression.BeanExpressionContextAccessor;
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -23,12 +28,18 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 /**
  * Provides methods used to assert expectations against given objects.
  */
-public class ExpectationUtils {
+public class Assertions {
 
   private static final Pattern FIELD_PATH_IS_AN_ARRAY = Pattern.compile("(?=(.*)\\[(\\d+)\\]$).*");
   private static final Pattern FIELD_PATH = Pattern.compile("(.*)(\\.|^)(.*)");
 
-  private ExpectationUtils() {
+  private final BeanExpressionContext rootObject;
+  private final ConfigurableBeanFactory beanFactory;
+  
+  @Autowired
+  public Assertions(ConfigurableBeanFactory beanFactory) {
+    this.beanFactory = beanFactory;
+    this.rootObject = new BeanExpressionContext(beanFactory, null);
   }
 
   /**
@@ -75,7 +86,7 @@ public class ExpectationUtils {
    * @param objectUnderTest JsonPath pointing to the object to assert against
    * @param fieldExpectations    A table of expectations to assert
    */
-  public static void objectMeetsExpectations(JsonPath objectUnderTest,
+  public void objectMeetsExpectations(JsonPath objectUnderTest,
       List<FieldExpectation> fieldExpectations,
       ObjectMapper objectMapper) {
     SoftAssertions softly = new SoftAssertions();
@@ -91,10 +102,9 @@ public class ExpectationUtils {
    * @param softly          The SoftAssertions instance
    */
   @SuppressWarnings("squid:S5960")// Assertions are needed in this test library
-  public static void objectMeetsExpectations(JsonPath objectUnderTest,
+  public void objectMeetsExpectations(JsonPath objectUnderTest,
       List<FieldExpectation> fieldExpectations, ObjectMapper objectMapper,
       @NonNull SoftAssertions softly) {
-
     fieldExpectations.forEach(expect -> {
       var field = expect.getField();
 
@@ -153,7 +163,7 @@ public class ExpectationUtils {
    * @param headers      The headers from a response
    * @param expectations The expectations to assert against the headers
    */
-  public static void headersMeetsExpectations(Headers headers, Map<String, String> expectations) {
+  public void headersMeetsExpectations(Headers headers, Map<String, String> expectations) {
     SoftAssertions softly = new SoftAssertions();
     expectations.forEach((headerName, expectation) -> {
       var header = headers.get(headerName);
@@ -170,17 +180,19 @@ public class ExpectationUtils {
    * @param expectation The expectation
    * @param softly      The SoftAssertions instance
    */
-  private static void evaluateExpectation(Object testSubject, String expectation,
+  private void evaluateExpectation(Object testSubject, String expectation,
       @NonNull SoftAssertions softly) {
     // Assert the expectation
     try {
       // Create the evaluation context and set the variable and function
       StandardEvaluationContext context = new StandardEvaluationContext();
       context.setVariable("objectToTest", testSubject);
-
+      context.setBeanResolver(new BeanFactoryResolver(this.beanFactory));
+      context.addPropertyAccessor(new BeanExpressionContextAccessor());
+  
       // The assertThat function has to be reflected because of type erasure
       // otherwise we would only be able to assert against objects
-      Method assertThatMethod = MethodUtils.getMatchingAccessibleMethod(Assertions.class,
+      Method assertThatMethod = MethodUtils.getMatchingAccessibleMethod(org.assertj.core.api.Assertions.class,
           "assertThat",
           testSubject.getClass());
       if (assertThatMethod == null) {
@@ -201,7 +213,8 @@ public class ExpectationUtils {
 
       // Execute the expression and capture any EvaluationException to determine
       // how the expectation failed
-      expression.getValue(context);
+      expression.getValue(context, rootObject);
+      // expression.getValue(context);
 
     } catch (SpelParseException ex) {
       softly.fail("Invalid expectation: " + expectation);
