@@ -26,7 +26,7 @@ public class AssertionSteps {
   private final Assertions assertions;
 
   public AssertionSteps(@NonNull HttpResponseManager httpResponseManager,
-      @NonNull ObjectMapper objectMapper , @NonNull Assertions assertions) {
+      @NonNull ObjectMapper objectMapper, @NonNull Assertions assertions) {
     this.httpResponseManager = httpResponseManager;
     this.objectMapper = objectMapper;
     this.assertions = assertions;
@@ -133,7 +133,8 @@ public class AssertionSteps {
   @Then("the {resource} should contain")
   public void theObjectShouldContain(Resource objectUnderTest,
       List<FieldExpectation> fieldExpectations) {
-        assertions.objectMeetsExpectations(objectUnderTest.getJsonPath(), fieldExpectations, this.objectMapper);
+    assertions.objectMeetsExpectations(
+        objectUnderTest.getJsonPath(), fieldExpectations, this.objectMapper);
   }
 
   /**
@@ -178,8 +179,8 @@ public class AssertionSteps {
     var itemsSize = objectsUnderTest.getJsonPath().getInt("size()");
     for (int i = 0; i < itemsSize; i++) {
       objectsUnderTest.getJsonPath().setRootPath("items[" + i + "]");
-      assertions.objectMeetsExpectations(objectsUnderTest.getJsonPath(), fieldExpectations, this.objectMapper,
-          softly);
+      assertions.objectMeetsExpectations(objectsUnderTest.getJsonPath(), 
+          fieldExpectations, this.objectMapper, softly);
     }
 
     softly.assertAll();
