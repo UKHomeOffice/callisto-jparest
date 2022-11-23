@@ -3,7 +3,6 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import java.lang.reflect.Method;
@@ -192,8 +191,8 @@ public class Assertions {
   
       // The assertThat function has to be reflected because of type erasure
       // otherwise we would only be able to assert against objects
-      Method assertThatMethod = MethodUtils.getMatchingAccessibleMethod(org.assertj.core.api.Assertions.class,
-          "assertThat",
+      Method assertThatMethod = MethodUtils.getMatchingAccessibleMethod(
+          org.assertj.core.api.Assertions.class, "assertThat",
           testSubject.getClass());
       if (assertThatMethod == null) {
         softly.fail(
