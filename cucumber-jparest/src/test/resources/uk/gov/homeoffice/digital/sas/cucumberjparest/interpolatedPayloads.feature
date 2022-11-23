@@ -45,6 +45,7 @@ Feature: Interpolated payloads
     Then the 1st of the profiles in the last response should contain
       | field        | type    | expectation                                               |
       | bio          | String  | isNotNull()                                               |
+      | bio          | String  | isEqualTo(personaManager.getPersona('Trevor').id)         |
       | firstRelease | Instant | isNotNull()                                               |
 
   Scenario: Reference a persona in a file payload
@@ -60,5 +61,5 @@ Feature: Interpolated payloads
     Then the 1st of the profiles in the last response should contain
       | field        | type    | expectation                                               |
       | bio          | String  | isNotNull()                                               |
-      | bio          | String  | isNotEqualTo("#{personaManager.getPersona('Trevor').id}") |
+      | bio          | String  | isEqualTo(personaManager.getPersona('Trevor').id)         |
       | firstRelease | Instant | isNotNull()                                               |
