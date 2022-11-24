@@ -213,7 +213,6 @@ public class Assertions {
       // Execute the expression and capture any EvaluationException to determine
       // how the expectation failed
       expression.getValue(context, rootObject);
-      // expression.getValue(context);
 
     } catch (SpelParseException ex) {
       softly.fail("Invalid expectation: " + expectation);
