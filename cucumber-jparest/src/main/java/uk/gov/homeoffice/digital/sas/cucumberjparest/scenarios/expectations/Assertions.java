@@ -34,7 +34,7 @@ public class Assertions {
 
   private final BeanExpressionContext rootObject;
   private final ConfigurableBeanFactory beanFactory;
-  
+
   @Autowired
   public Assertions(ConfigurableBeanFactory beanFactory) {
     this.beanFactory = beanFactory;
@@ -50,12 +50,10 @@ public class Assertions {
   public static void objectContainsFields(Map<Object, Object> objectUnderTest,
       List<String> fields) {
     SoftAssertions softly = new SoftAssertions();
-    fields.forEach(field ->
-        softly
-            .assertThat(objectUnderTest)
-            .withFailMessage("Expected the object to contain the field '%s'", field)
-            .containsKey(field)
-    );
+    fields.forEach(field -> softly
+        .assertThat(objectUnderTest)
+        .withFailMessage("Expected the object to contain the field '%s'", field)
+        .containsKey(field));
     softly.assertAll();
   }
 
@@ -68,22 +66,22 @@ public class Assertions {
   public static void objectDoesNotContainFields(Map<Object, Object> objectUnderTest,
       List<String> fields) {
     SoftAssertions softly = new SoftAssertions();
-    fields.forEach(field ->
-        softly
-            .assertThat(objectUnderTest)
-            .withFailMessage("Expected the object to not contain the field '%s'", field)
-            .doesNotContainKey(field));
+    fields.forEach(field -> softly
+        .assertThat(objectUnderTest)
+        .withFailMessage("Expected the object to not contain the field '%s'", field)
+        .doesNotContainKey(field));
     softly.assertAll();
   }
 
   /**
    * A convenience method for
    * {@link ExpectationUtils#objectMeetsExpectations(JsonPath, List, ObjectMapper, SoftAssertions)}.
-   * It creates an instance of SoftAssertions and calls the wrapped method then calls
+   * It creates an instance of SoftAssertions and calls the wrapped method then
+   * calls
    * {@link SoftAssertions#assertAll()}
    *
-   * @param objectUnderTest JsonPath pointing to the object to assert against
-   * @param fieldExpectations    A table of expectations to assert
+   * @param objectUnderTest   JsonPath pointing to the object to assert against
+   * @param fieldExpectations A table of expectations to assert
    */
   public void objectMeetsExpectations(JsonPath objectUnderTest,
       List<FieldExpectation> fieldExpectations,
@@ -96,11 +94,11 @@ public class Assertions {
   /**
    * Softly asserts that the objectUnderTests meets the provided expectations.
    *
-   * @param objectUnderTest JsonPath pointing to the object to assert against
-   * @param fieldExpectations    A table of expectations to assert
-   * @param softly          The SoftAssertions instance
+   * @param objectUnderTest   JsonPath pointing to the object to assert against
+   * @param fieldExpectations A table of expectations to assert
+   * @param softly            The SoftAssertions instance
    */
-  @SuppressWarnings("squid:S5960")// Assertions are needed in this test library
+  @SuppressWarnings("squid:S5960") // Assertions are needed in this test library
   public void objectMeetsExpectations(JsonPath objectUnderTest,
       List<FieldExpectation> fieldExpectations, ObjectMapper objectMapper,
       @NonNull SoftAssertions softly) {
@@ -144,12 +142,8 @@ public class Assertions {
         // Retrieve the typed object from the JsonPath and fail if the type doesn't
         // match
         var testSubject = objectMapper.convertValue(objectUnderTest.get(field), expect.getType());
+        evaluateExpectation(testSubject, expect.getType(), expect.getExpectation(), softly);
 
-        // Skip this if test subject doesn't exist, this will be caught in previous
-        // assertion
-        if (testSubject != null) {
-          evaluateExpectation(testSubject, expect.getExpectation(), softly);
-        }
       } catch (IllegalArgumentException ex) {
         softly.fail("Expected value to be of type '%s'", expect.getType());
       }
@@ -167,7 +161,7 @@ public class Assertions {
     expectations.forEach((headerName, expectation) -> {
       var header = headers.get(headerName);
       softly.assertThat(header).isNotNull();
-      evaluateExpectation(headers.getValue(headerName), expectation, softly);
+      evaluateExpectation(headers.getValue(headerName), String.class, expectation, softly);
     });
     softly.assertAll();
   }
@@ -179,7 +173,7 @@ public class Assertions {
    * @param expectation The expectation
    * @param softly      The SoftAssertions instance
    */
-  private void evaluateExpectation(Object testSubject, String expectation,
+  private void evaluateExpectation(Object testSubject, Class<?> clazz, String expectation,
       @NonNull SoftAssertions softly) {
     // Assert the expectation
     try {
@@ -188,17 +182,17 @@ public class Assertions {
       context.setVariable("objectToTest", testSubject);
       context.setBeanResolver(new BeanFactoryResolver(this.beanFactory));
       context.addPropertyAccessor(new BeanExpressionContextAccessor());
-  
+
       // The assertThat function has to be reflected because of type erasure
       // otherwise we would only be able to assert against objects
       Method assertThatMethod = MethodUtils.getMatchingAccessibleMethod(
           org.assertj.core.api.Assertions.class, "assertThat",
-          testSubject.getClass());
+          clazz);
       if (assertThatMethod == null) {
         softly.fail(
             "Unable to verify expectation. The org.assertj.core.api.Assertions class "
                 + "contains no matching assertThat method for the type %s",
-            testSubject.getClass());
+            clazz);
       } else {
         context.registerFunction("assertThat", assertThatMethod);
       }
@@ -223,7 +217,7 @@ public class Assertions {
       if (cause != null) {
         softly.fail(ex.getCause().getMessage());
       } else {
-        softly.fail(ex.getMessage());
+        softly.fail("Invalid expectation: %s\n%s", expectation, ex.getMessage());
       }
     }
   }
