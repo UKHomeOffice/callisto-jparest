@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.restassured.path.json.JsonPath;
 
-public class AssertionsTest {
+class AssertionsTest {
 
     private static Stream<Arguments> invalidExpectations() {
         return Stream.of(
@@ -65,7 +65,7 @@ public class AssertionsTest {
 
     }
 
-    private void validateAssertionError(SoftAssertions softly, String message) {
+    private static void validateAssertionError(SoftAssertions softly, String message) {
 
         assertThatThrownBy(() -> {
             softly.assertAll();
