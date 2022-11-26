@@ -1,6 +1,5 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Named.named;
@@ -63,7 +62,7 @@ class AssertionsTest {
         assertions.objectMeetsExpectations(objectUnderTest, expectations, objectMapper, softly);
 
         validateAssertionError(softly, expectedMessage);
-        assertThat(softly.errorsCollected()).hasSizeGreaterThan(0);
+
     }
 
     private static void validateAssertionError(SoftAssertions softly, String message) {
@@ -96,7 +95,6 @@ class AssertionsTest {
         assertThatNoException().isThrownBy(() -> {
             softly.assertAll();
         });
-        assertThat(softly.errorsCollected()).hasSize(0);
 
     }
 }
