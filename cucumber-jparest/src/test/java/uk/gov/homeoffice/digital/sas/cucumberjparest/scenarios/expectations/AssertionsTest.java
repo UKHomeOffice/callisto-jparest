@@ -48,6 +48,7 @@ class AssertionsTest {
                         "Invalid expectation"));
     }
 
+    @SuppressWarnings("squid:S2970") // Assertions are added by the call to objectMeetsExpectations
     @ParameterizedTest(name = "{0}")
     @MethodSource("invalidExpectations")
     void objectMeetsExpectations_throw_when(
@@ -81,6 +82,7 @@ class AssertionsTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2970") // Assertions are added by the call to objectMeetsExpectations
     void objectMeetsExpectations_nullObjectIsNull_doesNotThrow() {
 
         ConfigurableBeanFactory configurableBeanFactory = Mockito.mock(ConfigurableBeanFactory.class);
