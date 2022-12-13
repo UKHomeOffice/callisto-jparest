@@ -16,7 +16,7 @@ import org.hibernate.annotations.Type;
  * uses the field of the subclass marked with the {@link Id} annotation.
  */
 @MappedSuperclass
-public abstract class BaseEntity {
+public abstract class BaseEntity implements Message {
 
   @Getter
   @Setter
@@ -34,6 +34,11 @@ public abstract class BaseEntity {
   @Setter
   @Type(type = "uuid-char")
   private UUID tenantId;
+
+  @Override
+  public String getMessageKey() {
+    return getId().toString();
+  }
 
   @Override
   public boolean equals(Object o) {
