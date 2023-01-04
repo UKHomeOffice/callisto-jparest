@@ -20,6 +20,8 @@ import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
@@ -57,7 +59,6 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
-@Transactional
 @ContextConfiguration(locations = "/test-context.xml")
 class ResourceApiControllerTest {
 
@@ -383,6 +384,16 @@ class ResourceApiControllerTest {
         assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.update(TENANT_ID, NON_EXISTENT_ID, "{}"));
     }
 
+    @Test    
+    void update_resourceDoesntExist_noActiveTransactionFound() {
+        var controller = getResourceApiController(DummyEntityA.class);
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                        .isThrownBy(() -> controller.update(TENANT_ID, NON_EXISTENT_ID, "{}"));
+
+        assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+    }    
+
     @Test
     @Transactional
     void update_payloadIdDoesNotMatchUrlPathId_throwsError() {
@@ -465,6 +476,15 @@ class ResourceApiControllerTest {
         assertThatNoException().isThrownBy(() -> controller.get(TENANT_ID, id));
         assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.update(INVALID_TENANT_ID, id, updatedPayload));
     }
+
+    @Test    
+    void update_requestTenantIdDoesNotMatchResourceTenantId_noActiveTransactionFound() {      
+        var controller = getResourceApiController(DummyEntityA.class);
+        
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.update(INVALID_TENANT_ID, DUMMY_A_ID_1, "{}"));
+
+        assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+    }    
 
     @Test
     @Transactional
