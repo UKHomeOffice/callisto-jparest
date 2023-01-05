@@ -6,7 +6,7 @@
 
     <groupId>uk.gov.homeoffice.digital.sas</groupId>
     <artifactId>parentpom</artifactId>
-    <version>0.0.13</version>
+    <version>0.0.14</version>
     <packaging>pom</packaging>
 
     <properties>
