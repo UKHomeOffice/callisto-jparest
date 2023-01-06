@@ -233,13 +233,12 @@ public class ResourceApiController<T extends BaseEntity> {
     payload.setId(id);
     this.entityValidator.validateAndThrowIfErrorsExist(payload);
 
-    var orig = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
-
-    validateResourceTenantId(tenantId, orig, id);
-
     var transactionDefinition = new DefaultTransactionDefinition();
     var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
+    T orig;
     try {
+      orig = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+      validateResourceTenantId(tenantId, orig, id);
       BeanUtils.copyProperties(payload, orig, EntityUtils.ID_FIELD_NAME);
       repository.saveAndFlush(orig);
       transactionManager.commit(transactionStatus);
