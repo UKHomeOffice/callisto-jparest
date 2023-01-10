@@ -37,6 +37,7 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.repository.JpaRestRepositoryImpl;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
@@ -74,9 +75,6 @@ class ResourceApiControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private ResourceApiService service;
 
     public static final UUID NON_EXISTENT_ID = UUID.fromString("7a7c7da4-bb29-11ec-1000-0242ac120001");
     public static final UUID NON_EXISTENT_ID_2 = UUID.fromString("7a7c7da4-bb29-11ec-1001-0242ac120002");
@@ -576,11 +574,18 @@ class ResourceApiControllerTest {
 
         var entityUtils = new EntityUtils<>(DummyEntityC.class, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
         var mockedEntityValidator = Mockito.mock(EntityValidator.class);
+
+        var resourceApiService = new ResourceApiService<>(
+                entityManager,
+                entityUtils,
+                transactionManager,
+                new JpaRestRepositoryImpl<>(DummyEntityC.class, entityManager),
+                mockedEntityValidator);
+
         var controller = new ResourceApiController<>(
-                DummyEntity.class,
-                service,
-                objectMapper,
-                entityManager,);
+                DummyEntityC.class,
+                resourceApiService,
+                objectMapper);
 
         var resource = createResource(controller, payload, TENANT_ID);
         controller.update(TENANT_ID, resource.getId(), payload);
@@ -976,7 +981,15 @@ class ResourceApiControllerTest {
 
     private <T extends BaseEntity, U> ResourceApiController<T> getResourceApiController(Class<T> clazz) {
         var entityUtils = new EntityUtils<>(clazz, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
-        return new ResourceApiController<>(clazz, entityManager, transactionManager, entityUtils, entityValidator, objectMapper);
+
+        var resourceApiService = new ResourceApiService<>(
+                entityManager,
+                entityUtils,
+                transactionManager,
+                new JpaRestRepositoryImpl<>(clazz, entityManager),
+                entityValidator);
+
+        return new ResourceApiController<>(clazz, resourceApiService, objectMapper);
     }
 
     private <T extends BaseEntity> T createResource(ResourceApiController<T> controller,

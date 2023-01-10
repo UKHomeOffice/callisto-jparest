@@ -1,16 +1,23 @@
 package uk.gov.homeoffice.digital.sas.jparest.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import org.springframework.beans.BeanUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
+import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
+import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
+
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
@@ -23,34 +30,21 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.BeanUtils;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.expression.spel.standard.SpelExpression;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-
-import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
-import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
-
-import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
-import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.ID;
 import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.TENANT_ID;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage;
 
-@AllArgsConstructor
 @Service
 public class ResourceApiService <T extends BaseEntity> {
 
@@ -62,6 +56,19 @@ public class ResourceApiService <T extends BaseEntity> {
   private final EntityValidator entityValidator;
   private final PersistenceUnitUtil persistenceUnitUtil;
   private static final String QUERY_HINT = "javax.persistence.fetchgraph";
+
+  public ResourceApiService(EntityManager entityManager,
+                            EntityUtils<T, ?> entityUtils,
+                            PlatformTransactionManager transactionManager,
+                            JpaRepository<T, Serializable> repository,
+                            EntityValidator entityValidator) {
+    this.entityManager = entityManager;
+    this.entityUtils = entityUtils;
+    this.transactionManager = transactionManager;
+    this.repository = repository;
+    this.entityValidator = entityValidator;
+    this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
+  }
 
   public List<T> list(UUID tenantId, Pageable pageable, SpelExpression filter) {
     var builder = this.entityManager.getCriteriaBuilder();
@@ -119,24 +126,14 @@ public class ResourceApiService <T extends BaseEntity> {
     return List.of(result);
   }
 
-  public List<T> create(UUID tenantId, T entity)
-      throws JsonProcessingException {
-
-    validateAndSetTenantIdPayloadMatch(tenantId, entity);
-
-    this.entityValidator.validateAndThrowIfErrorsExist(entity);
-
-    if (Objects.nonNull(entity.getId())) {
-      throw new IllegalArgumentException(
-          "A resource id should not be provided when creating a new resource.");
-    }
+  public List<T> create(T payload) {
 
     var transactionDefinition = new DefaultTransactionDefinition();
-    var transactionStatus =
-        this.transactionManager.getTransaction(transactionDefinition);
+    var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
     T result;
     try {
-      result = repository.saveAndFlush(entity);
+      this.entityValidator.validateAndThrowIfErrorsExist(payload);
+      result = repository.saveAndFlush(payload);
       transactionManager.commit(transactionStatus);
     } catch (RuntimeException ex) {
       transactionManager.rollback(transactionStatus);
@@ -178,31 +175,16 @@ public class ResourceApiService <T extends BaseEntity> {
     }
   }
 
-  public T update(UUID tenantId, UUID id,
-                               T entity) {
-
-    validateAndSetTenantIdPayloadMatch(tenantId, entity);
-
-    var payloadEntityId = (UUID) this.persistenceUnitUtil.getIdentifier(entity);
-    if (payloadEntityId != null && !id.equals(payloadEntityId)) {
-      throw new IllegalArgumentException(
-          "The supplied payload resource id value must match the url id path parameter value");
-    }
-
-    entity.setId(id);
-    this.entityValidator.validateAndThrowIfErrorsExist(entity);
+  public T update(UUID tenantId, UUID id, T payload) {
 
     var transactionDefinition = new DefaultTransactionDefinition();
-    var transactionStatus =
-        this.transactionManager.getTransaction(transactionDefinition);
-
-    var orig = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
-
-    validateResourceTenantId(tenantId, orig, id);
-
-    BeanUtils.copyProperties(entity, orig, EntityUtils.ID_FIELD_NAME);
-
+    var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
+    T orig;
     try {
+      this.entityValidator.validateAndThrowIfErrorsExist(payload);
+      orig = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+      validateResourceTenantId(tenantId, orig, id);
+      BeanUtils.copyProperties(payload, orig, EntityUtils.ID_FIELD_NAME);
       repository.saveAndFlush(orig);
       transactionManager.commit(transactionStatus);
     } catch (RuntimeException ex) {
@@ -293,6 +275,7 @@ public class ResourceApiService <T extends BaseEntity> {
 
   }
 
+  @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters
   public List<?> getRelated(
       UUID tenantId,
       UUID id,
@@ -347,17 +330,6 @@ public class ResourceApiService <T extends BaseEntity> {
     }
   }
 
-  private void validateAndSetTenantIdPayloadMatch(UUID requestTenantId, T payload) {
-
-    var payloadTenantId = payload.getTenantId();
-    if (payloadTenantId != null && !requestTenantId.equals(payloadTenantId)) {
-      throw new TenantIdMismatchException();
-
-    } else if (payloadTenantId == null) {
-      payload.setTenantId(requestTenantId);
-    }
-  }
-
   private T getById(UUID id, String include, UUID tenantId) {
 
     var builder = this.entityManager.getCriteriaBuilder();
@@ -390,6 +362,10 @@ public class ResourceApiService <T extends BaseEntity> {
     if (!requestTenantId.equals(resource.getTenantId())) {
       throw new ResourceNotFoundException(resourceId);
     }
+  }
+
+  public UUID getPayloadEntityId(T payload) {
+    return (UUID) this.persistenceUnitUtil.getIdentifier(payload);
   }
 
 

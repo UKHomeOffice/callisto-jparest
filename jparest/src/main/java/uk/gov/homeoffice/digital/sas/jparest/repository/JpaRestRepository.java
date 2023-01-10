@@ -11,7 +11,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.expression.spel.standard.SpelExpression;
 
 @NoRepositoryBean
-public interface JparestRepository<T, ID extends Serializable> extends JpaRepository<T, ID> {
+public interface JpaRestRepository<T, ID extends Serializable> extends JpaRepository<T, ID> {
 
   List<T> findAllByTenantId(UUID tenantId, SpelExpression filter, Pageable pageable);
 

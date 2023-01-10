@@ -24,10 +24,10 @@ public class ApiResponse<T> {
   }
 
   @Getter
-  private Metadata meta = new Metadata();
+  private final Metadata meta = new Metadata();
 
   @Getter
-  private List<T> items;
+  private final List<T> items;
 
   public ApiResponse(List<T> items) {
     this.items = items;

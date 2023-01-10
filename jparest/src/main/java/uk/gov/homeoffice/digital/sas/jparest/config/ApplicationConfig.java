@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
-import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.PathItemCreator;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.ResourceOpenApiCustomiser;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
@@ -44,7 +43,4 @@ public class ApplicationConfig {
   public EntityValidator entityValidator() {
     return new EntityValidator();
   }
-
-  @Bean
-  public ResourceApiService resourceApiService() { return new ResourceApiService<>(); }
 }

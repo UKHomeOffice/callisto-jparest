@@ -34,6 +34,7 @@ import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.repository.JpaRestRepositoryImpl;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
@@ -55,7 +56,6 @@ public class HandlerMappingConfig {
   private final EntityValidator entityValidator;
   private final ObjectMapper objectMapper;
 
-  private final ResourceApiService service;
 
   public HandlerMappingConfig(
       EntityManager entityManager,
@@ -63,18 +63,17 @@ public class HandlerMappingConfig {
       ApplicationContext context,
       ResourceEndpoint resourceEndpoint,
       EntityValidator entityValidator,
-      ObjectMapper objectMapper, ResourceApiService service) {
+      ObjectMapper objectMapper) {
     this.entityManager = entityManager;
     this.transactionManager = transactionManager;
     this.context = context;
     this.resourceEndpoint = resourceEndpoint;
     this.entityValidator = entityValidator;
     this.objectMapper = objectMapper;
-    this.service = service;
   }
 
   @PostConstruct
-  public void registerUserController() throws NoSuchMethodException, SecurityException {
+  public <T extends BaseEntity> void registerUserController() throws NoSuchMethodException, SecurityException {
     requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
 
     createBuilderOptions();
@@ -95,10 +94,9 @@ public class HandlerMappingConfig {
     // find the id field , build the request mapping path and register the controller
     for (var entityClassEntry : baseEntitySubClassesMap.entrySet()) {
 
-      Class<? extends BaseEntity> resource = (
-          Class<? extends BaseEntity>) entityClassEntry.getKey();
-      LOGGER.fine("Processing resource" + resource.getName());
-      var resourceAnnotation = resource.getAnnotation(Resource.class);
+      Class<T> resourceType = (Class<T>) entityClassEntry.getKey();
+      LOGGER.fine("Processing resource" + resourceType.getName());
+      var resourceAnnotation = resourceType.getAnnotation(Resource.class);
       String resourcePath = resourceAnnotation.path();
       if (!StringUtils.hasText(resourcePath)) {
         resourcePath = entityClassEntry.getValue().getName().toLowerCase();
@@ -107,19 +105,24 @@ public class HandlerMappingConfig {
       LOGGER.log(Level.FINE, "root path for resource: {0}", path);
 
       // Added to endpoint resource types for documentation customiser
-      resourceTypes.add(resource);
+      resourceTypes.add(resourceType);
 
       // Create a controller for the resource
       LOGGER.fine("Creating controller");
-      EntityUtils<?, ?> entityUtils = new EntityUtils<>(resource, isBaseEntitySubclass);
-      ResourceApiController<?> controller = new ResourceApiController<>(entityType, service, objectMapper,
-          entityUtils);
+      var entityUtils = new EntityUtils<>(resourceType, isBaseEntitySubclass);
+      var resourceApiService = new ResourceApiService<>(
+              entityManager,
+              entityUtils,
+              transactionManager,
+              new JpaRestRepositoryImpl<>(resourceType, entityManager),
+              entityValidator);
+      var controller = new ResourceApiController<>(resourceType, resourceApiService, objectMapper);
 
       // Map the CRUD operations to the controllers methods
-      mapRestOperationsToController(resource, path, controller);
+      mapRestOperationsToController(resourceType, path, controller);
 
       LOGGER.fine("Registering related paths");
-      registerRelatedPaths(resource, path, entityUtils, controller);
+      registerRelatedPaths(resourceType, path, entityUtils, controller);
 
       LOGGER.fine("All paths registered");
     }

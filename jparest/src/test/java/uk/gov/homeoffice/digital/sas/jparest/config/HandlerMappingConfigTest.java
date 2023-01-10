@@ -80,7 +80,7 @@ class HandlerMappingConfigTest {
     public void setup() {
         when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
         handlerMappingConfig = new HandlerMappingConfig(entityManager, transactionManager, context,
-                resourceEndpoint, entityValidator, objectMapper, service);
+                resourceEndpoint, entityValidator, objectMapper);
     }
 
     @Test
