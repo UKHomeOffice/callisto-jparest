@@ -166,4 +166,4 @@ steps:
         Author: {{ build.author }}
     when:
       branch:
-        - main
+        - eahw-2347/urgent-slack-alerts
