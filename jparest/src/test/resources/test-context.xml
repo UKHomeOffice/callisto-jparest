@@ -31,4 +31,13 @@
 
     <bean class="uk.gov.homeoffice.digital.sas.jparest.config.ObjectMapperConfig"/>
     <bean class="uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator"/>
+<!--    <bean class="uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService">-->
+<!--        <property name="entityManager" ref="" value="" />-->
+<!--    </bean>-->
+<!--    private final EntityManager entityManager;-->
+<!--    private final EntityUtils<T, ?> entityUtils;-->
+<!--    private final PlatformTransactionManager transactionManager;-->
+<!--    private final JpaRepository<T, Serializable> repository;-->
+<!--    private final EntityValidator entityValidator;-->
+<!--    private final PersistenceUnitUtil persistenceUnitUtil;-->
 </beans>
