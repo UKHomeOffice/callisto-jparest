@@ -35,8 +35,6 @@ public class ResourceApiController<T extends BaseEntity> {
   private final ResourceApiService<T> service;
   private final ObjectMapper objectMapper;
 
-  private static final String QUERY_HINT = "javax.persistence.fetchgraph";
-
 
   @SuppressWarnings("unchecked")
   public ResourceApiController(Class<T> entityType, 
@@ -49,11 +47,11 @@ public class ResourceApiController<T extends BaseEntity> {
 
   public ApiResponse<T> list(
       @RequestParam UUID tenantId, Pageable pageable, SpelExpression filter) {
-    return new ApiResponse<>(service.list(tenantId, pageable, filter));
+    return new ApiResponse<>(service.getAllResources(tenantId, pageable, filter));
   }
 
   public ApiResponse<T> get(@RequestParam UUID tenantId, @PathVariable UUID id) {
-    return new ApiResponse<>(service.get(tenantId, id));
+    return new ApiResponse<>(service.getResource(tenantId, id));
   }
 
   public ApiResponse<T> create(@RequestParam UUID tenantId, @RequestBody String body)
@@ -66,11 +64,11 @@ public class ResourceApiController<T extends BaseEntity> {
       throw new IllegalArgumentException(
         "A resource id should not be provided when creating a new resource.");
     }
-    return new ApiResponse<>(service.create(payload));
+    return new ApiResponse<>(service.createResource(payload));
   }
 
   public void delete(@RequestParam UUID tenantId, @PathVariable UUID id) {
-    service.delete(tenantId, id);
+    service.deleteResource(tenantId, id);
   }
 
   public ApiResponse<T> update(@RequestParam UUID tenantId,
@@ -86,7 +84,7 @@ public class ResourceApiController<T extends BaseEntity> {
         "The supplied payload resource id value must match the url id path parameter value");
     }
     payload.setId(id);
-    return new ApiResponse(service.update(tenantId, id, payload));
+    return new ApiResponse<>(service.updateResource(tenantId, id, payload));
   }
 
   @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters
@@ -95,7 +93,7 @@ public class ResourceApiController<T extends BaseEntity> {
       @PathVariable UUID id,
       @PathVariable String relation, Pageable pageable, SpelExpression filter) {
 
-    return new ApiResponse<>(service.getRelated(tenantId, id, relation, pageable, filter));
+    return new ApiResponse<>(service.getRelatedResources(tenantId, id, relation, pageable, filter));
 
   }
 
@@ -105,7 +103,7 @@ public class ResourceApiController<T extends BaseEntity> {
       @PathVariable String relation,
       @PathVariable List<UUID> relatedIds)
       throws IllegalArgumentException {
-    service.deleteRelated(tenantId, id, relation, relatedIds);
+    service.deleteRelatedResources(tenantId, id, relation, relatedIds);
   }
 
   public void addRelated(
@@ -114,7 +112,7 @@ public class ResourceApiController<T extends BaseEntity> {
         @PathVariable String relation,
         @PathVariable List<UUID> relatedIds)
       throws IllegalArgumentException {
-    service.addRelated(tenantId, id, relation, relatedIds);
+    service.addRelatedResources(tenantId, id, relation, relatedIds);
   }
 
 

@@ -70,7 +70,7 @@ public class ResourceApiService <T extends BaseEntity> {
     this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
   }
 
-  public List<T> list(UUID tenantId, Pageable pageable, SpelExpression filter) {
+  public List<T> getAllResources(UUID tenantId, Pageable pageable, SpelExpression filter) {
     var builder = this.entityManager.getCriteriaBuilder();
     CriteriaQuery<T> query = builder.createQuery(this.entityUtils.getEntityType());
     Root<T> root = query.from(this.entityUtils.getEntityType());
@@ -82,7 +82,7 @@ public class ResourceApiService <T extends BaseEntity> {
     query.where(finalPredicate);
 
     CriteriaQuery<T> select = query.select(root);
-    List<Order> orderBy = toOrders(pageable.getSort(), root, builder);
+    List<Order> orderBy = getOrderCriteria(pageable.getSort(), root, builder);
     select.orderBy(orderBy);
 
     EntityGraph<T> entityGraph =
@@ -96,7 +96,7 @@ public class ResourceApiService <T extends BaseEntity> {
     return result;
   }
 
-  private static List<Order> toOrders(Sort sort, Path<?> path, CriteriaBuilder builder) {
+  private List<Order> getOrderCriteria(Sort sort, Path<?> path, CriteriaBuilder builder) {
 
     if (sort.isUnsorted()) {
       return Collections.emptyList();
@@ -121,12 +121,12 @@ public class ResourceApiService <T extends BaseEntity> {
 
   }
 
-  public List<T> get(UUID tenantId, UUID id) {
+  public List<T> getResource(UUID tenantId, UUID id) {
     var result = getById(id, null, tenantId);
     return List.of(result);
   }
 
-  public List<T> create(T payload) {
+  public List<T> createResource(T payload) {
 
     var transactionDefinition = new DefaultTransactionDefinition();
     var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
@@ -142,7 +142,7 @@ public class ResourceApiService <T extends BaseEntity> {
     return List.of(result);
   }
 
-  public void delete(UUID tenantId, UUID id) {
+  public void deleteResource(UUID tenantId, UUID id) {
 
     var transactionDefinition = new DefaultTransactionDefinition();
     var transactionStatus =
@@ -175,7 +175,7 @@ public class ResourceApiService <T extends BaseEntity> {
     }
   }
 
-  public T update(UUID tenantId, UUID id, T payload) {
+  public T updateResource(UUID tenantId, UUID id, T payload) {
 
     var transactionDefinition = new DefaultTransactionDefinition();
     var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
@@ -195,7 +195,7 @@ public class ResourceApiService <T extends BaseEntity> {
     return orig;
   }
 
-  public void deleteRelated(
+  public void deleteRelatedResources(
       UUID tenantId,
       UUID id,
       String relation,
@@ -236,10 +236,10 @@ public class ResourceApiService <T extends BaseEntity> {
     }
   }
 
-  public void addRelated(UUID tenantId,
-                         UUID id,
-                         String relation,
-                         List<UUID> relatedIds) {
+  public void addRelatedResources(UUID tenantId,
+                                  UUID id,
+                                  String relation,
+                                  List<UUID> relatedIds) {
 
     var transactionDefinition = new DefaultTransactionDefinition();
     var transactionStatus =
@@ -276,7 +276,7 @@ public class ResourceApiService <T extends BaseEntity> {
   }
 
   @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters
-  public List<?> getRelated(
+  public List<?> getRelatedResources(
       UUID tenantId,
       UUID id,
       String relation, Pageable pageable, SpelExpression filter) {
@@ -298,7 +298,7 @@ public class ResourceApiService <T extends BaseEntity> {
     var finalPredicate = builder.and(parentTenantPredicate, relatedTenantPredicate, predicate);
     select.where(finalPredicate);
 
-    List<Order> orderBy = toOrders(pageable.getSort(), relatedJoin, builder);
+    List<Order> orderBy = getOrderCriteria(pageable.getSort(), relatedJoin, builder);
     select.orderBy(orderBy);
 
     EntityGraph<T> entityGraph = this.entityManager.createEntityGraph(

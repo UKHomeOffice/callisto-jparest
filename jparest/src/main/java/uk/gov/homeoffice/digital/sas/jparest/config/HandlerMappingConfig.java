@@ -94,9 +94,9 @@ public class HandlerMappingConfig {
     // find the id field , build the request mapping path and register the controller
     for (var entityClassEntry : baseEntitySubClassesMap.entrySet()) {
 
-      Class<T> resourceType = (Class<T>) entityClassEntry.getKey();
-      LOGGER.fine("Processing resource" + resourceType.getName());
-      var resourceAnnotation = resourceType.getAnnotation(Resource.class);
+      Class<T> resourceClass = (Class<T>) entityClassEntry.getKey();
+      LOGGER.fine("Processing resource" + resourceClass.getName());
+      var resourceAnnotation = resourceClass.getAnnotation(Resource.class);
       String resourcePath = resourceAnnotation.path();
       if (!StringUtils.hasText(resourcePath)) {
         resourcePath = entityClassEntry.getValue().getName().toLowerCase();
@@ -105,24 +105,24 @@ public class HandlerMappingConfig {
       LOGGER.log(Level.FINE, "root path for resource: {0}", path);
 
       // Added to endpoint resource types for documentation customiser
-      resourceTypes.add(resourceType);
+      resourceTypes.add(resourceClass);
 
       // Create a controller for the resource
       LOGGER.fine("Creating controller");
-      var entityUtils = new EntityUtils<>(resourceType, isBaseEntitySubclass);
+      var entityUtils = new EntityUtils<>(resourceClass, isBaseEntitySubclass);
       var resourceApiService = new ResourceApiService<>(
               entityManager,
               entityUtils,
               transactionManager,
-              new JpaRestRepositoryImpl<>(resourceType, entityManager),
+              new JpaRestRepositoryImpl<>(resourceClass, entityManager),
               entityValidator);
-      var controller = new ResourceApiController<>(resourceType, resourceApiService, objectMapper);
+      var controller = new ResourceApiController<>(resourceClass, resourceApiService, objectMapper);
 
       // Map the CRUD operations to the controllers methods
-      mapRestOperationsToController(resourceType, path, controller);
+      mapRestOperationsToController(resourceClass, path, controller);
 
       LOGGER.fine("Registering related paths");
-      registerRelatedPaths(resourceType, path, entityUtils, controller);
+      registerRelatedPaths(resourceClass, path, entityUtils, controller);
 
       LOGGER.fine("All paths registered");
     }
