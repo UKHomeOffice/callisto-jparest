@@ -140,7 +140,6 @@ name: urgent notifications
 trigger:
   status:
     - failure
-    - success
   event:
     - push
 
@@ -166,4 +165,4 @@ steps:
         Author: {{ build.author }}
     when:
       branch:
-        - eahw-2347/urgent-slack-alerts
+        - main
