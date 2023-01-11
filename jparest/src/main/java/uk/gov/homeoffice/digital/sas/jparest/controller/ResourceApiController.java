@@ -164,8 +164,6 @@ public class ResourceApiController<T extends BaseEntity> {
     T r2 = readPayload(body);
     validateAndSetTenantIdPayloadMatch(tenantId, r2);
 
-    this.entityValidator.validateAndThrowIfErrorsExist(r2);
-
     if (Objects.nonNull(r2.getId())) {
       throw new IllegalArgumentException(
         "A resource id should not be provided when creating a new resource.");
@@ -176,6 +174,7 @@ public class ResourceApiController<T extends BaseEntity> {
         this.transactionManager.getTransaction(transactionDefinition);
     T result;
     try {
+      this.entityValidator.validateAndThrowIfErrorsExist(r2);
       result = repository.saveAndFlush(r2);
       transactionManager.commit(transactionStatus);
     } catch (RuntimeException ex) {
@@ -229,21 +228,16 @@ public class ResourceApiController<T extends BaseEntity> {
       throw new IllegalArgumentException(
         "The supplied payload resource id value must match the url id path parameter value");
     }
-
-    payload.setId(id);
-    this.entityValidator.validateAndThrowIfErrorsExist(payload);
+    payload.setId(id);    
 
     var transactionDefinition = new DefaultTransactionDefinition();
-    var transactionStatus =
-        this.transactionManager.getTransaction(transactionDefinition);
-
-    var orig = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
-
-    validateResourceTenantId(tenantId, orig, id);
-
-    BeanUtils.copyProperties(payload, orig, EntityUtils.ID_FIELD_NAME);
-
+    var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
+    T orig;
     try {
+      this.entityValidator.validateAndThrowIfErrorsExist(payload);
+      orig = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+      validateResourceTenantId(tenantId, orig, id);
+      BeanUtils.copyProperties(payload, orig, EntityUtils.ID_FIELD_NAME);
       repository.saveAndFlush(orig);
       transactionManager.commit(transactionStatus);
     } catch (RuntimeException ex) {
