@@ -1,5 +1,31 @@
 package uk.gov.homeoffice.digital.sas.jparest.service;
 
+import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.ID;
+import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.TENANT_ID;
+import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage;
+import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.PersistenceUnitUtil;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Root;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
@@ -18,35 +44,9 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultExc
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceUnitUtil;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.ID;
-import static uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter.TENANT_ID;
-import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage;
-import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage;
 
 @Service
-public class ResourceApiService <T extends BaseEntity> {
+public class ResourceApiService<T extends BaseEntity> {
 
 
   private final EntityManager entityManager;
@@ -92,8 +92,7 @@ public class ResourceApiService <T extends BaseEntity> {
     typedQuery.setFirstResult((int) pageable.getOffset());
     typedQuery.setMaxResults(pageable.getPageSize());
     typedQuery.setHint(QUERY_HINT, entityGraph);
-    List<T> result = typedQuery.getResultList();
-    return result;
+    return typedQuery.getResultList();
   }
 
   private List<Order> getOrderCriteria(Sort sort, Path<?> path, CriteriaBuilder builder) {
@@ -195,12 +194,10 @@ public class ResourceApiService <T extends BaseEntity> {
     return orig;
   }
 
-  public void deleteRelatedResources(
-      UUID tenantId,
-      UUID id,
-      String relation,
-      List<UUID> relatedIds)
-       {
+  public void deleteRelatedResources(UUID tenantId,
+                                     UUID id,
+                                     String relation,
+                                     List<UUID> relatedIds) {
 
     var transactionDefinition = new DefaultTransactionDefinition();
     var transactionStatus =
@@ -308,8 +305,7 @@ public class ResourceApiService <T extends BaseEntity> {
     typedQuery.setMaxResults(pageable.getPageSize());
     typedQuery.setHint(QUERY_HINT, entityGraph);
 
-    List<?> result = typedQuery.getResultList();
-    return result;
+    return typedQuery.getResultList();
   }
 
   private void validateRelatedResourcesTenantIds(
@@ -358,6 +354,7 @@ public class ResourceApiService <T extends BaseEntity> {
     }
     return result2.get(0);
   }
+
   private void validateResourceTenantId(UUID requestTenantId, T resource, UUID resourceId) {
     if (!requestTenantId.equals(resource.getTenantId())) {
       throw new ResourceNotFoundException(resourceId);

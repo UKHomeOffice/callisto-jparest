@@ -73,7 +73,8 @@ public class HandlerMappingConfig {
   }
 
   @PostConstruct
-  public <T extends BaseEntity> void registerUserController() throws NoSuchMethodException, SecurityException {
+  public <T extends BaseEntity> void registerUserController()
+          throws NoSuchMethodException, SecurityException {
     requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
 
     createBuilderOptions();

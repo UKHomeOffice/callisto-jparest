@@ -1,9 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest.repository;
 
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
-
-import javax.persistence.EntityManager;
 import java.io.Serializable;
+import javax.persistence.EntityManager;
+import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
 
 /**
@@ -12,11 +11,12 @@ import java.io.Serializable;
  * <p>
  * Resources for ManyToMany relationships can also be queried.
  */
-public class JpaRestRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRepository<T, ID> implements JpaRestRepository<T, ID> {
+public class JpaRestRepositoryImpl<T, Y extends Serializable>
+        extends SimpleJpaRepository<T, Y> implements JpaRestRepository<T, Y> {
 
-    public JpaRestRepositoryImpl(Class<T> entityType, EntityManager entityManager) {
-        super(entityType, entityManager);
-    }
+  public JpaRestRepositoryImpl(Class<T> entityType, EntityManager entityManager) {
+    super(entityType, entityManager);
+  }
 
-    //TODO EAHW-2543: Implement repository methods
+  //TODO EAHW-2543: Implement repository methods
 }

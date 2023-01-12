@@ -3,6 +3,9 @@ package uk.gov.homeoffice.digital.sas.jparest.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import lombok.Getter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.expression.spel.standard.SpelExpression;
@@ -15,10 +18,6 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyE
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Spring MVC controller that exposes JPA entities
