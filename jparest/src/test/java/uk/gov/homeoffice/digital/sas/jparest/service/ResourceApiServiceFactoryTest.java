@@ -56,8 +56,7 @@ class ResourceApiServiceFactoryTest  {
     var service = resourceApiServiceFactory.getBean(resourceClass, entityUtils, jpaRestRepository);
 
     assertThat(service).isNotNull();
-    verify(configurableBeanFactory).registerSingleton(
-        resourceClass.getSimpleName() + ResourceApiService.class.getSimpleName(), service);
+    verify(configurableBeanFactory).registerSingleton("DummyEntityAResourceApiService", service);
   }
 
 }
