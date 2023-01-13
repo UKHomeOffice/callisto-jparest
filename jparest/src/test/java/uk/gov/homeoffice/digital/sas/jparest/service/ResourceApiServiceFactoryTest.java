@@ -33,7 +33,7 @@ class ResourceApiServiceFactoryTest  {
   private ConfigurableBeanFactory configurableBeanFactory;
 
   @Mock
-  private TenantRepository<DummyEntityA, ?> tenantRepository;
+  private TenantRepository<DummyEntityA> tenantRepository;
 
   private ResourceApiServiceFactory resourceApiServiceFactory;
 
