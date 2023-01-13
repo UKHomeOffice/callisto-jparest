@@ -30,7 +30,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -42,6 +41,7 @@ import uk.gov.homeoffice.digital.sas.jparest.SpelExpressionToPredicateConverter;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepository;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 
@@ -52,7 +52,7 @@ public class ResourceApiService<T extends BaseEntity> {
   private final EntityManager entityManager;
   private final EntityUtils<T, ?> entityUtils;
   private final PlatformTransactionManager transactionManager;
-  private final JpaRepository<T, Serializable> repository;
+  private final TenantRepository<T, Serializable> repository;
   private final EntityValidator entityValidator;
   private final PersistenceUnitUtil persistenceUnitUtil;
   private static final String QUERY_HINT = "javax.persistence.fetchgraph";
@@ -60,7 +60,7 @@ public class ResourceApiService<T extends BaseEntity> {
   public ResourceApiService(EntityManager entityManager,
                             EntityUtils<T, ?> entityUtils,
                             PlatformTransactionManager transactionManager,
-                            JpaRepository<T, Serializable> repository,
+                            TenantRepository<T, Serializable> repository,
                             EntityValidator entityValidator) {
     this.entityManager = entityManager;
     this.entityUtils = entityUtils;
@@ -71,28 +71,7 @@ public class ResourceApiService<T extends BaseEntity> {
   }
 
   public List<T> getAllResources(UUID tenantId, Pageable pageable, SpelExpression filter) {
-    var builder = this.entityManager.getCriteriaBuilder();
-    CriteriaQuery<T> query = builder.createQuery(this.entityUtils.getEntityType());
-    Root<T> root = query.from(this.entityUtils.getEntityType());
-
-    var tenantPredicate = builder.equal(root.get(TENANT_ID.getParamName()), tenantId);
-    var filterPredicate = SpelExpressionToPredicateConverter.convert(filter, builder, root);
-    var finalPredicate =
-        filter != null ? builder.and(tenantPredicate, filterPredicate) : tenantPredicate;
-    query.where(finalPredicate);
-
-    CriteriaQuery<T> select = query.select(root);
-    List<Order> orderBy = getOrderCriteria(pageable.getSort(), root, builder);
-    select.orderBy(orderBy);
-
-    EntityGraph<T> entityGraph =
-        this.entityManager.createEntityGraph(this.entityUtils.getEntityType());
-
-    TypedQuery<T> typedQuery = this.entityManager.createQuery(select);
-    typedQuery.setFirstResult((int) pageable.getOffset());
-    typedQuery.setMaxResults(pageable.getPageSize());
-    typedQuery.setHint(QUERY_HINT, entityGraph);
-    return typedQuery.getResultList();
+    return repository.findAllByTenantId(tenantId, filter, pageable);
   }
 
   private List<Order> getOrderCriteria(Sort sort, Path<?> path, CriteriaBuilder builder) {
@@ -120,9 +99,9 @@ public class ResourceApiService<T extends BaseEntity> {
 
   }
 
-  public List<T> getResource(UUID tenantId, UUID id) {
-    var result = getById(id, null, tenantId);
-    return List.of(result);
+  public T getResource(UUID tenantId, UUID id) {
+    return repository.findByIdAndTenantId(id, tenantId)
+        .orElseThrow(() -> new ResourceNotFoundException(id));
   }
 
   public List<T> createResource(T payload) {

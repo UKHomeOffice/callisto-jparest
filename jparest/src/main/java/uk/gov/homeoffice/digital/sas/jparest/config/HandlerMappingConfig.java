@@ -33,7 +33,7 @@ import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
-import uk.gov.homeoffice.digital.sas.jparest.repository.JpaRestRepositoryImpl;
+import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepositoryImpl;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiServiceFactory;
 
 
@@ -109,7 +109,7 @@ public class HandlerMappingConfig {
       LOGGER.fine("Creating controller");
       var entityUtils = new EntityUtils<>(resourceClass, isBaseEntitySubclass);
       var resourceApiService =  resourceApiServiceFactory.getBean(resourceClass, entityUtils,
-              new JpaRestRepositoryImpl<>(resourceClass, entityManager));
+              new TenantRepositoryImpl<>(resourceClass, entityManager));
       var controller = new ResourceApiController<>(
           resourceClass, resourceApiService, objectMapper);
 

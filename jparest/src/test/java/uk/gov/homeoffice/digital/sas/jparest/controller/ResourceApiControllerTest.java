@@ -37,7 +37,7 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
-import uk.gov.homeoffice.digital.sas.jparest.repository.JpaRestRepositoryImpl;
+import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepositoryImpl;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
@@ -579,7 +579,7 @@ class ResourceApiControllerTest {
                 entityManager,
                 entityUtils,
                 transactionManager,
-                new JpaRestRepositoryImpl<>(DummyEntityC.class, entityManager),
+                new TenantRepositoryImpl<>(DummyEntityC.class, entityManager),
                 mockedEntityValidator);
 
         var controller = new ResourceApiController<>(
@@ -986,7 +986,7 @@ class ResourceApiControllerTest {
                 entityManager,
                 entityUtils,
                 transactionManager,
-                new JpaRestRepositoryImpl<>(clazz, entityManager),
+                new TenantRepositoryImpl<>(clazz, entityManager),
                 entityValidator);
 
         return new ResourceApiController<>(clazz, resourceApiService, objectMapper);
