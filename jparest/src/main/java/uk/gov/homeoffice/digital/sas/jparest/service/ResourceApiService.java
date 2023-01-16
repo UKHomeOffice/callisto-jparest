@@ -207,8 +207,8 @@ public class ResourceApiService<T extends BaseEntity> {
         tenantId, id, relation, entityUtils.getRelatedType(relation), filter, pageable);
   }
 
-  public UUID getPayloadEntityId(T payload) {
-    return repository.findId(payload);
+  public UUID getEntityId(T entity) {
+    return repository.findId(entity);
   }
 
 

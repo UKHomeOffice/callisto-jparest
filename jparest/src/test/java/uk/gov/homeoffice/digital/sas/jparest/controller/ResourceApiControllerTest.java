@@ -578,7 +578,7 @@ class ResourceApiControllerTest {
         var resourceApiService = new ResourceApiService<>(
                 entityUtils,
                 transactionManager,
-                new TenantRepositoryImpl<>(DummyEntityC.class, entityManager),
+                new TenantRepositoryImpl<DummyEntityC>(DummyEntityC.class, entityManager),
                 mockedEntityValidator);
 
         var controller = new ResourceApiController<>(
@@ -984,7 +984,7 @@ class ResourceApiControllerTest {
         var resourceApiService = new ResourceApiService<>(
                 entityUtils,
                 transactionManager,
-                new TenantRepositoryImpl<>(clazz, entityManager),
+                new TenantRepositoryImpl<T>(clazz, entityManager),
                 entityValidator);
 
         return new ResourceApiController<>(clazz, resourceApiService, objectMapper);

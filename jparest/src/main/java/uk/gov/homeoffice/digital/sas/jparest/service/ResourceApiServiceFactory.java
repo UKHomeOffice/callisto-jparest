@@ -28,9 +28,10 @@ public class ResourceApiServiceFactory implements BeanFactoryAware {
     this.configurableBeanFactory = (ConfigurableBeanFactory) beanFactory;
   }
 
-  public <T extends BaseEntity> ResourceApiService<T> getBean(Class<T> resourceClass,
-                                                              EntityUtils<T, ?> entityUtils,
-                                                              TenantRepository tenantRepository) {
+  public <T extends BaseEntity> ResourceApiService<T> getBean(
+      Class<T> resourceClass,
+      EntityUtils<T, ?> entityUtils,
+      TenantRepository<T> tenantRepository) {
 
     var resourceApiService = new ResourceApiService<T>(
             entityUtils,
