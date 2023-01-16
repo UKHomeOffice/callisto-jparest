@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
-import uk.gov.homeoffice.digital.sas.jparest.repository.JpaRestRepository;
+import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepository;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 @Component
@@ -32,15 +32,16 @@ public class ResourceApiServiceFactory implements BeanFactoryAware {
     this.configurableBeanFactory = (ConfigurableBeanFactory) beanFactory;
   }
 
-  public <T extends BaseEntity> ResourceApiService<T> getBean(Class<T> resourceClass,
-                                                              EntityUtils<T, ?> entityUtils,
-                                                              JpaRestRepository jpaRestRepository) {
+  public <T extends BaseEntity> ResourceApiService<T> getBean(
+      Class<T> resourceClass,
+      EntityUtils<T, ?> entityUtils,
+      TenantRepository<T> tenantRepository) {
 
     var resourceApiService = new ResourceApiService<T>(
             entityManager,
             entityUtils,
             transactionManager,
-            jpaRestRepository,
+            tenantRepository,
             entityValidator);
 
     configurableBeanFactory.registerSingleton(

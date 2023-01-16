@@ -11,7 +11,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
-import uk.gov.homeoffice.digital.sas.jparest.repository.JpaRestRepository;
+import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepository;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +33,7 @@ class ResourceApiServiceFactoryTest  {
   private ConfigurableBeanFactory configurableBeanFactory;
 
   @Mock
-  private JpaRestRepository<DummyEntityA, ?> jpaRestRepository;
+  private TenantRepository<DummyEntityA> tenantRepository;
 
   private ResourceApiServiceFactory resourceApiServiceFactory;
 
@@ -54,7 +54,7 @@ class ResourceApiServiceFactoryTest  {
     var entityUtils = new EntityUtils<>(resourceClass, (clazz) -> {return true;});
 
     ResourceApiService<DummyEntityA> service = resourceApiServiceFactory.getBean(
-        resourceClass, entityUtils, jpaRestRepository);
+        resourceClass, entityUtils, tenantRepository);
 
     assertThat(service).isNotNull();
     verify(configurableBeanFactory).registerSingleton("DummyEntityAResourceApiService", service);

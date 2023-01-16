@@ -56,14 +56,14 @@ public class ResourceApiController<T extends BaseEntity> {
   public ApiResponse<T> create(@RequestParam UUID tenantId, @RequestBody String body)
       throws JsonProcessingException {
 
-    T payload = readPayload(body);
-    validateAndSetTenantIdPayloadMatch(tenantId, payload);
+    T entity = readEntityFromPayload(body);
+    validateAndSetTenantIdPayloadMatch(tenantId, entity);
 
-    if (Objects.nonNull(payload.getId())) {
+    if (Objects.nonNull(entity.getId())) {
       throw new IllegalArgumentException(
         "A resource id should not be provided when creating a new resource.");
     }
-    return new ApiResponse<>(service.createResource(payload));
+    return new ApiResponse<>(service.createResource(entity));
   }
 
   public void delete(@RequestParam UUID tenantId, @PathVariable UUID id) {
@@ -74,16 +74,16 @@ public class ResourceApiController<T extends BaseEntity> {
                                @PathVariable UUID id,
                                @RequestBody String body) throws JsonProcessingException {
 
-    T payload = readPayload(body);
-    validateAndSetTenantIdPayloadMatch(tenantId, payload);
+    T entity = readEntityFromPayload(body);
+    validateAndSetTenantIdPayloadMatch(tenantId, entity);
 
-    var payloadEntityId = service.getPayloadEntityId(payload);
+    var payloadEntityId = service.getEntityId(entity);
     if (payloadEntityId != null && !id.equals(payloadEntityId)) {
       throw new IllegalArgumentException(
         "The supplied payload resource id value must match the url id path parameter value");
     }
-    payload.setId(id);
-    return new ApiResponse<>(service.updateResource(tenantId, id, payload));
+    entity.setId(id);
+    return new ApiResponse<>(service.updateResource(tenantId, id, entity));
   }
 
   @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters
@@ -115,7 +115,7 @@ public class ResourceApiController<T extends BaseEntity> {
   }
 
 
-  private T readPayload(String body) throws JsonProcessingException {
+  private T readEntityFromPayload(String body) throws JsonProcessingException {
     try {
       return objectMapper.readValue(body, entityType);
     } catch (UnrecognizedPropertyException ex) {
@@ -124,14 +124,14 @@ public class ResourceApiController<T extends BaseEntity> {
     }
   }
 
-  private void validateAndSetTenantIdPayloadMatch(UUID requestTenantId, T payload) {
+  private void validateAndSetTenantIdPayloadMatch(UUID requestTenantId, T entity) {
 
-    var payloadTenantId = payload.getTenantId();
-    if (payloadTenantId != null && !requestTenantId.equals(payloadTenantId)) {
+    var entityTenantId = entity.getTenantId();
+    if (entityTenantId != null && !requestTenantId.equals(entityTenantId)) {
       throw new TenantIdMismatchException();
 
-    } else if (payloadTenantId == null) {
-      payload.setTenantId(requestTenantId);
+    } else if (entityTenantId == null) {
+      entity.setTenantId(requestTenantId);
     }
   }
 
