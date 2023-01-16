@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceUnitUtil;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
@@ -41,6 +42,7 @@ public class TenantRepositoryImpl<T>
   private final EntityManager entityManager;
   private final Class<T> entityType;
   private final String tenantIdFieldName;
+  private final PersistenceUnitUtil persistenceUnitUtil;
 
   private static final String QUERY_HINT = "javax.persistence.fetchgraph";
 
@@ -50,6 +52,7 @@ public class TenantRepositoryImpl<T>
     this.entityManager = entityManager;
     this.entityType = entityType;
     this.tenantIdFieldName = getTenantIdEntityFieldName();
+    this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
   }
 
 
@@ -175,6 +178,11 @@ public class TenantRepositoryImpl<T>
     query.where(builder.and(tenantPredicate, idPredicate));
 
     return this.entityManager.createQuery(query).executeUpdate();
+  }
+
+  @Override
+  public UUID findId(T entity) {
+    return (UUID) this.persistenceUnitUtil.getIdentifier(entity);
   }
 
 

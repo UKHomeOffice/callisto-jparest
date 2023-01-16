@@ -3,16 +3,13 @@ package uk.gov.homeoffice.digital.sas.jparest.service;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceUnitUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
@@ -35,10 +32,8 @@ public class ResourceApiService<T extends BaseEntity> {
   private final PlatformTransactionManager transactionManager;
   private final TenantRepository<T> repository;
   private final EntityValidator entityValidator;
-  private final PersistenceUnitUtil persistenceUnitUtil;
 
-  public ResourceApiService(EntityManager entityManager,
-                            EntityUtils<T, ?> entityUtils,
+  public ResourceApiService(EntityUtils<T, ?> entityUtils,
                             PlatformTransactionManager transactionManager,
                             TenantRepository<T> repository,
                             EntityValidator entityValidator) {
@@ -46,7 +41,6 @@ public class ResourceApiService<T extends BaseEntity> {
     this.transactionManager = transactionManager;
     this.repository = repository;
     this.entityValidator = entityValidator;
-    this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
   }
 
   public List<T> getAllResources(UUID tenantId, Pageable pageable, SpelExpression filter) {
@@ -136,10 +130,11 @@ public class ResourceApiService<T extends BaseEntity> {
             .map(BaseEntity.class::cast)
             .collect(Collectors.toMap(BaseEntity::getId, Function.identity()));
 
-    var notDeletableRelatedIds = new HashSet<UUID>();
+    var notDeletableRelatedIds = new ArrayList<UUID>();
     for (var relatedId : relatedIds) {
       var entityReference = (BaseEntity) this.entityUtils.getEntityReference(relation, relatedId);
-      if (!relatedEntities.remove(relatedEntityIdToEntityMap.get(entityReference.getId()))) {
+      BaseEntity relatedEntityToDelete = relatedEntityIdToEntityMap.get(entityReference.getId());
+      if (!relatedEntities.remove(relatedEntityToDelete)) {
         notDeletableRelatedIds.add(relatedId);
       }
     }
@@ -168,7 +163,12 @@ public class ResourceApiService<T extends BaseEntity> {
 
     var parentEntity = repository.findByIdAndTenantId(id, tenantId, relation)
         .orElseThrow(() -> new ResourceNotFoundException(id));
-    validateRelatedResourcesTenantIds(relation, relatedIds, tenantId);
+
+    var totalRelationsWithMatchingTenantId = repository.countAllByRelationAndTenantId(
+        tenantId, entityUtils.getRelatedType(relation), relatedIds);
+    if (totalRelationsWithMatchingTenantId != relatedIds.size()) {
+      throw new ResourceNotFoundException(relatedResourcesMessage(relatedIds));
+    }
 
     var relatedEntities = entityUtils.getRelatedEntities(parentEntity, relation);
     var relatedEntityIdToEntityMap =
@@ -207,18 +207,8 @@ public class ResourceApiService<T extends BaseEntity> {
         tenantId, id, relation, entityUtils.getRelatedType(relation), filter, pageable);
   }
 
-  private void validateRelatedResourcesTenantIds(
-      String relation, Collection<UUID> relatedIds, UUID tenantId) {
-
-    var totalRelationsWithMatchingTenantId = repository.countAllByRelationAndTenantId(
-        tenantId, entityUtils.getRelatedType(relation), relatedIds);
-    if (totalRelationsWithMatchingTenantId != relatedIds.size()) {
-      throw new ResourceNotFoundException(relatedResourcesMessage(relatedIds));
-    }
-  }
-
   public UUID getPayloadEntityId(T payload) {
-    return (UUID) this.persistenceUnitUtil.getIdentifier(payload);
+    return repository.findId(payload);
   }
 
 

@@ -1,6 +1,5 @@
 package uk.gov.homeoffice.digital.sas.jparest.service;
 
-import javax.persistence.EntityManager;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -14,15 +13,12 @@ import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 @Component
 public class ResourceApiServiceFactory implements BeanFactoryAware {
 
-  private final EntityManager entityManager;
   private final PlatformTransactionManager transactionManager;
   private final EntityValidator entityValidator;
   private ConfigurableBeanFactory configurableBeanFactory;
 
-  public ResourceApiServiceFactory(EntityManager entityManager,
-                                   PlatformTransactionManager transactionManager,
+  public ResourceApiServiceFactory(PlatformTransactionManager transactionManager,
                                    EntityValidator entityValidator) {
-    this.entityManager = entityManager;
     this.transactionManager = transactionManager;
     this.entityValidator = entityValidator;
   }
@@ -37,7 +33,6 @@ public class ResourceApiServiceFactory implements BeanFactoryAware {
                                                               TenantRepository tenantRepository) {
 
     var resourceApiService = new ResourceApiService<T>(
-            entityManager,
             entityUtils,
             transactionManager,
             tenantRepository,

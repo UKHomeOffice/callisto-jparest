@@ -31,4 +31,6 @@ public interface TenantRepository<T> extends JpaRepository<T, UUID> {
                                      Collection<UUID> relatedIds);
 
   int deleteByIdAndTenantId(UUID tenantId, UUID id);
+
+  UUID findId(T entity);
 }

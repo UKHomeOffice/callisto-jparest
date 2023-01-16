@@ -576,7 +576,6 @@ class ResourceApiControllerTest {
         var mockedEntityValidator = Mockito.mock(EntityValidator.class);
 
         var resourceApiService = new ResourceApiService<>(
-                entityManager,
                 entityUtils,
                 transactionManager,
                 new TenantRepositoryImpl<>(DummyEntityC.class, entityManager),
@@ -983,7 +982,6 @@ class ResourceApiControllerTest {
         var entityUtils = new EntityUtils<>(clazz, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
 
         var resourceApiService = new ResourceApiService<>(
-                entityManager,
                 entityUtils,
                 transactionManager,
                 new TenantRepositoryImpl<>(clazz, entityManager),

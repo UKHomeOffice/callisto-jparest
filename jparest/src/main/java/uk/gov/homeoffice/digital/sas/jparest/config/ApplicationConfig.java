@@ -49,9 +49,8 @@ public class ApplicationConfig {
 
   @Bean
   public ResourceApiServiceFactory resourceApiServiceFactory(
-      EntityManager entityManager,
       PlatformTransactionManager transactionManager,
       EntityValidator entityValidator) {
-    return new ResourceApiServiceFactory(entityManager, transactionManager, entityValidator);
+    return new ResourceApiServiceFactory(transactionManager, entityValidator);
   }
 }
