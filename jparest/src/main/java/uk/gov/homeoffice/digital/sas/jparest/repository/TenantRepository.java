@@ -15,9 +15,9 @@ public interface TenantRepository<T> extends JpaRepository<T, UUID> {
 
   List<T> findAllByTenantId(UUID tenantId, SpelExpression filter, Pageable pageable);
 
-  Optional<T> findByIdAndTenantId(UUID id, UUID tenantId);
+  Optional<T> findByIdAndTenantId(UUID tenantId, UUID id);
 
-  Optional<T> findByIdAndTenantId(UUID id, UUID tenantId, String relatedResourceType);
+  Optional<T> findByIdAndTenantId(UUID tenantId, UUID id, String relatedResourceType);
 
   @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters
   List<?> findAllByIdAndRelationAndTenantId(UUID tenantId,

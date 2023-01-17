@@ -47,7 +47,7 @@ public class ResourceApiService<T extends BaseEntity> {
   }
 
   public T getResource(UUID tenantId, UUID id) {
-    return repository.findByIdAndTenantId(id, tenantId)
+    return repository.findByIdAndTenantId(tenantId, id)
         .orElseThrow(() -> new ResourceNotFoundException(id));
   }
 
@@ -86,16 +86,15 @@ public class ResourceApiService<T extends BaseEntity> {
     }
   }
 
-  //TODO: remove tenantID and id params
-  public T updateResource(UUID tenantId, UUID id, T entity) {
+  public T updateResource(T entity) {
 
     var transactionDefinition = new DefaultTransactionDefinition();
     var transactionStatus = this.transactionManager.getTransaction(transactionDefinition);
     T originalEntity;
     try {
       this.entityValidator.validateAndThrowIfErrorsExist(entity);
-      originalEntity = repository.findByIdAndTenantId(id, tenantId)
-              .orElseThrow(() -> new ResourceNotFoundException(id));
+      originalEntity = repository.findByIdAndTenantId(entity.getTenantId(), entity.getId())
+              .orElseThrow(() -> new ResourceNotFoundException(entity.getId()));
       BeanUtils.copyProperties(entity, originalEntity, EntityUtils.ID_FIELD_NAME);
       repository.saveAndFlush(originalEntity);
       transactionManager.commit(transactionStatus);
@@ -117,7 +116,7 @@ public class ResourceApiService<T extends BaseEntity> {
         this.transactionManager.getTransaction(transactionDefinition);
 
     try {
-      var parentEntity = repository.findByIdAndTenantId(id, tenantId, relation)
+      var parentEntity = repository.findByIdAndTenantId(tenantId, id, relation)
           .orElseThrow(() -> new ResourceNotFoundException(id));
       var relatedEntities = entityUtils.getRelatedEntities(parentEntity, relation);
       Map<UUID, BaseEntity> relatedEntityIdToEntityMap =
@@ -156,7 +155,7 @@ public class ResourceApiService<T extends BaseEntity> {
         this.transactionManager.getTransaction(transactionDefinition);
 
     try {
-      var parentEntity = repository.findByIdAndTenantId(id, tenantId, relation)
+      var parentEntity = repository.findByIdAndTenantId(tenantId, id, relation)
           .orElseThrow(() -> new ResourceNotFoundException(id));
 
       var totalMatchingRelations = repository.countAllByRelationAndTenantId(

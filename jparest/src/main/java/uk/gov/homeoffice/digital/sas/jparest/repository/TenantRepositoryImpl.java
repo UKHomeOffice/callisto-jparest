@@ -83,11 +83,11 @@ public class TenantRepositoryImpl<T>
 
   @Override
   @Transactional
-  public Optional<T> findByIdAndTenantId(UUID id, UUID tenantId) {
-    return this.findByIdAndTenantId(id, tenantId, null);
+  public Optional<T> findByIdAndTenantId(UUID tenantId, UUID id) {
+    return this.findByIdAndTenantId(tenantId, id, null);
   }
 
-  public Optional<T> findByIdAndTenantId(UUID id, UUID tenantId, String relatedResourceType) {
+  public Optional<T> findByIdAndTenantId(UUID tenantId, UUID id, String relatedResourceType) {
 
     CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
     CriteriaQuery<T> query = builder.createQuery(entityType);
@@ -168,7 +168,7 @@ public class TenantRepositoryImpl<T>
   @Override
   @Transactional
   public void deleteByIdAndTenantId(UUID tenantId, UUID id) throws NoSuchElementException {
-    delete(findByIdAndTenantId(id, tenantId).orElseThrow());
+    delete(findByIdAndTenantId(tenantId, id).orElseThrow());
   }
 
   @Override
