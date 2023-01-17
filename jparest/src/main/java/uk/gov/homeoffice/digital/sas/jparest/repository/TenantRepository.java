@@ -19,6 +19,7 @@ public interface TenantRepository<T> extends JpaRepository<T, UUID> {
 
   Optional<T> findByIdAndTenantId(UUID id, UUID tenantId, String relatedResourceType);
 
+  @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters
   List<?> findAllByIdAndRelationAndTenantId(UUID tenantId,
                                             UUID id,
                                             String relatedResourceType,
@@ -30,7 +31,7 @@ public interface TenantRepository<T> extends JpaRepository<T, UUID> {
                                      Class<?> relatedEntityClass,
                                      Collection<UUID> relatedIds);
 
-  int deleteByIdAndTenantId(UUID tenantId, UUID id);
+  void deleteByIdAndTenantId(UUID tenantId, UUID id);
 
   UUID findId(T entity);
 }

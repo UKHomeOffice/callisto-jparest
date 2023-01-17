@@ -626,15 +626,6 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void delete_entityIdHasMultipleRecordsWithMatchingIds_unexpectedQueryResultExceptionThrown() {
-
-        var controller = getResourceApiController(DummyEntityF.class);
-        assertThatExceptionOfType(UnexpectedQueryResultException.class).isThrownBy(() -> controller.delete(TENANT_ID, DUMMY_F_ID_1))
-                .withMessageContaining(DUMMY_F_ID_1.toString());
-    }
-
-    @Test
-    @Transactional
     void delete_requestTenantIdMatchesResourceTenantId_noExceptionThrown() throws JsonProcessingException {
         String payload = "{" +
                 "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +

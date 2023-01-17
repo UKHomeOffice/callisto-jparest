@@ -5,13 +5,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceUnitUtil;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Order;
@@ -64,9 +64,9 @@ public class TenantRepositoryImpl<T>
     CriteriaQuery<T> query = builder.createQuery(entityType);
     Root<T> root = query.from(entityType);
 
-    var tenantPredicate = builder.equal(root.get(tenantIdFieldName), tenantId);
-    var filterPredicate = SpelExpressionToPredicateConverter.convert(filter, builder, root);
-    var finalPredicate =
+    Predicate tenantPredicate = builder.equal(root.get(tenantIdFieldName), tenantId);
+    Predicate filterPredicate = SpelExpressionToPredicateConverter.convert(filter, builder, root);
+    Predicate finalPredicate =
         filter != null ? builder.and(tenantPredicate, filterPredicate) : tenantPredicate;
     query.where(finalPredicate);
 
@@ -167,17 +167,8 @@ public class TenantRepositoryImpl<T>
 
   @Override
   @Transactional
-  public int deleteByIdAndTenantId(UUID tenantId, UUID id) {
-    //TODO: Check if we can simply do findByID -> repo.delete instead of using criteria builder
-    CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
-    CriteriaDelete<T> query = builder.createCriteriaDelete(entityType);
-    Root<T> root = query.from(entityType);
-
-    var tenantPredicate = builder.equal(root.get(tenantIdFieldName), tenantId);
-    var idPredicate = builder.equal(root.get(EntityUtils.ID_FIELD_NAME), id);
-    query.where(builder.and(tenantPredicate, idPredicate));
-
-    return this.entityManager.createQuery(query).executeUpdate();
+  public void deleteByIdAndTenantId(UUID tenantId, UUID id) throws NoSuchElementException {
+    delete(findByIdAndTenantId(id, tenantId).orElseThrow());
   }
 
   @Override

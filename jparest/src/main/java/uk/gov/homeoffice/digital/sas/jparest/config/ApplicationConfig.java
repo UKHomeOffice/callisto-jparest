@@ -1,6 +1,5 @@
 package uk.gov.homeoffice.digital.sas.jparest.config;
 
-import javax.persistence.EntityManager;
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
