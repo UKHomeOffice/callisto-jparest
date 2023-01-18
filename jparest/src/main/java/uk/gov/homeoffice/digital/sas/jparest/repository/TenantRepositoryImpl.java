@@ -83,11 +83,11 @@ public class TenantRepositoryImpl<T>
 
   @Override
   @Transactional
-  public Optional<T> findByIdAndTenantId(UUID tenantId, UUID id) {
-    return this.findByIdAndTenantId(tenantId, id, null);
+  public Optional<T> findByTenantIdAndId(UUID tenantId, UUID id) {
+    return this.findByTenantIdAndId(tenantId, id, null);
   }
 
-  public Optional<T> findByIdAndTenantId(UUID tenantId, UUID id, String relatedResourceType) {
+  public Optional<T> findByTenantIdAndId(UUID tenantId, UUID id, String relatedResourceType) {
 
     CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
     CriteriaQuery<T> query = builder.createQuery(entityType);
@@ -112,7 +112,7 @@ public class TenantRepositoryImpl<T>
 
   @Override
   @Transactional
-  public List<?> findAllByIdAndRelationAndTenantId(UUID tenantId,
+  public List<?> findAllByTenantIdAndIdAndRelation(UUID tenantId,
                                                    UUID id,
                                                    String relatedResourceType,
                                                    Class<?> relatedEntityClass,
@@ -146,7 +146,8 @@ public class TenantRepositoryImpl<T>
   }
 
   @Override
-  public Long countAllByRelationAndTenantId(UUID tenantId,
+  @Transactional
+  public Long countAllByTenantIdAndRelation(UUID tenantId,
                                             Class<?> relatedEntityClass,
                                             Collection<UUID> relatedIds) {
 
@@ -167,8 +168,8 @@ public class TenantRepositoryImpl<T>
 
   @Override
   @Transactional
-  public void deleteByIdAndTenantId(UUID tenantId, UUID id) throws NoSuchElementException {
-    delete(findByIdAndTenantId(tenantId, id).orElseThrow());
+  public void deleteByTenantIdAndId(UUID tenantId, UUID id) throws NoSuchElementException {
+    delete(findByTenantIdAndId(tenantId, id).orElseThrow());
   }
 
   @Override

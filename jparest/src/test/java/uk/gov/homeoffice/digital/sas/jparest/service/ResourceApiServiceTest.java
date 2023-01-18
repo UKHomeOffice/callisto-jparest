@@ -77,7 +77,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
     @Test
     void getResource_resourceExists_resourceReturned() {
       T resource = DummyEntityTestUtil.getResource(DummyEntityA.class, RESOURCE_ID, TENANT_ID);
-      when(repository.findByIdAndTenantId(TENANT_ID, RESOURCE_ID)).thenReturn(Optional.of(resource));
+      when(repository.findByTenantIdAndId(TENANT_ID, RESOURCE_ID)).thenReturn(Optional.of(resource));
       var actualResource = resourceApiService.getResource(TENANT_ID, RESOURCE_ID);
       assertThat(actualResource).isEqualTo(resource);
     }
@@ -137,7 +137,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
       when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
       assertThatNoException().isThrownBy(() -> resourceApiService.deleteResource(TENANT_ID, RESOURCE_ID));
 
-      verify(repository).deleteByIdAndTenantId(TENANT_ID, RESOURCE_ID);
+      verify(repository).deleteByTenantIdAndId(TENANT_ID, RESOURCE_ID);
       verify(transactionManager).commit(transactionStatus);
       verify(transactionManager, never()).rollback(transactionStatus);
     }
@@ -146,7 +146,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
     void deleteResource_entityDoesNotExistForId_resourceNotFoundExceptionThrown() {
 
       doThrow(NoSuchElementException.class).when(repository)
-          .deleteByIdAndTenantId(TENANT_ID, RESOURCE_ID);
+          .deleteByTenantIdAndId(TENANT_ID, RESOURCE_ID);
       when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
 
       assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
@@ -166,7 +166,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
       var newDummyAResource = (DummyEntityA) newResource;
       newDummyAResource.setProfileId(1L);
 
-      when(repository.findByIdAndTenantId(newResource.getTenantId(), newResource.getId()))
+      when(repository.findByTenantIdAndId(newResource.getTenantId(), newResource.getId()))
           .thenReturn(Optional.of(existingResource));
       when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
 
@@ -174,7 +174,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
 
       var existingDummyAResource = (DummyEntityA) existingResource;
       assertThat(existingResource.getId()).isEqualTo(RESOURCE_ID);
-      assertThat(existingResource.getTenantId()).isEqualTo(TENANT_ID);
+      assertThat(existingResource.getTenantId()).isEqualTo(newDummyAResource.getTenantId());
       assertThat(existingDummyAResource.getProfileId()).isEqualTo(newDummyAResource.getProfileId());
       verify(transactionManager).commit(transactionStatus);
       verify(transactionManager, never()).rollback(transactionStatus);
@@ -219,7 +219,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
       //mock getting parent entity
       T parentResource = DummyEntityTestUtil.getResource(
           DummyEntityA.class, RESOURCE_ID, TENANT_ID);
-      when(repository.findByIdAndTenantId(TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME)).thenReturn(Optional.of(parentResource));
+      when(repository.findByTenantIdAndId(TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME)).thenReturn(Optional.of(parentResource));
 
       //mock getting the related entities and references to delete
       List<UUID> relatedIds = List.of(RESOURCE_ID_2, RESOURCE_ID_3);
@@ -263,7 +263,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
       //mock getting parent entity
       T parentResource = DummyEntityTestUtil.getResource(
           DummyEntityA.class, RESOURCE_ID, TENANT_ID);
-      when(repository.findByIdAndTenantId(TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME)).thenReturn(Optional.of(parentResource));
+      when(repository.findByTenantIdAndId(TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME)).thenReturn(Optional.of(parentResource));
 
       //mock getting the related entities to delete except those that are not related for the IDs passed in
       var relatedEntities = new ArrayList<>();
@@ -298,7 +298,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
       //mock getting parent entity
       T parentResource = DummyEntityTestUtil.getResource(
           DummyEntityA.class, RESOURCE_ID, TENANT_ID);
-      when(repository.findByIdAndTenantId(TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME)).thenReturn(Optional.of(parentResource));
+      when(repository.findByTenantIdAndId(TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME)).thenReturn(Optional.of(parentResource));
 
       //mock getting the related entities and references to add
       List<UUID> relatedIds = List.of(RESOURCE_ID_2, RESOURCE_ID_3);
@@ -306,7 +306,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
           .map(id -> DummyEntityTestUtil.getResource(RELATED_RESOURCE_CLASS, id, TENANT_ID))
           .collect(Collectors.toList());
       doReturn(RELATED_RESOURCE_CLASS).when(entityUtils).getRelatedType(RELATED_RESOURCE_NAME);
-      when(repository.countAllByRelationAndTenantId(
+      when(repository.countAllByTenantIdAndRelation(
           TENANT_ID, RELATED_RESOURCE_CLASS, relatedIds)).thenReturn(Long.valueOf(relatedIds.size()));
       when(entityUtils.getRelatedEntities(parentResource, RELATED_RESOURCE_NAME)).thenReturn(relatedEntities);
       when(entityUtils.getEntityReference(RELATED_RESOURCE_NAME, relatedIds.get(0))).thenReturn(relatedEntities.get(0));
@@ -341,13 +341,13 @@ class ResourceApiServiceTest<T extends BaseEntity> {
       //mock getting parent entity
       T parentResource = DummyEntityTestUtil.getResource(
           DummyEntityA.class, RESOURCE_ID, TENANT_ID);
-      when(repository.findByIdAndTenantId(TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME)).thenReturn(Optional.of(parentResource));
+      when(repository.findByTenantIdAndId(TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME)).thenReturn(Optional.of(parentResource));
 
       //mock failing related Ids resource validation
       List<UUID> relatedIds = List.of(RESOURCE_ID_2, RESOURCE_ID_3);
       doReturn(RELATED_RESOURCE_CLASS).when(entityUtils).getRelatedType(RELATED_RESOURCE_NAME);
-      when(repository.countAllByRelationAndTenantId(TENANT_ID, RELATED_RESOURCE_CLASS, relatedIds))
-          .thenReturn(0L);
+      when(repository.countAllByTenantIdAndRelation(TENANT_ID, RELATED_RESOURCE_CLASS, relatedIds))
+          .thenReturn(Long.valueOf(relatedIds.size() - 1));
 
       when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
 
@@ -371,7 +371,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
           DummyEntityTestUtil.getResource(RELATED_RESOURCE_CLASS, RESOURCE_ID_2, TENANT_ID),
           DummyEntityTestUtil.getResource(RELATED_RESOURCE_CLASS, RESOURCE_ID_3, TENANT_ID));
 
-      doReturn(relatedResources).when(repository).findAllByIdAndRelationAndTenantId(
+      doReturn(relatedResources).when(repository).findAllByTenantIdAndIdAndRelation(
           TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME, RELATED_RESOURCE_CLASS, null, null);
       doReturn(RELATED_RESOURCE_CLASS).when(entityUtils).getRelatedType(RELATED_RESOURCE_NAME);
 

@@ -15,23 +15,23 @@ public interface TenantRepository<T> extends JpaRepository<T, UUID> {
 
   List<T> findAllByTenantId(UUID tenantId, SpelExpression filter, Pageable pageable);
 
-  Optional<T> findByIdAndTenantId(UUID tenantId, UUID id);
+  Optional<T> findByTenantIdAndId(UUID tenantId, UUID id);
 
-  Optional<T> findByIdAndTenantId(UUID tenantId, UUID id, String relatedResourceType);
+  Optional<T> findByTenantIdAndId(UUID tenantId, UUID id, String relatedResourceType);
 
   @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters
-  List<?> findAllByIdAndRelationAndTenantId(UUID tenantId,
+  List<?> findAllByTenantIdAndIdAndRelation(UUID tenantId,
                                             UUID id,
                                             String relatedResourceType,
                                             Class<?> relatedEntityClass,
                                             SpelExpression filter,
                                             Pageable pageable);
 
-  Long countAllByRelationAndTenantId(UUID tenantId,
+  Long countAllByTenantIdAndRelation(UUID tenantId,
                                      Class<?> relatedEntityClass,
                                      Collection<UUID> relatedIds);
 
-  void deleteByIdAndTenantId(UUID tenantId, UUID id);
+  void deleteByTenantIdAndId(UUID tenantId, UUID id);
 
   UUID findId(T entity);
 }

@@ -4,6 +4,7 @@ import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundE
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -47,7 +48,7 @@ public class ResourceApiService<T extends BaseEntity> {
   }
 
   public T getResource(UUID tenantId, UUID id) {
-    return repository.findByIdAndTenantId(tenantId, id)
+    return repository.findByTenantIdAndId(tenantId, id)
         .orElseThrow(() -> new ResourceNotFoundException(id));
   }
 
@@ -74,7 +75,7 @@ public class ResourceApiService<T extends BaseEntity> {
         this.transactionManager.getTransaction(transactionDefinition);
 
     try {
-      repository.deleteByIdAndTenantId(tenantId, id);
+      repository.deleteByTenantIdAndId(tenantId, id);
       transactionManager.commit(transactionStatus);
     } catch (NoSuchElementException ex) {
       transactionManager.rollback(transactionStatus);
@@ -93,7 +94,7 @@ public class ResourceApiService<T extends BaseEntity> {
     T originalEntity;
     try {
       this.entityValidator.validateAndThrowIfErrorsExist(entity);
-      originalEntity = repository.findByIdAndTenantId(entity.getTenantId(), entity.getId())
+      originalEntity = repository.findByTenantIdAndId(entity.getTenantId(), entity.getId())
               .orElseThrow(() -> new ResourceNotFoundException(entity.getId()));
       BeanUtils.copyProperties(entity, originalEntity, EntityUtils.ID_FIELD_NAME);
       repository.saveAndFlush(originalEntity);
@@ -116,9 +117,9 @@ public class ResourceApiService<T extends BaseEntity> {
         this.transactionManager.getTransaction(transactionDefinition);
 
     try {
-      var parentEntity = repository.findByIdAndTenantId(tenantId, id, relation)
+      T parentEntity = repository.findByTenantIdAndId(tenantId, id, relation)
           .orElseThrow(() -> new ResourceNotFoundException(id));
-      var relatedEntities = entityUtils.getRelatedEntities(parentEntity, relation);
+      Collection<?> relatedEntities = entityUtils.getRelatedEntities(parentEntity, relation);
       Map<UUID, BaseEntity> relatedEntityIdToEntityMap =
           relatedEntities.stream()
               .map(BaseEntity.class::cast)
@@ -155,10 +156,10 @@ public class ResourceApiService<T extends BaseEntity> {
         this.transactionManager.getTransaction(transactionDefinition);
 
     try {
-      var parentEntity = repository.findByIdAndTenantId(tenantId, id, relation)
+      var parentEntity = repository.findByTenantIdAndId(tenantId, id, relation)
           .orElseThrow(() -> new ResourceNotFoundException(id));
 
-      var totalMatchingRelations = repository.countAllByRelationAndTenantId(
+      var totalMatchingRelations = repository.countAllByTenantIdAndRelation(
           tenantId, entityUtils.getRelatedType(relation), relatedIds);
       if (totalMatchingRelations != relatedIds.size()) {
         throw new ResourceNotFoundException(relatedResourcesMessage(relatedIds));
@@ -196,7 +197,7 @@ public class ResourceApiService<T extends BaseEntity> {
                                      String relation,
                                      Pageable pageable,
                                      SpelExpression filter) {
-    return repository.findAllByIdAndRelationAndTenantId(
+    return repository.findAllByTenantIdAndIdAndRelation(
         tenantId, id, relation, entityUtils.getRelatedType(relation), filter, pageable);
   }
 
