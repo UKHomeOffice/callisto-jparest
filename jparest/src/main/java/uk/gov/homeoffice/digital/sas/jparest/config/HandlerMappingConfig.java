@@ -22,7 +22,6 @@ import javax.persistence.metamodel.EntityType;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -34,7 +33,9 @@ import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
-import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
+import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepositoryImpl;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiServiceFactory;
+
 
 /**
  * Discovers JPA entities annotated with {@link Resource}
@@ -46,31 +47,31 @@ public class HandlerMappingConfig {
   private static final Logger LOGGER = Logger.getLogger(HandlerMappingConfig.class.getName());
 
   private final EntityManager entityManager;
-  private final PlatformTransactionManager transactionManager;
   private final ResourceEndpoint resourceEndpoint;
   private final ApplicationContext context;
+  private final ResourceApiServiceFactory resourceApiServiceFactory;
   private RequestMappingHandlerMapping requestMappingHandlerMapping;
   private BuilderConfiguration builderOptions;
-  private final EntityValidator entityValidator;
   private final ObjectMapper objectMapper;
+
+
 
   public HandlerMappingConfig(
       EntityManager entityManager,
-      PlatformTransactionManager transactionManager,
       ApplicationContext context,
+      ResourceApiServiceFactory resourceApiServiceFactory,
       ResourceEndpoint resourceEndpoint,
-      EntityValidator entityValidator,
       ObjectMapper objectMapper) {
     this.entityManager = entityManager;
-    this.transactionManager = transactionManager;
     this.context = context;
+    this.resourceApiServiceFactory = resourceApiServiceFactory;
     this.resourceEndpoint = resourceEndpoint;
-    this.entityValidator = entityValidator;
     this.objectMapper = objectMapper;
   }
 
   @PostConstruct
-  public void registerUserController() throws NoSuchMethodException, SecurityException {
+  public <T extends BaseEntity> void registerUserController()
+          throws NoSuchMethodException, SecurityException {
     requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
 
     createBuilderOptions();
@@ -91,10 +92,9 @@ public class HandlerMappingConfig {
     // find the id field , build the request mapping path and register the controller
     for (var entityClassEntry : baseEntitySubClassesMap.entrySet()) {
 
-      Class<? extends BaseEntity> resource = (
-          Class<? extends BaseEntity>) entityClassEntry.getKey();
-      LOGGER.fine("Processing resource" + resource.getName());
-      var resourceAnnotation = resource.getAnnotation(Resource.class);
+      Class<T> resourceClass = (Class<T>) entityClassEntry.getKey();
+      LOGGER.fine("Processing resource" + resourceClass.getName());
+      var resourceAnnotation = resourceClass.getAnnotation(Resource.class);
       String resourcePath = resourceAnnotation.path();
       if (!StringUtils.hasText(resourcePath)) {
         resourcePath = entityClassEntry.getValue().getName().toLowerCase();
@@ -103,20 +103,21 @@ public class HandlerMappingConfig {
       LOGGER.log(Level.FINE, "root path for resource: {0}", path);
 
       // Added to endpoint resource types for documentation customiser
-      resourceTypes.add(resource);
+      resourceTypes.add(resourceClass);
 
       // Create a controller for the resource
       LOGGER.fine("Creating controller");
-      EntityUtils<?, ?> entityUtils = new EntityUtils<>(resource, isBaseEntitySubclass);
-      ResourceApiController<?> controller = new ResourceApiController<>(
-          resource, entityManager,
-          transactionManager, entityUtils, entityValidator, objectMapper);
+      var entityUtils = new EntityUtils<>(resourceClass, isBaseEntitySubclass);
+      var resourceApiService =  resourceApiServiceFactory.getBean(resourceClass, entityUtils,
+              new TenantRepositoryImpl<>(resourceClass, entityManager));
+      var controller = new ResourceApiController<>(
+          resourceClass, resourceApiService, objectMapper);
 
       // Map the CRUD operations to the controllers methods
-      mapRestOperationsToController(resource, path, controller);
+      mapRestOperationsToController(resourceClass, path, controller);
 
       LOGGER.fine("Registering related paths");
-      registerRelatedPaths(resource, path, entityUtils, controller);
+      registerRelatedPaths(resourceClass, path, entityUtils, controller);
 
       LOGGER.fine("All paths registered");
     }

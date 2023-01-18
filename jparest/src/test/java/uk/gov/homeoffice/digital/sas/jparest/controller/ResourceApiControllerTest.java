@@ -37,6 +37,8 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepositoryImpl;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 import javax.persistence.EntityManager;
@@ -572,12 +574,17 @@ class ResourceApiControllerTest {
 
         var entityUtils = new EntityUtils<>(DummyEntityC.class, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
         var mockedEntityValidator = Mockito.mock(EntityValidator.class);
+
+        var resourceApiService = new ResourceApiService<>(
+                entityManager,
+                entityUtils,
+                transactionManager,
+                new TenantRepositoryImpl<DummyEntityC>(DummyEntityC.class, entityManager),
+                mockedEntityValidator);
+
         var controller = new ResourceApiController<>(
                 DummyEntityC.class,
-                entityManager,
-                transactionManager,
-                entityUtils,
-                mockedEntityValidator,
+                resourceApiService,
                 objectMapper);
 
         var resource = createResource(controller, payload, TENANT_ID);
@@ -974,7 +981,15 @@ class ResourceApiControllerTest {
 
     private <T extends BaseEntity, U> ResourceApiController<T> getResourceApiController(Class<T> clazz) {
         var entityUtils = new EntityUtils<>(clazz, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
-        return new ResourceApiController<>(clazz, entityManager, transactionManager, entityUtils, entityValidator, objectMapper);
+
+        var resourceApiService = new ResourceApiService<>(
+                entityManager,
+                entityUtils,
+                transactionManager,
+                new TenantRepositoryImpl<T>(clazz, entityManager),
+                entityValidator);
+
+        return new ResourceApiController<>(clazz, resourceApiService, objectMapper);
     }
 
     private <T extends BaseEntity> T createResource(ResourceApiController<T> controller,

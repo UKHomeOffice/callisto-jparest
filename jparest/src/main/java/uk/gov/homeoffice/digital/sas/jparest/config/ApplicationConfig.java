@@ -1,11 +1,14 @@
 package uk.gov.homeoffice.digital.sas.jparest.config;
 
+import javax.persistence.EntityManager;
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiServiceFactory;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.PathItemCreator;
 import uk.gov.homeoffice.digital.sas.jparest.swagger.ResourceOpenApiCustomiser;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
@@ -42,5 +45,13 @@ public class ApplicationConfig {
   @Bean
   public EntityValidator entityValidator() {
     return new EntityValidator();
+  }
+
+  @Bean
+  public ResourceApiServiceFactory resourceApiServiceFactory(
+      EntityManager entityManager,
+      PlatformTransactionManager transactionManager,
+      EntityValidator entityValidator) {
+    return new ResourceApiServiceFactory(entityManager, transactionManager, entityValidator);
   }
 }

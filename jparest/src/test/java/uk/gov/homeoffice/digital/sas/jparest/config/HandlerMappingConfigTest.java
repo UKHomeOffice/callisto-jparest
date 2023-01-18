@@ -1,6 +1,11 @@
 package uk.gov.homeoffice.digital.sas.jparest.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.stream.Stream;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
@@ -22,13 +26,8 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityH;
-import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-import java.util.List;
-import java.util.stream.Stream;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiServiceFactory;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -45,10 +44,10 @@ class HandlerMappingConfigTest {
     private EntityManager entityManager;
 
     @MockBean
-    private PlatformTransactionManager transactionManager;
+    private ApplicationContext context;
 
     @MockBean
-    private ApplicationContext context;
+    private ResourceApiServiceFactory resourceApiServiceFactory;
 
     @MockBean
     private ResourceEndpoint resourceEndpoint;
@@ -57,12 +56,12 @@ class HandlerMappingConfigTest {
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
     @MockBean
-    private EntityValidator entityValidator;
-
-    @MockBean
     private ObjectMapper objectMapper;
 
     private HandlerMappingConfig handlerMappingConfig;
+
+    @MockBean
+    private ResourceApiService<?> service;
 
     private static Stream<Arguments> resources() {
         return Stream.of(
@@ -75,8 +74,12 @@ class HandlerMappingConfigTest {
     @BeforeEach
     public void setup() {
         when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
-        handlerMappingConfig = new HandlerMappingConfig(entityManager, transactionManager, context,
-                resourceEndpoint, entityValidator, objectMapper);
+        handlerMappingConfig = new HandlerMappingConfig(
+            entityManager,
+            context,
+            resourceApiServiceFactory,
+            resourceEndpoint,
+            objectMapper);
     }
 
     @Test
