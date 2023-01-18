@@ -4,7 +4,6 @@ import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiServiceFactory;
@@ -47,9 +46,7 @@ public class ApplicationConfig {
   }
 
   @Bean
-  public ResourceApiServiceFactory resourceApiServiceFactory(
-      PlatformTransactionManager transactionManager,
-      EntityValidator entityValidator) {
-    return new ResourceApiServiceFactory(transactionManager, entityValidator);
+  public ResourceApiServiceFactory resourceApiServiceFactory(EntityValidator entityValidator) {
+    return new ResourceApiServiceFactory(entityValidator);
   }
 }

@@ -19,7 +19,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
@@ -34,7 +33,6 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.StructuredError;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepositoryImpl;
@@ -66,9 +64,6 @@ class ResourceApiControllerTest {
 
     @PersistenceContext
     private EntityManager entityManager;
-
-    @Autowired
-    private PlatformTransactionManager transactionManager;
 
     @Autowired
     private EntityValidator entityValidator;
@@ -577,7 +572,6 @@ class ResourceApiControllerTest {
 
         var resourceApiService = new ResourceApiService<>(
                 entityUtils,
-                transactionManager,
                 new TenantRepositoryImpl<DummyEntityC>(DummyEntityC.class, entityManager),
                 mockedEntityValidator);
 
@@ -974,7 +968,6 @@ class ResourceApiControllerTest {
 
         var resourceApiService = new ResourceApiService<>(
                 entityUtils,
-                transactionManager,
                 new TenantRepositoryImpl<T>(clazz, entityManager),
                 entityValidator);
 
