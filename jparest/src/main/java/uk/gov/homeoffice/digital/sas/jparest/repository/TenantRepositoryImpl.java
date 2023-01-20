@@ -22,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.expression.spel.standard.SpelExpression;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
@@ -57,7 +56,6 @@ public class TenantRepositoryImpl<T>
 
 
   @Override
-  @Transactional
   public List<T> findAllByTenantId(UUID tenantId, SpelExpression filter, Pageable pageable) {
 
     CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
@@ -82,7 +80,6 @@ public class TenantRepositoryImpl<T>
 
 
   @Override
-  @Transactional
   public Optional<T> findByTenantIdAndId(UUID tenantId, UUID id) {
     return this.findByTenantIdAndId(tenantId, id, null);
   }
@@ -111,7 +108,6 @@ public class TenantRepositoryImpl<T>
   }
 
   @Override
-  @Transactional
   public List<?> findAllByTenantIdAndIdAndRelation(UUID tenantId,
                                                    UUID id,
                                                    String relatedResourceType,
@@ -146,7 +142,6 @@ public class TenantRepositoryImpl<T>
   }
 
   @Override
-  @Transactional
   public Long countAllByTenantIdAndRelation(UUID tenantId,
                                             Class<?> relatedEntityClass,
                                             Collection<UUID> relatedIds) {
@@ -167,7 +162,6 @@ public class TenantRepositoryImpl<T>
   }
 
   @Override
-  @Transactional
   public void deleteByTenantIdAndId(UUID tenantId, UUID id) throws NoSuchElementException {
     delete(findByTenantIdAndId(tenantId, id).orElseThrow());
   }
