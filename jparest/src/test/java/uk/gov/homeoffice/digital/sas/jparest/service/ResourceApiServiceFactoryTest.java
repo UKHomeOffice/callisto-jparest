@@ -20,9 +20,6 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class ResourceApiServiceFactoryTest  {
 
-  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-  private EntityManager entityManager;
-
   @Mock
   private PlatformTransactionManager transactionManager;
 
@@ -40,7 +37,6 @@ class ResourceApiServiceFactoryTest  {
   @BeforeEach
   void setup() {
     resourceApiServiceFactory = new ResourceApiServiceFactory(
-        entityManager,
         transactionManager,
         entityValidator);
     resourceApiServiceFactory.setBeanFactory(configurableBeanFactory);

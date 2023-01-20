@@ -8,6 +8,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
@@ -15,6 +16,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 @Resource(path = "dummyEntityAs")
 @Entity(name = "dummyEntityA")
+@EqualsAndHashCode
 public class DummyEntityA extends BaseEntity {
 
     @Getter

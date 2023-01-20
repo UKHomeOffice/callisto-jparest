@@ -83,7 +83,7 @@ public class ResourceApiController<T extends BaseEntity> {
         "The supplied payload resource id value must match the url id path parameter value");
     }
     entity.setId(id);
-    return new ApiResponse<>(service.updateResource(tenantId, id, entity));
+    return new ApiResponse<>(service.updateResource(entity));
   }
 
   @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters

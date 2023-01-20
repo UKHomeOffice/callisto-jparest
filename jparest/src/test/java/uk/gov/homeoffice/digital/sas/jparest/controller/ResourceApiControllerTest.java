@@ -576,7 +576,6 @@ class ResourceApiControllerTest {
         var mockedEntityValidator = Mockito.mock(EntityValidator.class);
 
         var resourceApiService = new ResourceApiService<>(
-                entityManager,
                 entityUtils,
                 transactionManager,
                 new TenantRepositoryImpl<DummyEntityC>(DummyEntityC.class, entityManager),
@@ -623,15 +622,6 @@ class ResourceApiControllerTest {
         var controller = getResourceApiController(DummyEntityC.class);
         assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.delete(TENANT_ID, NON_EXISTENT_ID))
                 .withMessage(String.format(RESOURCE_NOT_FOUND_ERROR_FORMAT, NON_EXISTENT_ID));
-    }
-
-    @Test
-    @Transactional
-    void delete_entityIdHasMultipleRecordsWithMatchingIds_unexpectedQueryResultExceptionThrown() {
-
-        var controller = getResourceApiController(DummyEntityF.class);
-        assertThatExceptionOfType(UnexpectedQueryResultException.class).isThrownBy(() -> controller.delete(TENANT_ID, DUMMY_F_ID_1))
-                .withMessageContaining(DUMMY_F_ID_1.toString());
     }
 
     @Test
@@ -983,7 +973,6 @@ class ResourceApiControllerTest {
         var entityUtils = new EntityUtils<>(clazz, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
 
         var resourceApiService = new ResourceApiService<>(
-                entityManager,
                 entityUtils,
                 transactionManager,
                 new TenantRepositoryImpl<T>(clazz, entityManager),
