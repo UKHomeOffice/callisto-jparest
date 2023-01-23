@@ -1,6 +1,5 @@
 package uk.gov.homeoffice.digital.sas.jparest.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
@@ -21,12 +20,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
+import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiControllerFactory;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityH;
-import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
+import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
+import uk.gov.homeoffice.digital.sas.jparest.service.ControllerRegistererService;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiServiceFactory;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -56,12 +57,16 @@ class HandlerMappingConfigTest {
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
     @MockBean
-    private ObjectMapper objectMapper;
+    private ResourceApiControllerFactory resourceApiControllerFactory;
+
+    @MockBean
+    private BaseEntityCheckerService baseEntityCheckerService;
+
+    @MockBean
+    private ControllerRegistererService controllerRegistererService;
 
     private HandlerMappingConfig handlerMappingConfig;
 
-    @MockBean
-    private ResourceApiService<?> service;
 
     private static Stream<Arguments> resources() {
         return Stream.of(
@@ -76,10 +81,11 @@ class HandlerMappingConfigTest {
         when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
         handlerMappingConfig = new HandlerMappingConfig(
             entityManager,
-            context,
             resourceApiServiceFactory,
             resourceEndpoint,
-            objectMapper);
+            resourceApiControllerFactory,
+            baseEntityCheckerService,
+            controllerRegistererService);
     }
 
     @Test

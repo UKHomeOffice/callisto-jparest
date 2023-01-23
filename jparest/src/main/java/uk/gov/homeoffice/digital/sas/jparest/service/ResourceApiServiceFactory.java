@@ -1,8 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.service;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
@@ -10,18 +8,15 @@ import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepository;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 @Component
-public class ResourceApiServiceFactory implements BeanFactoryAware {
+public class ResourceApiServiceFactory {
 
   private final EntityValidator entityValidator;
-  private ConfigurableBeanFactory configurableBeanFactory;
+  private final GenericApplicationContext context;
 
-  public ResourceApiServiceFactory(EntityValidator entityValidator) {
+  public ResourceApiServiceFactory(EntityValidator entityValidator,
+                                   GenericApplicationContext context) {
     this.entityValidator = entityValidator;
-  }
-
-  @Override
-  public void setBeanFactory(BeanFactory beanFactory) {
-    this.configurableBeanFactory = (ConfigurableBeanFactory) beanFactory;
+    this.context = context;
   }
 
   public <T extends BaseEntity> ResourceApiService<T> getBean(
@@ -34,9 +29,10 @@ public class ResourceApiServiceFactory implements BeanFactoryAware {
             tenantRepository,
             entityValidator);
 
-    configurableBeanFactory.registerSingleton(
-        resourceClass.getSimpleName() + ResourceApiService.class.getSimpleName(),
-        resourceApiService);
+    context.registerBean(resourceClass.getSimpleName() + ResourceApiService.class.getSimpleName(),
+        ResourceApiService.class,
+        () -> resourceApiService,
+        beanDefinition -> beanDefinition.setAutowireCandidate(true));
 
     return resourceApiService;
   }

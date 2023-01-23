@@ -8,7 +8,9 @@ import io.cucumber.java.ParameterType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -80,10 +82,11 @@ public class ParameterTypes {
   public String fileContents(String path) {
     try {
       ClassLoader classLoader = getClass().getClassLoader();
-      File file = new File(classLoader.getResource(path).getFile());
+      String decodedPath = URLDecoder.decode(classLoader.getResource(path).getFile(), "UTF-8");
+      File file = new File(decodedPath);
       String data = Files.contentOf(file, "UTF-8");
       return interpolation.evaluate(data);
-    } catch (RuntimeException ex) {
+    } catch (RuntimeException | UnsupportedEncodingException ex) {
       throw new IllegalArgumentException("File doesn't exist " + path);
     }
   }
