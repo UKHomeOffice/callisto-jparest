@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
@@ -39,6 +40,9 @@ class ResourceApiServiceTest<T extends BaseEntity> {
     @Mock
     private TenantRepository<T> repository;
 
+    @Mock
+    private PlatformTransactionManager transactionManager;
+
     private ResourceApiService<T> resourceApiService;
 
 
@@ -52,7 +56,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
 
     @BeforeEach
     private void setup() {
-      resourceApiService = new ResourceApiService<T>(entityUtils, repository, entityValidator);
+      resourceApiService = new ResourceApiService<T>(entityUtils, repository, entityValidator, transactionManager);
     }
 
 

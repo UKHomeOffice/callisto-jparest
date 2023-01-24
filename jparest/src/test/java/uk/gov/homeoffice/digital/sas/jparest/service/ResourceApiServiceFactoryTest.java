@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepository;
@@ -32,9 +33,12 @@ class ResourceApiServiceFactoryTest  {
   @Mock
   GenericApplicationContext context;
 
+  @Mock
+  PlatformTransactionManager transactionManager;
+
   @BeforeEach
   void setup() {
-    resourceApiServiceFactory = new ResourceApiServiceFactory(entityValidator, context);
+    resourceApiServiceFactory = new ResourceApiServiceFactory(entityValidator, context, transactionManager);
   }
 
 

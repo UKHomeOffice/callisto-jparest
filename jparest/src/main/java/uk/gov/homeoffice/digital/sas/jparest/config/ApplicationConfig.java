@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiControllerFactory;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
@@ -54,9 +55,11 @@ public class ApplicationConfig {
   }
 
   @Bean
-  public ResourceApiServiceFactory resourceApiServiceFactory(EntityValidator entityValidator,
-                                                             GenericApplicationContext context) {
-    return new ResourceApiServiceFactory(entityValidator, context);
+  public ResourceApiServiceFactory resourceApiServiceFactory(
+      EntityValidator entityValidator,
+      GenericApplicationContext context,
+      PlatformTransactionManager transactionManager) {
+    return new ResourceApiServiceFactory(entityValidator, context, transactionManager);
   }
 
   @Bean

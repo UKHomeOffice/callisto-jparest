@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
@@ -70,6 +71,9 @@ class ResourceApiControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     public static final UUID NON_EXISTENT_ID = UUID.fromString("7a7c7da4-bb29-11ec-1000-0242ac120001");
     public static final UUID NON_EXISTENT_ID_2 = UUID.fromString("7a7c7da4-bb29-11ec-1001-0242ac120002");
@@ -573,7 +577,8 @@ class ResourceApiControllerTest {
         var resourceApiService = new ResourceApiService<>(
                 entityUtils,
                 new TenantRepositoryImpl<DummyEntityC>(DummyEntityC.class, entityManager),
-                mockedEntityValidator);
+                mockedEntityValidator,
+            transactionManager);
 
         var controller = new ResourceApiController<>(
                 DummyEntityC.class,
@@ -969,7 +974,8 @@ class ResourceApiControllerTest {
         var resourceApiService = new ResourceApiService<>(
                 entityUtils,
                 new TenantRepositoryImpl<T>(clazz, entityManager),
-                entityValidator);
+                entityValidator,
+                transactionManager);
 
         return new ResourceApiController<>(clazz, resourceApiService, objectMapper);
     }
