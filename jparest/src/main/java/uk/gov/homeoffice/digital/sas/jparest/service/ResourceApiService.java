@@ -138,7 +138,8 @@ public class ResourceApiService<T extends BaseEntity> {
                     .toMap(BaseEntity::getId, Function.identity()));
 
         for (var relatedId : relatedIds) {
-          var entityReference = (BaseEntity) this.entityUtils.getEntityReference(relation, relatedId);
+          var entityReference = (BaseEntity) this.entityUtils.getEntityReference(
+              relation, relatedId);
           if (!relatedEntityIdToEntityMap.containsKey(entityReference.getId())) {
             relatedEntities.add(entityReference);
           }
