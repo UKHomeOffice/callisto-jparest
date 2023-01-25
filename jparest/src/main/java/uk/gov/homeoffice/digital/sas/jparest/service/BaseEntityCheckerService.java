@@ -1,8 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.service;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;

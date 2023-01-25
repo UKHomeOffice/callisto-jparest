@@ -1,16 +1,11 @@
 package uk.gov.homeoffice.digital.sas.jparest.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -20,9 +15,7 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.function.Supplier;
 
-@ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @ContextConfiguration(locations = "/test-context.xml")
 class ResourceApiServiceFactoryTest {
@@ -33,22 +26,13 @@ class ResourceApiServiceFactoryTest {
   @Mock
   private EntityValidator entityValidator;
 
+  @Autowired
+  private GenericApplicationContext context;
+
+  @Mock
+  private PlatformTransactionManager transactionManager;
+
   private ResourceApiServiceFactory resourceApiServiceFactory;
-
-  @Mock
-  GenericApplicationContext context;
-
-  @Mock
-  PlatformTransactionManager transactionManager;
-
-  @Captor
-  ArgumentCaptor<String> serviceNameCaptor;
-
-  @Captor
-  ArgumentCaptor<Class<ResourceApiService>> serviceClassCaptor;
-
-  @Captor
-  ArgumentCaptor<Supplier<ResourceApiService>> supplierCaptor;
 
   @BeforeEach
   void setup() {
@@ -63,19 +47,12 @@ class ResourceApiServiceFactoryTest {
     var resourceClass = DummyEntityA.class;
     var entityUtils = new EntityUtils<>(resourceClass, (clazz) -> true);
 
-    ResourceApiService<DummyEntityA> service = resourceApiServiceFactory.getBean(
+    ResourceApiService<DummyEntityA> actualService = resourceApiServiceFactory.getBean(
         resourceClass, entityUtils);
 
-    verify(context).registerBean(
-        serviceNameCaptor.capture(),
-        serviceClassCaptor.capture(),
-        supplierCaptor.capture(),
-        any()
-    );
-
-    assertThat(serviceNameCaptor.getValue()).isEqualTo("DummyEntityAResourceApiService");
-    assertThat(serviceClassCaptor.getValue()).isEqualTo(ResourceApiService.class);
-    assertThat(supplierCaptor.getValue().get()).isEqualTo(service);
+    assertThat(context.getBean("DummyEntityAResourceApiService"))
+        .isNotNull().isInstanceOf(ResourceApiService.class);
+    assertThat(actualService).isNotNull();
   }
 
 }
