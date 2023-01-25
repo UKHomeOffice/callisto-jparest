@@ -8,13 +8,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -41,17 +39,13 @@ class ControllerRegistererServiceTest {
     controllerRegistererService = new ControllerRegistererService(requestMappingHandlerMapping);
   }
 
-  private static Stream<Arguments> resources() {
-    return Stream.of(
-        Arguments.of("dummyEntityAs"),
-        Arguments.of("dummyEntityBs"),
-        Arguments.of("dummyentityc"),
-        Arguments.of("dummyentityd"));
-  }
-
-
   @ParameterizedTest
-  @MethodSource("resources") //TODO: use ValueSource instead
+  @ValueSource(strings = {
+      "dummyEntityAs",
+      "dummyEntityBs",
+      "dummyentityc",
+      "dummyentityd"
+  })
   void mapRestOperationsToController_controllerAndPathProvided_registersRestfulEndpoints(String resourceName) {
 
     var expectedCalls = List.of(

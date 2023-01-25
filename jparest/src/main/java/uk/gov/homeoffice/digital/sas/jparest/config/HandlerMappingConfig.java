@@ -3,7 +3,6 @@ package uk.gov.homeoffice.digital.sas.jparest.config;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.API_ROOT_PATH;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.PATH_DELIMITER;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -47,7 +46,6 @@ public class HandlerMappingConfig {
       throws NoSuchMethodException, SecurityException {
 
     LOGGER.fine("Searching for classes annotated as resources");
-    List<Class<?>> resourceTypes = resourceEndpoint.getResourceTypes();
     Map<Class<?>, String> baseEntitySubClassesMap =
         baseEntityCheckerService.filterBaseEntitySubClasses();
 
@@ -60,9 +58,8 @@ public class HandlerMappingConfig {
       String path = getPath(resourceClass, entityClassEntry.getValue());
       LOGGER.log(Level.FINE, "root path for resource: {0}", path);
 
-      // Added to endpoint resource types for documentation customiser
-      //TODO: change to add through a new ResourceEndpoint service method
-      resourceTypes.add(resourceClass);
+      LOGGER.fine("Adding to endpoint resource type for documentation customiser");
+      resourceEndpoint.addResourceType(resourceClass);
 
       var entityUtils = new EntityUtils<>(resourceClass,
           baseEntityCheckerService.isBaseEntitySubclass(baseEntitySubClassesMap));

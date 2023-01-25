@@ -115,9 +115,6 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
   void configureResourceMapping_resourcesDiscovered_resourceTypesAndPathsAddedToServiceForOpenApi()
       throws NoSuchMethodException {
 
-    var resourceTypes = new ArrayList<Class<?>>();
-    when(resourceEndpoint.getResourceTypes()).thenReturn(resourceTypes);
-
     Map<Class<?>, String> baseEntitySubClassesMap = Map.of(
         DummyEntityA.class, "dummyEntityAs",
         DummyEntityG.class, "dummyEntityGs"
@@ -129,7 +126,7 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
     handlerMappingConfig.configureResourceMapping();
 
     baseEntitySubClassesMap.forEach((resourceClass, entityName) -> {
-      assertThat(resourceTypes).contains(resourceClass);
+      verify(resourceEndpoint).addResourceType(resourceClass);
       try {
         var resourcePath = resourceClass.getAnnotation(Resource.class).path();
 

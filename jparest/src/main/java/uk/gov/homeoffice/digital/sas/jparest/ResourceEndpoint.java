@@ -25,12 +25,16 @@ public class ResourceEndpoint {
   public static final String PATH_ALREADY_EXISTS = "Path has already been used";
 
   @Getter
-  private List<Class<?>> resourceTypes = new ArrayList<>();
+  private final List<Class<?>> resourceTypes = new ArrayList<>();
 
   @Getter
-  private Map<Class<?>, RootDescriptor> descriptors = new HashMap<>();
+  private final Map<Class<?>, RootDescriptor> descriptors = new HashMap<>();
 
-  private List<String> paths = new ArrayList<>();
+  private final List<String> paths = new ArrayList<>();
+
+  public void addResourceType(Class<?> resourceClass) {
+    resourceTypes.add(resourceClass);
+  }
 
   public void add(Class<?> clazz, String path) {
 
