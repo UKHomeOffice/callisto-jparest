@@ -62,7 +62,7 @@ public class ControllerRegistererService {
   }
 
   public void registerRelatedPaths(
-      String path,
+      String rootPath,
       EntityUtils<? extends BaseEntity, ?> entityUtils,
       ResourceApiController<?> controller,
       BiConsumer<Class<? extends BaseEntity>, String> addRelatedResourceConsumer)
@@ -72,7 +72,7 @@ public class ControllerRegistererService {
     for (String relation : entityUtils.getRelatedResources()) {
 
       Class<? extends BaseEntity> relatedType = entityUtils.getRelatedType(relation);
-      addRelatedResourceConsumer.accept(relatedType, path + URL_ID_PATH_PARAM + "/" + relation);
+      addRelatedResourceConsumer.accept(relatedType, rootPath + URL_ID_PATH_PARAM + "/" + relation);
       LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
 
       register(controller, "getRelated",
@@ -82,18 +82,18 @@ public class ControllerRegistererService {
               RequestParameter.RELATION,
               RequestParameter.FILTER,
               RequestParameter.PAGEABLE),
-          path + createIdAndRelationParams(relation), RequestMethod.GET);
+          rootPath + createIdAndRelationParams(relation), RequestMethod.GET);
 
       register(controller, "deleteRelated", getControllerMethodArgs(
               RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION,
               RequestParameter.RELATED_IDS),
-          path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM,
+          rootPath + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM,
           RequestMethod.DELETE);
 
       register(controller, "addRelated", getControllerMethodArgs(
               RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION,
               RequestParameter.RELATED_IDS),
-          path + createIdAndRelationParams(relation)
+          rootPath + createIdAndRelationParams(relation)
               + URL_RELATED_ID_PATH_PARAM, RequestMethod.PUT);
     }
   }

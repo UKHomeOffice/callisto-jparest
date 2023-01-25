@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.persistence.EntityManager;
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,10 +57,12 @@ public class ApplicationConfig {
 
   @Bean
   public ResourceApiServiceFactory resourceApiServiceFactory(
+      EntityManager entityManager,
       EntityValidator entityValidator,
       GenericApplicationContext context,
       PlatformTransactionManager transactionManager) {
-    return new ResourceApiServiceFactory(entityValidator, context, transactionManager);
+    return new ResourceApiServiceFactory(
+        entityManager, entityValidator, context, transactionManager);
   }
 
   @Bean

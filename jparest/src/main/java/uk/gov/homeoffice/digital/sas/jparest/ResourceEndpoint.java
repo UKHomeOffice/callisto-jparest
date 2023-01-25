@@ -10,6 +10,9 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.Ad
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.addresourcedescriptor.AddResourceDescriptorException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
+/**
+ * Stores endpoint paths for resources and related resources used for building the OpenApi Swagger
+ */
 @Component
 public class ResourceEndpoint {
   public static final String RESOURCE_ALREADY_ADDED = "Resource has already been added";

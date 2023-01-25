@@ -20,11 +20,16 @@ public class BaseEntityCheckerService {
     this.entityManager = entityManager;
   }
 
-  public Map<Class<?>, EntityType<?>> filterBaseEntitySubClasses() {
+  /**
+   * Filters all the entities and returns a map of only the BaseEntity subclasses
+   *
+   * @return A map of the key as the entity java class and the value as the entity name
+   */
+  public Map<Class<?>, String> filterBaseEntitySubClasses() {
     return entityManager.getMetamodel().getEntities().stream()
         .filter(entityType -> entityType.getJavaType().isAnnotationPresent(Resource.class)
             && classHasBaseEntityParent(entityType.getJavaType()))
-        .collect(Collectors.toMap(EntityType::getJavaType, Function.identity()));
+        .collect(Collectors.toMap(EntityType::getJavaType, EntityType::getName));
   }
 
   private boolean classHasBaseEntityParent(Class<?> childClass) {
@@ -39,7 +44,7 @@ public class BaseEntityCheckerService {
   }
 
   public Predicate<Class<?>> isBaseEntitySubclass(
-      Map<Class<?>, EntityType<?>> baseEntitySubClassesMap) {
+      Map<Class<?>, String> baseEntitySubClassesMap) {
     return baseEntitySubClassesMap::containsKey;
   }
 

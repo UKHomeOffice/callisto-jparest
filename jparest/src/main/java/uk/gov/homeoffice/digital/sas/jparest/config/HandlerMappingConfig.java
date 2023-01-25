@@ -10,8 +10,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.metamodel.EntityType;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
@@ -20,7 +19,6 @@ import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiControllerFactory;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
-import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepositoryImpl;
 import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
 import uk.gov.homeoffice.digital.sas.jparest.service.ControllerRegistererService;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
@@ -32,11 +30,11 @@ import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiServiceFactory;
  * and registers a {@link ResourceApiController} for them.
  */
 @Configuration
+@AllArgsConstructor
 public class HandlerMappingConfig {
 
   private static final Logger LOGGER = Logger.getLogger(HandlerMappingConfig.class.getName());
 
-  private final EntityManager entityManager;
   private final ResourceEndpoint resourceEndpoint;
   private final ResourceApiServiceFactory resourceApiServiceFactory;
   private final ResourceApiControllerFactory resourceApiControllerFactory;
@@ -44,44 +42,22 @@ public class HandlerMappingConfig {
   private final ControllerRegistererService controllerRegistererService;
 
 
-
-  public HandlerMappingConfig(
-      EntityManager entityManager,
-      ResourceApiServiceFactory resourceApiServiceFactory,
-      ResourceEndpoint resourceEndpoint,
-      ResourceApiControllerFactory resourceApiControllerFactory,
-      BaseEntityCheckerService baseEntityCheckerService,
-      ControllerRegistererService controllerRegistererService) {
-    this.entityManager = entityManager;
-    this.resourceApiServiceFactory = resourceApiServiceFactory;
-    this.resourceEndpoint = resourceEndpoint;
-    this.resourceApiControllerFactory = resourceApiControllerFactory;
-    this.baseEntityCheckerService = baseEntityCheckerService;
-    this.controllerRegistererService = controllerRegistererService;
-  }
-
   @PostConstruct
-  public <T extends BaseEntity> void registerUserController()
+  public <T extends BaseEntity> void configureResourceMapping()
       throws NoSuchMethodException, SecurityException {
 
     LOGGER.fine("Searching for classes annotated as resources");
     List<Class<?>> resourceTypes = resourceEndpoint.getResourceTypes();
-
-    Map<Class<?>, EntityType<?>> baseEntitySubClassesMap =
+    Map<Class<?>, String> baseEntitySubClassesMap =
         baseEntityCheckerService.filterBaseEntitySubClasses();
-
 
     // find the id field , build the request mapping path and register the controller
     for (var entityClassEntry : baseEntitySubClassesMap.entrySet()) {
 
       Class<T> resourceClass = (Class<T>) entityClassEntry.getKey();
       LOGGER.fine("Processing resource" + resourceClass.getName());
-      var resourceAnnotation = resourceClass.getAnnotation(Resource.class);
-      String resourcePath = resourceAnnotation.path();
-      if (!StringUtils.hasText(resourcePath)) {
-        resourcePath = entityClassEntry.getValue().getName().toLowerCase();
-      }
-      String path = API_ROOT_PATH + PATH_DELIMITER + resourcePath;
+
+      String path = getPath(resourceClass, entityClassEntry.getValue());
       LOGGER.log(Level.FINE, "root path for resource: {0}", path);
 
       // Added to endpoint resource types for documentation customiser
@@ -95,13 +71,21 @@ public class HandlerMappingConfig {
     }
   }
 
+  private <T> String getPath(Class<T> resourceClass, String entityName) {
+    var resourceAnnotation = resourceClass.getAnnotation(Resource.class);
+    String resourcePath = resourceAnnotation.path();
+    if (!StringUtils.hasText(resourcePath)) {
+      resourcePath = entityName.toLowerCase();
+    }
+    return API_ROOT_PATH + PATH_DELIMITER + resourcePath;
+  }
+
   private <T extends BaseEntity>  ResourceApiController<T> createController(
       Class<T> resourceClass,
       EntityUtils<T, ? extends BaseEntity> entityUtils) {
 
     LOGGER.fine("Creating controller");
-    ResourceApiService<T> service = resourceApiServiceFactory.getBean(resourceClass, entityUtils,
-        new TenantRepositoryImpl<>(resourceClass, entityManager));
+    ResourceApiService<T> service = resourceApiServiceFactory.getBean(resourceClass, entityUtils);
     return resourceApiControllerFactory.getBean(resourceClass, service);
   }
 
