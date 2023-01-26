@@ -5,18 +5,16 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.EntityType;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 @Service
+@AllArgsConstructor
 public class BaseEntityCheckerService {
 
   private final EntityManager entityManager;
-
-  public BaseEntityCheckerService(EntityManager entityManager) {
-    this.entityManager = entityManager;
-  }
 
   /**
    * Filters all the entities and returns a map of only the BaseEntity subclasses
@@ -41,7 +39,7 @@ public class BaseEntityCheckerService {
     return false;
   }
 
-  public Predicate<Class<?>> isBaseEntitySubclass(
+  public Predicate<Class<?>> getPredicateForBaseEntitySubclassesMap(
       Map<Class<?>, String> baseEntitySubClassesMap) {
     return baseEntitySubClassesMap::containsKey;
   }

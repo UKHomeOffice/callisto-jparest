@@ -62,7 +62,7 @@ public class HandlerMappingConfig {
       resourceEndpoint.addResourceType(resourceClass);
 
       var entityUtils = new EntityUtils<>(resourceClass,
-          baseEntityCheckerService.isBaseEntitySubclass(baseEntitySubClassesMap));
+          baseEntityCheckerService.getPredicateForBaseEntitySubclassesMap(baseEntitySubClassesMap));
       ResourceApiController<T> controller = createController(resourceClass, entityUtils);
       mapCrudOperationsToController(controller, entityUtils, resourceClass, path);
     }
@@ -92,16 +92,16 @@ public class HandlerMappingConfig {
       Class<T> resourceClass,
       String path) throws NoSuchMethodException {
 
-    Consumer<String> addResourceConsumer = pathArg -> resourceEndpoint.add(
+    Consumer<String> addResourcePathConsumer = pathArg -> resourceEndpoint.add(
         resourceClass, pathArg);
     controllerRegistererService.mapRestOperationsToController(
-        path, controller, addResourceConsumer);
+        path, controller, addResourcePathConsumer);
 
-    BiConsumer<Class<? extends BaseEntity>, String> addRelatedResourceConsumer =
+    BiConsumer<Class<? extends BaseEntity>, String> addRelatedResourcePathConsumer =
         (relatedClass, pathArg) -> resourceEndpoint.addRelated(
             resourceClass, relatedClass, pathArg);
     controllerRegistererService.registerRelatedPaths(
-        path, entityUtils, controller, addRelatedResourceConsumer);
+        path, entityUtils, controller, addRelatedResourcePathConsumer);
 
     LOGGER.fine("All paths registered");
   }

@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,6 +24,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
 
 @Service
+@AllArgsConstructor
 public class ControllerRegistererService {
 
   private final RequestMappingHandlerMapping requestMappingHandlerMapping;
@@ -30,9 +32,6 @@ public class ControllerRegistererService {
   private static final Logger LOGGER = Logger.getLogger(
       ControllerRegistererService.class.getName());
 
-  public ControllerRegistererService(RequestMappingHandlerMapping requestMappingHandlerMapping) {
-    this.requestMappingHandlerMapping = requestMappingHandlerMapping;
-  }
 
   public void mapRestOperationsToController(String path,
                                             ResourceApiController<?> controller,

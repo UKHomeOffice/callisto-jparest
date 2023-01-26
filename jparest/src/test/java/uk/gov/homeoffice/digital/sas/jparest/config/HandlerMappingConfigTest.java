@@ -87,7 +87,7 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
     when(baseEntityCheckerService.filterBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
 
     baseEntitySubClassesMap.forEach((resourceClass, entityName) -> {
-      when(baseEntityCheckerService.isBaseEntitySubclass(baseEntitySubClassesMap)).thenReturn((clazz) -> true);
+      when(baseEntityCheckerService.getPredicateForBaseEntitySubclassesMap(baseEntitySubClassesMap)).thenReturn((clazz) -> true);
       when(resourceApiServiceFactory.getBean(
           eq((Class<T>) resourceClass), any(EntityUtils.class))).thenReturn(resourceApiService);
       when(resourceApiControllerFactory.getBean((Class<T>) resourceClass, resourceApiService)).thenReturn(resourceApiController);
@@ -120,7 +120,7 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
     );
     when(baseEntityCheckerService.filterBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
     baseEntitySubClassesMap.forEach((resourceClass, entityName) ->
-        when(baseEntityCheckerService.isBaseEntitySubclass(baseEntitySubClassesMap)).thenReturn((clazz) -> true));
+        when(baseEntityCheckerService.getPredicateForBaseEntitySubclassesMap(baseEntitySubClassesMap)).thenReturn((clazz) -> true));
 
     handlerMappingConfig.configureResourceMapping();
 

@@ -35,7 +35,7 @@ class ResourceApiControllerFactoryTest {
   }
 
   @Test
-  void getBean_serviceDependenciesProvided_controllerBeanRegistered() {
+  void getBean_controllerDependenciesProvided_controllerBeanRegistered() {
 
     ResourceApiController<DummyEntityA> actualController = resourceApiControllerFactory.getBean(
         DummyEntityA.class, resourceApiService);
