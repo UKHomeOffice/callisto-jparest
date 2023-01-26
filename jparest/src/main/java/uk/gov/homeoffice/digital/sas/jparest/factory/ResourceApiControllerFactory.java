@@ -1,8 +1,9 @@
-package uk.gov.homeoffice.digital.sas.jparest.controller;
+package uk.gov.homeoffice.digital.sas.jparest.factory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
+import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 

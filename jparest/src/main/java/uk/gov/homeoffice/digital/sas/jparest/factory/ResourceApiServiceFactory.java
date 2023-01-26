@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest.service;
+package uk.gov.homeoffice.digital.sas.jparest.factory;
 
 import javax.persistence.EntityManager;
 import org.springframework.context.support.GenericApplicationContext;
@@ -7,6 +7,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepositoryImpl;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 @Component

@@ -16,12 +16,12 @@ import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
-import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiControllerFactory;
+import uk.gov.homeoffice.digital.sas.jparest.factory.ResourceApiControllerFactory;
+import uk.gov.homeoffice.digital.sas.jparest.factory.ResourceApiServiceFactory;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
 import uk.gov.homeoffice.digital.sas.jparest.service.ControllerRegistererService;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
-import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiServiceFactory;
 
 
 /**

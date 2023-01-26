@@ -1,6 +1,5 @@
 package uk.gov.homeoffice.digital.sas.jparest.config;
 
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -16,7 +15,7 @@ import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
-import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiControllerFactory;
+import uk.gov.homeoffice.digital.sas.jparest.factory.ResourceApiControllerFactory;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
@@ -25,7 +24,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
 import uk.gov.homeoffice.digital.sas.jparest.service.ControllerRegistererService;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
-import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiServiceFactory;
+import uk.gov.homeoffice.digital.sas.jparest.factory.ResourceApiServiceFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;

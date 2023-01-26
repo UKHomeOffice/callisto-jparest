@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest.service;
+package uk.gov.homeoffice.digital.sas.jparest.factory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,6 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
+import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

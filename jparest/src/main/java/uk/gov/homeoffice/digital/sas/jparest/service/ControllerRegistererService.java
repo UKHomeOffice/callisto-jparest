@@ -36,7 +36,7 @@ public class ControllerRegistererService {
 
   public void mapRestOperationsToController(String path,
                                             ResourceApiController<?> controller,
-                                            Consumer<String> resourceEndpointAdder)
+                                            Consumer<String> pathConsumer)
       throws NoSuchMethodException {
 
     LOGGER.fine("Registering common paths");
@@ -58,21 +58,22 @@ public class ControllerRegistererService {
         getControllerMethodArgs(RequestParameter.TENANT_ID,
             RequestParameter.ID, RequestParameter.BODY),
         path + URL_ID_PATH_PARAM, RequestMethod.PUT);
-    resourceEndpointAdder.accept(path);
+    pathConsumer.accept(path);
   }
 
   public void registerRelatedPaths(
       String rootPath,
       EntityUtils<? extends BaseEntity, ?> entityUtils,
       ResourceApiController<?> controller,
-      BiConsumer<Class<? extends BaseEntity>, String> addRelatedResourceConsumer)
+      BiConsumer<Class<? extends BaseEntity>, String> relatedClassAndPathConsumer)
       throws NoSuchMethodException {
 
     LOGGER.fine("Registering related paths");
     for (String relation : entityUtils.getRelatedResources()) {
 
       Class<? extends BaseEntity> relatedType = entityUtils.getRelatedType(relation);
-      addRelatedResourceConsumer.accept(relatedType, rootPath + URL_ID_PATH_PARAM + "/" + relation);
+      relatedClassAndPathConsumer.accept(
+          relatedType, rootPath + URL_ID_PATH_PARAM + "/" + relation);
       LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
 
       register(controller, "getRelated",
