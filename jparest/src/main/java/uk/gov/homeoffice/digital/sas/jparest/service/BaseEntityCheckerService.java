@@ -23,20 +23,13 @@ public class BaseEntityCheckerService {
    */
   public Map<Class<?>, String> filterBaseEntitySubClasses() {
     return entityManager.getMetamodel().getEntities().stream()
-        .filter(entityType -> entityType.getJavaType().isAnnotationPresent(Resource.class)
-            && classHasBaseEntityParent(entityType.getJavaType()))
+        .filter(entityType -> isResourceEntity(entityType.getJavaType()))
         .collect(Collectors.toMap(EntityType::getJavaType, EntityType::getName));
   }
 
-  private boolean classHasBaseEntityParent(Class<?> childClass) {
-    var superType = childClass.getSuperclass();
-    while (!superType.equals(Object.class)) {
-      if (superType.equals(BaseEntity.class)) {
-        return true;
-      }
-      superType = superType.getSuperclass();
-    }
-    return false;
+  private boolean isResourceEntity(Class<?> childClass) {
+    return childClass.isAnnotationPresent(Resource.class)
+            && BaseEntity.class.isAssignableFrom(childClass);
   }
 
   public Predicate<Class<?>> getPredicateForBaseEntitySubclassesMap(

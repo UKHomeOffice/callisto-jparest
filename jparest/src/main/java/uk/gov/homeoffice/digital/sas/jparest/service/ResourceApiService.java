@@ -16,7 +16,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
@@ -36,11 +35,11 @@ public class ResourceApiService<T extends BaseEntity> {
   public ResourceApiService(EntityUtils<T, ?> entityUtils,
                             TenantRepository<T> repository,
                             EntityValidator entityValidator,
-                            PlatformTransactionManager platformTransactionManager) {
+                            TransactionTemplate transactionTemplate) {
     this.entityUtils = entityUtils;
     this.repository = repository;
     this.entityValidator = entityValidator;
-    this.transactionTemplate = new TransactionTemplate(platformTransactionManager);
+    this.transactionTemplate = transactionTemplate;
   }
 
   public List<T> getAllResources(UUID tenantId, Pageable pageable, SpelExpression filter) {

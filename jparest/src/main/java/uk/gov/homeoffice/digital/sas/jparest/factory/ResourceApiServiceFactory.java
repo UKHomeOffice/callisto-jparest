@@ -4,6 +4,7 @@ import javax.persistence.EntityManager;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepositoryImpl;
@@ -16,7 +17,7 @@ public class ResourceApiServiceFactory {
   private final EntityManager entityManager;
   private final EntityValidator entityValidator;
   private final GenericApplicationContext context;
-  private final PlatformTransactionManager transactionManager;
+  private final TransactionTemplate transactionTemplate;
 
   public ResourceApiServiceFactory(EntityManager entityManager,
                                    EntityValidator entityValidator,
@@ -25,7 +26,7 @@ public class ResourceApiServiceFactory {
     this.entityManager = entityManager;
     this.entityValidator = entityValidator;
     this.context = context;
-    this.transactionManager = transactionManager;
+    this.transactionTemplate = new TransactionTemplate(transactionManager);
   }
 
   public <T extends BaseEntity> ResourceApiService<T> getBean(
@@ -36,7 +37,7 @@ public class ResourceApiServiceFactory {
             entityUtils,
             new TenantRepositoryImpl<>(resourceClass, entityManager),
             entityValidator,
-            transactionManager);
+            transactionTemplate);
 
     context.registerBean(
         resourceClass.getSimpleName() + ResourceApiService.class.getSimpleName(),

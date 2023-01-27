@@ -22,6 +22,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
@@ -578,7 +579,7 @@ class ResourceApiControllerTest {
                 entityUtils,
                 new TenantRepositoryImpl<DummyEntityC>(DummyEntityC.class, entityManager),
                 mockedEntityValidator,
-            transactionManager);
+                new TransactionTemplate(transactionManager));
 
         var controller = new ResourceApiController<>(
                 DummyEntityC.class,
@@ -975,7 +976,7 @@ class ResourceApiControllerTest {
                 entityUtils,
                 new TenantRepositoryImpl<T>(clazz, entityManager),
                 entityValidator,
-                transactionManager);
+                new TransactionTemplate(transactionManager));
 
         return new ResourceApiController<>(clazz, resourceApiService, objectMapper);
     }
