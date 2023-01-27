@@ -60,16 +60,18 @@ public class ApplicationConfig {
       EntityManager entityManager,
       EntityValidator entityValidator,
       GenericApplicationContext context,
-      PlatformTransactionManager transactionManager) {
+      PlatformTransactionManager transactionManager,
+      BaseEntityCheckerService baseEntityCheckerService) {
     return new ResourceApiServiceFactory(
-        entityManager, entityValidator, context, transactionManager);
+        entityManager, entityValidator, context, transactionManager, baseEntityCheckerService);
   }
 
   @Bean
   public ResourceApiControllerFactory resourceApiControllerFactory(
       ObjectMapper objectMapper,
-      GenericApplicationContext context) {
-    return new ResourceApiControllerFactory(objectMapper, context);
+      GenericApplicationContext context,
+      ResourceApiServiceFactory resourceApiServiceFactory) {
+    return new ResourceApiControllerFactory(objectMapper, context, resourceApiServiceFactory);
   }
 
 }

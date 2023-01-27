@@ -2,12 +2,15 @@ package uk.gov.homeoffice.digital.sas.jparest.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
@@ -29,14 +31,21 @@ class ControllerRegistererServiceTest {
   private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
   @Mock
+  private BaseEntityCheckerService baseEntityCheckerService;
+
+  @Mock
   private ResourceApiController<?> resourceApiController;
+
+  @Mock
+  Predicate<Class<?>> mockPredicate;
 
   private ControllerRegistererService controllerRegistererService;
 
 
   @BeforeEach
   public void setup() {
-    controllerRegistererService = new ControllerRegistererService(requestMappingHandlerMapping);
+    controllerRegistererService = new ControllerRegistererService(
+        requestMappingHandlerMapping, baseEntityCheckerService);
   }
 
   @ParameterizedTest
@@ -78,12 +87,15 @@ class ControllerRegistererServiceTest {
         List.of("{PUT [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedIds}], produces [application/json]}",
             "addRelated"));
 
-    var entityUtils = new EntityUtils<>(DummyEntityA.class, (arg) -> true);
+    when(mockPredicate.test(any())).thenReturn(true);
+    when(baseEntityCheckerService.getPredicateForBaseEntitySubclassesMap(any()))
+        .thenReturn(mockPredicate);
+
     var relatedResourceEndpointPaths = new HashMap<Class<?>, String>();
 
     assertThatNoException().isThrownBy(() -> controllerRegistererService.registerRelatedPaths(
         "resources/dummyEntityAs",
-        entityUtils,
+        DummyEntityA.class,
         resourceApiController,
         relatedResourceEndpointPaths::put
     ));

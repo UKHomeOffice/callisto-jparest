@@ -11,7 +11,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
@@ -23,8 +22,6 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
 import uk.gov.homeoffice.digital.sas.jparest.service.ControllerRegistererService;
-import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
-import uk.gov.homeoffice.digital.sas.jparest.factory.ResourceApiServiceFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -41,9 +38,6 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
   private ResourceEndpoint resourceEndpoint;
 
   @Mock
-  private ResourceApiServiceFactory resourceApiServiceFactory;
-
-  @Mock
   private ResourceApiControllerFactory resourceApiControllerFactory;
 
   @Mock
@@ -51,9 +45,6 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
 
   @Mock
   private ControllerRegistererService controllerRegistererService;
-
-  @Mock
-  private ResourceApiService<T> resourceApiService;
 
   @Mock
   private ResourceApiController<T> resourceApiController;
@@ -70,7 +61,6 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
   public void setup() {
       handlerMappingConfig = new HandlerMappingConfig(
           resourceEndpoint,
-          resourceApiServiceFactory,
           resourceApiControllerFactory,
           baseEntityCheckerService,
           controllerRegistererService);
@@ -86,12 +76,9 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
     );
     when(baseEntityCheckerService.filterBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
 
-    baseEntitySubClassesMap.forEach((resourceClass, entityName) -> {
-      when(baseEntityCheckerService.getPredicateForBaseEntitySubclassesMap(baseEntitySubClassesMap)).thenReturn((clazz) -> true);
-      when(resourceApiServiceFactory.getBean(
-          eq((Class<T>) resourceClass), any(EntityUtils.class))).thenReturn(resourceApiService);
-      when(resourceApiControllerFactory.getBean((Class<T>) resourceClass, resourceApiService)).thenReturn(resourceApiController);
-    });
+    baseEntitySubClassesMap.forEach((resourceClass, entityName) ->
+      when(resourceApiControllerFactory.getControllerBean((Class<T>) resourceClass)).thenReturn(resourceApiController)
+    );
 
     handlerMappingConfig.configureResourceMapping();
 
@@ -102,7 +89,7 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
             argThat(path -> path.contains(resourcePath)), eq(resourceApiController), any());
 
         verify(controllerRegistererService).registerRelatedPaths(argThat(path -> path.contains(resourcePath)),
-            any(EntityUtils.class), eq(resourceApiController), any());
+            any(), eq(resourceApiController), any());
       } catch (NoSuchMethodException e) {
         e.printStackTrace();
         fail("NoSuchMethodException thrown");
@@ -119,8 +106,6 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
         DummyEntityG.class, "dummyEntityGs"
     );
     when(baseEntityCheckerService.filterBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
-    baseEntitySubClassesMap.forEach((resourceClass, entityName) ->
-        when(baseEntityCheckerService.getPredicateForBaseEntitySubclassesMap(baseEntitySubClassesMap)).thenReturn((clazz) -> true));
 
     handlerMappingConfig.configureResourceMapping();
 

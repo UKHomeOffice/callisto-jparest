@@ -10,7 +10,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
-import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,20 +24,21 @@ class ResourceApiControllerFactoryTest {
   private ObjectMapper objectMapper;
 
   @Mock
-  private ResourceApiService<DummyEntityA> resourceApiService;
+  private ResourceApiServiceFactory resourceApiServiceFactory;
 
   private ResourceApiControllerFactory resourceApiControllerFactory;
 
   @BeforeEach
   void setup() {
-    resourceApiControllerFactory = new ResourceApiControllerFactory(objectMapper, context);
+    resourceApiControllerFactory = new ResourceApiControllerFactory(
+        objectMapper, context, resourceApiServiceFactory);
   }
 
   @Test
   void getBean_controllerDependenciesProvided_controllerBeanRegistered() {
 
-    ResourceApiController<DummyEntityA> actualController = resourceApiControllerFactory.getBean(
-        DummyEntityA.class, resourceApiService);
+    ResourceApiController<DummyEntityA> actualController = resourceApiControllerFactory.getControllerBean(
+        DummyEntityA.class);
 
     assertThat(context.getBean("DummyEntityAResourceApiController"))
         .isNotNull().isInstanceOf(ResourceApiController.class);

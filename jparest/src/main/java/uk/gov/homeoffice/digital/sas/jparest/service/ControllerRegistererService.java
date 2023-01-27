@@ -5,6 +5,7 @@ import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_REL
 
 import java.lang.reflect.Method;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -28,6 +29,8 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 public class ControllerRegistererService {
 
   private final RequestMappingHandlerMapping requestMappingHandlerMapping;
+  private final BaseEntityCheckerService baseEntityCheckerService;
+
 
   private static final Logger LOGGER = Logger.getLogger(
       ControllerRegistererService.class.getName());
@@ -60,12 +63,17 @@ public class ControllerRegistererService {
     pathConsumer.accept(path);
   }
 
-  public void registerRelatedPaths(
+  public <T extends BaseEntity> void registerRelatedPaths(
       String rootPath,
-      EntityUtils<? extends BaseEntity, ?> entityUtils,
+      Class<T> resourceClass,
       ResourceApiController<?> controller,
       BiConsumer<Class<? extends BaseEntity>, String> relatedClassAndPathConsumer)
       throws NoSuchMethodException {
+
+    Map<Class<?>, String> baseEntitySubClassesMap =
+        baseEntityCheckerService.filterBaseEntitySubClasses();
+    var entityUtils = new EntityUtils<>(resourceClass,
+        baseEntityCheckerService.getPredicateForBaseEntitySubclassesMap(baseEntitySubClassesMap));
 
     LOGGER.fine("Registering related paths");
     for (String relation : entityUtils.getRelatedResources()) {
