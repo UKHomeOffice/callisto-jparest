@@ -34,11 +34,11 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.StructuredError;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
-import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnexpectedQueryResultException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepositoryImpl;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
+import uk.gov.homeoffice.digital.sas.jparest.utils.PayloadCreator;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 import javax.persistence.EntityManager;
@@ -271,9 +271,7 @@ class ResourceApiControllerTest {
     @Test
     @Transactional
     void create_requestTenantIdMatchesPayloadTenantId_resourceIsCreatedWithTenantId() throws JsonProcessingException {
-        String payload = "{\n" +
-                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"" +
-                "        }";
+        String payload = PayloadCreator.createIDPayload(List.of(TENANT_ID_FIELD_NAME), List.of(TENANT_ID.toString()));
 
         var controller = getResourceApiController(DummyEntityA.class);
         var apiResponse = controller.create(TENANT_ID, payload);
@@ -285,10 +283,8 @@ class ResourceApiControllerTest {
     @Test
     @Transactional
     void create_requestTenantIdDoesNotMatchPayloadTenantId_tenantIdMismatchExceptionThrown() {
-        String payload = "{\n" +
-                "            \"" + ID_FIELD_NAME + "\": \"" + NON_EXISTENT_ID + "\",\n" +
-                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"" +
-                "        }";
+        String payload = PayloadCreator.createIDPayload(List.of(ID_FIELD_NAME, TENANT_ID_FIELD_NAME),
+                List.of(NON_EXISTENT_ID.toString(), TENANT_ID.toString()));
 
         var controller = getResourceApiController(DummyEntityA.class);
         assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.create(INVALID_TENANT_ID, payload));
@@ -297,9 +293,8 @@ class ResourceApiControllerTest {
     @Test
     @Transactional
     void create_requestTenantIdIsPresent_payloadTenantIdIsNotPresent_tenantIdIsSavedWithResource() throws JsonProcessingException {
-        String payload = "{\n" +
-                "            \"" + PROFILE_ID_FIELD_NAME + "\": \"" + 1 + "\"\n" +
-                "        }";
+
+        String payload = PayloadCreator.createIDPayload(List.of(PROFILE_ID_FIELD_NAME), List.of("1"));
 
         var controller = getResourceApiController(DummyEntityA.class);
         var apiResponse = controller.create(TENANT_ID, payload);
@@ -316,10 +311,7 @@ class ResourceApiControllerTest {
     @Transactional
     void update_resourceExists_persistsChanges() throws JsonProcessingException {
 
-        String payload = "{" +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 1" +
-                "        }";
+        String payload = PayloadCreator.createIDPayload(List.of(DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME), List.of("Dummy Entity C", "1"));
 
         //create new resource
         var controller = getResourceApiController(DummyEntityC.class);
@@ -332,12 +324,9 @@ class ResourceApiControllerTest {
         var getResource = getResponse.getItems().get(0);
         assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C");
 
-        //update the newly created resource
-        String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": \""+ createdResource.getId() +"\"," +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 2" +
-                "        }";
+        String updatedPayload = PayloadCreator.createIDPayload(List.of(ID_FIELD_NAME, DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME)
+                , List.of(createdResource.getId().toString(), "Updated Dummy Entity C", ": 2"));
+
         var updateResponse = controller.update(TENANT_ID, createdResource.getId(), updatedPayload);
 
 
@@ -401,7 +390,7 @@ class ResourceApiControllerTest {
     void update_payloadIdDoesNotMatchUrlPathId_throwsError() {
         var controller = getResourceApiController(DummyEntityA.class);
 
-        var payload = "{\"" + ID_FIELD_NAME + "\": \"" + DUMMY_A_ID_2 + "\" }";
+        String payload = PayloadCreator.createIDPayload(List.of(ID_FIELD_NAME), List.of(DUMMY_A_ID_2.toString()));;
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> controller.update(TENANT_ID, DUMMY_A_ID_1, payload))
                 .withMessageContaining("payload resource id value must match the url id");
@@ -437,18 +426,12 @@ class ResourceApiControllerTest {
     @Transactional
     void update_requestTenantIdMatchesResourceTenantId_noExceptionThrown() throws JsonProcessingException {
 
-        String payload = "{" +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 1" +
-                "        }";
+        String payload = PayloadCreator.createIDPayload(List.of(DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME), List.of("Dummy Entity C 100", "1"));
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
 
-        String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": \" "+ resource.getId() + "\"," +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 2" +
-                "        }";
+        String updatedPayload = PayloadCreator.createIDPayload(List.of(ID_FIELD_NAME, DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME),
+                List.of(resource.getId().toString(), "Updated Dummy Entity C 100", "2"));
 
         assertThatNoException().isThrownBy(() -> controller.get(TENANT_ID, resource.getId()));
         assertThatNoException().isThrownBy(() -> controller.update(TENANT_ID, resource.getId(), updatedPayload));
@@ -459,19 +442,16 @@ class ResourceApiControllerTest {
     @Transactional
     void update_requestTenantIdDoesNotMatchResourceTenantId_resourceNotFoundExceptionThrown() throws JsonProcessingException {
 
-        String payload = "{" +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 1" +
-                "        }";
+        String payload = PayloadCreator.createIDPayload(List.of(DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME), List.of("Dummy Entity C 100", "1"));
+
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
         UUID id = resource.getId();
 
-        String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": \"" + id + "\"," +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 2" +
-                "        }";
+
+
+        String updatedPayload = PayloadCreator.createIDPayload(List.of(ID_FIELD_NAME, DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME),
+                List.of(id.toString(), "Updated Dummy Entity C 100", "2"));
 
 
         assertThatNoException().isThrownBy(() -> controller.create(TENANT_ID, payload));
@@ -492,20 +472,16 @@ class ResourceApiControllerTest {
     @Transactional
     void update_requestTenantIdMatchesPayloadTenantId_noExceptionThrown() throws JsonProcessingException {
 
-        String payload = "{" +
-                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 1" +
-                "        }";
+        String payload = PayloadCreator.createIDPayload(List.of(TENANT_ID_FIELD_NAME, DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME),
+                List.of(TENANT_ID.toString(), "Dummy Entity C 100", "1"));
+
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
 
-        String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": \"" + resource.getId() + "\"," +
-                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 2" +
-                "        }";
+
+
+        String updatedPayload = PayloadCreator.createIDPayload(List.of(ID_FIELD_NAME, TENANT_ID_FIELD_NAME, DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME),
+                List.of(resource.getId().toString(), TENANT_ID.toString(), "Updated Dummy Entity C 100", "2"));
 
         assertThatNoException().isThrownBy(() -> controller.create(TENANT_ID, payload));
         assertThatNoException().isThrownBy(() -> controller.update(TENANT_ID, resource.getId(), updatedPayload));
@@ -515,18 +491,12 @@ class ResourceApiControllerTest {
     @Transactional
     void update_requestTenantIdDoesNotMatchPayloadTenantId_tenantIdMismatchExceptionThrown() {
 
-        String payload = "{" +
-                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 1" +
-                "        }";
 
-        String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": \"" + NEW_RESOURCE_ID + "\"," +
-                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 2" +
-                "        }";
+        String payload = PayloadCreator.createIDPayload(List.of(TENANT_ID_FIELD_NAME, DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME),
+                List.of(TENANT_ID.toString(), "Dummy Entity C 100", "1"));
+
+        String updatedPayload = PayloadCreator.createIDPayload(List.of(ID_FIELD_NAME, TENANT_ID_FIELD_NAME, DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME),
+                List.of(NEW_RESOURCE_ID.toString(), TENANT_ID.toString(), "Updated Dummy Entity C 100", "2"));
 
         var controller = getResourceApiController(DummyEntityC.class);
 
@@ -538,20 +508,16 @@ class ResourceApiControllerTest {
     @Transactional
     void update_requestTenantIdIsPresentAndPayloadTenantIdIsNotPresent_tenantIdIsSavedWithResource() throws JsonProcessingException {
 
-        String payload = "{" +
-                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 1" +
-                "        }";
+
+
+        String payload = PayloadCreator.createIDPayload(List.of(TENANT_ID_FIELD_NAME, DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME),
+                List.of(TENANT_ID.toString(), "Dummy Entity C 100", "1"));
+
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
 
-        String updatedPayload = "{" +
-                "            \"" + ID_FIELD_NAME + "\": \"" + resource.getId() + "\"," +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Updated Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 2" +
-                "        }";
-
+        String updatedPayload = PayloadCreator.createIDPayload(List.of(ID_FIELD_NAME, DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME),
+                List.of(resource.getId().toString(), "Updated Dummy Entity C 100", "2"));
 
         assertThatNoException().isThrownBy(() -> controller.create(TENANT_ID, payload));
         var updateResponse = controller.update(TENANT_ID, resource.getId(), updatedPayload);
@@ -566,11 +532,8 @@ class ResourceApiControllerTest {
     @Transactional
     void update_idExistsOnRequestPathAndDoesNotExistOnBody_verifyPayloadIsValidatedWithIdPresent() throws JsonProcessingException {
 
-        var payload = "{" +
-                "            \"" + TENANT_ID_FIELD_NAME + "\": \"" + TENANT_ID + "\"," +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 1" +
-                "        }";
+        String payload = PayloadCreator.createIDPayload(List.of(TENANT_ID_FIELD_NAME, DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME),
+                List.of(TENANT_ID.toString(), "Dummy Entity C 100", "1"));
 
         var entityUtils = new EntityUtils<>(DummyEntityC.class, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
         var mockedEntityValidator = Mockito.mock(EntityValidator.class);
@@ -602,10 +565,8 @@ class ResourceApiControllerTest {
     @Test
     @Transactional
     void delete_resourceExists_resourceIsDeleted() throws JsonProcessingException {
-        String payload = "{" +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 1" +
-                "        }";
+        String payload = PayloadCreator.createIDPayload(List.of(DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME),
+                List.of("Dummy Entity C 100", "1"));
 
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
@@ -627,10 +588,8 @@ class ResourceApiControllerTest {
     @Test
     @Transactional
     void delete_requestTenantIdMatchesResourceTenantId_noExceptionThrown() throws JsonProcessingException {
-        String payload = "{" +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 1" +
-                "        }";
+        String payload = PayloadCreator.createIDPayload(List.of(DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME),
+                List.of("Dummy Entity C 100", "1"));
 
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
@@ -641,10 +600,8 @@ class ResourceApiControllerTest {
     @Test
     @Transactional
     void delete_requestTenantIdDoesNotMatchResourceTenantId_resourceNotFoundExceptionThrown() throws JsonProcessingException {
-        String payload = "{" +
-                "            \"" + DESCRIPTION_FIELD_NAME + "\": \"Dummy Entity C 100\"," +
-                "            \"" + INDEX_FIELD_NAME + "\": 1" +
-                "        }";
+        String payload = PayloadCreator.createIDPayload(List.of(DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME),
+                List.of("Dummy Entity C 100", "1"));
 
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
