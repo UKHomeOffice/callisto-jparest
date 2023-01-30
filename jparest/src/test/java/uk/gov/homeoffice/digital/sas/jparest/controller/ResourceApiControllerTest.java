@@ -325,7 +325,7 @@ class ResourceApiControllerTest {
         assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C");
 
         String updatedPayload = PayloadCreator.createIDPayload(List.of(ID_FIELD_NAME, DESCRIPTION_FIELD_NAME, INDEX_FIELD_NAME)
-                , List.of(createdResource.getId().toString(), "Updated Dummy Entity C", ": 2"));
+                , List.of(createdResource.getId().toString(), "Updated Dummy Entity C", "2"));
 
         var updateResponse = controller.update(TENANT_ID, createdResource.getId(), updatedPayload);
 
