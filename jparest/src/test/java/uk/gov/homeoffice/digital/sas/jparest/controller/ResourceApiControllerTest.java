@@ -272,7 +272,7 @@ class ResourceApiControllerTest {
     @Test
     @Transactional
     void create_requestTenantIdMatchesPayloadTenantId_resourceIsCreatedWithTenantId() throws JsonProcessingException {
-        String payload = PayloadCreator.createPayload(Map.of(TENANT_ID_FIELD_NAME, TENANT_ID));
+        String payload = PayloadCreator.createPayload(TENANT_ID_FIELD_NAME, TENANT_ID);
 
         var controller = getResourceApiController(DummyEntityA.class);
         var apiResponse = controller.create(TENANT_ID, payload);
@@ -296,7 +296,7 @@ class ResourceApiControllerTest {
     @Transactional
     void create_requestTenantIdIsPresent_payloadTenantIdIsNotPresent_tenantIdIsSavedWithResource() throws JsonProcessingException {
 
-        String payload = PayloadCreator.createPayload(Map.of(PROFILE_ID_FIELD_NAME, "1"));
+        String payload = PayloadCreator.createPayload(PROFILE_ID_FIELD_NAME, 1);
 
         var controller = getResourceApiController(DummyEntityA.class);
         var apiResponse = controller.create(TENANT_ID, payload);
@@ -314,7 +314,7 @@ class ResourceApiControllerTest {
     void update_resourceExists_persistsChanges() throws JsonProcessingException {
 
         String payload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
-                INDEX_FIELD_NAME, "1"));
+                INDEX_FIELD_NAME, 1));
 
         //create new resource
         var controller = getResourceApiController(DummyEntityC.class);
@@ -329,7 +329,7 @@ class ResourceApiControllerTest {
 
         String updatedPayload = PayloadCreator.createPayload(Map.of(ID_FIELD_NAME, createdResource.getId(),
                 DESCRIPTION_FIELD_NAME, "Updated Dummy Entity C",
-                INDEX_FIELD_NAME, "2"));
+                INDEX_FIELD_NAME, 2));
 
         var updateResponse = controller.update(TENANT_ID, createdResource.getId(), updatedPayload);
 
@@ -394,7 +394,7 @@ class ResourceApiControllerTest {
     void update_payloadIdDoesNotMatchUrlPathId_throwsError() {
         var controller = getResourceApiController(DummyEntityA.class);
 
-        String payload = PayloadCreator.createPayload(Map.of(ID_FIELD_NAME, DUMMY_A_ID_2));
+        String payload = PayloadCreator.createPayload(ID_FIELD_NAME, DUMMY_A_ID_2);
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> controller.update(TENANT_ID, DUMMY_A_ID_1, payload))
                 .withMessageContaining("payload resource id value must match the url id");
@@ -431,13 +431,13 @@ class ResourceApiControllerTest {
     void update_requestTenantIdMatchesResourceTenantId_noExceptionThrown() throws JsonProcessingException {
 
         String payload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C 100",
-                INDEX_FIELD_NAME, "1"));
+                INDEX_FIELD_NAME, 1));
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
 
         String updatedPayload = PayloadCreator.createPayload(Map.of(ID_FIELD_NAME, resource.getId(),
                 DESCRIPTION_FIELD_NAME, "Updated Dummy Entity C 100",
-                INDEX_FIELD_NAME, "2"));
+                INDEX_FIELD_NAME, 2));
 
         assertThatNoException().isThrownBy(() -> controller.get(TENANT_ID, resource.getId()));
         assertThatNoException().isThrownBy(() -> controller.update(TENANT_ID, resource.getId(), updatedPayload));
@@ -449,7 +449,7 @@ class ResourceApiControllerTest {
     void update_requestTenantIdDoesNotMatchResourceTenantId_resourceNotFoundExceptionThrown() throws JsonProcessingException {
 
         String payload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C 100",
-                INDEX_FIELD_NAME, "1"));
+                INDEX_FIELD_NAME, 1));
 
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
@@ -459,7 +459,7 @@ class ResourceApiControllerTest {
 
         String updatedPayload = PayloadCreator.createPayload(Map.of(ID_FIELD_NAME, id,
                 DESCRIPTION_FIELD_NAME, "Updated Dummy Entity C 100",
-                INDEX_FIELD_NAME, "2"));
+                INDEX_FIELD_NAME, 2));
 
 
         assertThatNoException().isThrownBy(() -> controller.create(TENANT_ID, payload));
@@ -482,7 +482,7 @@ class ResourceApiControllerTest {
 
         String payload = PayloadCreator.createPayload(Map.of(TENANT_ID_FIELD_NAME, TENANT_ID,
                 DESCRIPTION_FIELD_NAME, "Dummy Entity C 100",
-                INDEX_FIELD_NAME, "1"));
+                INDEX_FIELD_NAME, 1));
 
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
@@ -492,7 +492,7 @@ class ResourceApiControllerTest {
         String updatedPayload = PayloadCreator.createPayload(Map.of(ID_FIELD_NAME, resource.getId(),
                 TENANT_ID_FIELD_NAME, TENANT_ID,
                 DESCRIPTION_FIELD_NAME, "Updated Dummy Entity C 100",
-                INDEX_FIELD_NAME, "2"));
+                INDEX_FIELD_NAME, 2));
 
         assertThatNoException().isThrownBy(() -> controller.create(TENANT_ID, payload));
         assertThatNoException().isThrownBy(() -> controller.update(TENANT_ID, resource.getId(), updatedPayload));
@@ -505,12 +505,12 @@ class ResourceApiControllerTest {
 
         String payload = PayloadCreator.createPayload(Map.of(TENANT_ID_FIELD_NAME, TENANT_ID,
                 DESCRIPTION_FIELD_NAME, "Dummy Entity C 100",
-                INDEX_FIELD_NAME, "1"));
+                INDEX_FIELD_NAME, 1));
 
         String updatedPayload = PayloadCreator.createPayload(Map.of(ID_FIELD_NAME, NEW_RESOURCE_ID,
                 TENANT_ID_FIELD_NAME, TENANT_ID,
                 DESCRIPTION_FIELD_NAME, "Updated Dummy Entity C 100",
-                INDEX_FIELD_NAME, "2"));
+                INDEX_FIELD_NAME, 2));
 
         var controller = getResourceApiController(DummyEntityC.class);
 
@@ -526,14 +526,14 @@ class ResourceApiControllerTest {
 
         String payload = PayloadCreator.createPayload(Map.of(TENANT_ID_FIELD_NAME, TENANT_ID,
                 DESCRIPTION_FIELD_NAME, "Dummy Entity C 100",
-                INDEX_FIELD_NAME, "1"));
+                INDEX_FIELD_NAME, 1));
 
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
 
         String updatedPayload = PayloadCreator.createPayload(Map.of(ID_FIELD_NAME, resource.getId(),
                 DESCRIPTION_FIELD_NAME, "Updated Dummy Entity C 100",
-                INDEX_FIELD_NAME, "2"));
+                INDEX_FIELD_NAME, 2));
 
         assertThatNoException().isThrownBy(() -> controller.create(TENANT_ID, payload));
         var updateResponse = controller.update(TENANT_ID, resource.getId(), updatedPayload);
@@ -550,7 +550,7 @@ class ResourceApiControllerTest {
 
         String payload = PayloadCreator.createPayload(Map.of(TENANT_ID_FIELD_NAME, TENANT_ID,
                 DESCRIPTION_FIELD_NAME, "Dummy Entity C 100",
-                INDEX_FIELD_NAME, "1"));
+                INDEX_FIELD_NAME, 1));
 
         var entityUtils = new EntityUtils<>(DummyEntityC.class, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
         var mockedEntityValidator = Mockito.mock(EntityValidator.class);
@@ -583,7 +583,7 @@ class ResourceApiControllerTest {
     @Transactional
     void delete_resourceExists_resourceIsDeleted() throws JsonProcessingException {
         String payload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C 100",
-                INDEX_FIELD_NAME, "1"));
+                INDEX_FIELD_NAME, 1));
 
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
@@ -606,7 +606,7 @@ class ResourceApiControllerTest {
     @Transactional
     void delete_requestTenantIdMatchesResourceTenantId_noExceptionThrown() throws JsonProcessingException {
         String payload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C 100",
-                INDEX_FIELD_NAME, "1"));
+                INDEX_FIELD_NAME, 1));
 
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);
@@ -618,7 +618,7 @@ class ResourceApiControllerTest {
     @Transactional
     void delete_requestTenantIdDoesNotMatchResourceTenantId_resourceNotFoundExceptionThrown() throws JsonProcessingException {
         String payload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C 100",
-                INDEX_FIELD_NAME, "1"));
+                INDEX_FIELD_NAME, 1));
 
         var controller = getResourceApiController(DummyEntityC.class);
         var resource = createResource(controller, payload, TENANT_ID);

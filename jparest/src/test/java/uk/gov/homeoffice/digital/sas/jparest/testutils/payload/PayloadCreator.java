@@ -14,4 +14,8 @@ public final class PayloadCreator {
     public static <S extends Serializable> String createPayload(Map<String, S> fieldHashMap){
         return new Gson().toJson(fieldHashMap);
     }
+
+    public static <S extends Serializable> String createPayload(String field, S value){
+        return createPayload(Map.of(field, value));
+    }
 }
