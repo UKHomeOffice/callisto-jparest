@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.util.function.Predicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -39,9 +38,6 @@ class ResourceApiServiceFactoryTest {
   @Mock
   private BaseEntityCheckerService baseEntityCheckerService;
 
-  @Mock
-  Predicate<Class<?>> mockPredicate;
-
   private ResourceApiServiceFactory resourceApiServiceFactory;
 
   @BeforeEach
@@ -56,9 +52,7 @@ class ResourceApiServiceFactoryTest {
 
     var resourceClass = DummyEntityA.class;
 
-    when(mockPredicate.test(any())).thenReturn(true);
-    when(baseEntityCheckerService.getPredicateForBaseEntitySubclassesMap(any()))
-        .thenReturn(mockPredicate);
+    when(baseEntityCheckerService.isBaseEntitySubclass(any())).thenReturn(true);
 
     ResourceApiService<DummyEntityA> actualService = resourceApiServiceFactory.getServiceBean(
         resourceClass);

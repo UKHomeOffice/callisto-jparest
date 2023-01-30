@@ -74,7 +74,7 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
         DummyEntityA.class, "dummyEntityAs",
         DummyEntityG.class, "dummyEntityGs"
     );
-    when(baseEntityCheckerService.filterBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
+    when(baseEntityCheckerService.getBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
 
     baseEntitySubClassesMap.forEach((resourceClass, entityName) ->
       when(resourceApiControllerFactory.getControllerBean((Class<T>) resourceClass)).thenReturn(resourceApiController)
@@ -105,7 +105,7 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
         DummyEntityA.class, "dummyEntityAs",
         DummyEntityG.class, "dummyEntityGs"
     );
-    when(baseEntityCheckerService.filterBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
+    when(baseEntityCheckerService.getBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
 
     handlerMappingConfig.configureResourceMapping();
 
@@ -139,7 +139,7 @@ class HandlerMappingConfigTest <T extends BaseEntity> {
 
     Map<Class<?>, String> baseEntitySubClassesMap = Map.of(DummyEntityD.class, "dummyEntityD");
     assertThat(DummyEntityD.class.getAnnotation(Resource.class).path()).isEmpty();
-    when(baseEntityCheckerService.filterBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
+    when(baseEntityCheckerService.getBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
 
     handlerMappingConfig.configureResourceMapping();
 

@@ -3,7 +3,6 @@ package uk.gov.homeoffice.digital.sas.jparest.config;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.API_ROOT_PATH;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.PATH_DELIMITER;
 
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -42,11 +41,9 @@ public class HandlerMappingConfig {
       throws NoSuchMethodException, SecurityException {
 
     LOGGER.fine("Searching for classes annotated as resources");
-    Map<Class<?>, String> baseEntitySubClassesMap =
-        baseEntityCheckerService.filterBaseEntitySubClasses();
 
     // find the id field , build the request mapping path and register the controller
-    for (var entityClassEntry : baseEntitySubClassesMap.entrySet()) {
+    for (var entityClassEntry : baseEntityCheckerService.getBaseEntitySubClasses().entrySet()) {
 
       Class<T> resourceClass = (Class<T>) entityClassEntry.getKey();
       LOGGER.fine("Processing resource" + resourceClass.getName());

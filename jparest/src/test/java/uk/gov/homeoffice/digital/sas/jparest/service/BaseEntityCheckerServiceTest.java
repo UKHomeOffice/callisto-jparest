@@ -2,39 +2,30 @@ package uk.gov.homeoffice.digital.sas.jparest.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+import uk.gov.homeoffice.digital.sas.jparest.config.BaseEntityCheckerServiceTestConfig;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.*;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.util.Map;
-import java.util.Set;
-
 
 @SpringBootTest
-@ContextConfiguration(locations = "/test-context.xml")
+@ContextConfiguration(locations = "/test-context.xml", classes = BaseEntityCheckerServiceTestConfig.class)
 class BaseEntityCheckerServiceTest {
 
-  @PersistenceContext
-  private EntityManager entityManager;
-
+  @Autowired
   private BaseEntityCheckerService baseEntityCheckerService;
-
-  @BeforeEach
-  void setup() {
-    baseEntityCheckerService = new BaseEntityCheckerService(entityManager);
-  }
 
 
   @Test
   void filterBaseEntitySubClasses_notAllEntitiesAreBaseEntitySubclasses_onlyBaseEntitySubclassesAreReturned() {
 
     Map<Class<?>, String> actualBaseEntitySubclassesMap =
-        baseEntityCheckerService.filterBaseEntitySubClasses();
+        baseEntityCheckerService.getBaseEntitySubClasses();
 
     var expectedBaseEntitySubclasses = Set.of(
             DummyEntityA.class,

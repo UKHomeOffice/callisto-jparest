@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,9 +34,6 @@ class ControllerRegistererServiceTest {
 
   @Mock
   private ResourceApiController<?> resourceApiController;
-
-  @Mock
-  Predicate<Class<?>> mockPredicate;
 
   private ControllerRegistererService controllerRegistererService;
 
@@ -87,9 +83,7 @@ class ControllerRegistererServiceTest {
         List.of("{PUT [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedIds}], produces [application/json]}",
             "addRelated"));
 
-    when(mockPredicate.test(any())).thenReturn(true);
-    when(baseEntityCheckerService.getPredicateForBaseEntitySubclassesMap(any()))
-        .thenReturn(mockPredicate);
+    when(baseEntityCheckerService.isBaseEntitySubclass(any())).thenReturn(true);
 
     var relatedResourceEndpointPaths = new HashMap<Class<?>, String>();
 

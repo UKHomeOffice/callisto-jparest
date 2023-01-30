@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
@@ -19,6 +18,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.springframework.util.StringUtils;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
 
 /**
  * Provides utility functions for JPA entities.
@@ -44,12 +44,13 @@ public class EntityUtils<T extends BaseEntity, Y extends BaseEntity> {
    * <p>Creates a utility class for the specified entityType.</p>
    *
    * @param entityType           The JPA entity class
-   * @param isBaseEntitySubclass A predicate that tests if a given class is a subclass of BaseEntity
+   * @param baseEntityCheckerService A service to check if a given class is a subclass of BaseEntity
    */
   @SuppressWarnings("squid:S3011")
   // Need to set accessibility of field to create instances with id set without
   // touching the database
-  public EntityUtils(@NonNull Class<T> entityType, Predicate<Class<?>> isBaseEntitySubclass) {
+  public EntityUtils(@NonNull Class<T> entityType,
+                     BaseEntityCheckerService baseEntityCheckerService) {
 
     this.entityType = entityType;
 
@@ -63,7 +64,7 @@ public class EntityUtils<T extends BaseEntity, Y extends BaseEntity> {
         Class<Y> relatedEntityClass = getRelatedEntityType(field);
 
         // Validate the Related entity also inherits from the BaseEntity
-        if (isBaseEntitySubclass.test(relatedEntityClass)) {
+        if (baseEntityCheckerService.isBaseEntitySubclass(relatedEntityClass)) {
           field.setAccessible(true);
           var relatedEntity = new RelatedEntity(field, relatedEntityClass);
           relations.putIfAbsent(field.getName(), relatedEntity);

@@ -1,6 +1,5 @@
 package uk.gov.homeoffice.digital.sas.jparest.factory;
 
-import java.util.Map;
 import javax.persistence.EntityManager;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
@@ -36,11 +35,7 @@ public class ResourceApiServiceFactory {
 
   public <T extends BaseEntity> ResourceApiService<T> getServiceBean(Class<T> resourceClass) {
 
-    Map<Class<?>, String> baseEntitySubClassesMap =
-        baseEntityCheckerService.filterBaseEntitySubClasses();
-
-    var entityUtils = new EntityUtils<>(resourceClass,
-        baseEntityCheckerService.getPredicateForBaseEntitySubclassesMap(baseEntitySubClassesMap));
+    var entityUtils = new EntityUtils<>(resourceClass, baseEntityCheckerService);
 
     var resourceApiService = new ResourceApiService<>(
             entityUtils,
