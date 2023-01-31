@@ -2,39 +2,22 @@ package uk.gov.homeoffice.digital.sas.jparest.config;
 
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.API_ROOT_PATH;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.PATH_DELIMITER;
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_ID_PATH_PARAM;
-import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_RELATED_ID_PATH_PARAM;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.metamodel.EntityType;
-import org.springframework.context.ApplicationContext;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo.BuilderConfiguration;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
-import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
+import uk.gov.homeoffice.digital.sas.jparest.factory.ResourceApiControllerFactory;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
-import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepositoryImpl;
-import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiServiceFactory;
+import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
+import uk.gov.homeoffice.digital.sas.jparest.service.ControllerRegistererService;
 
 
 /**
@@ -42,208 +25,66 @@ import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiServiceFactory;
  * and registers a {@link ResourceApiController} for them.
  */
 @Configuration
-public class HandlerMappingConfig {
+@AllArgsConstructor
+public class HandlerMappingConfig<T extends BaseEntity> {
 
   private static final Logger LOGGER = Logger.getLogger(HandlerMappingConfig.class.getName());
 
-  private final EntityManager entityManager;
   private final ResourceEndpoint resourceEndpoint;
-  private final ApplicationContext context;
-  private final ResourceApiServiceFactory resourceApiServiceFactory;
-  private RequestMappingHandlerMapping requestMappingHandlerMapping;
-  private BuilderConfiguration builderOptions;
-  private final ObjectMapper objectMapper;
+  private final ResourceApiControllerFactory resourceApiControllerFactory;
+  private final BaseEntityCheckerService baseEntityCheckerService;
+  private final ControllerRegistererService controllerRegistererService;
 
-
-
-  public HandlerMappingConfig(
-      EntityManager entityManager,
-      ApplicationContext context,
-      ResourceApiServiceFactory resourceApiServiceFactory,
-      ResourceEndpoint resourceEndpoint,
-      ObjectMapper objectMapper) {
-    this.entityManager = entityManager;
-    this.context = context;
-    this.resourceApiServiceFactory = resourceApiServiceFactory;
-    this.resourceEndpoint = resourceEndpoint;
-    this.objectMapper = objectMapper;
-  }
 
   @PostConstruct
-  public <T extends BaseEntity> void registerUserController()
-          throws NoSuchMethodException, SecurityException {
-    requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
-
-    createBuilderOptions();
+  public void configureResourceMapping() throws NoSuchMethodException, SecurityException {
 
     LOGGER.fine("Searching for classes annotated as resources");
-    List<Class<?>> resourceTypes = resourceEndpoint.getResourceTypes();
-
-    Map<Class<?>, EntityType<?>> baseEntitySubClassesMap =
-        entityManager.getMetamodel().getEntities()
-            .stream()
-            .filter(entityType -> entityType.getJavaType().isAnnotationPresent(Resource.class)
-                && classHasBaseEntityParent(entityType.getJavaType()))
-            .collect(Collectors.toMap(EntityType::getJavaType, Function.identity()));
-
-    Predicate<Class<?>> isBaseEntitySubclass = baseEntitySubClassesMap::containsKey;
-
-
-    // find the id field , build the request mapping path and register the controller
-    for (var entityClassEntry : baseEntitySubClassesMap.entrySet()) {
+    for (var entityClassEntry : baseEntityCheckerService.getBaseEntitySubClasses().entrySet()) {
 
       Class<T> resourceClass = (Class<T>) entityClassEntry.getKey();
       LOGGER.fine("Processing resource" + resourceClass.getName());
-      var resourceAnnotation = resourceClass.getAnnotation(Resource.class);
-      String resourcePath = resourceAnnotation.path();
-      if (!StringUtils.hasText(resourcePath)) {
-        resourcePath = entityClassEntry.getValue().getName().toLowerCase();
-      }
-      String path = API_ROOT_PATH + PATH_DELIMITER + resourcePath;
+
+      String path = getPath(resourceClass, entityClassEntry.getValue());
       LOGGER.log(Level.FINE, "root path for resource: {0}", path);
 
-      // Added to endpoint resource types for documentation customiser
-      resourceTypes.add(resourceClass);
+      LOGGER.fine("Adding to endpoint resource type for documentation customiser");
+      resourceEndpoint.addResourceType(resourceClass);
 
-      // Create a controller for the resource
       LOGGER.fine("Creating controller");
-      var entityUtils = new EntityUtils<>(resourceClass, isBaseEntitySubclass);
-      var resourceApiService =  resourceApiServiceFactory.getBean(resourceClass, entityUtils,
-              new TenantRepositoryImpl<>(resourceClass, entityManager));
-      var controller = new ResourceApiController<>(
-          resourceClass, resourceApiService, objectMapper);
-
-      // Map the CRUD operations to the controllers methods
-      mapRestOperationsToController(resourceClass, path, controller);
-
-      LOGGER.fine("Registering related paths");
-      registerRelatedPaths(resourceClass, path, entityUtils, controller);
-
-      LOGGER.fine("All paths registered");
+      ResourceApiController<T> controller =
+              resourceApiControllerFactory.getControllerBean(resourceClass);
+      mapCrudOperationsToController(controller, resourceClass, path);
     }
   }
 
-  private boolean classHasBaseEntityParent(Class<?> childClass) {
-    var superType = childClass.getSuperclass();
-    while (!superType.equals(Object.class)) {
-      if (superType.equals(BaseEntity.class)) {
-        return true;
-      }
-      superType = superType.getSuperclass();
+  private String getPath(Class<T> resourceClass, String entityName) {
+    var resourceAnnotation = resourceClass.getAnnotation(Resource.class);
+    String resourcePath = resourceAnnotation.path();
+    if (!StringUtils.hasText(resourcePath)) {
+      resourcePath = entityName.toLowerCase();
     }
-    return false;
+    return API_ROOT_PATH + PATH_DELIMITER + resourcePath;
   }
 
-  private void mapRestOperationsToController(Class<?> resource,
-                                             String path,
-                                             ResourceApiController<?> controller)
-      throws NoSuchMethodException {
+  private void mapCrudOperationsToController(
+      ResourceApiController<T> controller,
+      Class<T> resourceClass,
+      String path) throws NoSuchMethodException {
 
-    LOGGER.fine("Registering common paths");
+    Consumer<String> addResourcePathConsumer = pathArg -> resourceEndpoint.add(
+        resourceClass, pathArg);
+    controllerRegistererService.mapRestOperationsToController(
+        path, controller, addResourcePathConsumer);
 
-    register(controller, "list",
-        getControllerMethodArgs(RequestParameter.TENANT_ID,
-            RequestParameter.PAGEABLE, RequestParameter.FILTER),
-        path, RequestMethod.GET);
-    register(controller, "get",
-        getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.ID),
-        path + URL_ID_PATH_PARAM, RequestMethod.GET);
-    register(controller, "create",
-        getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.BODY),
-        path, RequestMethod.POST);
-    register(controller, "delete",
-        getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.ID),
-        path + URL_ID_PATH_PARAM, RequestMethod.DELETE);
-    register(controller, "update",
-        getControllerMethodArgs(RequestParameter.TENANT_ID,
-            RequestParameter.ID, RequestParameter.BODY),
-        path + URL_ID_PATH_PARAM, RequestMethod.PUT);
-    resourceEndpoint.add(resource, path);
+    BiConsumer<Class<? extends BaseEntity>, String> addRelatedResourcePathConsumer =
+        (relatedClass, pathArg) -> resourceEndpoint.addRelated(
+            resourceClass, relatedClass, pathArg);
+    controllerRegistererService.registerRelatedPaths(
+        path, resourceClass, controller, addRelatedResourcePathConsumer);
+
+    LOGGER.fine("All paths registered");
   }
 
-  private void registerRelatedPaths(Class<? extends BaseEntity> resource,
-                                    String path,
-                                    EntityUtils<? extends BaseEntity, ?> entityUtils,
-                                    ResourceApiController<?> controller)
-      throws NoSuchMethodException {
-
-    for (String relation : entityUtils.getRelatedResources()) {
-
-      Class<? extends BaseEntity> relatedType = entityUtils.getRelatedType(relation);
-      resourceEndpoint.addRelated(resource, relatedType,
-          path + URL_ID_PATH_PARAM + "/" + relation);
-      LOGGER.log(Level.FINE, "Registering related path: : {0}", relation);
-
-      register(controller, "getRelated",
-          getControllerMethodArgs(
-              RequestParameter.TENANT_ID,
-              RequestParameter.ID,
-              RequestParameter.RELATION,
-              RequestParameter.FILTER,
-              RequestParameter.PAGEABLE),
-          path + createIdAndRelationParams(relation), RequestMethod.GET);
-
-      register(controller, "deleteRelated", getControllerMethodArgs(
-              RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION,
-              RequestParameter.RELATED_IDS),
-          path + createIdAndRelationParams(relation) + URL_RELATED_ID_PATH_PARAM,
-          RequestMethod.DELETE);
-
-      register(controller, "addRelated", getControllerMethodArgs(
-              RequestParameter.TENANT_ID, RequestParameter.ID, RequestParameter.RELATION,
-              RequestParameter.RELATED_IDS),
-          path + createIdAndRelationParams(relation)
-              + URL_RELATED_ID_PATH_PARAM, RequestMethod.PUT);
-    }
-  }
-
-  private Class<?>[] getControllerMethodArgs(RequestParameter... requestParameters) {
-    return Stream.of(requestParameters)
-        .sorted(Comparator.comparing(RequestParameter::getOrder))
-        .map(RequestParameter::getParamDataType).toArray(Class<?>[]::new);
-  }
-
-  private void createBuilderOptions() {
-    builderOptions = new BuilderConfiguration();
-    builderOptions.setPathMatcher(requestMappingHandlerMapping.getPathMatcher());
-    builderOptions.setPatternParser(requestMappingHandlerMapping.getPatternParser());
-  }
-
-  private static String createIdAndRelationParams(String relation) {
-    return String.format(URL_ID_PATH_PARAM.concat("/{%s:%s}"),
-        RequestParameter.RELATION.getParamName(), Pattern.quote(relation));
-  }
-
-  /**
-   * Private help method that finds the specified method on the controller class
-   * and maps it to the
-   * given path for the given request method.
-   *
-   * @param controller    The controller to register the mapping to
-   * @param methodName    The method name to map to on the controller
-   * @param methodArgs    The argument types expected by the specified method
-   * @param path          The path to map
-   * @param requestMethod The request method to map
-   * @throws NoSuchMethodException when declared method cannot be found
-   */
-  private void register(Object controller,
-                        String methodName,
-                        Class<?>[] methodArgs,
-                        String path,
-                        RequestMethod requestMethod) throws NoSuchMethodException {
-
-    var method = ResourceApiController.class.getDeclaredMethod(methodName, methodArgs);
-
-    LOGGER.finest("Building RequestMappingInfo");
-    var builder = RequestMappingInfo.paths(path).options(this.builderOptions)
-        .methods(requestMethod)
-        .produces(MediaType.APPLICATION_JSON_VALUE);
-
-    var requestMappingInfo = builder.build();
-
-    LOGGER.finest("Registering mapping");
-    requestMappingHandlerMapping.registerMapping(requestMappingInfo, controller, method);
-    LOGGER.finest("Mapping registered");
-  }
 
 }

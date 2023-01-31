@@ -28,7 +28,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 @NoArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class Artist extends BaseEntity {
 
   @Type(type = "uuid-char")
@@ -50,10 +50,12 @@ public class Artist extends BaseEntity {
 
   @OneToMany(mappedBy = "artist")
   @JsonIgnore
+  @EqualsAndHashCode.Exclude
   private Set<Record> records;
 
   @ManyToMany(mappedBy = "artists")
   @JsonIgnore
+  @EqualsAndHashCode.Exclude
   private Set<Concert> concerts;
 
 }

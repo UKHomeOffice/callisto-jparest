@@ -20,7 +20,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 @Getter
 @Setter
 @AllArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class Profile extends BaseEntity {
 
   @NotEmpty
