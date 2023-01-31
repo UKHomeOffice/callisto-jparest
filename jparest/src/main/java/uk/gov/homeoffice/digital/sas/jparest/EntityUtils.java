@@ -35,10 +35,10 @@ public class EntityUtils<T extends BaseEntity, Y extends BaseEntity> {
   public static final Class<UUID> ID_FIELD_TYPE = UUID.class;
 
   @Getter
-  private Class<T> entityType;
-  private Map<String, RelatedEntity> relations = new HashMap<>();
+  private final Class<T> entityType;
+  private final Map<String, RelatedEntity> relations = new HashMap<>();
   @Getter
-  private Set<String> relatedResources = relations.keySet();
+  private final Set<String> relatedResources = relations.keySet();
 
   /**
    * <p>Creates a utility class for the specified entityType.</p>
@@ -50,7 +50,7 @@ public class EntityUtils<T extends BaseEntity, Y extends BaseEntity> {
   // Need to set accessibility of field to create instances with id set without
   // touching the database
   public EntityUtils(@NonNull Class<T> entityType,
-                     BaseEntityCheckerService baseEntityCheckerService) {
+                     @NonNull BaseEntityCheckerService baseEntityCheckerService) {
 
     this.entityType = entityType;
 

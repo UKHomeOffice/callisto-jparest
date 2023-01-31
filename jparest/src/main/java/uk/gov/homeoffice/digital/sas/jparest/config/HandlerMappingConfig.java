@@ -54,7 +54,9 @@ public class HandlerMappingConfig {
       LOGGER.fine("Adding to endpoint resource type for documentation customiser");
       resourceEndpoint.addResourceType(resourceClass);
 
-      ResourceApiController<T> controller = createController(resourceClass);
+      LOGGER.fine("Creating controller");
+      ResourceApiController<T> controller =
+              resourceApiControllerFactory.getControllerBean(resourceClass);
       mapCrudOperationsToController(controller, resourceClass, path);
     }
   }
@@ -66,13 +68,6 @@ public class HandlerMappingConfig {
       resourcePath = entityName.toLowerCase();
     }
     return API_ROOT_PATH + PATH_DELIMITER + resourcePath;
-  }
-
-  private <T extends BaseEntity>  ResourceApiController<T> createController(
-      Class<T> resourceClass) {
-
-    LOGGER.fine("Creating controller");
-    return resourceApiControllerFactory.getControllerBean(resourceClass);
   }
 
   private <T extends BaseEntity> void mapCrudOperationsToController(

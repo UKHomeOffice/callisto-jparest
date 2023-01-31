@@ -15,6 +15,10 @@ public class BaseEntityCheckerService {
 
   private final EntityManager entityManager;
 
+  /**
+   * A map containing resource annotated classes that inherit from BaseEntity as the key
+   * and their entity type name as the value
+   */
   @Getter
   private Map<Class<?>, String> baseEntitySubClasses;
 
@@ -34,7 +38,7 @@ public class BaseEntityCheckerService {
   private void setBaseEntitySubClasses() {
     this.baseEntitySubClasses = entityManager.getMetamodel().getEntities().stream()
             .filter(entityType -> isResourceEntity(entityType.getJavaType()))
-            .collect(Collectors.toMap(EntityType::getJavaType, EntityType::getName));
+            .collect(Collectors.toUnmodifiableMap(EntityType::getJavaType, EntityType::getName));
   }
 
   private boolean isResourceEntity(Class<?> childClass) {
