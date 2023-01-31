@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.expression.spel.standard.SpelExpression;
@@ -25,6 +26,7 @@ import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 
 
 @Service
+@AllArgsConstructor
 public class ResourceApiService<T extends BaseEntity> {
 
   private final EntityUtils<T, ?> entityUtils;
@@ -32,15 +34,6 @@ public class ResourceApiService<T extends BaseEntity> {
   private final EntityValidator entityValidator;
   private final TransactionTemplate transactionTemplate;
 
-  public ResourceApiService(EntityUtils<T, ?> entityUtils,
-                            TenantRepository<T> repository,
-                            EntityValidator entityValidator,
-                            TransactionTemplate transactionTemplate) {
-    this.entityUtils = entityUtils;
-    this.repository = repository;
-    this.entityValidator = entityValidator;
-    this.transactionTemplate = transactionTemplate;
-  }
 
   public List<T> getAllResources(UUID tenantId, Pageable pageable, SpelExpression filter) {
     return repository.findAllByTenantId(tenantId, filter, pageable);

@@ -26,7 +26,7 @@ import uk.gov.homeoffice.digital.sas.jparest.service.ControllerRegistererService
  */
 @Configuration
 @AllArgsConstructor
-public class HandlerMappingConfig {
+public class HandlerMappingConfig<T extends BaseEntity> {
 
   private static final Logger LOGGER = Logger.getLogger(HandlerMappingConfig.class.getName());
 
@@ -37,12 +37,9 @@ public class HandlerMappingConfig {
 
 
   @PostConstruct
-  public <T extends BaseEntity> void configureResourceMapping()
-      throws NoSuchMethodException, SecurityException {
+  public void configureResourceMapping() throws NoSuchMethodException, SecurityException {
 
     LOGGER.fine("Searching for classes annotated as resources");
-
-    // find the id field , build the request mapping path and register the controller
     for (var entityClassEntry : baseEntityCheckerService.getBaseEntitySubClasses().entrySet()) {
 
       Class<T> resourceClass = (Class<T>) entityClassEntry.getKey();
@@ -61,7 +58,7 @@ public class HandlerMappingConfig {
     }
   }
 
-  private <T> String getPath(Class<T> resourceClass, String entityName) {
+  private String getPath(Class<T> resourceClass, String entityName) {
     var resourceAnnotation = resourceClass.getAnnotation(Resource.class);
     String resourcePath = resourceAnnotation.path();
     if (!StringUtils.hasText(resourcePath)) {
@@ -70,7 +67,7 @@ public class HandlerMappingConfig {
     return API_ROOT_PATH + PATH_DELIMITER + resourcePath;
   }
 
-  private <T extends BaseEntity> void mapCrudOperationsToController(
+  private void mapCrudOperationsToController(
       ResourceApiController<T> controller,
       Class<T> resourceClass,
       String path) throws NoSuchMethodException {
