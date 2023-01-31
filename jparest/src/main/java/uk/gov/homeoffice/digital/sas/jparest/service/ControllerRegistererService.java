@@ -28,6 +28,8 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 public class ControllerRegistererService {
 
   private final RequestMappingHandlerMapping requestMappingHandlerMapping;
+  private final BaseEntityCheckerService baseEntityCheckerService;
+
 
   private static final Logger LOGGER = Logger.getLogger(
       ControllerRegistererService.class.getName());
@@ -60,12 +62,14 @@ public class ControllerRegistererService {
     pathConsumer.accept(path);
   }
 
-  public void registerRelatedPaths(
+  public <T extends BaseEntity> void registerRelatedPaths(
       String rootPath,
-      EntityUtils<? extends BaseEntity, ?> entityUtils,
+      Class<T> resourceClass,
       ResourceApiController<?> controller,
       BiConsumer<Class<? extends BaseEntity>, String> relatedClassAndPathConsumer)
       throws NoSuchMethodException {
+
+    var entityUtils = new EntityUtils<>(resourceClass, baseEntityCheckerService);
 
     LOGGER.fine("Registering related paths");
     for (String relation : entityUtils.getRelatedResources()) {

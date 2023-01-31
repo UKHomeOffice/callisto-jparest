@@ -5,25 +5,27 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
-import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 
 @Component
 public class ResourceApiControllerFactory {
 
   private final ObjectMapper objectMapper;
   private final GenericApplicationContext context;
-
+  private final ResourceApiServiceFactory resourceApiServiceFactory;
 
   public ResourceApiControllerFactory(ObjectMapper objectMapper,
-                                      GenericApplicationContext context) {
+                                      GenericApplicationContext context,
+                                      ResourceApiServiceFactory resourceApiServiceFactory) {
     this.objectMapper = objectMapper;
     this.context = context;
+    this.resourceApiServiceFactory = resourceApiServiceFactory;
   }
 
 
-  public <T extends BaseEntity> ResourceApiController<T> getBean(
-      Class<T> resourceClass,
-      ResourceApiService<T> resourceApiService) {
+  public <T extends BaseEntity> ResourceApiController<T> getControllerBean(
+      Class<T> resourceClass) {
+
+    var resourceApiService = resourceApiServiceFactory.getServiceBean(resourceClass);
 
     var controller = new ResourceApiController<>(
         resourceClass, resourceApiService, objectMapper);
@@ -36,5 +38,4 @@ public class ResourceApiControllerFactory {
 
     return controller;
   }
-
 }

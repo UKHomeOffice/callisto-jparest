@@ -3,7 +3,6 @@ package uk.gov.homeoffice.digital.sas.jparest.config;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.API_ROOT_PATH;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.PATH_DELIMITER;
 
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -12,16 +11,13 @@ import javax.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
-import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
 import uk.gov.homeoffice.digital.sas.jparest.factory.ResourceApiControllerFactory;
-import uk.gov.homeoffice.digital.sas.jparest.factory.ResourceApiServiceFactory;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
 import uk.gov.homeoffice.digital.sas.jparest.service.ControllerRegistererService;
-import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 
 
 /**
@@ -35,7 +31,6 @@ public class HandlerMappingConfig {
   private static final Logger LOGGER = Logger.getLogger(HandlerMappingConfig.class.getName());
 
   private final ResourceEndpoint resourceEndpoint;
-  private final ResourceApiServiceFactory resourceApiServiceFactory;
   private final ResourceApiControllerFactory resourceApiControllerFactory;
   private final BaseEntityCheckerService baseEntityCheckerService;
   private final ControllerRegistererService controllerRegistererService;
@@ -46,11 +41,9 @@ public class HandlerMappingConfig {
       throws NoSuchMethodException, SecurityException {
 
     LOGGER.fine("Searching for classes annotated as resources");
-    Map<Class<?>, String> baseEntitySubClassesMap =
-        baseEntityCheckerService.filterBaseEntitySubClasses();
 
     // find the id field , build the request mapping path and register the controller
-    for (var entityClassEntry : baseEntitySubClassesMap.entrySet()) {
+    for (var entityClassEntry : baseEntityCheckerService.getBaseEntitySubClasses().entrySet()) {
 
       Class<T> resourceClass = (Class<T>) entityClassEntry.getKey();
       LOGGER.fine("Processing resource" + resourceClass.getName());
@@ -61,10 +54,10 @@ public class HandlerMappingConfig {
       LOGGER.fine("Adding to endpoint resource type for documentation customiser");
       resourceEndpoint.addResourceType(resourceClass);
 
-      var entityUtils = new EntityUtils<>(resourceClass,
-          baseEntityCheckerService.getPredicateForBaseEntitySubclassesMap(baseEntitySubClassesMap));
-      ResourceApiController<T> controller = createController(resourceClass, entityUtils);
-      mapCrudOperationsToController(controller, entityUtils, resourceClass, path);
+      LOGGER.fine("Creating controller");
+      ResourceApiController<T> controller =
+              resourceApiControllerFactory.getControllerBean(resourceClass);
+      mapCrudOperationsToController(controller, resourceClass, path);
     }
   }
 
@@ -77,18 +70,8 @@ public class HandlerMappingConfig {
     return API_ROOT_PATH + PATH_DELIMITER + resourcePath;
   }
 
-  private <T extends BaseEntity>  ResourceApiController<T> createController(
-      Class<T> resourceClass,
-      EntityUtils<T, ? extends BaseEntity> entityUtils) {
-
-    LOGGER.fine("Creating controller");
-    ResourceApiService<T> service = resourceApiServiceFactory.getBean(resourceClass, entityUtils);
-    return resourceApiControllerFactory.getBean(resourceClass, service);
-  }
-
   private <T extends BaseEntity> void mapCrudOperationsToController(
       ResourceApiController<T> controller,
-      EntityUtils<T, ? extends BaseEntity> entityUtils,
       Class<T> resourceClass,
       String path) throws NoSuchMethodException {
 
@@ -101,7 +84,7 @@ public class HandlerMappingConfig {
         (relatedClass, pathArg) -> resourceEndpoint.addRelated(
             resourceClass, relatedClass, pathArg);
     controllerRegistererService.registerRelatedPaths(
-        path, entityUtils, controller, addRelatedResourcePathConsumer);
+        path, resourceClass, controller, addRelatedResourcePathConsumer);
 
     LOGGER.fine("All paths registered");
   }

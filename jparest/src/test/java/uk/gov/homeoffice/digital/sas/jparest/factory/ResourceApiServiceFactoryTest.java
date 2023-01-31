@@ -1,6 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest.factory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,8 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
-import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
+import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 import javax.persistence.EntityManager;
@@ -33,12 +35,15 @@ class ResourceApiServiceFactoryTest {
   @Mock
   private PlatformTransactionManager transactionManager;
 
+  @Mock
+  private BaseEntityCheckerService baseEntityCheckerService;
+
   private ResourceApiServiceFactory resourceApiServiceFactory;
 
   @BeforeEach
   void setup() {
     resourceApiServiceFactory = new ResourceApiServiceFactory(
-        entityManager, entityValidator, context, transactionManager);
+        entityManager, entityValidator, context, transactionManager, baseEntityCheckerService);
   }
 
 
@@ -46,10 +51,11 @@ class ResourceApiServiceFactoryTest {
   void getBean_serviceDependenciesProvided_serviceBeanRegistered() {
 
     var resourceClass = DummyEntityA.class;
-    var entityUtils = new EntityUtils<>(resourceClass, (clazz) -> true);
 
-    ResourceApiService<DummyEntityA> actualService = resourceApiServiceFactory.getBean(
-        resourceClass, entityUtils);
+    when(baseEntityCheckerService.isBaseEntitySubclass(any())).thenReturn(true);
+
+    ResourceApiService<DummyEntityA> actualService = resourceApiServiceFactory.getServiceBean(
+        resourceClass);
 
     assertThat(context.getBean("DummyEntityAResourceApiService"))
         .isNotNull().isInstanceOf(ResourceApiService.class);

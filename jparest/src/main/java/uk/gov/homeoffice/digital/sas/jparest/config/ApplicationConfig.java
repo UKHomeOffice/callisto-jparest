@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
 import uk.gov.homeoffice.digital.sas.jparest.factory.ResourceApiControllerFactory;
@@ -22,9 +23,7 @@ import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
 @Import({
   ObjectMapperConfig.class,
   JpaRestMvcConfig.class,
-  HandlerMappingConfig.class,
-  BaseEntityCheckerService.class,
-  ControllerRegistererService.class
+  HandlerMappingConfig.class
 })
 public class ApplicationConfig {
 
@@ -60,16 +59,30 @@ public class ApplicationConfig {
       EntityManager entityManager,
       EntityValidator entityValidator,
       GenericApplicationContext context,
-      PlatformTransactionManager transactionManager) {
+      PlatformTransactionManager transactionManager,
+      BaseEntityCheckerService baseEntityCheckerService) {
     return new ResourceApiServiceFactory(
-        entityManager, entityValidator, context, transactionManager);
+        entityManager, entityValidator, context, transactionManager, baseEntityCheckerService);
   }
 
   @Bean
   public ResourceApiControllerFactory resourceApiControllerFactory(
       ObjectMapper objectMapper,
-      GenericApplicationContext context) {
-    return new ResourceApiControllerFactory(objectMapper, context);
+      GenericApplicationContext context,
+      ResourceApiServiceFactory resourceApiServiceFactory) {
+    return new ResourceApiControllerFactory(objectMapper, context, resourceApiServiceFactory);
+  }
+
+  @Bean
+  public BaseEntityCheckerService baseEntityCheckerService(EntityManager entityManager) {
+    return new BaseEntityCheckerService(entityManager);
+  }
+
+  @Bean
+  public ControllerRegistererService controllerRegistererService(
+          RequestMappingHandlerMapping requestMappingHandlerMapping,
+          BaseEntityCheckerService baseEntityCheckerService) {
+    return new ControllerRegistererService(requestMappingHandlerMapping, baseEntityCheckerService);
   }
 
 }
