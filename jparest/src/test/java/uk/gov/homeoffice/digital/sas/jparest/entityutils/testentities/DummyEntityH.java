@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities;
 
+import lombok.EqualsAndHashCode;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 
 import javax.persistence.Entity;
@@ -13,11 +14,13 @@ import java.util.Set;
 
 @Resource(path = "dummyEntityHs")
 @Entity(name = "dummyEntityH")
+@EqualsAndHashCode(callSuper = false)
 public class DummyEntityH  {
 
     @Id
     Long id;
 
+    @EqualsAndHashCode.Exclude
     @ManyToMany(mappedBy = "dummyEntityHSet")
     private Set<DummyEntityG> dummyEntityGSet;
 

@@ -9,6 +9,7 @@ import java.util.UUID;
 import lombok.Getter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,6 +28,7 @@ import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
  * <p>Resources for ManyToMany relationships can also be queried.
  */
 @ResponseBody
+@Controller
 public class ResourceApiController<T extends BaseEntity> {
 
   @Getter

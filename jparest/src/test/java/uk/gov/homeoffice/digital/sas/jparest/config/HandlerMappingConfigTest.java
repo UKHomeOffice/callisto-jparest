@@ -1,145 +1,157 @@
 package uk.gov.homeoffice.digital.sas.jparest.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
-import java.util.stream.Stream;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
+import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.ResourceApiController;
+import uk.gov.homeoffice.digital.sas.jparest.factory.ResourceApiControllerFactory;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityH;
-import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
-import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiServiceFactory;
+import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityG;
+import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
+import uk.gov.homeoffice.digital.sas.jparest.service.ControllerRegistererService;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest
-@Transactional
-@ContextConfiguration(locations = "/test-context.xml")
-class HandlerMappingConfigTest {
+class HandlerMappingConfigTest <T extends BaseEntity> {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+  @Mock
+  private ResourceEndpoint resourceEndpoint;
 
-    @MockBean
-    private ApplicationContext context;
+  @Mock
+  private ResourceApiControllerFactory resourceApiControllerFactory;
 
-    @MockBean
-    private ResourceApiServiceFactory resourceApiServiceFactory;
+  @Mock
+  private BaseEntityCheckerService baseEntityCheckerService;
 
-    @MockBean
-    private ResourceEndpoint resourceEndpoint;
+  @Mock
+  private ControllerRegistererService controllerRegistererService;
 
-    @MockBean
-    private RequestMappingHandlerMapping requestMappingHandlerMapping;
+  @Mock
+  private ResourceApiController<T> resourceApiController;
 
-    @MockBean
-    private ObjectMapper objectMapper;
+  @Captor
+  ArgumentCaptor<Consumer<String>> addResourceConsumerCaptor;
 
-    private HandlerMappingConfig handlerMappingConfig;
+  @Captor
+  ArgumentCaptor<BiConsumer<Class<? extends BaseEntity>, String>> addRelatedResourceConsumerCaptor;
 
-    @MockBean
-    private ResourceApiService<?> service;
+  private HandlerMappingConfig handlerMappingConfig;
 
-    private static Stream<Arguments> resources() {
-        return Stream.of(
-                Arguments.of(DummyEntityA.class, "dummyEntityAs"),
-                Arguments.of(DummyEntityB.class, "dummyEntityBs"),
-                Arguments.of(DummyEntityC.class, "dummyentityc"),
-                Arguments.of(DummyEntityD.class, "dummyentityd"));
-    }
+  @BeforeEach
+  public void setup() {
+      handlerMappingConfig = new HandlerMappingConfig(
+          resourceEndpoint,
+          resourceApiControllerFactory,
+          baseEntityCheckerService,
+          controllerRegistererService);
+  }
 
-    @BeforeEach
-    public void setup() {
-        when(context.getBean(RequestMappingHandlerMapping.class)).thenReturn(requestMappingHandlerMapping);
-        handlerMappingConfig = new HandlerMappingConfig(
-            entityManager,
-            context,
-            resourceApiServiceFactory,
-            resourceEndpoint,
-            objectMapper);
-    }
+  @Test
+  void configureResourceMapping_resourcesDiscovered_verifyInteractionWithControllerRegistererService()
+      throws NoSuchMethodException {
 
-    @Test
-    void registerUserController_classAnnotatedAsResourceButDoesNotExtendBaseEntity_restfulEndpointsNotRegistered() {
+    Map<Class<?>, String> baseEntitySubClassesMap = Map.of(
+        DummyEntityA.class, "dummyEntityAs",
+        DummyEntityG.class, "dummyEntityGs"
+    );
+    when(baseEntityCheckerService.getBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
 
-        var resourceName = "dummyEntityHs";
-        var expectedCalls = List.of(
-                List.of("{GET [/resources/" + resourceName + "], produces [application/json]}", "list"),
-                List.of("{GET [/resources/" + resourceName + "/{id}], produces [application/json]}", "get"),
-                List.of("{POST [/resources/" + resourceName + "], produces [application/json]}", "create"),
-                List.of("{DELETE [/resources/" + resourceName + "/{id}], produces [application/json]}", "delete"),
-                List.of("{PUT [/resources/" + resourceName + "/{id}], produces [application/json]}", "update"));
+    baseEntitySubClassesMap.forEach((resourceClass, entityName) ->
+      when(resourceApiControllerFactory.getControllerBean((Class<T>) resourceClass)).thenReturn(resourceApiController)
+    );
 
-        assertThatNoException().isThrownBy(() -> handlerMappingConfig.registerUserController());
+    handlerMappingConfig.configureResourceMapping();
 
-        for (var expected : expectedCalls) {
-            Mockito.verify(requestMappingHandlerMapping, never()).registerMapping(
-                    argThat((requestMappingInfo) -> requestMappingInfo.toString().equals(expected.get(0))),
-                    argThat((controller) -> ((ResourceApiController<?>) controller).getEntityType().equals(DummyEntityH.class)),
-                    argThat((method) -> method.getName().equals(expected.get(1))));
-        }
+    baseEntitySubClassesMap.forEach((resourceClass, entityName) -> {
+      try {
+        String resourcePath = resourceClass.getAnnotation(Resource.class).path();
+        verify(controllerRegistererService).mapRestOperationsToController(
+            argThat(path -> path.contains(resourcePath)), eq(resourceApiController), any());
 
-    }
+        verify(controllerRegistererService).registerRelatedPaths(argThat(path -> path.contains(resourcePath)),
+            any(), eq(resourceApiController), any());
+      } catch (NoSuchMethodException e) {
+        e.printStackTrace();
+        fail("NoSuchMethodException thrown");
+      }
+    });
+  }
 
-    @ParameterizedTest
-    @MethodSource("resources")
-    void registerUserController_classAnnotatedAsResource_registersRestfulEndpoints(
-            Class<?> clazz, String resourceName) {
-        var expectedCalls = List.of(
-                List.of("{GET [/resources/" + resourceName + "], produces [application/json]}", "list"),
-                List.of("{GET [/resources/" + resourceName + "/{id}], produces [application/json]}", "get"),
-                List.of("{POST [/resources/" + resourceName + "], produces [application/json]}", "create"),
-                List.of("{DELETE [/resources/" + resourceName + "/{id}], produces [application/json]}", "delete"),
-                List.of("{PUT [/resources/" + resourceName + "/{id}], produces [application/json]}", "update"));
-        assertThatNoException().isThrownBy(() -> handlerMappingConfig.registerUserController());
-        verifyExpectedHandlerMappingCalls(clazz, expectedCalls);
-    }
+  @Test
+  void configureResourceMapping_resourcesDiscovered_resourceTypesAndPathsAddedToServiceForOpenApi()
+      throws NoSuchMethodException {
 
-    @Test
-    void registerUserController_classAnnotatedAsResourceWithManyToManyAnnotation_registersRelatedEndpoints() {
-        var expectedCalls = List.of(
-                List.of("{GET [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}], produces [application/json]}",
-                        "getRelated"),
-                List.of("{DELETE [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedIds}], produces [application/json]}",
-                        "deleteRelated"),
-                List.of("{PUT [/resources/dummyEntityAs/{id}/{relation:\\QdummyEntityBSet\\E}/{relatedIds}], produces [application/json]}",
-                        "addRelated"));
-        assertThatNoException().isThrownBy(() -> handlerMappingConfig.registerUserController());
-        verifyExpectedHandlerMappingCalls(DummyEntityA.class, expectedCalls);
-    }
+    Map<Class<?>, String> baseEntitySubClassesMap = Map.of(
+        DummyEntityA.class, "dummyEntityAs",
+        DummyEntityG.class, "dummyEntityGs"
+    );
+    when(baseEntityCheckerService.getBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
 
-    private void verifyExpectedHandlerMappingCalls(
-            Class<?> clazz, List<List<String>> expectedCalls) {
-        for (var expected : expectedCalls) {
-            Mockito.verify(requestMappingHandlerMapping).registerMapping(
-                    argThat((a) -> a.toString().equals(expected.get(0))),
-                    argThat((b) -> ((ResourceApiController<?>) b).getEntityType().equals(clazz)),
-                    argThat((c) -> c.getName().equals(expected.get(1))));
-        }
-    }
+    handlerMappingConfig.configureResourceMapping();
+
+    baseEntitySubClassesMap.forEach((resourceClass, entityName) -> {
+      verify(resourceEndpoint).addResourceType(resourceClass);
+      try {
+        var resourcePath = resourceClass.getAnnotation(Resource.class).path();
+
+        verify(controllerRegistererService).mapRestOperationsToController(
+            argThat(path -> path.contains(resourcePath)), any(), addResourceConsumerCaptor.capture());
+        addResourceConsumerCaptor.getValue().accept("path/" + resourcePath);
+        verify(resourceEndpoint).add(resourceClass, "path/" + resourcePath);
+
+        verify(controllerRegistererService).registerRelatedPaths(
+            argThat(path -> path.contains(resourcePath)), any(), any(), addRelatedResourceConsumerCaptor.capture());
+        var relatedResourcePath = DummyEntityB.class.getAnnotation(Resource.class).path();
+        addRelatedResourceConsumerCaptor.getValue().accept(DummyEntityB.class, "relatedPath/" + relatedResourcePath);
+        verify(resourceEndpoint).addRelated((Class<T>) resourceClass, DummyEntityB.class,
+            "relatedPath/" + relatedResourcePath);
+
+      } catch (NoSuchMethodException e) {
+        e.printStackTrace();
+        fail("NoSuchMethodException thrown");
+      }
+    });
+  }
+
+  @Test
+  void configureResourceMapping_entityResourceAnnotationDoesNotHavePathValue_pathObtainedFromEntityName()
+      throws NoSuchMethodException {
+
+    Map<Class<?>, String> baseEntitySubClassesMap = Map.of(DummyEntityD.class, "dummyEntityD");
+    assertThat(DummyEntityD.class.getAnnotation(Resource.class).path()).isEmpty();
+    when(baseEntityCheckerService.getBaseEntitySubClasses()).thenReturn(baseEntitySubClassesMap);
+
+    handlerMappingConfig.configureResourceMapping();
+
+    var entityName = baseEntitySubClassesMap.get(DummyEntityD.class);
+    verify(controllerRegistererService).mapRestOperationsToController(
+        argThat(path -> path.contains(entityName.toLowerCase(Locale.ROOT))), any(), any());
+
+    verify(controllerRegistererService).registerRelatedPaths(
+        argThat(path -> path.contains(entityName.toLowerCase(Locale.ROOT))), any(), any(), any());
+  }
+
+
 
 
 }

@@ -6,8 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
@@ -45,9 +44,6 @@ class ResourceApiServiceTest<T extends BaseEntity> {
     @Mock
     private PlatformTransactionManager transactionManager;
 
-    @Mock
-    private TransactionStatus transactionStatus;
-
     private ResourceApiService<T> resourceApiService;
 
 
@@ -61,8 +57,8 @@ class ResourceApiServiceTest<T extends BaseEntity> {
 
     @BeforeEach
     private void setup() {
-      resourceApiService = new ResourceApiService<T>(entityUtils, transactionManager,
-          repository, entityValidator);
+      resourceApiService = new ResourceApiService<T>(
+              entityUtils, repository, entityValidator, new TransactionTemplate(transactionManager));
     }
 
 
@@ -98,14 +94,9 @@ class ResourceApiServiceTest<T extends BaseEntity> {
 
       T resourceToSave = DummyEntityTestUtil.getResource(DummyEntityA.class);
       T createdResource = DummyEntityTestUtil.getResource(DummyEntityA.class, RESOURCE_ID, TENANT_ID);
-
       when(repository.saveAndFlush(resourceToSave)).thenReturn(createdResource);
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
 
       var actualResource = resourceApiService.createResource(resourceToSave);
-
-      verify(transactionManager).commit(transactionStatus);
-      verify(transactionManager, never()).rollback(transactionStatus);
       assertThat(actualResource).isEqualTo(resourceToSave);
     }
 
@@ -116,14 +107,10 @@ class ResourceApiServiceTest<T extends BaseEntity> {
 
       doThrow(ResourceConstraintViolationException.class).when(entityValidator)
           .validateAndThrowIfErrorsExist(resourceToSave);
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
 
       assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() ->
           resourceApiService.createResource(resourceToSave));
-      verify(transactionManager).rollback(transactionStatus);
-      verify(transactionManager, never()).commit(transactionStatus);
       verify(repository, never()).saveAndFlush(resourceToSave);
-
     }
 
     // endregion
@@ -134,12 +121,8 @@ class ResourceApiServiceTest<T extends BaseEntity> {
     @Test
     void deleteResource_entityExistsForId_verifyRepositoryDeleteInteraction() {
 
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
       assertThatNoException().isThrownBy(() -> resourceApiService.deleteResource(TENANT_ID, RESOURCE_ID));
-
       verify(repository).deleteByTenantIdAndId(TENANT_ID, RESOURCE_ID);
-      verify(transactionManager).commit(transactionStatus);
-      verify(transactionManager, never()).rollback(transactionStatus);
     }
 
     @Test
@@ -147,11 +130,9 @@ class ResourceApiServiceTest<T extends BaseEntity> {
 
       doThrow(NoSuchElementException.class).when(repository)
           .deleteByTenantIdAndId(TENANT_ID, RESOURCE_ID);
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
 
       assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
           resourceApiService.deleteResource(TENANT_ID, RESOURCE_ID));
-      verify(transactionManager, never()).commit(transactionStatus);
     }
 
     // endregion
@@ -168,7 +149,6 @@ class ResourceApiServiceTest<T extends BaseEntity> {
 
       when(repository.findByTenantIdAndId(newResource.getTenantId(), newResource.getId()))
           .thenReturn(Optional.of(existingResource));
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
 
       resourceApiService.updateResource(newResource);
 
@@ -176,8 +156,6 @@ class ResourceApiServiceTest<T extends BaseEntity> {
       assertThat(existingResource.getId()).isEqualTo(RESOURCE_ID);
       assertThat(existingResource.getTenantId()).isEqualTo(newDummyAResource.getTenantId());
       assertThat(existingDummyAResource.getProfileId()).isEqualTo(newDummyAResource.getProfileId());
-      verify(transactionManager).commit(transactionStatus);
-      verify(transactionManager, never()).rollback(transactionStatus);
     }
 
     @Test
@@ -186,12 +164,9 @@ class ResourceApiServiceTest<T extends BaseEntity> {
       T newResource = DummyEntityTestUtil.getResource(DummyEntityA.class, RESOURCE_ID, TENANT_ID);
       doThrow(ResourceConstraintViolationException.class).when(entityValidator)
           .validateAndThrowIfErrorsExist(newResource);
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
 
       assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() ->
           resourceApiService.updateResource(newResource));
-      verify(transactionManager).rollback(transactionStatus);
-      verify(transactionManager, never()).commit(transactionStatus);
       verify(repository, never()).saveAndFlush(any());
     }
 
@@ -199,12 +174,9 @@ class ResourceApiServiceTest<T extends BaseEntity> {
     void updateResource_originalEntityNotFound_resourceNotFoundExceptionThrown() {
 
       T newResource = DummyEntityTestUtil.getResource(DummyEntityA.class, RESOURCE_ID, TENANT_ID);
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
 
       assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
           resourceApiService.updateResource(newResource));
-      verify(transactionManager).rollback(transactionStatus);
-      verify(transactionManager, never()).commit(transactionStatus);
       verify(repository, never()).saveAndFlush(any());
     }
 
@@ -230,27 +202,21 @@ class ResourceApiServiceTest<T extends BaseEntity> {
       when(entityUtils.getEntityReference(RELATED_RESOURCE_NAME, relatedIds.get(0))).thenReturn(relatedEntities.get(0));
       when(entityUtils.getEntityReference(RELATED_RESOURCE_NAME, relatedIds.get(1))).thenReturn(relatedEntities.get(1));
 
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
       assertThatNoException().isThrownBy(() -> resourceApiService.deleteRelatedResources(
           TENANT_ID, parentResource.getId(), RELATED_RESOURCE_NAME, relatedIds));
 
       verify(repository).saveAndFlush(parentResource);
-      verify(transactionManager).commit(transactionStatus);
-      verify(transactionManager, never()).rollback(transactionStatus);
     }
 
     @Test
     void deleteRelatedResources_parentResourceNotFound_resourceNotFoundExceptionThrown() {
 
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
       List<UUID> relatedIds = List.of();
       assertThatExceptionOfType(ResourceNotFoundException.class)
           .isThrownBy(() -> resourceApiService.deleteRelatedResources(
               TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME, relatedIds));
 
       verify(repository, never()).saveAndFlush(any());
-      verify(transactionManager, never()).commit(transactionStatus);
-      verify(transactionManager).rollback(transactionStatus);
     }
 
     @Test
@@ -276,15 +242,12 @@ class ResourceApiServiceTest<T extends BaseEntity> {
       when(entityUtils.getEntityReference(RELATED_RESOURCE_NAME, unrelatedEntityId)).thenReturn(
           DummyEntityTestUtil.getResource(DummyEntityB.class, unrelatedEntityId, TENANT_ID));
 
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
       assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
               resourceApiService.deleteRelatedResources(
                   TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME, idsToDelete))
           .withMessage(deletableRelatedResourcesMessage(RELATED_RESOURCE_CLASS, List.of(unrelatedEntityId)));
 
       verify(repository, never()).saveAndFlush(parentResource);
-      verify(transactionManager, never()).commit(transactionStatus);
-      verify(transactionManager).rollback(transactionStatus);
     }
 
     // endregion
@@ -312,27 +275,21 @@ class ResourceApiServiceTest<T extends BaseEntity> {
       when(entityUtils.getEntityReference(RELATED_RESOURCE_NAME, relatedIds.get(0))).thenReturn(relatedEntities.get(0));
       when(entityUtils.getEntityReference(RELATED_RESOURCE_NAME, relatedIds.get(1))).thenReturn(relatedEntities.get(1));
 
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
       resourceApiService.addRelatedResources(
           TENANT_ID, parentResource.getId(), RELATED_RESOURCE_NAME, relatedIds);
 
       verify(repository).saveAndFlush(parentResource);
-      verify(transactionManager).commit(transactionStatus);
-      verify(transactionManager, never()).rollback(transactionStatus);
     }
 
     @Test
     void addRelatedResources_parentResourceNotFound_resourceNotFoundExceptionThrown() {
 
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
       List<UUID> relatedIds = List.of();
       assertThatExceptionOfType(ResourceNotFoundException.class)
           .isThrownBy(() -> resourceApiService.addRelatedResources(
               TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME, relatedIds));
 
       verify(repository, never()).saveAndFlush(any());
-      verify(transactionManager, never()).commit(transactionStatus);
-      verify(transactionManager).rollback(transactionStatus);
     }
 
     @Test
@@ -349,15 +306,12 @@ class ResourceApiServiceTest<T extends BaseEntity> {
       when(repository.countAllByTenantIdAndRelation(TENANT_ID, RELATED_RESOURCE_CLASS, relatedIds))
           .thenReturn(Long.valueOf(relatedIds.size() - 1));
 
-      when(transactionManager.getTransaction(new DefaultTransactionDefinition())).thenReturn(transactionStatus);
 
       assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
               resourceApiService.addRelatedResources(
                   TENANT_ID, RESOURCE_ID, RELATED_RESOURCE_NAME, relatedIds))
           .withMessage(relatedResourcesMessage(relatedIds));
       verify(repository, never()).saveAndFlush(any());
-      verify(transactionManager, never()).commit(transactionStatus);
-      verify(transactionManager).rollback(transactionStatus);
     }
 
     // endregion

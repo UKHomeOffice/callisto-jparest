@@ -37,3 +37,4 @@ build/
 
 ### Config ###
 google_checks.xml
+.editorconfig

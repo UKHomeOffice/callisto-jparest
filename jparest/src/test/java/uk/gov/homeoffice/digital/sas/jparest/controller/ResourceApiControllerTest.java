@@ -22,13 +22,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.homeoffice.digital.sas.jparest.EntityUtils;
+import uk.gov.homeoffice.digital.sas.jparest.config.BaseEntityCheckerServiceTestConfig;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityB;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityF;
-import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityTestUtil;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil;
@@ -37,6 +38,7 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchExceptio
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.repository.TenantRepositoryImpl;
+import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.testutils.payload.PayloadCreator;
 import uk.gov.homeoffice.digital.sas.jparest.validation.EntityValidator;
@@ -62,20 +64,23 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
-@ContextConfiguration(locations = "/test-context.xml")
+@ContextConfiguration(locations = "/test-context.xml", classes = BaseEntityCheckerServiceTestConfig.class)
 class ResourceApiControllerTest {
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    private PlatformTransactionManager transactionManager;
-
-    @Autowired
     private EntityValidator entityValidator;
 
     @Autowired
+    BaseEntityCheckerService baseEntityCheckerService;
+
+    @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     public static final UUID NON_EXISTENT_ID = UUID.fromString("7a7c7da4-bb29-11ec-1000-0242ac120001");
     public static final UUID NON_EXISTENT_ID_2 = UUID.fromString("7a7c7da4-bb29-11ec-1001-0242ac120002");
@@ -552,14 +557,14 @@ class ResourceApiControllerTest {
                 DESCRIPTION_FIELD_NAME, "Dummy Entity C 100",
                 INDEX_FIELD_NAME, 1));
 
-        var entityUtils = new EntityUtils<>(DummyEntityC.class, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
+        var entityUtils = new EntityUtils<>(DummyEntityC.class, baseEntityCheckerService);
         var mockedEntityValidator = Mockito.mock(EntityValidator.class);
 
         var resourceApiService = new ResourceApiService<>(
                 entityUtils,
-                transactionManager,
                 new TenantRepositoryImpl<DummyEntityC>(DummyEntityC.class, entityManager),
-                mockedEntityValidator);
+                mockedEntityValidator,
+                new TransactionTemplate(transactionManager));
 
         var controller = new ResourceApiController<>(
                 DummyEntityC.class,
@@ -944,13 +949,13 @@ class ResourceApiControllerTest {
     // endregion
 
     private <T extends BaseEntity, U> ResourceApiController<T> getResourceApiController(Class<T> clazz) {
-        var entityUtils = new EntityUtils<>(clazz, DummyEntityTestUtil.getBaseEntitySubclassPredicate());
+        var entityUtils = new EntityUtils<>(clazz, baseEntityCheckerService);
 
         var resourceApiService = new ResourceApiService<>(
                 entityUtils,
-                transactionManager,
                 new TenantRepositoryImpl<T>(clazz, entityManager),
-                entityValidator);
+                entityValidator,
+                new TransactionTemplate(transactionManager));
 
         return new ResourceApiController<>(clazz, resourceApiService, objectMapper);
     }

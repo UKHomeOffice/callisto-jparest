@@ -21,7 +21,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 @NoArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class Concert extends BaseEntity {
 
   @NotEmpty
