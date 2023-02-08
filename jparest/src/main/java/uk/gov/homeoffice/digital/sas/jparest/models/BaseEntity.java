@@ -1,15 +1,16 @@
 package uk.gov.homeoffice.digital.sas.jparest.models;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 import java.util.Objects;
 import java.util.UUID;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Provides an implementation of equals and hashCode that
@@ -27,13 +28,13 @@ public abstract class BaseEntity {
       strategy = "org.hibernate.id.UUIDGenerator",
       parameters = @Parameter(name = "uuid_gen_strategy_class",
       value = "org.hibernate.id.uuid.CustomVersionOneStrategy"))
-  @Type(type = "uuid-char")
-  private UUID id;
+  @JdbcTypeCode(SqlTypes.CHAR)
+  protected UUID id;
 
   @Getter
   @Setter
-  @Type(type = "uuid-char")
-  private UUID tenantId;
+  @JdbcTypeCode(SqlTypes.CHAR)
+  protected UUID tenantId;
 
   @Override
   public boolean equals(Object o) {

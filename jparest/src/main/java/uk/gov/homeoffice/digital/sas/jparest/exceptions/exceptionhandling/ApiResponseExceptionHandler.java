@@ -3,9 +3,9 @@ package uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.SERVER_ERROR;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.persistence.PersistenceException;
 import java.util.List;
 import java.util.logging.Logger;
-import javax.persistence.PersistenceException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

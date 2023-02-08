@@ -1,6 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import lombok.Getter;
 import lombok.Setter;

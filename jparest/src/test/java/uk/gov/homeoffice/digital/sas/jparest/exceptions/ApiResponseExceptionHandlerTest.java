@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiErrorResponse;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.exceptionhandling.ApiResponseExceptionHandler;
 
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 import java.util.UUID;
 import java.util.stream.Stream;
 

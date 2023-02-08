@@ -3,11 +3,11 @@ package uk.gov.homeoffice.digital.sas.jparest.config;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.API_ROOT_PATH;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.PATH_DELIMITER;
 
+import jakarta.annotation.PostConstruct;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
@@ -85,6 +85,4 @@ public class HandlerMappingConfig<T extends BaseEntity> {
 
     LOGGER.fine("All paths registered");
   }
-
-
 }

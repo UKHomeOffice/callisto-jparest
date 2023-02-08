@@ -11,9 +11,9 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map.Entry;
-import org.springdoc.core.SpringDocAnnotationsUtils;
 import org.springdoc.core.converters.models.Pageable;
-import org.springdoc.core.customizers.OpenApiCustomiser;
+import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springdoc.core.utils.SpringDocAnnotationsUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
@@ -25,7 +25,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
  * annotation.
  */
 @Component
-public class ResourceOpenApiCustomiser implements OpenApiCustomiser {
+public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
 
 
   public static final int DEFAULT_PAGE_SIZE = 10;

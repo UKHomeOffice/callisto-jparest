@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.jparest.service;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.deletableRelatedResourcesMessage;
 import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil.relatedResourcesMessage;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -11,7 +12,6 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;

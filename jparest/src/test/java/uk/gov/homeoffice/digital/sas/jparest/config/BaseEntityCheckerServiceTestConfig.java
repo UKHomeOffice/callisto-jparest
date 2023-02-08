@@ -1,11 +1,10 @@
 package uk.gov.homeoffice.digital.sas.jparest.config;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 @Configuration
 public class BaseEntityCheckerServiceTestConfig {

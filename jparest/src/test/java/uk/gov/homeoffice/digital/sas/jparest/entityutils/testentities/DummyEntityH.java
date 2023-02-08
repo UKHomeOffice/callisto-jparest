@@ -3,9 +3,9 @@ package uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities;
 import lombok.EqualsAndHashCode;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import java.util.Set;
 
 /**

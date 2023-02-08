@@ -6,7 +6,7 @@ import org.mockito.Mockito;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 
-import javax.validation.Validation;
+import jakarta.validation.Validation;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.StructuredError;
 
 import static org.assertj.core.api.Assertions.assertThat;

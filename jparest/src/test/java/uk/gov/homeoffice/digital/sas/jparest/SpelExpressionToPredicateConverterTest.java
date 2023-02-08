@@ -1,8 +1,9 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
-import org.hibernate.query.criteria.internal.expression.LiteralExpression;
-import org.hibernate.query.criteria.internal.predicate.ComparisonPredicate;
-import org.hibernate.query.criteria.internal.predicate.CompoundPredicate;
+import org.hibernate.query.sqm.ComparisonOperator;
+import org.hibernate.query.sqm.tree.expression.ValueBindJpaCriteriaParameter;
+import org.hibernate.query.sqm.tree.predicate.SqmComparisonPredicate;
+import org.hibernate.query.sqm.tree.predicate.SqmJunctionPredicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,21 +23,20 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.InvalidFilterException;
 import uk.gov.homeoffice.digital.sas.jparest.service.BaseEntityCheckerService;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.util.Map;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
-import static org.hibernate.query.criteria.internal.predicate.ComparisonPredicate.ComparisonOperator.*;
-import static javax.persistence.criteria.Predicate.BooleanOperator.*;
+import static org.hibernate.query.sqm.ComparisonOperator.*;
+import static jakarta.persistence.criteria.Predicate.BooleanOperator.*;
 
 @SpringBootTest
 @ContextConfiguration(locations = "/test-context.xml", classes = BaseEntityCheckerServiceTestConfig.class)
@@ -141,8 +141,8 @@ class SpelExpressionToPredicateConverterTest {
         Predicate predicate = SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getOperator()).isEqualTo(OR);
         assertThat(predicate.getExpressions()).hasSize(2);
-        assertThat(((ComparisonPredicate)predicate.getExpressions().get(0)).getComparisonOperator()).isEqualTo(EQUAL);
-        assertThat(((ComparisonPredicate)predicate.getExpressions().get(1)).getComparisonOperator()).isEqualTo(GREATER_THAN);
+        assertThat(((SqmComparisonPredicate)predicate.getExpressions().get(0)).getSqmOperator()).isEqualTo(EQUAL);
+        assertThat(((SqmComparisonPredicate)predicate.getExpressions().get(1)).getSqmOperator()).isEqualTo(GREATER_THAN);
     }
 
     @Test
@@ -151,64 +151,64 @@ class SpelExpressionToPredicateConverterTest {
         Predicate predicate = SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getOperator()).isEqualTo(AND);
         assertThat(predicate.getExpressions()).hasSize(2);
-        assertThat(((ComparisonPredicate)predicate.getExpressions().get(0)).getComparisonOperator()).isEqualTo(EQUAL);
-        assertThat(((ComparisonPredicate)predicate.getExpressions().get(1)).getComparisonOperator()).isEqualTo(GREATER_THAN);
+        assertThat(((SqmComparisonPredicate)predicate.getExpressions().get(0)).getSqmOperator()).isEqualTo(EQUAL);
+        assertThat(((SqmComparisonPredicate)predicate.getExpressions().get(1)).getSqmOperator()).isEqualTo(GREATER_THAN);
     }
 
     @Test
     void test_convert_with_equal_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("index==1L");
-        ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate.getComparisonOperator()).isEqualTo(EQUAL);
-        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        SqmComparisonPredicate predicate = (SqmComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
+        assertThat(predicate.getSqmOperator()).isEqualTo(EQUAL);
+        assertThat(((ValueBindJpaCriteriaParameter<Long>)predicate.getRightHandExpression()).getValue()).isEqualTo(1L);
     }
 
     @Test
     void test_convert_with_greaterThan_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("index>1L");
-        ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate.getComparisonOperator()).isEqualTo(GREATER_THAN);
-        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        SqmComparisonPredicate predicate = (SqmComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
+        assertThat(predicate.getSqmOperator()).isEqualTo(GREATER_THAN);
+        assertThat(((ValueBindJpaCriteriaParameter<Long>)predicate.getRightHandExpression()).getValue()).isEqualTo(1L);
     }
 
     @Test
     void test_convert_with_greaterThanOrEqual_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("index>=1L");
-        ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate.getComparisonOperator()).isEqualTo(GREATER_THAN_OR_EQUAL);
-        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        SqmComparisonPredicate predicate = (SqmComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
+        assertThat(predicate.getSqmOperator()).isEqualTo(GREATER_THAN_OR_EQUAL);
+        assertThat(((ValueBindJpaCriteriaParameter<Long>)predicate.getRightHandExpression()).getValue()).isEqualTo(1L);
     }
 
     @Test
     void test_convert_with_lessthan_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("index<1L");
-        ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate.getComparisonOperator()).isEqualTo(LESS_THAN);
-        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        SqmComparisonPredicate predicate = (SqmComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
+        assertThat(predicate.getSqmOperator()).isEqualTo(LESS_THAN);
+        assertThat(((ValueBindJpaCriteriaParameter<Long>)predicate.getRightHandExpression()).getValue()).isEqualTo(1L);
     }
 
     @Test
     void test_convert_with_lessThanOrEqual_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("index<=1L");
-        ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate.getComparisonOperator()).isEqualTo(LESS_THAN_OR_EQUAL);
-        assertThat(((LiteralExpression<?>)predicate.getRightHandOperand()).getLiteral()).isEqualTo(1L);
+        SqmComparisonPredicate predicate = (SqmComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
+        assertThat(predicate.getSqmOperator()).isEqualTo(LESS_THAN_OR_EQUAL);
+        assertThat(((ValueBindJpaCriteriaParameter<Long>)predicate.getRightHandExpression()).getValue()).isEqualTo(1L);
     }
 
     @Test
     void test_convert_with_field_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("id == dummyEntityBSet");
-        ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate.getComparisonOperator()).isEqualTo(EQUAL);
+        SqmComparisonPredicate predicate = (SqmComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
+        assertThat(predicate.getSqmOperator()).isEqualTo(EQUAL);
     }
 
     @Test
     void test_convert_with_field_or_operation_in_filter() {
         SpelExpression expression = expressionParser.parseRaw("id == dummyEntityBSet or index>2");
-        CompoundPredicate predicate = (CompoundPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
+        SqmJunctionPredicate predicate = (SqmJunctionPredicate)SpelExpressionToPredicateConverter.convert(expression, builder, root);
         assertThat(predicate.getOperator()).isEqualTo(OR);
-        assertThat(((ComparisonPredicate)predicate.getExpressions().get(0)).getComparisonOperator()).isEqualTo(EQUAL);
-        assertThat(((ComparisonPredicate)predicate.getExpressions().get(1)).getComparisonOperator()).isEqualTo(GREATER_THAN);
+        assertThat(((SqmComparisonPredicate)predicate.getExpressions().get(0)).getSqmOperator()).isEqualTo(EQUAL);
+        assertThat(((SqmComparisonPredicate)predicate.getExpressions().get(1)).getSqmOperator()).isEqualTo(GREATER_THAN);
     }
 
     private static Stream<Arguments> fieldFilterTestData() {
@@ -222,10 +222,10 @@ class SpelExpressionToPredicateConverterTest {
     }
     @ParameterizedTest
     @MethodSource("fieldFilterTestData")
-    void test_convert_with_field_used_in_filter(String expressionString, ComparisonPredicate.ComparisonOperator operator){
+    void test_convert_with_field_used_in_filter(String expressionString, ComparisonOperator operator){
         SpelExpression expression = parseExpression(expressionString);
-        ComparisonPredicate predicate = (ComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
-        assertThat(predicate.getComparisonOperator()).isEqualTo(operator);
+        SqmComparisonPredicate predicate = (SqmComparisonPredicate) SpelExpressionToPredicateConverter.convert(expression, builder, root);
+        assertThat(predicate.getSqmOperator()).isEqualTo(operator);
     }
 
     @Test

@@ -6,9 +6,9 @@ import lombok.Setter;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 
 /**
  * A dummy entity used for a table without a primary key, helpful for testing unique scenarios

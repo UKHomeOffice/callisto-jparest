@@ -36,7 +36,7 @@ public class JpaRestMvcConfig implements WebMvcConfigurer {
    * {@link com.example.misc.ApiResponse}.
    *
    * <p>The specialised ObjectMapper registers the
-   * {@link com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module}
+   * {@link com.fasterxml.jackson.datatype.hibernate5.jakarta.Hibernate5JakartaModule}
    * module. This prevents lazy loading of related entities.The ObjectMapper
    * is also configured to not serialise empty objects.
    *

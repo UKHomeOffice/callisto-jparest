@@ -3,7 +3,7 @@ package uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 
 //A dummy test entity extending another DummyEntity
