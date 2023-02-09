@@ -42,13 +42,11 @@ public class Profile extends BaseEntity {
     @NotNull
     @Column(name = "dob", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-//    private Date dob;
     private Instant dob;
 
     @NotNull
     @Column(name = "first_release", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-//    private Date firstRelease;
     private Instant firstRelease;
 
     @Type(JsonType.class)
