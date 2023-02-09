@@ -4,7 +4,9 @@ CREATE TABLE profiles (
     preferences varchar(80) NULL,
     bio varchar(800) NULL,
     phone_number varchar(20) NULL,
-    dob date NULL,
-    first_release date NULL,
+--     dob date NULL,
+    dob TIMESTAMP WITH TIME ZONE NULL,
+--     first_release date NULL,
+    first_release TIMESTAMP WITH TIME ZONE NULL,
     props json NULL
 );

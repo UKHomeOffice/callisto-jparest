@@ -2,6 +2,8 @@ package uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities;
 
 import jakarta.persistence.Entity;
 
+import java.time.Instant;
+import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
@@ -23,4 +25,11 @@ public class DummyEntityC extends BaseEntity {
     @Setter
     private Long profileId;
 
+    @Getter
+    @Setter
+    private Date dob;
+
+    @Getter
+    @Setter
+    private Instant instant;
 }

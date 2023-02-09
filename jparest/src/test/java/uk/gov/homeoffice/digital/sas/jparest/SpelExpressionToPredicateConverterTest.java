@@ -81,7 +81,9 @@ class SpelExpressionToPredicateConverterTest {
         "!(index != 2 && index != 3)",
         "in(index, 1, 2, 3, 4)",
         "between(index, 1, 4)",
-        "not (index == 1)"
+        "not (index == 1)",
+        "dob == \"1901-05-21\"",
+        "instant == \"1901-05-21T00:00:00.000+00:00\""
     })
     void convert_when_expressionIsValid_shouldNotThrow(String expressionString){
         SpelExpression spelExpression = (SpelExpression)expressionParser.parseExpression(expressionString);

@@ -1,6 +1,6 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.testapi.models;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import com.vladmihalcea.hibernate.type.json.JsonType;
+import org.springframework.format.annotation.DateTimeFormat;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
@@ -39,10 +40,16 @@ public class Profile extends BaseEntity {
     private String phoneNumber;
 
     @NotNull
-    private Date dob;
+    @Column(name = "dob", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+//    private Date dob;
+    private Instant dob;
 
     @NotNull
-    private Date firstRelease;
+    @Column(name = "first_release", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+//    private Date firstRelease;
+    private Instant firstRelease;
 
     @Type(JsonType.class)
     @Column(name = "props", columnDefinition = "json")
