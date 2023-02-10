@@ -8,12 +8,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.web.bind.WebDataBinder;
+import uk.gov.homeoffice.digital.sas.jparest.editor.CustomInstantEditor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class WebDataBinderFactory {
 
   @Getter
-  private static WebDataBinder webDataBinder = initWebDataBinder();
+  private static final WebDataBinder webDataBinder = initWebDataBinder();
 
   private static WebDataBinder initWebDataBinder() {
     var webDataBinder = new WebDataBinder(null);

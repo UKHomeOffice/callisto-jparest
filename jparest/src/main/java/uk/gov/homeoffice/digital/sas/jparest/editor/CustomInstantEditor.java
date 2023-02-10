@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.jparest.utils;
+package uk.gov.homeoffice.digital.sas.jparest.editor;
 
 import java.beans.PropertyEditorSupport;
 import java.time.Instant;
