@@ -28,8 +28,12 @@ class CustomInstantEditorTest {
   @ParameterizedTest
   @MethodSource("testData")
   void instantEditor(Object[] args) {
-    instantEditor.setAsText((String) args[0]);
-    assertThat(instantEditor.getValue()).isEqualTo(args[1]);
-    assertThat(instantEditor.getAsText()).isEqualTo(args[2]);
+    String inputText = (String) args[0];
+    Object expectedParsedProperty = args[1];
+    String expectedPropertyAsText = (String) args[2];
+
+    instantEditor.setAsText(inputText);
+    assertThat(instantEditor.getValue()).isEqualTo(expectedParsedProperty);
+    assertThat(instantEditor.getAsText()).isEqualTo(expectedPropertyAsText);
   }
 }
