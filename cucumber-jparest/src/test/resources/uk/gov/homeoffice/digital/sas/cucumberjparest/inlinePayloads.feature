@@ -28,7 +28,7 @@ Feature: Inline Payloads
         "preferences": "Valid preference",
         "bio": "Valid bio",
         "phoneNumber": "0133 3245 392",
-        "dob": "1975-02-28T00:00:00.000+00:00",
+        "dob": "1975-02-28",
         "firstRelease": "1989-05-21T00:00:00.000+00:00"
       }
       """

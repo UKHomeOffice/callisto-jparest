@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.testapi.models;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,9 +41,8 @@ public class Profile extends BaseEntity {
     private String phoneNumber;
 
     @NotNull
-    @Column(name = "dob", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private Instant dob;
+    @Column(name = "dob", columnDefinition = "DATE")
+    private LocalDate dob;
 
     @NotNull
     @Column(name = "first_release", columnDefinition = "TIMESTAMP WITH TIME ZONE")
