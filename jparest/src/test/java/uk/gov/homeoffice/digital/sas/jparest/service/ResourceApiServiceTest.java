@@ -56,7 +56,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
 
 
     @BeforeEach
-    private void setup() {
+    void setup() {
       resourceApiService = new ResourceApiService<T>(
               entityUtils, repository, entityValidator, new TransactionTemplate(transactionManager));
     }

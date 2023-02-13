@@ -1,11 +1,11 @@
 package uk.gov.homeoffice.digital.sas.jparest;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.logging.Logger;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.ast.Literal;
 import org.springframework.expression.spel.ast.MethodReference;
@@ -45,7 +45,7 @@ public class SpelExpressionToPredicateConverter {
    * @param from    The source SpelExpression
    * @param builder The CriteriaBuilder to use to create the predicate, must not be {@literal null}.
    * @param root    must not be {@literal null}.
-   * @return a {@link javax.persistence.criteria.Predicate}.
+   * @return a {@link jakarta.persistence.criteria.Predicate}.
    */
   public static Predicate convert(SpelExpression from, CriteriaBuilder builder, From<?, ?> root) {
     if (from == null) {

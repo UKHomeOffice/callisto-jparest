@@ -1,1 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=uk.gov.homeoffice.digital.sas.jparest.config.ApplicationConfig

@@ -2,11 +2,10 @@ package uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities;
 
 import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.core.SpringDocAnnotationsUtils;
+import org.springdoc.core.utils.SpringDocAnnotationsUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;

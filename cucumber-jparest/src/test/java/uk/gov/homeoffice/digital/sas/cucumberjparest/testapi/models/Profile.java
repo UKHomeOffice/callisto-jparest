@@ -1,28 +1,27 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.testapi.models;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.vladmihalcea.hibernate.type.json.JsonType;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
+import com.vladmihalcea.hibernate.type.json.JsonType;
+import org.springframework.format.annotation.DateTimeFormat;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
-@TypeDef(name = "json", typeClass = JsonType.class)
 @Resource(path = "profiles")
 @Entity(name = "profiles")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
@@ -42,12 +41,15 @@ public class Profile extends BaseEntity {
     private String phoneNumber;
 
     @NotNull
-    private Date dob;
+    @Column(name = "dob", columnDefinition = "DATE")
+    private LocalDate dob;
 
     @NotNull
-    private Date firstRelease;
+    @Column(name = "first_release", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Instant firstRelease;
 
-    @Type(type = "json")
+    @Type(JsonType.class)
     @Column(name = "props", columnDefinition = "json")
     private Map<String, Object> props = new HashMap<>();
 }

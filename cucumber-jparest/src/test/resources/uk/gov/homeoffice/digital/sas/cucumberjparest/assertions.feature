@@ -84,9 +84,9 @@ Feature: Assertions
       | field | type | expectation           |
       | items | List | hasSizeGreaterThan(1) |
     Then the 1st of the profiles in the last response from the test service should contain
-      | field       | type    | expectation |
-      | dob         | Instant | isNotNull() |
-      | preferences | String  | isNotNull() |
+      | field       | type      | expectation |
+      | dob         | LocalDate | isNotNull() |
+      | preferences | String    | isNotNull() |
 
   Scenario: Property expectations for each object
 
@@ -95,10 +95,10 @@ Feature: Assertions
       | field | type | expectation           |
       | items | List | hasSizeGreaterThan(1) |
     And each of the profiles in the last response from the test service should contain
-      | field        | type    | expectation                                        |
-      | dob          | Instant | isNotNull()                                        |
-      | preferences  | String  | isNotNull()                                        |
-      | firstRelease | Instant | isBeforeOrEqualTo("1979-01-01T00:00:00.000+00:00") |
+      | field        | type      | expectation                                        |
+      | dob          | LocalDate | isNotNull()                                        |
+      | preferences  | String    | isNotNull()                                        |
+      | firstRelease | Instant   | isBeforeOrEqualTo("1979-01-01T00:00:00.000+00:00") |
 
   Scenario: Asserting against nested properties in a response
 

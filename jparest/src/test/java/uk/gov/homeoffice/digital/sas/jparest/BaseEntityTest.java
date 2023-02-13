@@ -7,9 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityA;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
-import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 
-import javax.persistence.Id;
 import java.util.UUID;
 import java.util.stream.Stream;
 

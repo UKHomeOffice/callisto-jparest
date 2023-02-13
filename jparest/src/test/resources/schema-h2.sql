@@ -18,7 +18,9 @@ CREATE TABLE dummy_EntityC
     tenant_id    varchar(36) NOT NULL,
     description  varchar(800) NULL,
     index        integer NOT NULL,
-    profile_id   integer
+    profile_id   integer,
+    dob          date,
+    instant      timestamp with time zone
 );
 
 CREATE TABLE dummy_EntityD

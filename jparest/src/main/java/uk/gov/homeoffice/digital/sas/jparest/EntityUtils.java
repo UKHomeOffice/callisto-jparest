@@ -2,6 +2,9 @@ package uk.gov.homeoffice.digital.sas.jparest;
 
 import static java.util.Collections.emptyList;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -11,9 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
-import javax.persistence.EntityManager;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import lombok.Getter;
 import lombok.NonNull;
 import org.springframework.util.StringUtils;

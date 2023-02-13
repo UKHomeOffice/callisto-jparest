@@ -1,8 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.persistence.EntityManager;
-import org.springdoc.core.customizers.OpenApiCustomiser;
+import jakarta.persistence.EntityManager;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -29,7 +29,7 @@ public class ApplicationConfig {
 
 
   @Bean
-  public OpenApiCustomiser resourceOpenApiCustomiser(ResourceEndpoint endpoint,
+  public OpenApiCustomizer resourceOpenApiCustomiser(ResourceEndpoint endpoint,
                                                      PathItemCreator pathItemCreator) {
     return new ResourceOpenApiCustomiser(endpoint, pathItemCreator);
   }

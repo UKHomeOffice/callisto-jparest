@@ -1,10 +1,10 @@
 package uk.gov.homeoffice.digital.sas.jparest.service;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.metamodel.EntityType;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.metamodel.EntityType;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;

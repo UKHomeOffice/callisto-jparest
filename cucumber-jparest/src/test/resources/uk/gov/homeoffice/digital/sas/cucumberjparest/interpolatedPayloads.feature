@@ -36,7 +36,7 @@ Feature: Interpolated payloads
         "preferences": "Valid preference",
         "bio": "#{personaManager.getPersona('Trevor').id}",
         "phoneNumber": "0133 3245 392",
-        "dob": "1975-02-28T00:00:00.000+00:00",
+        "dob": "1975-02-28",
         "firstRelease": "#{T(java.time.Instant).now().toString()}"
       }
       """

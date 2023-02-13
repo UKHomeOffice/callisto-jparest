@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest.config;
 import io.cucumber.spring.ScenarioScope;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -33,7 +34,8 @@ public class JpaTestContext {
       BigDecimal.class.getSimpleName(), Double.class,
       Map.class.getSimpleName(), Map.class,
       List.class.getSimpleName(), List.class,
-      Instant.class.getSimpleName(), Instant.class);
+      Instant.class.getSimpleName(), Instant.class,
+      LocalDate.class.getSimpleName(), LocalDate.class);
 
   /**
    * The service registry needs to be accessed to by the Cucumber context and the test runner so

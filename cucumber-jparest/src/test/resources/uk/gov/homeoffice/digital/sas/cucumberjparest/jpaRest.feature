@@ -57,10 +57,10 @@ Feature: Make requests to endpoints created by JpaRest
       | field | type | expectation   |
       | items | List | <Expectation> |
     Examples:
-      | Preference | Date of birth                 | Filter                                 | Expectation           |
-      | Pref 1     | 1901-05-21T00:00:00.000+00:00 | dob == "1901-05-21T00:00:00.000+00:00" | hasSize(1)            |
-      | Pref 2     | 1902-05-21T00:00:00.000+00:00 | preferences == "Pref 2"                | hasSize(1)            |
-      | Pref 3     | 1903-05-21T00:00:00.000+00:00 | preferences != "Pref 3"                | hasSizeGreaterThan(3) |
+      | Preference | Date of birth | Filter                  | Expectation           |
+      | Pref 1     | 1901-05-21    | dob == "1901-05-21"     | hasSize(1)            |
+      | Pref 2     | 1902-05-21    | preferences == "Pref 2" | hasSize(1)            |
+      | Pref 3     | 1903-05-21    | preferences != "Pref 3" | hasSizeGreaterThan(3) |
 
   Scenario: Paged resources
 
@@ -108,7 +108,7 @@ Feature: Make requests to endpoints created by JpaRest
         "preferences": "Valid preference",
         "bio": "Valid bio",
         "phoneNumber": "0133 3245 392",
-        "dob": "1975-02-28T00:00:00.000+00:00",
+        "dob": "1975-02-28",
         "firstRelease": "1989-05-21T00:00:00.000+00:00"
       }
       """
@@ -120,19 +120,19 @@ Feature: Make requests to endpoints created by JpaRest
         "preferences": "Valid preference",
         "bio": "Updated bio",
         "phoneNumber": "0133 3245 392",
-        "dob": "1975-02-28T00:00:00.000+00:00",
-        "firstRelease": "1989-05-21T00:00:00.000+00:00"
+        "dob": "1975-02-28",
+        "firstRelease": "1989-05-21T10:00:00.000+02:00"
       }
       """
     And Trevor updates the 1st of the profiles in the last response with the updated profiles
     Then the 1st of the profiles in the last response should contain
-      | field        | type    | expectation                                       |
-      | tenantId     | String  | isEqualTo("b7e813a2-bb28-11ec-8422-0242ac120002") |
-      | preferences  | String  | isEqualTo("Valid preference")                     |
-      | bio          | String  | isEqualTo("Updated bio")                          |
-      | phoneNumber  | String  | isEqualTo("0133 3245 392")                        |
-      | dob          | Instant | isEqualTo("1975-02-28T00:00:00.000+00:00")        |
-      | firstRelease | Instant | isEqualTo("1989-05-21T00:00:00.000+00:00")        |
+      | field        | type      | expectation                                       |
+      | tenantId     | String    | isEqualTo("b7e813a2-bb28-11ec-8422-0242ac120002") |
+      | preferences  | String    | isEqualTo("Valid preference")                     |
+      | bio          | String    | isEqualTo("Updated bio")                          |
+      | phoneNumber  | String    | isEqualTo("0133 3245 392")                        |
+      | dob          | LocalDate | isEqualTo("1975-02-28")                           |
+      | firstRelease | Instant   | isEqualTo("1989-05-21T08:00:00.000+00:00")        |
 
 
   Scenario: Delete a resource
