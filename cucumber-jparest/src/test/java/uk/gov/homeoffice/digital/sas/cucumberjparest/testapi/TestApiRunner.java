@@ -3,20 +3,17 @@ package uk.gov.homeoffice.digital.sas.cucumberjparest.testapi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import uk.gov.homeoffice.digital.sas.jparest.config.ApplicationConfig;
 
 /**
  * Class with necessary annotations to be able to run
  * the SpringBoot Application
  */
 @SpringBootApplication
-@Import(ApplicationConfig.class)
 @Profile("testapi")
 public class TestApiRunner {
 
