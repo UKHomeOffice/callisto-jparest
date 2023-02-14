@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public class KafkaEventMessage<T> {
 
-  public static final String SCHEMA_FORMAT ="%s, %s";
+  public static final String SCHEMA_FORMAT = "%s, %s";
 
   private final String schema;
 
