@@ -23,7 +23,6 @@ class KafkaEntityListenerTest {
 
   ProfileKafkaEntityListener kafkaEntityListener;
 
-
   @BeforeEach
   void setup() {
     profile = new Profile(PROFILE_ID);

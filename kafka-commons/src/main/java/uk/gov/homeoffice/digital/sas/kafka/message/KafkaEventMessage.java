@@ -6,6 +6,8 @@ import lombok.Getter;
 @Getter
 public class KafkaEventMessage<T> {
 
+  public static final String SCHEMA_FORMAT ="%s, %s";
+
   private final String schema;
 
   @NotNull
@@ -16,7 +18,7 @@ public class KafkaEventMessage<T> {
 
   public KafkaEventMessage(String projectVersion, Class<T> resourceType, T resource,
       KafkaAction action) {
-    this.schema = resourceType.getName() + ", " + projectVersion;
+    this.schema = String.format(SCHEMA_FORMAT, resourceType.getName(), projectVersion);
     this.resource = resource;
     this.action = action;
   }

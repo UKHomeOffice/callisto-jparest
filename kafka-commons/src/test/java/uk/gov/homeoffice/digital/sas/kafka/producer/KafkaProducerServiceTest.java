@@ -16,6 +16,7 @@ import uk.gov.homeoffice.digital.sas.model.Profile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage.SCHEMA_FORMAT;
 
 @ExtendWith(MockitoExtension.class)
 class KafkaProducerServiceTest {
@@ -56,9 +57,8 @@ class KafkaProducerServiceTest {
     assertThat(topicArgument.getValue()).isEqualTo(TOPIC_NAME);
     assertThat(messageKeyArgument.getValue()).isEqualTo(profile.getId());
     assertThat(messageArgument.getValue().getSchema()).isEqualTo(
-        Profile.class.getCanonicalName() + ", " + SCHEMA_VERSION);
+        String.format(SCHEMA_FORMAT, Profile.class.getCanonicalName(), SCHEMA_VERSION));
     assertThat(messageArgument.getValue().getResource()).isEqualTo(profile);
     assertThat(messageArgument.getValue().getAction()).isEqualTo(action);
   }
-
 }
