@@ -21,7 +21,7 @@ import static uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage.SCHE
 @ExtendWith(MockitoExtension.class)
 class KafkaProducerServiceTest {
 
-  private final static String TOPIC_NAME = "callisto-profile";
+  private final static String TOPIC_NAME = "callisto-profile-topic";
   private final static String PROFILE_ID = "profileId";
   private final static String SCHEMA_VERSION = "1.0.0";
   private Profile profile;
