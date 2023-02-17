@@ -23,6 +23,7 @@ class KafkaProducerServiceTest {
 
   private final static String TOPIC_NAME = "callisto-profile-topic";
   private final static String PROFILE_ID = "profileId";
+  private final static String PROFILE_NAME = "profileX";
   private final static String SCHEMA_VERSION = "1.0.0";
   private Profile profile;
 
@@ -40,7 +41,7 @@ class KafkaProducerServiceTest {
 
   @BeforeEach
   void setup() {
-    profile = new Profile(PROFILE_ID);
+    profile = new Profile(PROFILE_ID, PROFILE_NAME);
     kafkaProducerService = new KafkaProducerService<>(kafkaTemplate, TOPIC_NAME, SCHEMA_VERSION);
   }
 

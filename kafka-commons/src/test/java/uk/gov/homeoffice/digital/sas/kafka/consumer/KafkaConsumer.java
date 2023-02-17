@@ -6,6 +6,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * Basic Kafka consumer used to validate messages written to topics in integration tests
+ */
 @Component
 @Getter
 public class KafkaConsumer {

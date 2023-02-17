@@ -15,8 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class KafkaEntityListenerTest {
 
+  private static final String PROFILE_ID = "profileId";
+  private static final String PROFILE_NAME = "profileX";
   private Profile profile;
-  private final static String PROFILE_ID ="profileId";
 
   @Mock
   private KafkaProducerService<Profile> kafkaProducerService;
@@ -25,7 +26,7 @@ class KafkaEntityListenerTest {
 
   @BeforeEach
   void setup() {
-    profile = new Profile(PROFILE_ID);
+    profile = new Profile(PROFILE_ID, PROFILE_NAME);
     kafkaEntityListener = new ProfileKafkaEntityListener(kafkaProducerService);
   }
 
