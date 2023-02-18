@@ -5,7 +5,7 @@ import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
 
 public abstract class KafkaEntityListener<T> {
 
-  protected KafkaProducerService<T> kafkaProducerService;
+  private final KafkaProducerService<T> kafkaProducerService;
 
   protected KafkaEntityListener(KafkaProducerService<T> kafkaProducerService) {
     this.kafkaProducerService = kafkaProducerService;

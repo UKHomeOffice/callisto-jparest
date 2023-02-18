@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import uk.gov.homeoffice.digital.sas.TestConfig;
+import uk.gov.homeoffice.digital.sas.config.TestConfig;
 import uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumer;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
@@ -56,49 +56,65 @@ class EmbeddedKafkaIntegrationTest {
 
   @Test
   void shouldSendCreateMessageToTopicFromProducer() throws Exception{
+    // GIVEN
     kafkaProducerService.sendMessage(profile.getId(), Profile.class, profile, KafkaAction.CREATE);
 
+    // WHEN
     boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+
+    // THEN
     assertThat(messageConsumed).isTrue();
     assertThat(kafkaConsumer.getPayload()).isEqualTo(EXPECTED_CREATE_MESSAGE_PAYLOAD);
   }
 
   @Test
   void shouldSendCreateMessageToTopicWhenProfileIsCreated() throws Exception {
+    // GIVEN
     profileRepository.save(profile);
-    boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
-    assertThat(messageConsumed).isTrue();
 
+    // WHEN
+    boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+
+    // THEN
+    assertThat(messageConsumed).isTrue();
     assertThat(kafkaConsumer.getPayload()).isEqualTo(EXPECTED_CREATE_MESSAGE_PAYLOAD);
   }
 
   @Test
   void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
+    // GIVEN
     profileRepository.save(profile);
     profile.setName(UPDATED_PROFILE_NAME);
     profile = profileRepository.save(profile);
 
+    // WHEN
     boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
-    assertThat(messageConsumed).isTrue();
 
+    // THEN
+    assertThat(messageConsumed).isTrue();
     String expectedUpdateMessagePayload = generatePayload(version, profile, KafkaAction.UPDATE);
     assertThat(kafkaConsumer.getPayload()).isEqualTo(expectedUpdateMessagePayload);
   }
 
   @Test
   void shouldSendDeleteMessageToTopicWhenProfileIsDeleted() throws Exception {
+    // GIVEN
     profileRepository.save(profile);
     profileRepository.delete(profile);
 
+    // WHEN
     boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
-    assertThat(messageConsumed).isTrue();
 
+    // THEN
+    assertThat(messageConsumed).isTrue();
     String expectedDeleteMessagePayload = generatePayload(version, profile, KafkaAction.DELETE);
     assertThat(kafkaConsumer.getPayload()).isEqualTo(expectedDeleteMessagePayload);
   }
 
   private String generatePayload(String version, Profile profile, KafkaAction action) {
-    return "{\"schema\":\"uk.gov.homeoffice.digital.sas.model.Profile, "
+    return "{\"schema\":\""
+        .concat(profile.getClass().getName())
+        .concat(", ")
         .concat(version)
         .concat("\",\"resource\":{\"id\":\"")
         .concat(profile.getId())
