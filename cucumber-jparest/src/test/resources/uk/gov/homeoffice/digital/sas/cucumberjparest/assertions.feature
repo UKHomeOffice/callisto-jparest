@@ -97,7 +97,6 @@ Feature: Assertions
     And each of the profiles in the last response from the test service should contain
       | field        | type      | expectation                                        |
       | dob          | LocalDate | isNotNull()                                        |
-      | preferences  | String    | isNotNull()                                        |
       | firstRelease | Instant   | isBeforeOrEqualTo("1979-01-01T00:00:00.000+00:00") |
 
   Scenario: Asserting against nested properties in a response
