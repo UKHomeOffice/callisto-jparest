@@ -50,7 +50,7 @@ class KafkaProducerServiceTest {
   void sendMessage_actionOnResource_messageIsSentWithCorrectArguments(KafkaAction action) {
 
     assertThatNoException().isThrownBy(() ->
-        kafkaProducerService.sendMessage(PROFILE_ID, Profile.class, profile, action));
+        kafkaProducerService.sendMessage(PROFILE_ID, profile, action));
 
     Mockito.verify(kafkaTemplate)
         .send(topicArgument.capture(), messageKeyArgument.capture(), messageArgument.capture());

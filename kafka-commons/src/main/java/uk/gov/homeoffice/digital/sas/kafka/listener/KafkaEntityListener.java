@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.kafka.listener;
 
+import jakarta.validation.constraints.NotNull;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
 
@@ -25,9 +26,7 @@ public abstract class KafkaEntityListener<T> {
     sendMessage(resource, KafkaAction.DELETE);
   }
 
-  @SuppressWarnings("unchecked")
-  private void sendMessage(T resource, KafkaAction action) {
-    kafkaProducerService.sendMessage(resolveMessageKey(resource),
-        (Class<T>) resource.getClass(), resource, action);
+  private void sendMessage(@NotNull T resource, KafkaAction action) {
+    kafkaProducerService.sendMessage(resolveMessageKey(resource), resource, action);
   }
 }

@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.kafka.producer;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -24,9 +25,10 @@ public class KafkaProducerService<T> {
     this.projectVersion = projectVersion;
   }
 
-  public void sendMessage(String messageKey, Class<T> resourceType,
-      T resource, KafkaAction action) {
-    var kafkaEventMessage = new KafkaEventMessage<>(projectVersion, resourceType, resource, action);
+  @SuppressWarnings("unchecked")
+  public void sendMessage(@NotNull String messageKey, @NotNull T resource, KafkaAction action) {
+    var kafkaEventMessage = new KafkaEventMessage<>(projectVersion,
+        (Class<T>)resource.getClass(), resource, action);
     kafkaTemplate.send(topicName, messageKey, kafkaEventMessage);
   }
 }

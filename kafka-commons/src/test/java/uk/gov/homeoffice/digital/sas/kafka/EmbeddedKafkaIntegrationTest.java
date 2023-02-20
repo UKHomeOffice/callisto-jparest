@@ -58,7 +58,7 @@ class EmbeddedKafkaIntegrationTest {
   @Test
   void shouldSendCreateMessageToTopicFromProducer() throws Exception{
     // GIVEN
-    kafkaProducerService.sendMessage(profile.getId(), Profile.class, profile, KafkaAction.CREATE);
+    kafkaProducerService.sendMessage(profile.getId(), profile, KafkaAction.CREATE);
 
     // WHEN
     boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);

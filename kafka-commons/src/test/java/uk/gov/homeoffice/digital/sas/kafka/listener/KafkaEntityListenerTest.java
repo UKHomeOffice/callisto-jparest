@@ -41,7 +41,6 @@ class KafkaEntityListenerTest {
 
     Mockito.verify(kafkaProducerService)
         .sendMessage(PROFILE_ID,
-            Profile.class,
             profile,
             KafkaAction.CREATE);
   }
@@ -52,7 +51,6 @@ class KafkaEntityListenerTest {
 
     Mockito.verify(kafkaProducerService)
         .sendMessage(PROFILE_ID,
-            Profile.class,
             profile,
             KafkaAction.UPDATE);
   }
@@ -63,7 +61,6 @@ class KafkaEntityListenerTest {
 
     Mockito.verify(kafkaProducerService)
         .sendMessage(PROFILE_ID,
-            Profile.class,
             profile,
             KafkaAction.DELETE);
   }
