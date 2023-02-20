@@ -46,7 +46,7 @@ class KafkaProducerServiceTest {
   }
 
   @ParameterizedTest
-  @EnumSource(value = KafkaAction.class, names = {"CREATE", "UPDATE", "DELETE"})
+  @EnumSource(value = KafkaAction.class)
   void sendMessage_actionOnResource_messageIsSentWithCorrectArguments(KafkaAction action) {
 
     assertThatNoException().isThrownBy(() ->
