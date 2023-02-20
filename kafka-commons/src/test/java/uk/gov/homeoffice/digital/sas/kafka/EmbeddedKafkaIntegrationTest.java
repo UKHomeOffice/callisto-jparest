@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +29,8 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
     }
 )
 class EmbeddedKafkaIntegrationTest {
+
+  private final static Logger LOGGER = Logger.getLogger(EmbeddedKafkaIntegrationTest.class.getName());
 
   private static final String PROFILE_ID = "profileId";
   private static final String PROFILE_NAME = "Original profile";
@@ -56,7 +58,7 @@ class EmbeddedKafkaIntegrationTest {
   }
 
   @Test
-  void shouldSendCreateMessageToTopicFromProducer() throws Exception{
+  void shouldSendCreateMessageToTopicFromProducer() throws Exception {
     // GIVEN
     kafkaProducerService.sendMessage(profile.getId(), profile, KafkaAction.CREATE);
 
@@ -72,6 +74,7 @@ class EmbeddedKafkaIntegrationTest {
   void shouldSendCreateMessageToTopicWhenProfileIsCreated() throws Exception {
     // GIVEN
     profileRepository.save(profile);
+    LOGGER.info("CREATE - Profile Created");
 
     // WHEN
     boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
@@ -85,8 +88,10 @@ class EmbeddedKafkaIntegrationTest {
   void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
     // GIVEN
     profileRepository.save(profile);
+    LOGGER.info("UPDATE - Profile Created");
     profile.setName(UPDATED_PROFILE_NAME);
     profile = profileRepository.save(profile);
+    LOGGER.info("UPDATE - Profile Updated");
 
     // WHEN
     boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
@@ -97,12 +102,13 @@ class EmbeddedKafkaIntegrationTest {
     assertThat(kafkaConsumer.getPayload()).isEqualTo(expectedUpdateMessagePayload);
   }
 
-  @Disabled("Currently failing on CI/CD")
   @Test
   void shouldSendDeleteMessageToTopicWhenProfileIsDeleted() throws Exception {
     // GIVEN
     profileRepository.save(profile);
+    LOGGER.info("DELETE - Profile Created");
     profileRepository.delete(profile);
+    LOGGER.info("DELETE - Profile Deleted");
 
     // WHEN
     boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
