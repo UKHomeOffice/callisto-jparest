@@ -97,7 +97,7 @@ class EmbeddedKafkaIntegrationTest {
     assertThat(kafkaConsumer.getPayload()).isEqualTo(expectedUpdateMessagePayload);
   }
 
-  @Disabled("Currently failing on CI/CD")
+  // @Disabled("Currently failing on CI/CD")
   @Test
   void shouldSendDeleteMessageToTopicWhenProfileIsDeleted() throws Exception {
     // GIVEN
