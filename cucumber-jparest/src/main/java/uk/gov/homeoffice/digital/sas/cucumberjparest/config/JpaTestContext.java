@@ -16,6 +16,7 @@ import uk.gov.homeoffice.digital.sas.cucumberjparest.api.ResourceHelper;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.ServiceRegistry;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.persona.PersonaManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.ScenarioState;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.Assertions;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.interpolation.Interpolation;
 
 /**
@@ -110,8 +111,24 @@ public class JpaTestContext {
     return new Interpolation(beanFactory);
   }
 
+  /**
+   * Singleton ResourceHelper.
+   *
+   * @return ResourceHelper
+   */
   @Bean
   public ResourceHelper resourceHelper() {
     return new ResourceHelper(jpaRestApiClient(), personaManager());
   }
+  
+  /**
+   * Singleton Assertions.
+   *
+   * @return Assertions
+   */
+  @Bean
+  public Assertions assertions(ConfigurableBeanFactory beanFactory) {
+    return new Assertions(beanFactory);
+  }
+
 }

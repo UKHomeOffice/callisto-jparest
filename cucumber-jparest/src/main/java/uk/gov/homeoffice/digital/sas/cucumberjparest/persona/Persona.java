@@ -1,7 +1,5 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.persona;
 
-import static uk.gov.homeoffice.digital.sas.cucumberjparest.utils.SecureRandomStringGenerator.randomAlphabetic;
-
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +16,7 @@ public class Persona {
 
   @Getter
   @Setter
-  private String id = randomAlphabetic(10);
+  private UUID id = UUID.randomUUID();
 
   @Getter
   @Setter

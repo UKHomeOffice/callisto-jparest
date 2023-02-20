@@ -1,10 +1,8 @@
 package uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.stepdefinitions;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.homeoffice.digital.sas.cucumberjparest.utils.ExpectationUtils.headersMeetsExpectations;
-import static uk.gov.homeoffice.digital.sas.cucumberjparest.utils.ExpectationUtils.objectContainsFields;
-import static uk.gov.homeoffice.digital.sas.cucumberjparest.utils.ExpectationUtils.objectDoesNotContainFields;
-import static uk.gov.homeoffice.digital.sas.cucumberjparest.utils.ExpectationUtils.objectMeetsExpectations;
+import static uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.Assertions.objectContainsFields;
+import static uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.Assertions.objectDoesNotContainFields;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Then;
@@ -14,6 +12,7 @@ import lombok.NonNull;
 import org.assertj.core.api.SoftAssertions;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.HttpResponseManager;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.api.Resource;
+import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.Assertions;
 import uk.gov.homeoffice.digital.sas.cucumberjparest.scenarios.expectations.FieldExpectation;
 
 /**
@@ -24,11 +23,13 @@ public class AssertionSteps {
 
   private final HttpResponseManager httpResponseManager;
   private final ObjectMapper objectMapper;
+  private final Assertions assertions;
 
   public AssertionSteps(@NonNull HttpResponseManager httpResponseManager,
-      @NonNull ObjectMapper objectMapper) {
+      @NonNull ObjectMapper objectMapper, @NonNull Assertions assertions) {
     this.httpResponseManager = httpResponseManager;
     this.objectMapper = objectMapper;
+    this.assertions = assertions;
   }
 
   /**
@@ -86,7 +87,7 @@ public class AssertionSteps {
   @Then("the last response body should contain")
   public void theLastResponseShouldContain(List<FieldExpectation> fieldExpectations) {
     var root = this.httpResponseManager.getLastResponse().getBody().jsonPath();
-    objectMeetsExpectations(root, fieldExpectations, this.objectMapper);
+    assertions.objectMeetsExpectations(root, fieldExpectations, this.objectMapper);
   }
 
   /**
@@ -97,7 +98,7 @@ public class AssertionSteps {
   @Then("the last response should contain the headers")
   public void theLastResponseShouldContainTheHeaders(Map<String, String> expectations) {
     var response = this.httpResponseManager.getLastResponse();
-    headersMeetsExpectations(response.getHeaders(), expectations);
+    assertions.headersMeetsExpectations(response.getHeaders(), expectations);
   }
 
   /**
@@ -132,7 +133,8 @@ public class AssertionSteps {
   @Then("the {resource} should contain")
   public void theObjectShouldContain(Resource objectUnderTest,
       List<FieldExpectation> fieldExpectations) {
-    objectMeetsExpectations(objectUnderTest.getJsonPath(), fieldExpectations, this.objectMapper);
+    assertions.objectMeetsExpectations(
+        objectUnderTest.getJsonPath(), fieldExpectations, this.objectMapper);
   }
 
   /**
@@ -177,8 +179,8 @@ public class AssertionSteps {
     var itemsSize = objectsUnderTest.getJsonPath().getInt("size()");
     for (int i = 0; i < itemsSize; i++) {
       objectsUnderTest.getJsonPath().setRootPath("items[" + i + "]");
-      objectMeetsExpectations(objectsUnderTest.getJsonPath(), fieldExpectations, this.objectMapper,
-          softly);
+      assertions.objectMeetsExpectations(objectsUnderTest.getJsonPath(), 
+          fieldExpectations, this.objectMapper, softly);
     }
 
     softly.assertAll();
