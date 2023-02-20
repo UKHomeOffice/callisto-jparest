@@ -84,6 +84,7 @@ class EmbeddedKafkaIntegrationTest {
   @Test
   void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
     // GIVEN
+    kafkaConsumer.setExpectedNumberOfMessages(2);
     profileRepository.save(profile);
     profile.setName(UPDATED_PROFILE_NAME);
     profile = profileRepository.save(profile);
@@ -101,6 +102,7 @@ class EmbeddedKafkaIntegrationTest {
   @Test
   void shouldSendDeleteMessageToTopicWhenProfileIsDeleted() throws Exception {
     // GIVEN
+    kafkaConsumer.setExpectedNumberOfMessages(2);
     profileRepository.save(profile);
     profileRepository.delete(profile);
 

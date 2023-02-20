@@ -12,12 +12,20 @@ import org.springframework.stereotype.Component;
 @Component
 @Getter
 public class KafkaConsumer {
-  private final CountDownLatch latch = new CountDownLatch(1);
+  private CountDownLatch latch = new CountDownLatch(1);
   private String payload;
 
   @KafkaListener(topics = "${spring.kafka.template.default-topic}")
   public void receive(ConsumerRecord<String, String> consumerRecord) {
-    payload = consumerRecord.value();
-    latch.countDown();
+    if (latch != null) {
+      latch.countDown();
+      if (latch.getCount() == 0) {
+        payload = consumerRecord.value();
+      }
+    }
+  }
+
+  public void setExpectedNumberOfMessages(int expectedNumberOfMessages) {
+    latch = new CountDownLatch(expectedNumberOfMessages);
   }
 }
