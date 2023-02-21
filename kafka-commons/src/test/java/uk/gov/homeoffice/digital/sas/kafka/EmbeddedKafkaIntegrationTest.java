@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,8 +29,6 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 )
 class EmbeddedKafkaIntegrationTest {
 
-  private final static Logger LOGGER = Logger.getLogger(EmbeddedKafkaIntegrationTest.class.getName());
-
   private static final String PROFILE_ID = "profileId";
   private static final String PROFILE_NAME = "Original profile";
   private static final String UPDATED_PROFILE_NAME = "Updated profile";
@@ -54,7 +51,7 @@ class EmbeddedKafkaIntegrationTest {
   @BeforeEach
   void setup() {
     profile = new Profile(PROFILE_ID, PROFILE_NAME);
-    EXPECTED_CREATE_MESSAGE_PAYLOAD = generatePayload(version, profile, KafkaAction.CREATE);
+    EXPECTED_CREATE_MESSAGE_PAYLOAD = generateExpectedPayload(version, profile, KafkaAction.CREATE);
   }
 
   @Test
@@ -74,7 +71,6 @@ class EmbeddedKafkaIntegrationTest {
   void shouldSendCreateMessageToTopicWhenProfileIsCreated() throws Exception {
     // GIVEN
     profileRepository.save(profile);
-    LOGGER.info("CREATE - Profile Created");
 
     // WHEN
     boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
@@ -86,40 +82,38 @@ class EmbeddedKafkaIntegrationTest {
 
   @Test
   void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
+    kafkaConsumer.setExpectedNumberOfMessages(2);
     // GIVEN
     profileRepository.save(profile);
-    LOGGER.info("UPDATE - Profile Created");
     profile.setName(UPDATED_PROFILE_NAME);
     profile = profileRepository.save(profile);
-    LOGGER.info("UPDATE - Profile Updated");
 
     // WHEN
     boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
 
     // THEN
     assertThat(messageConsumed).isTrue();
-    String expectedUpdateMessagePayload = generatePayload(version, profile, KafkaAction.UPDATE);
+    String expectedUpdateMessagePayload = generateExpectedPayload(version, profile, KafkaAction.UPDATE);
     assertThat(kafkaConsumer.getPayload()).isEqualTo(expectedUpdateMessagePayload);
   }
 
   @Test
   void shouldSendDeleteMessageToTopicWhenProfileIsDeleted() throws Exception {
+    kafkaConsumer.setExpectedNumberOfMessages(2);
     // GIVEN
     profileRepository.save(profile);
-    LOGGER.info("DELETE - Profile Created");
     profileRepository.delete(profile);
-    LOGGER.info("DELETE - Profile Deleted");
 
     // WHEN
     boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
 
     // THEN
     assertThat(messageConsumed).isTrue();
-    String expectedDeleteMessagePayload = generatePayload(version, profile, KafkaAction.DELETE);
+    String expectedDeleteMessagePayload = generateExpectedPayload(version, profile, KafkaAction.DELETE);
     assertThat(kafkaConsumer.getPayload()).isEqualTo(expectedDeleteMessagePayload);
   }
 
-  private String generatePayload(String version, Profile profile, KafkaAction action) {
+  private String generateExpectedPayload(String version, Profile profile, KafkaAction action) {
     return "{\"schema\":\""
         .concat(profile.getClass().getName())
         .concat(", ")
