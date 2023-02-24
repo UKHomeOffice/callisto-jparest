@@ -73,6 +73,23 @@ public class ResourceApiService<T extends BaseEntity> {
     });
   }
 
+  public List<T> updateResources(List<T> entities) {
+
+    return transactionTemplate.execute(status -> {
+      var entityList = new ArrayList<T>();
+      for (T entity : entities) {
+        this.entityValidator.validateAndThrowIfErrorsExist(entity);
+        T originalEntity = repository.findByTenantIdAndId(entity.getTenantId(), entity.getId())
+            .orElseThrow(() -> new ResourceNotFoundException(entity.getId()));
+        BeanUtils.copyProperties(entity, originalEntity, EntityUtils.ID_FIELD_NAME);
+        entityList.add(originalEntity);
+      }
+
+      repository.saveAllAndFlush(entityList);
+      return entityList;
+    });
+  }
+
   public void deleteRelatedResources(UUID tenantId,
                                      UUID id,
                                      String relation,

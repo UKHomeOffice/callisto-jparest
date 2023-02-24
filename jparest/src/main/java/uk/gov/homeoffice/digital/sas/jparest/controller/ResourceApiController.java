@@ -88,6 +88,23 @@ public class ResourceApiController<T extends BaseEntity> {
     return new ApiResponse<>(service.updateResource(entity));
   }
 
+  public ApiResponse<T> batchUpdate(@RequestParam UUID tenantId,
+                               @PathVariable UUID id,
+                               @RequestBody String body) throws JsonProcessingException {
+
+    List<T> entities = readEntitiesFromPayload(body);
+    validateAndSetTenantIdPayloadMatch(tenantId, entities.get(0));
+
+    var payloadEntityId = service.getEntityId(entities.get(0));
+    if (payloadEntityId != null && !id.equals(payloadEntityId)) {
+      throw new IllegalArgumentException(
+          "The supplied payload resource id value must match the url id path parameter value");
+    }
+    entities.get(0).setId(id);
+
+    return new ApiResponse<>(service.updateResources(entities));
+  }
+
   @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters
   public ApiResponse<?> getRelated(
       @RequestParam UUID tenantId,
@@ -123,6 +140,15 @@ public class ResourceApiController<T extends BaseEntity> {
     } catch (UnrecognizedPropertyException ex) {
       throw new UnknownResourcePropertyException(
         ex.getPropertyName(), ex.getReferringClass().getSimpleName());
+    }
+  }
+
+  private List<T> readEntitiesFromPayload(String body) throws JsonProcessingException {
+    try {
+      return objectMapper.readerForListOf(entityType).readValue(body);
+    } catch (UnrecognizedPropertyException ex) {
+      throw new UnknownResourcePropertyException(
+          ex.getPropertyName(), ex.getReferringClass().getSimpleName());
     }
   }
 

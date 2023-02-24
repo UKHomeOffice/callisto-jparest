@@ -351,6 +351,43 @@ class ResourceApiControllerTest {
         assertThat(checkResource).isEqualTo(dummy);
     }
 
+    @Test
+    @Transactional
+    void updateMultiple_resourceExists_persistsChanges() throws JsonProcessingException {
+
+        String payload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resource
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponse = controller.create(TENANT_ID, payload);
+        assertThat(apiResponse.getItems()).hasSize(1);
+        var createdResource = apiResponse.getItems().get(0);
+
+        //get the newly created resource
+        var getResponse = controller.get(TENANT_ID, createdResource.getId());
+        var getResource = getResponse.getItems().get(0);
+        assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C");
+
+        String updatedPayload = PayloadCreator.createPayload(Map.of(ID_FIELD_NAME, createdResource.getId(),
+            DESCRIPTION_FIELD_NAME, "Updated Dummy Entity C",
+            INDEX_FIELD_NAME, 2, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        var updateResponse = controller.batchUpdate(TENANT_ID, createdResource.getId(), "[" + updatedPayload + "]");
+
+
+        assertThat(updateResponse.getItems()).hasSize(1);
+        var dummy = updateResponse.getItems().get(0);
+        assertThat(dummy).isNotNull();
+        assertThat(dummy.getId()).isEqualTo(createdResource.getId());
+        assertThat(dummy.getIndex()).isEqualTo(2);
+        assertThat(dummy.getDescription()).isEqualTo("Updated Dummy Entity C");
+
+        var checkResponse = controller.get(TENANT_ID, createdResource.getId());
+        var checkResource = checkResponse.getItems().get(0);
+        assertThat(checkResource).isEqualTo(dummy);
+    }
+
     @ParameterizedTest(name="{0}")
     @MethodSource("invalidPayloads")
     @Transactional
