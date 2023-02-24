@@ -61,7 +61,7 @@ public class ControllerRegistererService {
         path + URL_ID_PATH_PARAM, RequestMethod.PUT);
     register(controller, "batchUpdate",
         getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.BODY),
-        path + "batch-update", RequestMethod.PUT);
+        path + "/batch-update", RequestMethod.PUT);
     pathConsumer.accept(path);
   }
 
