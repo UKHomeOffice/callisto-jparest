@@ -89,18 +89,12 @@ public class ResourceApiController<T extends BaseEntity> {
   }
 
   public ApiResponse<T> batchUpdate(@RequestParam UUID tenantId,
-                               @PathVariable UUID id,
                                @RequestBody String body) throws JsonProcessingException {
 
     List<T> entities = readEntitiesFromPayload(body);
-    validateAndSetTenantIdPayloadMatch(tenantId, entities.get(0));
-
-    var payloadEntityId = service.getEntityId(entities.get(0));
-    if (payloadEntityId != null && !id.equals(payloadEntityId)) {
-      throw new IllegalArgumentException(
-          "The supplied payload resource id value must match the url id path parameter value");
+    for (T entity : entities) {
+      validateAndSetTenantIdPayloadMatch(tenantId, entity);
     }
-    entities.get(0).setId(id);
 
     return new ApiResponse<>(service.updateResources(entities));
   }
