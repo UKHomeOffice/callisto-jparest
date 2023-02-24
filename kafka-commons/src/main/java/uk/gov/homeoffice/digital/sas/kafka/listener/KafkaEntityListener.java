@@ -1,10 +1,14 @@
 package uk.gov.homeoffice.digital.sas.kafka.listener;
 
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostRemove;
+import jakarta.persistence.PostUpdate;
 import jakarta.validation.constraints.NotNull;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
+import uk.gov.homeoffice.digital.sas.kafka.message.Messageable;
 import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
 
-public abstract class KafkaEntityListener<T> {
+public class KafkaEntityListener<T extends Messageable> {
 
   private final KafkaProducerService<T> kafkaProducerService;
 
@@ -12,21 +16,22 @@ public abstract class KafkaEntityListener<T> {
     this.kafkaProducerService = kafkaProducerService;
   }
 
-  public abstract String resolveMessageKey(T resource);
-
+  @PostPersist
   protected void sendKafkaMessageOnCreate(T resource) {
     sendMessage(resource, KafkaAction.CREATE);
   }
 
+  @PostUpdate
   protected void sendKafkaMessageOnUpdate(T resource) {
     sendMessage(resource, KafkaAction.UPDATE);
   }
 
+  @PostRemove
   protected void sendKafkaMessageOnDelete(T resource) {
     sendMessage(resource, KafkaAction.DELETE);
   }
 
   private void sendMessage(@NotNull T resource, KafkaAction action) {
-    kafkaProducerService.sendMessage(resolveMessageKey(resource), resource, action);
+    kafkaProducerService.sendMessage(resource.resolveMessageKey(), resource, action);
   }
 }

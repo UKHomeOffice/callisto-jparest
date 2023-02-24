@@ -22,17 +22,17 @@ class KafkaEntityListenerTest {
   @Mock
   private KafkaProducerService<Profile> kafkaProducerService;
 
-  ProfileKafkaEntityListener kafkaEntityListener;
+  KafkaEntityListener<Profile> kafkaEntityListener;
 
   @BeforeEach
   void setup() {
     profile = new Profile(PROFILE_ID, PROFILE_NAME);
-    kafkaEntityListener = new ProfileKafkaEntityListener(kafkaProducerService);
+    kafkaEntityListener = new KafkaEntityListener<>(kafkaProducerService);
   }
 
   @Test
   void resolveMessageKey_profileEntity_profileIdReturnedAsMessageKey() {
-    assertThat(kafkaEntityListener.resolveMessageKey(profile)).isEqualTo(PROFILE_ID);
+    assertThat(profile.resolveMessageKey()).isEqualTo(PROFILE_ID);
   }
 
   @Test

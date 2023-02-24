@@ -7,16 +7,23 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import uk.gov.homeoffice.digital.sas.kafka.listener.ProfileKafkaEntityListener;
+import uk.gov.homeoffice.digital.sas.kafka.listener.KafkaEntityListener;
+import uk.gov.homeoffice.digital.sas.kafka.message.Messageable;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity(name = "profile")
-@EntityListeners(ProfileKafkaEntityListener.class)
-public class Profile {
+@EntityListeners(KafkaEntityListener.class)
+public class Profile implements Messageable {
+
   @Id
   private String id;
   private String name;
+
+  @Override
+  public String resolveMessageKey() {
+    return getId();
+  }
 }
