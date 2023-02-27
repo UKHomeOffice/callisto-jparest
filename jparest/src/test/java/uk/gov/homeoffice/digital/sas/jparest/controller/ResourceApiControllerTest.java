@@ -619,7 +619,7 @@ class ResourceApiControllerTest {
 
         String updatedResourceTwoPayload = PayloadCreator.createPayload(Map.of(ID_FIELD_NAME, createdResource2.getId(),
             DESCRIPTION_FIELD_NAME, "Updated Dummy Entity C Two",
-            INDEX_FIELD_NAME, 2, TENANT_ID_FIELD_NAME, TENANT_ID));
+            INDEX_FIELD_NAME, 3, TENANT_ID_FIELD_NAME, TENANT_ID));
 
         var updatedPayload = new String[] {updatedResourceOnePayload, updatedResourceTwoPayload};
 
@@ -639,7 +639,7 @@ class ResourceApiControllerTest {
         var dummyTwo = updateResponse.getItems().get(1);
         assertThat(dummyTwo).isNotNull();
         assertThat(dummyTwo.getId()).isEqualTo(createdResource2.getId());
-        assertThat(dummyTwo.getIndex()).isEqualTo(2);
+        assertThat(dummyTwo.getIndex()).isEqualTo(3);
         assertThat(dummyTwo.getDescription()).isEqualTo("Updated Dummy Entity C Two");
 
         var checkResponse = controller.get(TENANT_ID, createdResource.getId());
@@ -836,7 +836,7 @@ class ResourceApiControllerTest {
         //create update payload
         String updatedResourceOnePayload = PayloadCreator.createPayload(Map.of(ID_FIELD_NAME, createdResource.getId(),
             DESCRIPTION_FIELD_NAME, "Updated Dummy Entity C One",
-            INDEX_FIELD_NAME, 2));
+            INDEX_FIELD_NAME, 3));
 
         String updatedResourceTwoPayload = PayloadCreator.createPayload(Map.of(ID_FIELD_NAME, createdResource2.getId(),
             DESCRIPTION_FIELD_NAME, "Updated Dummy Entity C Two",
@@ -854,7 +854,7 @@ class ResourceApiControllerTest {
         var dummyOne = updateResponse.getItems().get(0);
         assertThat(dummyOne).isNotNull();
         assertThat(dummyOne.getId()).isEqualTo(createdResource.getId());
-        assertThat(dummyOne.getIndex()).isEqualTo(2);
+        assertThat(dummyOne.getIndex()).isEqualTo(3);
         assertThat(dummyOne.getDescription()).isEqualTo("Updated Dummy Entity C One");
 
         var dummyTwo = updateResponse.getItems().get(1);
