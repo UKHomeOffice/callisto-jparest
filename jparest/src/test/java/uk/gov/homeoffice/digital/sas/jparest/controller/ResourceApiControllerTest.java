@@ -623,7 +623,9 @@ class ResourceApiControllerTest {
 
         var updatedPayload = new String[] {updatedResourceOnePayload, updatedResourceTwoPayload};
 
-        var updateResponse = controller.batchUpdate(TENANT_ID, Arrays.toString(updatedPayload));
+        var payload = Arrays.toString(updatedPayload);
+
+        var updateResponse = controller.batchUpdate(TENANT_ID, payload);
 
 
         assertThat(updateResponse.getItems()).hasSize(2);
@@ -679,12 +681,12 @@ class ResourceApiControllerTest {
     @Transactional
     void updateMultiple_oneResourceDoesntExist_resourceNotFoundExceptionThrown() throws JsonProcessingException {
 
-        String payload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
+        String createPayload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
             INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
 
         //create new resource
         var controller = getResourceApiController(DummyEntityC.class);
-        var apiResponse = controller.create(TENANT_ID, payload);
+        var apiResponse = controller.create(TENANT_ID, createPayload);
         assertThat(apiResponse.getItems()).hasSize(1);
         var createdResource = apiResponse.getItems().get(0);
 
@@ -703,7 +705,9 @@ class ResourceApiControllerTest {
 
         var updatedPayload = new String[] {updatedResourceOnePayload, updatedResourceTwoPayload};
 
-        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.batchUpdate(TENANT_ID, Arrays.toString(updatedPayload)));
+        var payload = Arrays.toString(updatedPayload);
+
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.batchUpdate(TENANT_ID, payload));
     }
 
     @Test
@@ -716,8 +720,10 @@ class ResourceApiControllerTest {
 
         var updatePayload = new String[] {resourcePayload};
 
+        var payload = Arrays.toString(updatePayload);
+
         assertThatExceptionOfType(ResourceNotFoundException.class)
-            .isThrownBy(() -> controller.batchUpdate(TENANT_ID, Arrays.toString(updatePayload)));
+            .isThrownBy(() -> controller.batchUpdate(TENANT_ID, payload));
 
         assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
     }
@@ -762,7 +768,9 @@ class ResourceApiControllerTest {
 
         var updatedPayload = new String[] {updatedResourceOnePayload, updatedResourceTwoPayload};
 
-        assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.batchUpdate(INVALID_TENANT_ID, Arrays.toString(updatedPayload)));
+        var payload = Arrays.toString(updatedPayload);
+
+        assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.batchUpdate(INVALID_TENANT_ID, payload));
     }
 
     @Test
@@ -804,7 +812,9 @@ class ResourceApiControllerTest {
 
         var updatedPayload = new String[] {updatedResourceOnePayload, updatedResourceTwoPayload};
 
-        assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.batchUpdate(TENANT_ID, Arrays.toString(updatedPayload)));
+        var payload = Arrays.toString(updatedPayload);
+
+        assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.batchUpdate(TENANT_ID, payload));
     }
 
     @Test
@@ -846,7 +856,9 @@ class ResourceApiControllerTest {
 
         var updatedPayload = new String[] {updatedResourceOnePayload, updatedResourceTwoPayload};
 
-        var updateResponse = controller.batchUpdate(TENANT_ID, Arrays.toString(updatedPayload));
+        var payload = Arrays.toString(updatedPayload);
+
+        var updateResponse = controller.batchUpdate(TENANT_ID, payload);
 
 
         assertThat(updateResponse.getItems()).hasSize(2);
