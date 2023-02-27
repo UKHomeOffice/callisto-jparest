@@ -818,7 +818,7 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void batchUpdate_noTenantIdInPayload_persistsChanges() throws JsonProcessingException {
+    void batchUpdate_tenantIdInRequestButNotPayload_persistsChanges() throws JsonProcessingException {
 
         String payloadOne = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C One",
             INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
