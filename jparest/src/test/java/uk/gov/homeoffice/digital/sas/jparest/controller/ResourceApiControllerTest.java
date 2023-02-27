@@ -679,7 +679,7 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void updateMultiple_oneResourceDoesntExist_resourceNotFoundExceptionThrown() throws JsonProcessingException {
+    void batchUpdate_oneResourceDoesntExist_resourceNotFoundExceptionThrown() throws JsonProcessingException {
 
         String createPayload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
             INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
@@ -728,7 +728,6 @@ class ResourceApiControllerTest {
         assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
     }
 
-    // region batch update
     @Test
     @Transactional
     void batchUpdate_requestTenantIdDoesNotMatchOneResourceTenantId_tenantIdMismatchExceptionThrown() throws JsonProcessingException {
