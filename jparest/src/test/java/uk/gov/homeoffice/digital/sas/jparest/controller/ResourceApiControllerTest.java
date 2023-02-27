@@ -654,19 +654,8 @@ class ResourceApiControllerTest {
     @ParameterizedTest(name="{0}")
     @MethodSource("invalidPayloads")
     @Transactional
-    void batchUpdate_resourceExistsInvalidPayload_jsonExceptionThrown(String payload) {
+    void batchUpdate_invalidPayload_jsonExceptionThrown(String payload) {
         var controller = getResourceApiController(DummyEntityA.class);
-        assertThatExceptionOfType(JsonProcessingException.class).isThrownBy(() -> controller.batchUpdate(TENANT_ID, payload));
-    }
-
-    @ParameterizedTest(name="{0}")
-    @MethodSource("invalidPayloads")
-    @Transactional
-    void batchUpdate_resourceDoesntExistInvalidPayload_jsonExceptionThrown(String payload) {
-
-        var controller = getResourceApiController(DummyEntityA.class);
-
-        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.get(TENANT_ID, NON_EXISTENT_ID));
         assertThatExceptionOfType(JsonProcessingException.class).isThrownBy(() -> controller.batchUpdate(TENANT_ID, payload));
     }
 
