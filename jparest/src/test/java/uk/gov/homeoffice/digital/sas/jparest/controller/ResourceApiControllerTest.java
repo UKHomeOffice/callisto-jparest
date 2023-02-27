@@ -628,25 +628,25 @@ class ResourceApiControllerTest {
 
         assertThat(updateResponse.getItems()).hasSize(2);
 
-        var dummy = updateResponse.getItems().get(0);
-        assertThat(dummy).isNotNull();
-        assertThat(dummy.getId()).isEqualTo(createdResource.getId());
-        assertThat(dummy.getIndex()).isEqualTo(2);
-        assertThat(dummy.getDescription()).isEqualTo("Updated Dummy Entity C One");
+        var dummyOne = updateResponse.getItems().get(0);
+        assertThat(dummyOne).isNotNull();
+        assertThat(dummyOne.getId()).isEqualTo(createdResource.getId());
+        assertThat(dummyOne.getIndex()).isEqualTo(2);
+        assertThat(dummyOne.getDescription()).isEqualTo("Updated Dummy Entity C One");
 
-        var dummy2 = updateResponse.getItems().get(1);
-        assertThat(dummy2).isNotNull();
-        assertThat(dummy2.getId()).isEqualTo(createdResource2.getId());
-        assertThat(dummy2.getIndex()).isEqualTo(2);
-        assertThat(dummy2.getDescription()).isEqualTo("Updated Dummy Entity C Two");
+        var dummyTwo = updateResponse.getItems().get(1);
+        assertThat(dummyTwo).isNotNull();
+        assertThat(dummyTwo.getId()).isEqualTo(createdResource2.getId());
+        assertThat(dummyTwo.getIndex()).isEqualTo(2);
+        assertThat(dummyTwo.getDescription()).isEqualTo("Updated Dummy Entity C Two");
 
         var checkResponse = controller.get(TENANT_ID, createdResource.getId());
         var checkResource = checkResponse.getItems().get(0);
-        assertThat(checkResource).isEqualTo(dummy);
+        assertThat(checkResource).isEqualTo(dummyOne);
 
         var checkResponse2 = controller.get(TENANT_ID, createdResource2.getId());
         var checkResource2 = checkResponse2.getItems().get(0);
-        assertThat(checkResource2).isEqualTo(dummy2);
+        assertThat(checkResource2).isEqualTo(dummyTwo);
     }
 
     @ParameterizedTest(name="{0}")
@@ -677,7 +677,7 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void updateMultiple_oneResourceMissing_resourceNotFoundExceptionThrown() throws JsonProcessingException {
+    void updateMultiple_oneResourceDoesntExist_resourceNotFoundExceptionThrown() throws JsonProcessingException {
 
         String payload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
             INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
@@ -851,25 +851,25 @@ class ResourceApiControllerTest {
 
         assertThat(updateResponse.getItems()).hasSize(2);
 
-        var dummy = updateResponse.getItems().get(0);
-        assertThat(dummy).isNotNull();
-        assertThat(dummy.getId()).isEqualTo(createdResource.getId());
-        assertThat(dummy.getIndex()).isEqualTo(2);
-        assertThat(dummy.getDescription()).isEqualTo("Updated Dummy Entity C One");
+        var dummyOne = updateResponse.getItems().get(0);
+        assertThat(dummyOne).isNotNull();
+        assertThat(dummyOne.getId()).isEqualTo(createdResource.getId());
+        assertThat(dummyOne.getIndex()).isEqualTo(2);
+        assertThat(dummyOne.getDescription()).isEqualTo("Updated Dummy Entity C One");
 
-        var dummy2 = updateResponse.getItems().get(1);
-        assertThat(dummy2).isNotNull();
-        assertThat(dummy2.getId()).isEqualTo(createdResource2.getId());
-        assertThat(dummy2.getIndex()).isEqualTo(2);
-        assertThat(dummy2.getDescription()).isEqualTo("Updated Dummy Entity C Two");
+        var dummyTwo = updateResponse.getItems().get(1);
+        assertThat(dummyTwo).isNotNull();
+        assertThat(dummyTwo.getId()).isEqualTo(createdResource2.getId());
+        assertThat(dummyTwo.getIndex()).isEqualTo(2);
+        assertThat(dummyTwo.getDescription()).isEqualTo("Updated Dummy Entity C Two");
 
         var checkResponse = controller.get(TENANT_ID, createdResource.getId());
         var checkResource = checkResponse.getItems().get(0);
-        assertThat(checkResource).isEqualTo(dummy);
+        assertThat(checkResource).isEqualTo(dummyOne);
 
         var checkResponse2 = controller.get(TENANT_ID, createdResource2.getId());
         var checkResource2 = checkResponse2.getItems().get(0);
-        assertThat(checkResource2).isEqualTo(dummy2);
+        assertThat(checkResource2).isEqualTo(dummyTwo);
     }
 
     // endregion

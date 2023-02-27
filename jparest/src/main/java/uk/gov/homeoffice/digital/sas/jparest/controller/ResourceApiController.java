@@ -91,7 +91,7 @@ public class ResourceApiController<T extends BaseEntity> {
   public ApiResponse<T> batchUpdate(@RequestParam UUID tenantId,
                                @RequestBody String body) throws JsonProcessingException {
 
-    List<T> entities = readEntitiesFromPayload(body);
+    var entities = readEntitiesFromPayload(body);
     for (T entity : entities) {
       validateAndSetTenantIdPayloadMatch(tenantId, entity);
     }
