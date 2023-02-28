@@ -90,7 +90,7 @@ class EmbeddedKafkaIntegrationTest {
     profile = profileRepository.saveAndFlush(profile);
 
     // WHEN
-    boolean messageConsumed = kafkaConsumer.getLatch().await(20, TimeUnit.SECONDS);
+    boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
 
     // THEN
     assertThat(messageConsumed).isTrue();
