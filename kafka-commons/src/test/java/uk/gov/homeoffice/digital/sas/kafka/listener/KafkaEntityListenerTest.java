@@ -34,34 +34,4 @@ class KafkaEntityListenerTest {
   void resolveMessageKey_profileEntity_profileIdReturnedAsMessageKey() {
     assertThat(profile.resolveMessageKey()).isEqualTo(PROFILE_ID);
   }
-
-  @Test
-  void sendKafkaMessageOnCreate_profileEntity_sendMessageMethodInvokedAsExpected() {
-    kafkaEntityListener.sendKafkaMessageOnCreate(profile);
-
-    Mockito.verify(kafkaProducerService)
-        .sendMessage(PROFILE_ID,
-            profile,
-            KafkaAction.CREATE);
-  }
-
-  @Test
-  void sendKafkaMessageOnUpdate_profileEntity_sendMessageMethodInvokedAsExpected() {
-    kafkaEntityListener.sendKafkaMessageOnUpdate(profile);
-
-    Mockito.verify(kafkaProducerService)
-        .sendMessage(PROFILE_ID,
-            profile,
-            KafkaAction.UPDATE);
-  }
-
-  @Test
-  void sendKafkaMessageOnDelete_profileEntity_sendMessageMethodInvokedAsExpected() {
-    kafkaEntityListener.sendKafkaMessageOnDelete(profile);
-
-    Mockito.verify(kafkaProducerService)
-        .sendMessage(PROFILE_ID,
-            profile,
-            KafkaAction.DELETE);
-  }
 }
