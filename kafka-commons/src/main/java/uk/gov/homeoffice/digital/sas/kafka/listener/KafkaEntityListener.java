@@ -17,17 +17,17 @@ public class KafkaEntityListener<T extends Messageable> {
   }
 
   @PostPersist
-  protected void sendKafkaMessageOnCreate(T resource) {
+  private void sendKafkaMessageOnCreate(T resource) {
     sendMessage(resource, KafkaAction.CREATE);
   }
 
   @PostUpdate
-  protected void sendKafkaMessageOnUpdate(T resource) {
+  private void sendKafkaMessageOnUpdate(T resource) {
     sendMessage(resource, KafkaAction.UPDATE);
   }
 
   @PostRemove
-  protected void sendKafkaMessageOnDelete(T resource) {
+  private void sendKafkaMessageOnDelete(T resource) {
     sendMessage(resource, KafkaAction.DELETE);
   }
 
