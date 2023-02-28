@@ -35,7 +35,6 @@ public class KafkaProducerService<T> {
     this.projectVersion = projectVersion;
   }
 
-  @SuppressWarnings("unchecked")
   public void sendMessage(@NotNull String messageKey, @NotNull T resource, KafkaAction action) {
     var kafkaEventMessage =
         new KafkaEventMessage<>(projectVersion, resource, action);
