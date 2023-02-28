@@ -2,7 +2,9 @@ package uk.gov.homeoffice.digital.sas.kafka.constants;
 
 public final class Constants {
 
-  private Constants() {}
+  private Constants() {
+    throw new AssertionError();
+  }
 
   //Log Messages
 
