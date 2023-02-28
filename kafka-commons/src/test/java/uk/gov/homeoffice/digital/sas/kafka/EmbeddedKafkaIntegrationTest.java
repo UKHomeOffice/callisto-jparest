@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import uk.gov.homeoffice.digital.sas.config.TestConfig;
 import uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumer;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
@@ -84,12 +85,12 @@ class EmbeddedKafkaIntegrationTest {
   void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
     kafkaConsumer.setExpectedNumberOfMessages(2);
     // GIVEN
-    profileRepository.save(profile);
+    profileRepository.saveAndFlush(profile);
     profile.setName(UPDATED_PROFILE_NAME);
-    profile = profileRepository.save(profile);
+    profile = profileRepository.saveAndFlush(profile);
 
     // WHEN
-    boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    boolean messageConsumed = kafkaConsumer.getLatch().await(20, TimeUnit.SECONDS);
 
     // THEN
     assertThat(messageConsumed).isTrue();

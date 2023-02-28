@@ -65,6 +65,8 @@ class KafkaProducerServiceTest {
   @ParameterizedTest
   @EnumSource(value = KafkaAction.class)
   void sendMessage_actionOnResource_messageIsSentWithCorrectArguments(KafkaAction action) {
+    when(kafkaTemplate.send(any(), any(), any()))
+        .thenReturn(responseFuture);
 
     assertThatNoException().isThrownBy(() ->
         kafkaProducerService.sendMessage(PROFILE_ID, profile, action));
