@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import uk.gov.homeoffice.digital.sas.config.TestConfig;
 import uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumer;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
