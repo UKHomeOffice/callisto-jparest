@@ -8,11 +8,11 @@ import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.message.Messageable;
 import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
 
-public class KafkaEntityListener<T extends Messageable> {
+public final class KafkaEntityListener<T extends Messageable> {
 
   private final KafkaProducerService<T> kafkaProducerService;
 
-  protected KafkaEntityListener(KafkaProducerService<T> kafkaProducerService) {
+  public KafkaEntityListener(KafkaProducerService<T> kafkaProducerService) {
     this.kafkaProducerService = kafkaProducerService;
   }
 
