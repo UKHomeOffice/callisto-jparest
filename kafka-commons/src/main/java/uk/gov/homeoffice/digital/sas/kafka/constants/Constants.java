@@ -1,10 +1,9 @@
 package uk.gov.homeoffice.digital.sas.kafka.constants;
 
-public class Constants {
+public final class Constants {
 
-  private Constants() {
+  private Constants() {}
 
-  }
   //Log Messages
 
   public static final String KAFKA_TRANSACTION_INITIALIZED =

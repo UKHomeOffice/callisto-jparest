@@ -5,7 +5,6 @@ import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
 import jakarta.validation.constraints.NotNull;
 import java.util.function.BiConsumer;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.message.Messageable;
 import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
@@ -15,11 +14,12 @@ public final class KafkaEntityListener<T extends Messageable> {
 
   private final KafkaProducerService<T> kafkaProducerService;
 
-  @Autowired
   private KafkaDbTransactionSynchronizer kafkaDbTransactionSynchronizer;
 
-  public KafkaEntityListener(KafkaProducerService<T> kafkaProducerService) {
+  public KafkaEntityListener(KafkaProducerService<T> kafkaProducerService,
+                             KafkaDbTransactionSynchronizer kafkaDbTransactionSynchronizer) {
     this.kafkaProducerService = kafkaProducerService;
+    this.kafkaDbTransactionSynchronizer = kafkaDbTransactionSynchronizer;
   }
 
 

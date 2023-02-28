@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.DATABASE_TRANSACTION_SUCCESSFUL;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_TRANSACTION_INITIALIZED;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.TRANSACTION_SUCCESSFUL;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Random;
 import org.junit.jupiter.api.AfterEach;
@@ -20,6 +19,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import uk.gov.homeoffice.digital.sas.config.TestConfig;
+import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.transactionsync.KafkaDbTransactionSynchronizer;
 import uk.gov.homeoffice.digital.sas.model.Profile;
 import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
@@ -33,7 +33,7 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
         "port=3333"
     }
 )
-class KafkaDbTransactionSyncronizerIntergrationTest {
+class KafkaDbTransactionSyncrhonizerIntegrationTest {
   private Long profileId;
   private static final String PROFILE_NAME = "Original profile";
   private Profile profile;
@@ -49,8 +49,7 @@ class KafkaDbTransactionSyncronizerIntergrationTest {
   }
 
   @Test
-  void givenValidRequest_WhenSendingCreateRequest_thenTransactionSyncLogsSuccessMessage()
-      throws Exception {
+  void givenValidRequest_whenSendingCreateRequest_thenTransactionSyncLogsSuccessMessage() {
     ListAppender<ILoggingEvent> listAppender = getLoggingEventListAppender();
 
     List<ILoggingEvent> logList = listAppender.list;
@@ -59,18 +58,17 @@ class KafkaDbTransactionSyncronizerIntergrationTest {
 
     assertThat(String.format(
         KAFKA_TRANSACTION_INITIALIZED,
-        "create" , profileId)).isEqualTo(logList.get(0).getMessage());
+        KafkaAction.CREATE , profileId)).isEqualTo(logList.get(0).getMessage());
 
     assertThat(logList.get(1).getMessage()).isEqualTo(String.format(
-        DATABASE_TRANSACTION_SUCCESSFUL, "create"));
+        DATABASE_TRANSACTION_SUCCESSFUL, KafkaAction.CREATE));
     assertThat(logList.get(2).getMessage()).isEqualTo(String.format(
         TRANSACTION_SUCCESSFUL, profileId));
 
   }
 
   @Test
-  void givenValidRequest_WhenSendingUpdateRequest_thenTransactionSyncLogsSuccessMessage()
-      throws Exception {
+  void givenValidRequest_whenSendingUpdateRequest_thenTransactionSyncLogsSuccessMessage() {
     ListAppender<ILoggingEvent> listAppender = getLoggingEventListAppender();
 
     List<ILoggingEvent> logList = listAppender.list;
@@ -82,23 +80,22 @@ class KafkaDbTransactionSyncronizerIntergrationTest {
     List<ILoggingEvent> filteredList =
         logList.stream().filter(o -> o.getMessage().equals(
             String.format(
-                DATABASE_TRANSACTION_SUCCESSFUL, "update"))).toList();
+                DATABASE_TRANSACTION_SUCCESSFUL, KafkaAction.UPDATE))).toList();
 
     assertThat(filteredList).hasSize(1);
 
     assertThat(logList.get(3).getMessage()).isEqualTo(String.format(
-        KAFKA_TRANSACTION_INITIALIZED, "update", profileId));
+        KAFKA_TRANSACTION_INITIALIZED, KafkaAction.UPDATE, profileId));
 
     assertThat(logList.get(4).getMessage()).isEqualTo(String.format(
-        DATABASE_TRANSACTION_SUCCESSFUL, "update"));
+        DATABASE_TRANSACTION_SUCCESSFUL, KafkaAction.UPDATE));
 
     assertThat(logList.get(5).getMessage()).isEqualTo(String.format(
         TRANSACTION_SUCCESSFUL, profileId));
   }
 
   @Test
-  void givenValidRequest_WhenSendingDelete_thenTransactionSyncLogsSuccessMessage()
-      throws Exception {
+  void givenValidRequest_whenSendingDelete_thenTransactionSyncLogsSuccessMessage() {
     ListAppender<ILoggingEvent> listAppender = getLoggingEventListAppender();
 
     List<ILoggingEvent> logList = listAppender.list;
@@ -110,15 +107,15 @@ class KafkaDbTransactionSyncronizerIntergrationTest {
     List<ILoggingEvent> filteredList =
         logList.stream().filter(o -> o.getMessage().equals(
             String.format(
-                DATABASE_TRANSACTION_SUCCESSFUL, "delete"))).toList();
+                DATABASE_TRANSACTION_SUCCESSFUL, KafkaAction.DELETE))).toList();
 
     assertThat(filteredList).hasSize(1);
 
     assertThat(logList.get(3).getMessage() ).isEqualTo(String.format(
-        KAFKA_TRANSACTION_INITIALIZED, "delete", profileId));
+        KAFKA_TRANSACTION_INITIALIZED, KafkaAction.DELETE, profileId));
 
     assertThat(logList.get(4).getMessage()).isEqualTo(String.format(
-        DATABASE_TRANSACTION_SUCCESSFUL, "delete"));
+        DATABASE_TRANSACTION_SUCCESSFUL, KafkaAction.DELETE));
 
     assertThat(logList.get(5).getMessage()).isEqualTo(String.format(
         TRANSACTION_SUCCESSFUL, profileId));
