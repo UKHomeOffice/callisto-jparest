@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.transactionsync;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -69,7 +70,7 @@ public class KafkaDbTransactionSyncronizerIntergrationTest {
         "create" , PROFILE_ID)).isEqualTo(logList.get(0).getMessage());
 
     assertThat(logList.get(1).getMessage()).isEqualTo(String.format(
-        DATABASE_TRANSACTION_SUCCESSFUL, "create", ""));
+        DATABASE_TRANSACTION_SUCCESSFUL, "create"));
     assertThat(logList.get(2).getMessage()).isEqualTo(String.format(
         TRANSACTION_SUCCESSFUL, PROFILE_ID));
 
@@ -94,7 +95,7 @@ public class KafkaDbTransactionSyncronizerIntergrationTest {
             .content(objectAsJsonString(profileUpdate)))
         .andDo(print())
         .andExpect(status().isOk());
-    TransactionSynchronizationManager.initSynchronization();
+
     List<ILoggingEvent> filteredList =
         logList.stream().filter(o -> o.getMessage().equals(
             String.format(
@@ -107,6 +108,39 @@ public class KafkaDbTransactionSyncronizerIntergrationTest {
 
     assertThat(logList.get(4).getMessage()).isEqualTo(String.format(
         DATABASE_TRANSACTION_SUCCESSFUL, "update"));
+
+    assertThat(logList.get(5).getMessage()).isEqualTo(String.format(
+        TRANSACTION_SUCCESSFUL, PROFILE_ID));
+  }
+
+  @Test
+  void givenValidRequest_WhenSendingDelete_thenTransactionSyncLogsSuccessMessage()
+      throws Exception {
+    ListAppender<ILoggingEvent> listAppender = getLoggingEventListAppender();
+
+    List<ILoggingEvent> logList = listAppender.list;
+
+    persistProfile(profile);
+    TransactionSynchronizationManager.initSynchronization();
+
+    mockMvc.perform(delete("/profiles/" + PROFILE_ID)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectAsJsonString(profile)))
+        .andDo(print())
+        .andExpect(status().isOk());
+
+    List<ILoggingEvent> filteredList =
+        logList.stream().filter(o -> o.getMessage().equals(
+            String.format(
+                DATABASE_TRANSACTION_SUCCESSFUL, "delete"))).toList();
+
+    assertThat(filteredList).hasSize(1);
+
+    assertThat(logList.get(3).getMessage() ).isEqualTo(String.format(
+        KAFKA_TRANSACTION_INITIALIZED, "delete", PROFILE_ID));
+
+    assertThat(logList.get(4).getMessage()).isEqualTo(String.format(
+        DATABASE_TRANSACTION_SUCCESSFUL, "delete"));
 
     assertThat(logList.get(5).getMessage()).isEqualTo(String.format(
         TRANSACTION_SUCCESSFUL, PROFILE_ID));

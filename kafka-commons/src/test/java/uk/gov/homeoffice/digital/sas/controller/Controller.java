@@ -23,12 +23,12 @@ public class Controller {
 
   @PostMapping("/{id}")
   public Profile postProfile(@RequestBody Profile profile, @PathVariable Long id) {
-    return repository.save(profile);
+    return repository.saveAndFlush(profile);
   }
 
   @PutMapping("/{id}")
   public Profile putProfile(@RequestBody Profile profile, @PathVariable Long id) {
-    return repository.save(profile);
+    return repository.saveAndFlush(profile);
   }
 
   @DeleteMapping("/{id}")
