@@ -6,6 +6,7 @@ public class Constants {
 
   }
   //Log Messages
+
   public static final String KAFKA_TRANSACTION_INITIALIZED =
       "Kafka Transaction [ %s ] Initialized with message key [ %s ]";
 
@@ -17,8 +18,6 @@ public class Constants {
 
   public static final String DATABASE_TRANSACTION_FAILED =
       "Database transaction [ %s ] failed";
-
-  public static final String WITH_ENTITY_ID = "with entity id [ %s ] ";
 
   public static final String KAFKA_FAILED_MESSAGE =
       "Message with key [ %s ] failed sending to topic [ %s ] action [ %s ]";

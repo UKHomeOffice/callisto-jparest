@@ -4,6 +4,7 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.DATABASE_T
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.DATABASE_TRANSACTION_SUCCESSFUL;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_TRANSACTION_INITIALIZED;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.TRANSACTION_SUCCESSFUL;
+
 import java.util.function.BiConsumer;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;

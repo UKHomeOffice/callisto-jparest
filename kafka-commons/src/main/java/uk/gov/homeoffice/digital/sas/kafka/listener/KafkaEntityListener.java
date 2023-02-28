@@ -1,10 +1,10 @@
 package uk.gov.homeoffice.digital.sas.kafka.listener;
 
-import java.util.function.BiConsumer;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
 import jakarta.validation.constraints.NotNull;
+import java.util.function.BiConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.message.Messageable;
