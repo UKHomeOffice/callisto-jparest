@@ -33,7 +33,7 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
         "port=3333"
     }
 )
-class KafkaDbTransactionSyncrhonizerIntegrationTest {
+class KafkaDbTransactionSynchronizerIntegrationTest {
   private Long profileId;
   private static final String PROFILE_NAME = "Original profile";
   private Profile profile;
