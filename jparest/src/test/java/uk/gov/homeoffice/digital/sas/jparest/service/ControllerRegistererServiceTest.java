@@ -59,7 +59,7 @@ class ControllerRegistererServiceTest {
         List.of("{POST [/resources/" + resourceName + "], produces [application/json]}", "create"),
         List.of("{DELETE [/resources/" + resourceName + "/{id}], produces [application/json]}", "delete"),
         List.of("{PUT [/resources/" + resourceName + "/{id}], produces [application/json]}", "update"),
-        List.of("{PUT [/resources/" + resourceName + "/batch-update], produces [application/json]}", "batchUpdate"));
+        List.of("{PATCH [/resources/" + resourceName + "], produces [application/json]}", "patch"));
 
     var resourceEndpointPaths = new ArrayList<String>();
     assertThatNoException().isThrownBy(() -> controllerRegistererService.mapRestOperationsToController(

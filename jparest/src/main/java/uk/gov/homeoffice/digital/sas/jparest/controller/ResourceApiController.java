@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.jparest.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyE
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
+import uk.gov.homeoffice.digital.sas.jparest.web.PatchOperation;
 
 /**
  * Spring MVC controller that exposes JPA entities
@@ -88,12 +90,14 @@ public class ResourceApiController<T extends BaseEntity> {
     return new ApiResponse<>(service.updateResource(entity));
   }
 
-  public ApiResponse<T> batchUpdate(@RequestParam UUID tenantId,
-                               @RequestBody String body) throws JsonProcessingException {
+  public ApiResponse<T> patch(@RequestParam UUID tenantId,
+                               @RequestBody List<PatchOperation<T>> body) throws JsonProcessingException {
 
-    var entities = readEntitiesFromPayload(body);
-    for (T entity : entities) {
-      validateAndSetTenantIdPayloadMatch(tenantId, entity);
+    var entities = new ArrayList<T>();
+    for (PatchOperation<T> patchOperation : body) {
+      //TODO check for op type
+      validateAndSetTenantIdPayloadMatch(tenantId, patchOperation.getValue());
+      entities.add(patchOperation.getValue());
     }
 
     return new ApiResponse<>(service.updateResources(entities));

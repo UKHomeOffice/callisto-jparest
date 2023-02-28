@@ -19,7 +19,8 @@ public enum RequestParameter {
   RELATED_IDS("relatedIds", ParameterType.PATH, List.class, true, 40),
   PAGEABLE("pageable", ParameterType.QUERY, Pageable.class, true, 50),
   FILTER("filter", ParameterType.QUERY, SpelExpression.class, false, 60),
-  BODY("body", ParameterType.BODY, String.class, true, 200);
+  BODY("body", ParameterType.BODY, String.class, true, 200),
+  PATCH_BODY("body", ParameterType.BODY, List.class, true, 200);
 
   private final String paramName;
   private final ParameterType paramType;

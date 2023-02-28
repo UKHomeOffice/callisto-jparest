@@ -182,6 +182,50 @@ class ResourceApiServiceTest<T extends BaseEntity> {
 
     // endregion
 
+  // region batch update
+  @Test
+  void updateResources_entityValidationPassed_existingResourceIsUpdated() {
+
+    T existingResource = DummyEntityTestUtil.getResource(DummyEntityA.class, RESOURCE_ID, TENANT_ID);
+    T newResource = DummyEntityTestUtil.getResource(DummyEntityA.class, RESOURCE_ID, TENANT_ID);
+    var newDummyAResource = (DummyEntityA) newResource;
+    newDummyAResource.setProfileId(1L);
+
+    when(repository.findByTenantIdAndId(newResource.getTenantId(), newResource.getId()))
+        .thenReturn(Optional.of(existingResource));
+
+    resourceApiService.updateResources(List.of(newResource));
+
+    var existingDummyAResource = (DummyEntityA) existingResource;
+    assertThat(existingResource.getId()).isEqualTo(RESOURCE_ID);
+    assertThat(existingResource.getTenantId()).isEqualTo(newDummyAResource.getTenantId());
+    assertThat(existingDummyAResource.getProfileId()).isEqualTo(newDummyAResource.getProfileId());
+  }
+
+  @Test
+  void updateResources_entityValidationFailed_resourceConstraintViolationExceptionThrown() {
+
+    T newResource = DummyEntityTestUtil.getResource(DummyEntityA.class, RESOURCE_ID, TENANT_ID);
+    doThrow(ResourceConstraintViolationException.class).when(entityValidator)
+        .validateAndThrowIfErrorsExist(newResource);
+
+    assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() ->
+        resourceApiService.updateResources(List.of(newResource)));
+    verify(repository, never()).saveAndFlush(any());
+  }
+
+  @Test
+  void updateResources_originalEntityNotFound_resourceNotFoundExceptionThrown() {
+
+    T newResource = DummyEntityTestUtil.getResource(DummyEntityA.class, RESOURCE_ID, TENANT_ID);
+
+    assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
+        resourceApiService.updateResources(List.of(newResource)));
+    verify(repository, never()).saveAndFlush(any());
+  }
+
+  // endregion
+
 
     // region deleteRelated
 
