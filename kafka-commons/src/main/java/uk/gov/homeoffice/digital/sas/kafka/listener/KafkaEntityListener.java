@@ -22,6 +22,7 @@ public final class KafkaEntityListener<T extends Messageable> {
     this.kafkaProducerService = kafkaProducerService;
   }
 
+
   @PrePersist
   private void sendKafkaMessageOnCreate(T resource) {
     sendMessage(resource, KafkaAction.CREATE);
@@ -44,6 +45,5 @@ public final class KafkaEntityListener<T extends Messageable> {
 
     kafkaDbTransactionSynchronizer.registerSynchronization(
         action, resource.resolveMessageKey(), sendMessageConsumer);
-
   }
 }
