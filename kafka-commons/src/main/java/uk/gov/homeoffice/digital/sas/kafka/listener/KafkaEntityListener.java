@@ -11,29 +11,29 @@ import uk.gov.homeoffice.digital.sas.kafka.message.Messageable;
 import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
 import uk.gov.homeoffice.digital.sas.kafka.transactionsync.KafkaDbTransactionSynchronizer;
 
-public class KafkaEntityListener<T extends Messageable> {
+public final class KafkaEntityListener<T extends Messageable> {
 
   private final KafkaProducerService<T> kafkaProducerService;
 
   @Autowired
   private KafkaDbTransactionSynchronizer kafkaDbTransactionSynchronizer;
 
-  protected KafkaEntityListener(KafkaProducerService<T> kafkaProducerService) {
+  public KafkaEntityListener(KafkaProducerService<T> kafkaProducerService) {
     this.kafkaProducerService = kafkaProducerService;
   }
 
   @PrePersist
-  protected void sendKafkaMessageOnCreate(T resource) {
+  private void sendKafkaMessageOnCreate(T resource) {
     sendMessage(resource, KafkaAction.CREATE);
   }
 
   @PreUpdate
-  protected void sendKafkaMessageOnUpdate(T resource) {
+  private void sendKafkaMessageOnUpdate(T resource) {
     sendMessage(resource, KafkaAction.UPDATE);
   }
 
   @PreRemove
-  protected void sendKafkaMessageOnDelete(T resource) {
+  private void sendKafkaMessageOnDelete(T resource) {
     sendMessage(resource, KafkaAction.DELETE);
   }
 

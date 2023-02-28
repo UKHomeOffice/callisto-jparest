@@ -34,18 +34,18 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
     }
 )
 class KafkaDbTransactionSyncronizerIntergrationTest {
-  private static final Long PROFILE_ID = new Random().nextLong();
+  private Long profileId;
   private static final String PROFILE_NAME = "Original profile";
   private Profile profile;
-
-  private static ObjectMapper mapper = new ObjectMapper();
 
   @Autowired
   private ProfileRepository profileRepository;
 
   @BeforeEach
   void setup() {
-    profile = new Profile(String.valueOf(PROFILE_ID), PROFILE_NAME);
+    TransactionSynchronizationManager.initSynchronization();
+    profileId = new Random().nextLong();
+    profile = new Profile(String.valueOf(profileId), PROFILE_NAME);
   }
 
   @Test
@@ -55,16 +55,16 @@ class KafkaDbTransactionSyncronizerIntergrationTest {
 
     List<ILoggingEvent> logList = listAppender.list;
 
-    profileRepository.save(profile);
+    profileRepository.saveAndFlush(profile);
 
     assertThat(String.format(
         KAFKA_TRANSACTION_INITIALIZED,
-        "create" , PROFILE_ID)).isEqualTo(logList.get(0).getMessage());
+        "create" , profileId)).isEqualTo(logList.get(0).getMessage());
 
     assertThat(logList.get(1).getMessage()).isEqualTo(String.format(
         DATABASE_TRANSACTION_SUCCESSFUL, "create"));
     assertThat(logList.get(2).getMessage()).isEqualTo(String.format(
-        TRANSACTION_SUCCESSFUL, PROFILE_ID));
+        TRANSACTION_SUCCESSFUL, profileId));
 
   }
 
@@ -76,9 +76,7 @@ class KafkaDbTransactionSyncronizerIntergrationTest {
     List<ILoggingEvent> logList = listAppender.list;
 
     profileRepository.saveAndFlush(profile);
-
     profile.setName("updated_name");
-
     profileRepository.saveAndFlush(profile);
 
     List<ILoggingEvent> filteredList =
@@ -89,13 +87,13 @@ class KafkaDbTransactionSyncronizerIntergrationTest {
     assertThat(filteredList).hasSize(1);
 
     assertThat(logList.get(3).getMessage()).isEqualTo(String.format(
-        KAFKA_TRANSACTION_INITIALIZED, "update", PROFILE_ID));
+        KAFKA_TRANSACTION_INITIALIZED, "update", profileId));
 
     assertThat(logList.get(4).getMessage()).isEqualTo(String.format(
         DATABASE_TRANSACTION_SUCCESSFUL, "update"));
 
     assertThat(logList.get(5).getMessage()).isEqualTo(String.format(
-        TRANSACTION_SUCCESSFUL, PROFILE_ID));
+        TRANSACTION_SUCCESSFUL, profileId));
   }
 
   @Test
@@ -117,13 +115,13 @@ class KafkaDbTransactionSyncronizerIntergrationTest {
     assertThat(filteredList).hasSize(1);
 
     assertThat(logList.get(3).getMessage() ).isEqualTo(String.format(
-        KAFKA_TRANSACTION_INITIALIZED, "delete", PROFILE_ID));
+        KAFKA_TRANSACTION_INITIALIZED, "delete", profileId));
 
     assertThat(logList.get(4).getMessage()).isEqualTo(String.format(
         DATABASE_TRANSACTION_SUCCESSFUL, "delete"));
 
     assertThat(logList.get(5).getMessage()).isEqualTo(String.format(
-        TRANSACTION_SUCCESSFUL, PROFILE_ID));
+        TRANSACTION_SUCCESSFUL, profileId));
   }
 
   @AfterEach
