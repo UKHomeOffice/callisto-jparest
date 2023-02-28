@@ -38,7 +38,7 @@ public class KafkaProducerService<T> {
   @SuppressWarnings("unchecked")
   public void sendMessage(@NotNull String messageKey, @NotNull T resource, KafkaAction action) {
     var kafkaEventMessage =
-        new KafkaEventMessage<>(projectVersion, (Class<T>) resource.getClass(), resource, action);
+        new KafkaEventMessage<>(projectVersion, resource, action);
     CompletableFuture<SendResult<String, KafkaEventMessage<T>>> future = null;
     try {
       future = kafkaTemplate.send(

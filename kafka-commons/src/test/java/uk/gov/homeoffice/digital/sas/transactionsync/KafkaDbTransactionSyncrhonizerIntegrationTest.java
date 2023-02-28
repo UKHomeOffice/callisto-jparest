@@ -56,10 +56,9 @@ class KafkaDbTransactionSyncrhonizerIntegrationTest {
 
     profileRepository.saveAndFlush(profile);
 
-    assertThat(String.format(
+    assertThat(logList.get(0).getMessage()).isEqualTo(String.format(
         KAFKA_TRANSACTION_INITIALIZED,
-        KafkaAction.CREATE , profileId)).isEqualTo(logList.get(0).getMessage());
-
+        KafkaAction.CREATE , profileId));
     assertThat(logList.get(1).getMessage()).isEqualTo(String.format(
         DATABASE_TRANSACTION_SUCCESSFUL, KafkaAction.CREATE));
     assertThat(logList.get(2).getMessage()).isEqualTo(String.format(

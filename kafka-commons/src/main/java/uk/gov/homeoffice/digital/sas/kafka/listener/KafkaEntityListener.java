@@ -14,7 +14,7 @@ public final class KafkaEntityListener<T extends Messageable> {
 
   private final KafkaProducerService<T> kafkaProducerService;
 
-  private KafkaDbTransactionSynchronizer kafkaDbTransactionSynchronizer;
+  private final KafkaDbTransactionSynchronizer kafkaDbTransactionSynchronizer;
 
   public KafkaEntityListener(KafkaProducerService<T> kafkaProducerService,
                              KafkaDbTransactionSynchronizer kafkaDbTransactionSynchronizer) {

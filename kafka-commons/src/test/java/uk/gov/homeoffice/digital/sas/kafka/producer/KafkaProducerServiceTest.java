@@ -51,7 +51,6 @@ class KafkaProducerServiceTest {
   @Mock
   private KafkaTemplate<String, KafkaEventMessage<Profile>> kafkaTemplate;
 
-  @Mock
   private CompletableFuture<SendResult<String, KafkaEventMessage<Profile>>> responseFuture;
 
   private KafkaProducerService<Profile> kafkaProducerService;
@@ -65,6 +64,8 @@ class KafkaProducerServiceTest {
   @ParameterizedTest
   @EnumSource(value = KafkaAction.class)
   void sendMessage_actionOnResource_messageIsSentWithCorrectArguments(KafkaAction action) {
+    responseFuture = mock(CompletableFuture.class);
+
     when(kafkaTemplate.send(any(), any(), any()))
         .thenReturn(responseFuture);
 
@@ -98,9 +99,9 @@ class KafkaProducerServiceTest {
 
     kafkaProducerService.sendMessage(PROFILE_ID, profile, action);
     assertThat(responseFuture.isDone()).isFalse();
-    assertThat(String.format(
+    assertThat(logList.get(0).getMessage()).isEqualTo(String.format(
         KAFKA_FAILED_MESSAGE,
-        PROFILE_ID, "callisto-profile-topic",action.toString().toLowerCase())).isEqualTo(logList.get(0).getMessage());
+        PROFILE_ID, "callisto-profile-topic",action.toString().toLowerCase()));
   }
 
   @ParameterizedTest
@@ -119,9 +120,11 @@ class KafkaProducerServiceTest {
 
     kafkaProducerService.sendMessage(PROFILE_ID, profile, action);
     assertThat(responseFuture.isDone()).isFalse();
-    assertThat(String.format(
-        KAFKA_FAILED_MESSAGE,
-        PROFILE_ID, "callisto-profile-topic",action.toString().toLowerCase())).isEqualTo(logList.get(0).getMessage());
+    assertThat(logList.get(0).getMessage()).isEqualTo(
+        String.format(
+            KAFKA_FAILED_MESSAGE,
+            PROFILE_ID, "callisto-profile-topic",action.toString().toLowerCase())
+    );
   }
 
   @ParameterizedTest
@@ -141,11 +144,9 @@ class KafkaProducerServiceTest {
     kafkaProducerService.sendMessage(PROFILE_ID, profile,
         action);
 
-    assertThat(String.format(
+    assertThat(logList.get(0).getMessage()).isEqualTo(String.format(
         KAFKA_SUCCESS_MESSAGE,
-        PROFILE_ID, "callisto-profile-topic",
-        action.toString().toLowerCase())).isEqualTo(logList.get(0).getMessage());
-
+        PROFILE_ID, "callisto-profile-topic",action.toString().toLowerCase()));
   }
 
   private static ListAppender<ILoggingEvent> getLoggingEventListAppender() {
