@@ -5,7 +5,6 @@ import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
 import jakarta.validation.constraints.NotNull;
 import java.util.function.Consumer;
-
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.message.Messageable;
 import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
@@ -22,7 +21,6 @@ public final class KafkaEntityListener<T extends Messageable> {
     this.kafkaProducerService = kafkaProducerService;
     this.kafkaDbTransactionSynchronizer = kafkaDbTransactionSynchronizer;
   }
-
 
   @PrePersist
   private void sendKafkaMessageOnCreate(T resource) {
