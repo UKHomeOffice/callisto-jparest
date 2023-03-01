@@ -102,8 +102,8 @@ public class ResourceApiController<T extends BaseEntity> {
       validateAndSetTenantIdPayloadMatch(tenantId, patchOperation.getValue());
       entities.add(patchOperation.getValue());
     }
-
-    return new ApiResponse<>(service.updateResources(entities));
+    //TODO handle null tenant id
+    return new ApiResponse<>(service.updateResources(entities, tenantId));
   }
 
   @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters

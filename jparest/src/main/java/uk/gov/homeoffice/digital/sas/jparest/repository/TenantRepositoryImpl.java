@@ -107,6 +107,25 @@ public class TenantRepositoryImpl<T>
         .stream().findFirst();
   }
 
+  public List<T> findByTenantIdAndIds(UUID tenantId, Collection<UUID> ids) {
+
+    CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+    CriteriaQuery<T> query = builder.createQuery(entityType);
+    Root<T> root = query.from(entityType);
+
+    Predicate tenantPredicate = builder.equal(root.get(tenantIdFieldName), tenantId);
+    Predicate idPredicate = root.get(EntityUtils.ID_FIELD_NAME).in(ids);
+    Predicate finalPredicate = builder.and(tenantPredicate, idPredicate);
+    query.where(finalPredicate);
+
+    EntityGraph<T> entityGraph = entityManager.createEntityGraph(entityType);
+
+    CriteriaQuery<T> select = query.select(root);
+    return this.entityManager.createQuery(select)
+        .setHint(QUERY_HINT, entityGraph)
+        .getResultList();
+  }
+
   @Override
   public List<?> findAllByTenantIdAndIdAndRelation(UUID tenantId,
                                                    UUID id,

@@ -191,10 +191,10 @@ class ResourceApiServiceTest<T extends BaseEntity> {
     var newDummyAResource = (DummyEntityA) newResource;
     newDummyAResource.setProfileId(1L);
 
-    when(repository.findByTenantIdAndId(newResource.getTenantId(), newResource.getId()))
-        .thenReturn(Optional.of(existingResource));
+    when(repository.findByTenantIdAndIds(newResource.getTenantId(), List.of(newResource.getId())))
+        .thenReturn(List.of(existingResource));
 
-    resourceApiService.updateResources(List.of(newResource));
+    resourceApiService.updateResources(List.of(newResource), TENANT_ID);
 
     var existingDummyAResource = (DummyEntityA) existingResource;
     assertThat(existingResource.getId()).isEqualTo(RESOURCE_ID);
@@ -210,7 +210,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
         .validateAndThrowIfErrorsExist(newResource);
 
     assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() ->
-        resourceApiService.updateResources(List.of(newResource)));
+        resourceApiService.updateResources(List.of(newResource), TENANT_ID));
     verify(repository, never()).saveAndFlush(any());
   }
 
@@ -220,7 +220,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
     T newResource = DummyEntityTestUtil.getResource(DummyEntityA.class, RESOURCE_ID, TENANT_ID);
 
     assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
-        resourceApiService.updateResources(List.of(newResource)));
+        resourceApiService.updateResources(List.of(newResource), TENANT_ID));
     verify(repository, never()).saveAndFlush(any());
   }
 
