@@ -182,7 +182,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
 
     // endregion
 
-  // region batch update
+  // region update multiple
   @Test
   void updateResources_entityValidationPassed_existingResourceIsUpdated() {
 

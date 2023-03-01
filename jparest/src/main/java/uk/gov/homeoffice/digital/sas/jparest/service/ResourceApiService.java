@@ -90,6 +90,7 @@ public class ResourceApiService<T extends BaseEntity> {
       var originalEntities = repository.findByTenantIdAndIds(tenantId, ids);
 
       if (originalEntities.size() != entities.size()) {
+        //TODO does this need to include the specific ids?
         throw new ResourceNotFoundException();
       }
 
@@ -98,8 +99,6 @@ public class ResourceApiService<T extends BaseEntity> {
         BeanUtils.copyProperties(entity, originalEntity, EntityUtils.ID_FIELD_NAME);
         entityList.add(originalEntity);
       }
-
-
 
       repository.saveAllAndFlush(entityList);
       return entityList;

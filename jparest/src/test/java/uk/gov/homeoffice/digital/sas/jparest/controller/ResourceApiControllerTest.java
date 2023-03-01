@@ -585,7 +585,7 @@ class ResourceApiControllerTest {
 
     // endregion
 
-    // region batch update
+    // region patch
     @Test
     @Transactional
     void patch_resourcesExist_persistsChanges() throws JsonProcessingException, JSONException {

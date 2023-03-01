@@ -146,12 +146,12 @@ public class ResourceApiController<T extends BaseEntity> {
 
   private PatchOperation<T>[] readEntitiesFromPayload(String body) throws JsonProcessingException {
     try {
-      var type1 = objectMapper.getTypeFactory().constructParametricType(
+      var patchOperationType = objectMapper.getTypeFactory().constructParametricType(
           PatchOperation.class,
           entityType);
-      var type2 = objectMapper.getTypeFactory().constructArrayType(type1);
+      var listPatchOperationType = objectMapper.getTypeFactory().constructArrayType(patchOperationType);
 
-      return objectMapper.readValue(body, type2);
+      return objectMapper.readValue(body, listPatchOperationType);
     } catch (UnrecognizedPropertyException ex) {
       throw new UnknownResourcePropertyException(
           ex.getPropertyName(), ex.getReferringClass().getSimpleName());
