@@ -1,7 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import java.util.ArrayList;
@@ -99,8 +98,9 @@ public class ResourceApiController<T extends BaseEntity> {
     var entities = new ArrayList<T>();
     for (PatchOperation<T> patchOperation : ops) {
       //TODO check for op type
-      validateAndSetTenantIdPayloadMatch(tenantId, (T) patchOperation.getValue());
-      entities.add((T) patchOperation.getValue());
+      //TODO check id and path match
+      validateAndSetTenantIdPayloadMatch(tenantId, patchOperation.getValue());
+      entities.add(patchOperation.getValue());
     }
 
     return new ApiResponse<>(service.updateResources(entities));
