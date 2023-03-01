@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import java.util.ArrayList;
@@ -91,13 +92,15 @@ public class ResourceApiController<T extends BaseEntity> {
   }
 
   public ApiResponse<T> patch(@RequestParam UUID tenantId,
-                               @RequestBody List<PatchOperation<T>> body) throws JsonProcessingException {
+                               @RequestBody String body) throws JsonProcessingException {
+
+    var ops = readEntitiesFromPayload(body);
 
     var entities = new ArrayList<T>();
-    for (PatchOperation<T> patchOperation : body) {
+    for (PatchOperation<T> patchOperation : ops) {
       //TODO check for op type
-      validateAndSetTenantIdPayloadMatch(tenantId, patchOperation.getValue());
-      entities.add(patchOperation.getValue());
+      validateAndSetTenantIdPayloadMatch(tenantId, (T) patchOperation.getValue());
+      entities.add((T) patchOperation.getValue());
     }
 
     return new ApiResponse<>(service.updateResources(entities));
@@ -141,9 +144,12 @@ public class ResourceApiController<T extends BaseEntity> {
     }
   }
 
-  private List<T> readEntitiesFromPayload(String body) throws JsonProcessingException {
+  private PatchOperation<T>[] readEntitiesFromPayload(String body) throws JsonProcessingException {
     try {
-      return objectMapper.readerForListOf(entityType).readValue(body);
+      var type1 = objectMapper.getTypeFactory().constructParametricType(PatchOperation.class, entityType);
+      var type2 = objectMapper.getTypeFactory().constructArrayType(type1);
+
+      return objectMapper.readValue(body, type2);
     } catch (UnrecognizedPropertyException ex) {
       throw new UnknownResourcePropertyException(
           ex.getPropertyName(), ex.getReferringClass().getSimpleName());

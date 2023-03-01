@@ -20,7 +20,7 @@ public enum RequestParameter {
   PAGEABLE("pageable", ParameterType.QUERY, Pageable.class, true, 50),
   FILTER("filter", ParameterType.QUERY, SpelExpression.class, false, 60),
   BODY("body", ParameterType.BODY, String.class, true, 200),
-  PATCH_BODY("patch_body", ParameterType.BODY, List.class, true, 200);
+  PATCH_BODY("patch_body", ParameterType.BODY, String.class, true, 200);
 
   private final String paramName;
   private final ParameterType paramType;

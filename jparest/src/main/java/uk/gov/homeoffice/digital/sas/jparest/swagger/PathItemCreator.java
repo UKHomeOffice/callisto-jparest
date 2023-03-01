@@ -57,9 +57,9 @@ public class PathItemCreator {
     ApiResponses responses = new ApiResponses().addApiResponse("200", response);
 
     var get = new Operation();
+    get.setResponses(responses);
     addParametersToOperation(get, TENANT_ID_PARAMETER, PAGEABLE_PARAMETER,
         getFilterParameter(clazz));
-    get.setResponses(responses);
     get.addTagsItem(tag);
     var pi = new PathItem();
     pi.get(get);
@@ -68,10 +68,19 @@ public class PathItemCreator {
     post.setResponses(responses);
     addParametersToOperation(post, TENANT_ID_PARAMETER);
     post.addTagsItem(tag);
-    var requestBody = getRequestBody(clazz);
-    post.setRequestBody(requestBody);
+    var postRequestBody = getRequestBody(clazz);
+    post.setRequestBody(postRequestBody);
 
     pi.post(post);
+
+    var patch = new Operation();
+    patch.setResponses(responses);
+    addParametersToOperation(patch, TENANT_ID_PARAMETER);
+    patch.addTagsItem(tag);
+    var patchRequestBody = getRequestBody(clazz);
+    patch.setRequestBody(patchRequestBody);
+
+    pi.patch(patch);
 
     return pi;
   }
