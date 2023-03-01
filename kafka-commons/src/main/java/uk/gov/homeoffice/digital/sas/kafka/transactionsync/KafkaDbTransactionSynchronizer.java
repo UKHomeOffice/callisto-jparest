@@ -5,7 +5,7 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.DATABASE_T
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_TRANSACTION_INITIALIZED;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.TRANSACTION_SUCCESSFUL;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class KafkaDbTransactionSynchronizer<T extends Messageable> {
   private static final Logger log = LoggerFactory.getLogger(KafkaDbTransactionSynchronizer.class);
 
   public void registerSynchronization(KafkaAction action, T resource,
-                                      BiConsumer<KafkaAction, String> sendKafkaMessage) {
+                                      Consumer<String> sendKafkaMessage) {
 
     TransactionSynchronizationManager.registerSynchronization(
         new TransactionSynchronization() {
@@ -34,7 +34,7 @@ public class KafkaDbTransactionSynchronizer<T extends Messageable> {
             messageKey = resource.resolveMessageKey();
             log.info(String.format(KAFKA_TRANSACTION_INITIALIZED,
                 action, messageKey));
-            sendKafkaMessage.accept(action, messageKey);
+            sendKafkaMessage.accept(messageKey);
           }
 
           @Override

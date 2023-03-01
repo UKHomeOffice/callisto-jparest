@@ -4,7 +4,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
 import jakarta.validation.constraints.NotNull;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.message.Messageable;
 import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
@@ -39,9 +40,9 @@ public final class KafkaEntityListener<T extends Messageable> {
   }
 
   private void sendMessage(@NotNull T resource, KafkaAction action) {
-    BiConsumer<KafkaAction, String> sendMessageConsumer =
-        (KafkaAction actionArg, String messageKeyArg) -> kafkaProducerService.sendMessage(
-            messageKeyArg, resource, actionArg);
+    Consumer<String> sendMessageConsumer =
+        (String messageKeyArg) -> kafkaProducerService.sendMessage(
+            messageKeyArg, resource, action);
 
     kafkaDbTransactionSynchronizer.registerSynchronization(
         action, resource, sendMessageConsumer);
