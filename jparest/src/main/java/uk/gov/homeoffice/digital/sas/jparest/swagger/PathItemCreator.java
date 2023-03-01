@@ -27,6 +27,7 @@ import org.springdoc.core.utils.SpringDocAnnotationsUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.annotation.Resource;
 import uk.gov.homeoffice.digital.sas.jparest.controller.enums.RequestParameter;
+import uk.gov.homeoffice.digital.sas.jparest.web.PatchOperation;
 
 @Component
 public class PathItemCreator {
@@ -77,7 +78,7 @@ public class PathItemCreator {
     patch.setResponses(responses);
     addParametersToOperation(patch, TENANT_ID_PARAMETER);
     patch.addTagsItem(tag);
-    var patchRequestBody = getRequestBody(clazz);
+    var patchRequestBody = getPatchRequestBody(clazz);
     patch.setRequestBody(patchRequestBody);
 
     pi.patch(patch);
@@ -291,6 +292,28 @@ public class PathItemCreator {
     var mt = new MediaType();
     Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(
           null, clazz, null, null);
+    mt.schema(schema);
+    c.addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mt);
+
+    var requestBody = new RequestBody();
+    requestBody.setContent(c);
+    return requestBody;
+  }
+
+  /**
+   * <p>>This method returns a swagger RequestBody that
+   *    * contains a schema for the specified class.</p>
+   *
+   * @param clazz The type of item to describe in the schema
+   * @return RequestBody
+   *
+   */
+  private static RequestBody getPatchRequestBody(Class<?> clazz) {
+
+    var c = new Content();
+    var mt = new MediaType();
+    Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(
+        null, PatchOperation[].class, null, null);
     mt.schema(schema);
     c.addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mt);
 

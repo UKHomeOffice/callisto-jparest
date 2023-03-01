@@ -149,7 +149,8 @@ public class ResourceApiController<T extends BaseEntity> {
       var patchOperationType = objectMapper.getTypeFactory().constructParametricType(
           PatchOperation.class,
           entityType);
-      var listPatchOperationType = objectMapper.getTypeFactory().constructArrayType(patchOperationType);
+      var listPatchOperationType =
+          objectMapper.getTypeFactory().constructArrayType(patchOperationType);
 
       return objectMapper.readValue(body, listPatchOperationType);
     } catch (UnrecognizedPropertyException ex) {
