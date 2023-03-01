@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.OperationNotSupportedException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
@@ -96,12 +97,19 @@ public class ResourceApiController<T extends BaseEntity> {
     var ops = readEntitiesFromPayload(body);
 
     var entities = new ArrayList<T>();
+
     for (PatchOperation<T> patchOperation : ops) {
-      //TODO check for op type
-      //TODO check id and path match
       validateAndSetTenantIdPayloadMatch(tenantId, patchOperation.getValue());
+      if (!Objects.equals(patchOperation.getOp(), "replace")) { //TODO make a constant for the operation value
+        throw new OperationNotSupportedException(patchOperation.getOp());
+      }
+      var id = UUID.fromString(patchOperation.getPath().replace("/",""));
+      if (!id.equals(patchOperation.getValue().getId())) {
+        throw new TenantIdMismatchException(); //TODO make new relevant error
+      }
       entities.add(patchOperation.getValue());
     }
+
     //TODO handle null tenant id
     return new ApiResponse<>(service.updateResources(entities, tenantId));
   }
