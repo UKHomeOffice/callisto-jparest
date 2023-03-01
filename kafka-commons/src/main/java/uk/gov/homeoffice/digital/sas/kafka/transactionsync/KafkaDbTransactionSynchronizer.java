@@ -13,23 +13,25 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
+import uk.gov.homeoffice.digital.sas.kafka.message.Messageable;
 
 @Component
-public class KafkaDbTransactionSynchronizer {
+public class KafkaDbTransactionSynchronizer<T extends Messageable> {
 
   private static final Logger log = LoggerFactory.getLogger(KafkaDbTransactionSynchronizer.class);
 
-  public void registerSynchronization(KafkaAction action,
-                                      String messageKey,
+  public void registerSynchronization(KafkaAction action, T resource,
                                       BiConsumer<KafkaAction, String> sendKafkaMessage) {
 
     TransactionSynchronizationManager.registerSynchronization(
         new TransactionSynchronization() {
           int status = TransactionSynchronization.STATUS_UNKNOWN;
+          String messageKey;
 
           @SneakyThrows
           @Override
           public void beforeCommit(boolean readOnly) {
+            messageKey = resource.resolveMessageKey();
             log.info(String.format(KAFKA_TRANSACTION_INITIALIZED,
                 action, messageKey));
             sendKafkaMessage.accept(action, messageKey);

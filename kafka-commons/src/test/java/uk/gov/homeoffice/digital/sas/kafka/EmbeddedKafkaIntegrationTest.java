@@ -30,6 +30,7 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 class EmbeddedKafkaIntegrationTest {
 
   private static final String PROFILE_ID = "profileId";
+  private static final String TENANT_ID = "tenantId";
   private static final String PROFILE_NAME = "Original profile";
   private static final String UPDATED_PROFILE_NAME = "Updated profile";
   private static final int CONSUMER_TIMEOUT = 10;
@@ -50,7 +51,7 @@ class EmbeddedKafkaIntegrationTest {
 
   @BeforeEach
   void setup() {
-    profile = new Profile(PROFILE_ID, PROFILE_NAME);
+    profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME);
     EXPECTED_CREATE_MESSAGE_PAYLOAD = generateExpectedPayload(version, profile, KafkaAction.CREATE);
   }
 
@@ -120,6 +121,8 @@ class EmbeddedKafkaIntegrationTest {
         .concat(version)
         .concat("\",\"resource\":{\"id\":\"")
         .concat(profile.getId())
+        .concat("\",\"tenantId\":\"")
+        .concat(profile.getTenantId())
         .concat("\",\"name\":\"")
         .concat(profile.getName())
         .concat("\"},\"action\":\"")

@@ -44,6 +44,6 @@ public final class KafkaEntityListener<T extends Messageable> {
             messageKeyArg, resource, actionArg);
 
     kafkaDbTransactionSynchronizer.registerSynchronization(
-        action, resource.resolveMessageKey(), sendMessageConsumer);
+        action, resource, sendMessageConsumer);
   }
 }
