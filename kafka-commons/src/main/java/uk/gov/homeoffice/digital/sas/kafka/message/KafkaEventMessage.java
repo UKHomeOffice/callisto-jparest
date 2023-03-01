@@ -16,9 +16,9 @@ public class KafkaEventMessage<T> {
   @NotNull
   private final KafkaAction action;
 
-  public KafkaEventMessage(String projectVersion, Class<T> resourceType, T resource,
+  public KafkaEventMessage(String projectVersion, T resource,
       KafkaAction action) {
-    this.schema = String.format(SCHEMA_FORMAT, resourceType.getName(), projectVersion);
+    this.schema = String.format(SCHEMA_FORMAT, resource.getClass().getName(), projectVersion);
     this.resource = resource;
     this.action = action;
   }
