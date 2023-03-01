@@ -146,7 +146,9 @@ public class ResourceApiController<T extends BaseEntity> {
 
   private PatchOperation<T>[] readEntitiesFromPayload(String body) throws JsonProcessingException {
     try {
-      var type1 = objectMapper.getTypeFactory().constructParametricType(PatchOperation.class, entityType);
+      var type1 = objectMapper.getTypeFactory().constructParametricType(
+          PatchOperation.class,
+          entityType);
       var type2 = objectMapper.getTypeFactory().constructArrayType(type1);
 
       return objectMapper.readValue(body, type2);
