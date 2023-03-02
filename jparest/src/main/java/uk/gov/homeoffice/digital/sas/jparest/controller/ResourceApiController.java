@@ -164,7 +164,7 @@ public class ResourceApiController<T extends BaseEntity> {
           PatchOperation.class,
           entityType);
       for (Object ob : body) {
-       opList.add(objectMapper.convertValue(ob, patchOperationType));
+        opList.add(objectMapper.convertValue(ob, patchOperationType));
       }
       return opList;
     } catch (Exception ex) { //TODO catch correct exception
