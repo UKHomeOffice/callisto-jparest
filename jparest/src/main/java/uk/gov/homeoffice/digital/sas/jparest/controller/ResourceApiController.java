@@ -93,7 +93,7 @@ public class ResourceApiController<T extends BaseEntity> {
   }
 
   public ApiResponse<T> patch(@RequestParam UUID tenantId,
-                               @RequestBody String body) throws JsonProcessingException {
+                               @RequestBody List<Object> body) {
 
     var ops = readEntitiesFromPayload(body);
 
@@ -101,6 +101,7 @@ public class ResourceApiController<T extends BaseEntity> {
 
     for (PatchOperation<T> patchOperation : ops) {
       validateAndSetTenantIdPayloadMatch(tenantId, patchOperation.getValue());
+      //TODO handle null path/null value id
       var id = UUID.fromString(patchOperation.getPath().replace("/", ""));
       if (!id.equals(patchOperation.getValue().getId())) {
         throw new IllegalArgumentException(
@@ -156,18 +157,18 @@ public class ResourceApiController<T extends BaseEntity> {
     }
   }
 
-  private PatchOperation<T>[] readEntitiesFromPayload(String body) throws JsonProcessingException {
+  private List<PatchOperation<T>> readEntitiesFromPayload(List<Object> body) {
     try {
+      var opList = new ArrayList<PatchOperation<T>>();
       var patchOperationType = objectMapper.getTypeFactory().constructParametricType(
           PatchOperation.class,
           entityType);
-      var listPatchOperationType =
-          objectMapper.getTypeFactory().constructArrayType(patchOperationType);
-
-      return objectMapper.readValue(body, listPatchOperationType);
-    } catch (UnrecognizedPropertyException ex) {
-      throw new UnknownResourcePropertyException(
-          ex.getPropertyName(), ex.getReferringClass().getSimpleName());
+      for (Object ob : body) {
+       opList.add(objectMapper.convertValue(ob, patchOperationType));
+      }
+      return opList;
+    } catch (Exception ex) { //TODO catch correct exception
+      throw new UnknownResourcePropertyException();
     }
   }
 

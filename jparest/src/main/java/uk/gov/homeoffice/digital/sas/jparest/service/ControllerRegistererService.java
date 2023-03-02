@@ -60,7 +60,7 @@ public class ControllerRegistererService {
             RequestParameter.ID, RequestParameter.BODY),
         path + URL_ID_PATH_PARAM, RequestMethod.PUT);
     register(controller, "patch",
-        getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.BODY),
+        getControllerMethodArgs(RequestParameter.TENANT_ID, RequestParameter.LIST_BODY),
         path, RequestMethod.PATCH);
     pathConsumer.accept(path);
   }
