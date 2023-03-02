@@ -33,6 +33,7 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityF;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.OperationNotSupportedException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil;
@@ -55,6 +56,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import uk.gov.homeoffice.digital.sas.jparest.web.SupportedPatchOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -622,7 +624,7 @@ class ResourceApiControllerTest {
             .put(ID_FIELD_NAME, getResourceOne.getId().toString());
 
         var operationOne = new JSONObject()
-            .put("op", "replace")
+            .put("op", SupportedPatchOperations.REPLACE.toString())
             .put("path", "/" + getResourceOne.getId().toString())
             .put("value", updatedResourceOnePayload);
 
@@ -633,7 +635,7 @@ class ResourceApiControllerTest {
             .put(ID_FIELD_NAME, getResourceTwo.getId().toString());
 
         var operationTwo = new JSONObject()
-            .put("op", "replace")
+            .put("op", SupportedPatchOperations.REPLACE.toString())
             .put("path", "/" + getResourceTwo.getId().toString())
             .put("value", updatedResourceTwoPayload);
 
@@ -716,7 +718,7 @@ class ResourceApiControllerTest {
             .put(ID_FIELD_NAME, createdResource.getId().toString());
 
         var operationOne = new JSONObject()
-            .put("op", "replace")
+            .put("op", SupportedPatchOperations.REPLACE.toString())
             .put("path", "/" + createdResource.getId().toString())
             .put("value", updatedResourceOnePayload);
 
@@ -727,7 +729,7 @@ class ResourceApiControllerTest {
             .put(ID_FIELD_NAME, notCreatedResource.getId().toString());
 
         var operationTwo = new JSONObject()
-            .put("op", "replace")
+            .put("op", SupportedPatchOperations.REPLACE.toString())
             .put("path", "/" + notCreatedResource.getId().toString())
             .put("value", updatedResourceTwoPayload);
 
@@ -737,6 +739,97 @@ class ResourceApiControllerTest {
         assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload));
     }
 
+    @Test
+    @Transactional
+    void patch_unsupportedOperation_operationNotSupportedExceptionThrown()
+        throws JsonProcessingException, JSONException {
+
+        String createPayload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resource
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponse = controller.create(TENANT_ID, createPayload);
+        assertThat(apiResponse.getItems()).hasSize(1);
+        var createdResource = apiResponse.getItems().get(0);
+
+        //get the newly created resource
+        var getResponse = controller.get(TENANT_ID, createdResource.getId());
+        var getResource = getResponse.getItems().get(0);
+        assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C");
+
+        createdResource.setDescription("Updated Dummy Entity C One");
+        createdResource.setIndex(2L);
+
+        var notCreatedResource = new DummyEntityC();
+        notCreatedResource.setId(NON_EXISTENT_ID);
+        notCreatedResource.setDescription("Updated Dummy Entity C Two");
+        notCreatedResource.setIndex(3L);
+
+        //create update payload
+        var updatedResourceOnePayload = new JSONObject()
+            .put(DESCRIPTION_FIELD_NAME, "Updated Dummy Entity C One")
+            .put(INDEX_FIELD_NAME, 2)
+            .put(TENANT_ID_FIELD_NAME, TENANT_ID)
+            .put(ID_FIELD_NAME, createdResource.getId().toString());
+
+        var operationOne = new JSONObject()
+            .put("op", "foo")
+            .put("path", "/" + createdResource.getId().toString())
+            .put("value", updatedResourceOnePayload);
+
+
+        var updatedPayload = List.of(operationOne).toString();
+
+
+        assertThatExceptionOfType(OperationNotSupportedException.class).isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload));
+    }
+
+    @Test
+    @Transactional
+    void patch_pathIdDoesNotMatchValueId_illegalArgumentExceptionThrown()
+        throws JsonProcessingException, JSONException {
+
+        String createPayload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resource
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponse = controller.create(TENANT_ID, createPayload);
+        assertThat(apiResponse.getItems()).hasSize(1);
+        var createdResource = apiResponse.getItems().get(0);
+
+        //get the newly created resource
+        var getResponse = controller.get(TENANT_ID, createdResource.getId());
+        var getResource = getResponse.getItems().get(0);
+        assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C");
+
+        createdResource.setDescription("Updated Dummy Entity C One");
+        createdResource.setIndex(2L);
+
+        var notCreatedResource = new DummyEntityC();
+        notCreatedResource.setId(NON_EXISTENT_ID);
+        notCreatedResource.setDescription("Updated Dummy Entity C Two");
+        notCreatedResource.setIndex(3L);
+
+        //create update payload
+        var updatedResourceOnePayload = new JSONObject()
+            .put(DESCRIPTION_FIELD_NAME, "Updated Dummy Entity C One")
+            .put(INDEX_FIELD_NAME, 2)
+            .put(TENANT_ID_FIELD_NAME, TENANT_ID)
+            .put(ID_FIELD_NAME, createdResource.getId().toString());
+
+        var operationOne = new JSONObject()
+            .put("op", SupportedPatchOperations.REPLACE.toString())
+            .put("path", "/" + NON_EXISTENT_ID)
+            .put("value", updatedResourceOnePayload);
+
+
+        var updatedPayload = List.of(operationOne).toString();
+
+
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload));
+    }
     @Test
     void patch_resourceDoesntExist_noActiveTransactionFound() throws JSONException {
         var controller = getResourceApiController(DummyEntityC.class);
@@ -748,7 +841,7 @@ class ResourceApiControllerTest {
             .put(ID_FIELD_NAME, NON_EXISTENT_ID);
 
         var operation = new JSONObject()
-            .put("op", "replace")
+            .put("op", SupportedPatchOperations.REPLACE.toString())
             .put("path", "/" + NON_EXISTENT_ID)
             .put("value", notCreatedResourcePayload);
 
@@ -797,7 +890,7 @@ class ResourceApiControllerTest {
             .put(ID_FIELD_NAME, getResourceOne.getId().toString());
 
         var operationOne = new JSONObject()
-            .put("op", "replace")
+            .put("op", SupportedPatchOperations.REPLACE.toString())
             .put("path", "/" + getResourceOne.getId().toString())
             .put("value", updatedResourceOnePayload);
 
@@ -808,7 +901,7 @@ class ResourceApiControllerTest {
             .put(ID_FIELD_NAME, getResourceTwo.getId().toString());
 
         var operationTwo = new JSONObject()
-            .put("op", "replace")
+            .put("op", SupportedPatchOperations.REPLACE.toString())
             .put("path", "/" + getResourceTwo.getId().toString())
             .put("value", updatedResourceTwoPayload);
 
@@ -855,7 +948,7 @@ class ResourceApiControllerTest {
             .put(ID_FIELD_NAME, getResourceOne.getId().toString());
 
         var operationOne = new JSONObject()
-            .put("op", "replace")
+            .put("op", SupportedPatchOperations.REPLACE.toString())
             .put("path", "/" + getResourceOne.getId().toString())
             .put("value", updatedResourceOnePayload);
 
@@ -866,7 +959,7 @@ class ResourceApiControllerTest {
             .put(ID_FIELD_NAME, getResourceTwo.getId().toString());
 
         var operationTwo = new JSONObject()
-            .put("op", "replace")
+            .put("op", SupportedPatchOperations.REPLACE.toString())
             .put("path", "/" + getResourceTwo.getId().toString())
             .put("value", updatedResourceTwoPayload);
         var updatedPayload = Arrays.asList(operationOne, operationTwo).toString();
@@ -911,7 +1004,7 @@ class ResourceApiControllerTest {
             .put(ID_FIELD_NAME, getResourceOne.getId().toString());
 
         var operationOne = new JSONObject()
-            .put("op", "replace")
+            .put("op", SupportedPatchOperations.REPLACE.toString())
             .put("path", "/" + getResourceOne.getId().toString())
             .put("value", updatedResourceOnePayload);
 
@@ -921,7 +1014,7 @@ class ResourceApiControllerTest {
             .put(ID_FIELD_NAME, getResourceTwo.getId().toString());
 
         var operationTwo = new JSONObject()
-            .put("op", "replace")
+            .put("op", SupportedPatchOperations.REPLACE.toString())
             .put("path", "/" + getResourceTwo.getId().toString())
             .put("value", updatedResourceTwoPayload);
 

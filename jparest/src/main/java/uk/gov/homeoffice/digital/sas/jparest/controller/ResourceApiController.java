@@ -22,6 +22,7 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 import uk.gov.homeoffice.digital.sas.jparest.web.PatchOperation;
+import uk.gov.homeoffice.digital.sas.jparest.web.SupportedPatchOperations;
 
 /**
  * Spring MVC controller that exposes JPA entities
@@ -100,15 +101,17 @@ public class ResourceApiController<T extends BaseEntity> {
 
     for (PatchOperation<T> patchOperation : ops) {
       validateAndSetTenantIdPayloadMatch(tenantId, patchOperation.getValue());
-      //TODO make a constant for the operation value
-      if (!Objects.equals(patchOperation.getOp(), "replace")) {
-        throw new OperationNotSupportedException(patchOperation.getOp());
-      }
       var id = UUID.fromString(patchOperation.getPath().replace("/", ""));
       if (!id.equals(patchOperation.getValue().getId())) {
-        throw new TenantIdMismatchException(); //TODO make new relevant error
+        throw new IllegalArgumentException(
+            "The supplied payload value resource id value must match payload id path value");
       }
-      entities.add(patchOperation.getValue());
+
+      if (Objects.equals(patchOperation.getOp(), SupportedPatchOperations.REPLACE.toString())) {
+        entities.add(patchOperation.getValue());
+      } else {
+        throw new OperationNotSupportedException(patchOperation.getOp());
+      }
     }
 
     //TODO handle null tenant id
