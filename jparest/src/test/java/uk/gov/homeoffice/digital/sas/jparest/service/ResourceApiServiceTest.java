@@ -57,7 +57,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
 
     @BeforeEach
     void setup() {
-      resourceApiService = new ResourceApiService<T>(
+      resourceApiService = new ResourceApiService<>(
               entityUtils, repository, entityValidator, new TransactionTemplate(transactionManager));
     }
 
@@ -209,8 +209,10 @@ class ResourceApiServiceTest<T extends BaseEntity> {
     doThrow(ResourceConstraintViolationException.class).when(entityValidator)
         .validateAndThrowIfErrorsExist(newResource);
 
+    var payload = List.of(newResource);
+
     assertThatExceptionOfType(ResourceConstraintViolationException.class).isThrownBy(() ->
-        resourceApiService.updateResources(List.of(newResource), TENANT_ID));
+        resourceApiService.updateResources(payload, TENANT_ID));
     verify(repository, never()).saveAndFlush(any());
   }
 
@@ -219,8 +221,10 @@ class ResourceApiServiceTest<T extends BaseEntity> {
 
     T newResource = DummyEntityTestUtil.getResource(DummyEntityA.class, RESOURCE_ID, TENANT_ID);
 
+    var payload = List.of(newResource);
+
     assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
-        resourceApiService.updateResources(List.of(newResource), TENANT_ID));
+        resourceApiService.updateResources(payload, TENANT_ID));
     verify(repository, never()).saveAndFlush(any());
   }
 

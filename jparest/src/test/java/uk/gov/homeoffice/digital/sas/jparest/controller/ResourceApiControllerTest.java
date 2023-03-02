@@ -731,10 +731,10 @@ class ResourceApiControllerTest {
             .put("path", "/" + notCreatedResource.getId().toString())
             .put("value", updatedResourceTwoPayload);
 
-        var updatedPayload = Arrays.asList(operationOne, operationTwo);
+        var updatedPayload = Arrays.asList(operationOne, operationTwo).toString();
 
 
-        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload.toString()));
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload));
     }
 
     @Test
@@ -752,10 +752,10 @@ class ResourceApiControllerTest {
             .put("path", "/" + NON_EXISTENT_ID)
             .put("value", notCreatedResourcePayload);
 
-        var updatedPayload = List.of(operation);
+        var updatedPayload = List.of(operation).toString();
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
-            .isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload.toString()));
+            .isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload));
 
         assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
     }
@@ -812,10 +812,10 @@ class ResourceApiControllerTest {
             .put("path", "/" + getResourceTwo.getId().toString())
             .put("value", updatedResourceTwoPayload);
 
-        var updatedPayload = Arrays.asList(operationOne, operationTwo);
+        var updatedPayload = Arrays.asList(operationOne, operationTwo).toString();
 
 
-        assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.patch(INVALID_TENANT_ID, updatedPayload.toString()));
+        assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.patch(INVALID_TENANT_ID, updatedPayload));
     }
 
     @Test
@@ -869,10 +869,10 @@ class ResourceApiControllerTest {
             .put("op", "replace")
             .put("path", "/" + getResourceTwo.getId().toString())
             .put("value", updatedResourceTwoPayload);
-        var updatedPayload = Arrays.asList(operationOne, operationTwo);
+        var updatedPayload = Arrays.asList(operationOne, operationTwo).toString();
 
 
-        assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload.toString()));
+        assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload));
     }
 
     @Test
@@ -925,9 +925,9 @@ class ResourceApiControllerTest {
             .put("path", "/" + getResourceTwo.getId().toString())
             .put("value", updatedResourceTwoPayload);
 
-        var updatedPayload = Arrays.asList(operationOne, operationTwo);
+        var updatedPayload = Arrays.asList(operationOne, operationTwo).toString();
 
-        var updateResponse = controller.patch(TENANT_ID, updatedPayload.toString());
+        var updateResponse = controller.patch(TENANT_ID, updatedPayload);
 
 
         assertThat(updateResponse.getItems()).hasSize(2);
