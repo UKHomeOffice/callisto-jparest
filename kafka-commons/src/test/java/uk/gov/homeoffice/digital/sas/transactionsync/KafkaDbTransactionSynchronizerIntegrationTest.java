@@ -34,8 +34,6 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
     }
 )
 class KafkaDbTransactionSynchronizerIntegrationTest {
-  private Long profileId;
-  private Long tenantId;
   private static final String PROFILE_NAME = "Original profile";
   private Profile profile;
 
@@ -47,9 +45,8 @@ class KafkaDbTransactionSynchronizerIntegrationTest {
   @BeforeEach
   void setup() {
     TransactionSynchronizationManager.initSynchronization();
-    profileId = new Random().nextLong();
-    tenantId = new Random().nextLong();
-    profile = new Profile(String.valueOf(profileId), String.valueOf(tenantId), PROFILE_NAME);
+    Long tenantId = new Random().nextLong();
+    profile = new Profile(null, String.valueOf(tenantId), PROFILE_NAME);
   }
 
   @Test

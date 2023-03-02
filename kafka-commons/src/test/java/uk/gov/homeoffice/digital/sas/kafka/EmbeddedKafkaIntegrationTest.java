@@ -29,12 +29,11 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 )
 class EmbeddedKafkaIntegrationTest {
 
-  private static final String PROFILE_ID = "profileId";
+  private static final Long PROFILE_ID = 1L;
   private static final String TENANT_ID = "tenantId";
   private static final String PROFILE_NAME = "Original profile";
   private static final String UPDATED_PROFILE_NAME = "Updated profile";
   private static final int CONSUMER_TIMEOUT = 10;
-  private String EXPECTED_CREATE_MESSAGE_PAYLOAD;
   private Profile profile;
 
   @Value("${projectVersion}")
@@ -51,21 +50,22 @@ class EmbeddedKafkaIntegrationTest {
 
   @BeforeEach
   void setup() {
-    profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME);
-    EXPECTED_CREATE_MESSAGE_PAYLOAD = generateExpectedPayload(version, profile, KafkaAction.CREATE);
+    profile = new Profile(null, TENANT_ID, PROFILE_NAME);
   }
 
   @Test
   void shouldSendCreateMessageToTopicFromProducer() throws Exception {
+    profile.setId(PROFILE_ID);
     // GIVEN
-    kafkaProducerService.sendMessage(profile.getId(), profile, KafkaAction.CREATE);
+    kafkaProducerService.sendMessage(PROFILE_ID.toString(), profile, KafkaAction.CREATE);
 
     // WHEN
     boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
 
     // THEN
     assertThat(messageConsumed).isTrue();
-    assertThat(kafkaConsumer.getPayload()).isEqualTo(EXPECTED_CREATE_MESSAGE_PAYLOAD);
+    String expectedUpdateMessagePayload = generateExpectedPayload(version, profile, KafkaAction.CREATE);
+    assertThat(kafkaConsumer.getPayload()).isEqualTo(expectedUpdateMessagePayload);
   }
 
   @Test
@@ -78,7 +78,8 @@ class EmbeddedKafkaIntegrationTest {
 
     // THEN
     assertThat(messageConsumed).isTrue();
-    assertThat(kafkaConsumer.getPayload()).isEqualTo(EXPECTED_CREATE_MESSAGE_PAYLOAD);
+    String expectedUpdateMessagePayload = generateExpectedPayload(version, profile, KafkaAction.CREATE);
+    assertThat(kafkaConsumer.getPayload()).isEqualTo(expectedUpdateMessagePayload);
   }
 
   @Test
@@ -119,9 +120,9 @@ class EmbeddedKafkaIntegrationTest {
         .concat(profile.getClass().getName())
         .concat(", ")
         .concat(version)
-        .concat("\",\"resource\":{\"id\":\"")
-        .concat(profile.getId())
-        .concat("\",\"tenantId\":\"")
+        .concat("\",\"resource\":{\"id\":")
+        .concat(profile.getId().toString())
+        .concat(",\"tenantId\":\"")
         .concat(profile.getTenantId())
         .concat("\",\"name\":\"")
         .concat(profile.getName())
