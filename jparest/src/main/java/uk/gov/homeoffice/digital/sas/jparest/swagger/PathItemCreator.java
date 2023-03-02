@@ -37,11 +37,9 @@ public class PathItemCreator {
   private static final Parameter PAGEABLE_PARAMETER = getParameter(RequestParameter.PAGEABLE);
   private static final Parameter TENANT_ID_PARAMETER = getParameter(RequestParameter.TENANT_ID);
 
-  private static final Map<String, RequestParameter> PARAM_NAME_TO_ENUM_MAP
-      = RequestParameter.getParamNameToEnumMap();
+  private static final Map<String, RequestParameter> PARAM_NAME_TO_ENUM_MAP = RequestParameter.getParamNameToEnumMap();
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PathItemCreator.class);
-
 
   /**
    * Creates documentation for the endpoints of the resource
@@ -138,7 +136,6 @@ public class PathItemCreator {
    */
   public PathItem createRelatedRootPath(String tag, Class<?> clazz) {
 
-
     ApiResponse response = getResourceResponse(clazz);
     ApiResponses responses = new ApiResponses().addApiResponse("200", response);
 
@@ -153,8 +150,10 @@ public class PathItemCreator {
   }
 
   /**
-   * <p>Creates documentation for the endpoints of the resource.
-   * covers delete and put related resources for an individual resource</p>
+   * <p>
+   * Creates documentation for the endpoints of the resource.
+   * covers delete and put related resources for an individual resource
+   * </p>
    *
    * @param tag The tag to group the endpoints together. Expected to be
    *            the simplename of the parent resource
@@ -162,7 +161,6 @@ public class PathItemCreator {
    *
    */
   public PathItem createRelatedItemPath(String tag) {
-
 
     ApiResponses defaultResponses = new ApiResponses().addApiResponse("200", EMPTY_RESPONSE);
 
@@ -184,9 +182,10 @@ public class PathItemCreator {
   }
 
   /**
-   * The {@link ApiResponse} can return any type of resource in its items property.
-   * This method returns a swagger ApiResponse that contains a schema for the {@link ApiResponse}
-   * with its items set to the specified class
+   * The {@link ApiResponse} can return any type of resource in its items
+   * property.This method returns a swagger ApiResponse that contains a
+   * schema for the {@link ApiResponse} with its items set to the
+   * specified class
    *
    * @param clazz The type of items to describe in the schema
    * @return ApiResponse
@@ -205,18 +204,20 @@ public class PathItemCreator {
   }
 
   /**
-   * <p>generates a schema for the ApiResponse.</p>
+   * <p>
+   * generates a schema for the ApiResponse.
+   * </p>
    *
    * @param clazz The type to generate a schema for
-   * @return a schema for the {@link ApiResponse} class with the items property containing
-   *     a schema for the given class
+   * @return a schema for the {@link ApiResponse} class with the items property
+   *         containing a schema for the given class
    */
   private static Schema<?> getTypedApiResponseSchema(Class<?> clazz) {
 
     // Generate a schema for the ApiResponse
     Schema<?> schema = ModelConverters.getInstance()
         .read(new AnnotatedType(uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class)
-        .resolveAsRef(false))
+            .resolveAsRef(false))
         .get("ApiResponse");
 
     // Get the schema for the given class
@@ -233,10 +234,13 @@ public class PathItemCreator {
   }
 
   /**
-   * <p>Generates a parameter for the specified class
-   *based on the given RequestParameter type.</p>
+   * <p>
+   * Generates a parameter for the specified class
+   * based on the given RequestParameter type.
+   * </p>
    *
-   * @param requestParameter the parameter information used to create the Swagger Parameter
+   * @param requestParameter the parameter information used to create the Swagger
+   *                         Parameter
    * @return A Parameter with a schema for the given class
    *
    */
@@ -259,7 +263,8 @@ public class PathItemCreator {
    * based on the given RequestParameter type.
    *
    * @param clazz            The parameter type
-   * @param requestParameter the parameter information used to create the Swagger Parameter
+   * @param requestParameter the parameter information used to create the Swagger
+   *                         Parameter
    * @return A Parameter with an array schema for items of the given class
    *
    */
@@ -279,8 +284,10 @@ public class PathItemCreator {
   }
 
   /**
-   * <p>>This method returns a swagger RequestBody that
-   *    * contains a schema for the specified class.</p>
+   * <p>
+   * >This method returns a swagger RequestBody that
+   * * contains a schema for the specified class.
+   * </p>
    *
    * @param clazz The type of item to describe in the schema
    * @return RequestBody
@@ -291,7 +298,7 @@ public class PathItemCreator {
     var c = new Content();
     var mt = new MediaType();
     Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(
-          null, clazz, null, null);
+        null, clazz, null, null);
     mt.schema(schema);
     c.addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mt);
 
@@ -301,8 +308,10 @@ public class PathItemCreator {
   }
 
   /**
-   * <p>>This method returns a swagger RequestBody that
-   *    * contains a schema for the specified class.</p>
+   * <p>
+   * >This method returns a swagger RequestBody that
+   * * contains a schema for the specified class.
+   * </p>
    *
    * @param clazz The type of item to describe in the schema
    * @return RequestBody
@@ -312,9 +321,20 @@ public class PathItemCreator {
 
     var c = new Content();
     var mt = new MediaType();
-    Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(
-        null, PatchOperation[].class, null, null);
-    mt.schema(schema);
+
+    Schema<?> clazzSchema = SpringDocAnnotationsUtils.extractSchema(
+        null, clazz, null, null);
+
+    Schema<?> patchOperationSchema = ModelConverters.getInstance()
+        .read(new AnnotatedType(PatchOperation.class)
+            .resolveAsRef(false))
+        .get("PatchOperation");
+
+    patchOperationSchema.getProperties().put("value", clazzSchema);
+    ArraySchema arraySchema = new ArraySchema();
+    arraySchema.setItems(patchOperationSchema);
+
+    mt.schema(arraySchema);
     c.addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mt);
 
     var requestBody = new RequestBody();
@@ -323,10 +343,13 @@ public class PathItemCreator {
   }
 
   /**
-   * <p>Generates an empty/unspecified response.</p>
+   * <p>
+   * Generates an empty/unspecified response.
+   * </p>
    *
-   * @return An empty ApiResponse. This will be replaced as the ResourceApiController
-   *     is refined to define all expected response
+   * @return An empty ApiResponse. This will be replaced as the
+   *         ResourceApiController
+   *         is refined to define all expected response
    */
   private static ApiResponse emptyResponse() {
     var deleteResponse = new ApiResponse();
@@ -341,7 +364,9 @@ public class PathItemCreator {
   }
 
   /**
-   * <p>defines parameter representing SpelExpression.</p>
+   * <p>
+   * defines parameter representing SpelExpression.
+   * </p>
    *
    * @return Parameter representing SpelExpression
    *
@@ -374,16 +399,15 @@ public class PathItemCreator {
 
   }
 
-
   private void addParametersToOperation(Operation operation, Parameter... parameters) {
     Arrays.stream(parameters)
-      .sorted(Comparator.comparing(param -> Optional.of(PARAM_NAME_TO_ENUM_MAP.get(
-        param.getName())).orElseThrow(() ->
-        new IllegalArgumentException(
-          String.format("No %s enum constant found for parameter name: %s ",
-              RequestParameter.class.getCanonicalName(), param.getName()))).getOrder()))
+        .sorted(Comparator.comparing(param -> Optional.of(PARAM_NAME_TO_ENUM_MAP.get(
+            param.getName())).orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format("No %s enum constant found for parameter name: %s ",
+                        RequestParameter.class.getCanonicalName(), param.getName())))
+            .getOrder()))
         .forEach(operation::addParametersItem);
   }
-
 
 }
