@@ -100,10 +100,11 @@ public class ResourceApiController<T extends BaseEntity> {
 
     for (PatchOperation<T> patchOperation : ops) {
       validateAndSetTenantIdPayloadMatch(tenantId, patchOperation.getValue());
-      if (!Objects.equals(patchOperation.getOp(), "replace")) { //TODO make a constant for the operation value
+      //TODO make a constant for the operation value
+      if (!Objects.equals(patchOperation.getOp(), "replace")) {
         throw new OperationNotSupportedException(patchOperation.getOp());
       }
-      var id = UUID.fromString(patchOperation.getPath().replace("/",""));
+      var id = UUID.fromString(patchOperation.getPath().replace("/", ""));
       if (!id.equals(patchOperation.getValue().getId())) {
         throw new TenantIdMismatchException(); //TODO make new relevant error
       }
