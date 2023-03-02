@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -22,8 +23,6 @@ import uk.gov.homeoffice.digital.sas.model.Profile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_FAILED_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SUCCESS_MESSAGE;
@@ -36,7 +35,9 @@ import java.util.concurrent.ExecutionException;
 class KafkaProducerServiceTest {
 
   private final static String TOPIC_NAME = "callisto-profile-topic";
-  private final static String PROFILE_ID = "profileId";
+  private final static Long PROFILE_ID = 1L;
+
+  private final static String TENANT_ID = "tenantId";
   private final static String PROFILE_NAME = "profileX";
   private final static String SCHEMA_VERSION = "1.0.0";
   private Profile profile;
@@ -51,32 +52,35 @@ class KafkaProducerServiceTest {
   @Mock
   private KafkaTemplate<String, KafkaEventMessage<Profile>> kafkaTemplate;
 
-  private CompletableFuture<SendResult<String, KafkaEventMessage<Profile>>> responseFuture;
+  @Mock
+  private CompletableFuture<SendResult<String, KafkaEventMessage<Profile>>> responseFutureMock;
+  @Spy
+  private CompletableFuture<SendResult<String, KafkaEventMessage<Profile>>> responseFutureSpy;
+  @Mock
+  SendResult<String, KafkaEventMessage<Profile>> sendResult;
 
   private KafkaProducerService<Profile> kafkaProducerService;
 
   @BeforeEach
   void setup() {
-    profile = new Profile(PROFILE_ID, PROFILE_NAME);
+    profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME);
     kafkaProducerService = new KafkaProducerService<>(kafkaTemplate, TOPIC_NAME, SCHEMA_VERSION);
   }
 
   @ParameterizedTest
   @EnumSource(value = KafkaAction.class)
   void sendMessage_actionOnResource_messageIsSentWithCorrectArguments(KafkaAction action) {
-    responseFuture = mock(CompletableFuture.class);
-
     when(kafkaTemplate.send(any(), any(), any()))
-        .thenReturn(responseFuture);
+        .thenReturn(responseFutureMock);
 
     assertThatNoException().isThrownBy(() ->
-        kafkaProducerService.sendMessage(PROFILE_ID, profile, action));
+        kafkaProducerService.sendMessage(PROFILE_ID.toString(), profile, action));
 
     Mockito.verify(kafkaTemplate)
         .send(topicArgument.capture(), messageKeyArgument.capture(), messageArgument.capture());
 
     assertThat(topicArgument.getValue()).isEqualTo(TOPIC_NAME);
-    assertThat(messageKeyArgument.getValue()).isEqualTo(profile.getId());
+    assertThat(messageKeyArgument.getValue()).isEqualTo(profile.getId().toString());
     assertThat(messageArgument.getValue().getSchema()).isEqualTo(
         String.format(SCHEMA_FORMAT, Profile.class.getCanonicalName(), SCHEMA_VERSION));
     assertThat(messageArgument.getValue().getResource()).isEqualTo(profile);
@@ -91,14 +95,12 @@ class KafkaProducerServiceTest {
 
     List<ILoggingEvent> logList = listAppender.list;
 
-    responseFuture = mock(CompletableFuture.class);
-
     when(kafkaTemplate.send(any(), any(), any()))
-        .thenReturn(responseFuture);
-    Mockito.doThrow(InterruptedException.class).when(responseFuture).get();
+        .thenReturn(responseFutureMock);
+    Mockito.doThrow(InterruptedException.class).when(responseFutureMock).get();
 
-    kafkaProducerService.sendMessage(PROFILE_ID, profile, action);
-    assertThat(responseFuture.isDone()).isFalse();
+    kafkaProducerService.sendMessage(PROFILE_ID.toString(), profile, action);
+    assertThat(responseFutureMock.isDone()).isFalse();
     assertThat(logList.get(0).getMessage()).isEqualTo(String.format(
         KAFKA_FAILED_MESSAGE,
         PROFILE_ID, "callisto-profile-topic",action.toString().toLowerCase()));
@@ -112,14 +114,12 @@ class KafkaProducerServiceTest {
 
     List<ILoggingEvent> logList = listAppender.list;
 
-    responseFuture = mock(CompletableFuture.class);
-
     when(kafkaTemplate.send(any(), any(), any()))
-        .thenReturn(responseFuture);
-    Mockito.doThrow(ExecutionException.class).when(responseFuture).get();
+        .thenReturn(responseFutureMock);
+    Mockito.doThrow(ExecutionException.class).when(responseFutureMock).get();
 
-    kafkaProducerService.sendMessage(PROFILE_ID, profile, action);
-    assertThat(responseFuture.isDone()).isFalse();
+    kafkaProducerService.sendMessage(PROFILE_ID.toString(), profile, action);
+    assertThat(responseFutureMock.isDone()).isFalse();
     assertThat(logList.get(0).getMessage()).isEqualTo(
         String.format(
             KAFKA_FAILED_MESSAGE,
@@ -129,19 +129,16 @@ class KafkaProducerServiceTest {
 
   @ParameterizedTest
   @EnumSource(value = KafkaAction.class)
-  void sendMessage_actionOnResource_onSuccessMessageLogged(KafkaAction action) throws InterruptedException, ExecutionException {
+  void sendMessage_actionOnResource_onSuccessMessageLogged(KafkaAction action) {
     ListAppender<ILoggingEvent> listAppender = getLoggingEventListAppender();
 
     List<ILoggingEvent> logList = listAppender.list;
 
-    responseFuture = spy(CompletableFuture.class);
-    SendResult<String, KafkaEventMessage<Profile>> sendResult = mock(SendResult.class);
+    when(kafkaTemplate.send(any(), any(), any())).thenReturn(responseFutureSpy);
+    when(responseFutureSpy.complete(sendResult)).thenReturn(true);
+    assertThat(responseFutureSpy.isDone()).isTrue();
 
-    when(kafkaTemplate.send(any(), any(), any())).thenReturn(responseFuture);
-    when(responseFuture.complete(sendResult)).thenReturn(true);
-    assertThat(responseFuture.isDone()).isTrue();
-
-    kafkaProducerService.sendMessage(PROFILE_ID, profile,
+    kafkaProducerService.sendMessage(PROFILE_ID.toString(), profile,
         action);
 
     assertThat(logList.get(0).getMessage()).isEqualTo(String.format(
