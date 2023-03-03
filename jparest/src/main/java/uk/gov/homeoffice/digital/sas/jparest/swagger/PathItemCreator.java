@@ -1,5 +1,8 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.homeoffice.digital.sas.jparest.utils.CommonUtils.getFieldNameOrThrow;
+
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.util.AnnotationsUtils;
@@ -198,7 +201,7 @@ public class PathItemCreator {
     var mt = new MediaType();
     Schema<?> responseSchema = getTypedApiResponseSchema(clazz);
     mt.schema(responseSchema);
-    c.addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mt);
+    c.addMediaType(APPLICATION_JSON_VALUE, mt);
     response.content(c);
 
     return response;
@@ -295,22 +298,25 @@ public class PathItemCreator {
    *
    */
   private static RequestBody getRequestBody(Class<?> clazz) {
+    return getRequestBody(SpringDocAnnotationsUtils.extractSchema(
+        null, clazz, null, null));
+  }
 
-    var c = new Content();
-    var mt = new MediaType();
-    Schema<?> schema = SpringDocAnnotationsUtils.extractSchema(
-        null, clazz, null, null);
-    mt.schema(schema);
-    c.addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mt);
+  private static RequestBody getRequestBody(Schema<?> schema) {
+
+    var content = new Content();
+    var mediaType = new MediaType();
+    mediaType.schema(schema);
+    content.addMediaType(APPLICATION_JSON_VALUE, mediaType);
 
     var requestBody = new RequestBody();
-    requestBody.setContent(c);
+    requestBody.setContent(content);
     return requestBody;
   }
 
   /**
    * <p>
-   * >This method returns a swagger RequestBody that
+   * >This method returns a swagger RequestBody for PATCH requests that
    * * contains a schema for the specified class.
    * </p>
    *
@@ -326,21 +332,13 @@ public class PathItemCreator {
     Schema<?> patchOperationSchema = ModelConverters.getInstance()
         .read(new AnnotatedType(PatchOperation.class)
             .resolveAsRef(false))
-        .get("PatchOperation");
+        .get(PatchOperation.class.getSimpleName());
 
-    patchOperationSchema.getProperties().put("value", clazzSchema);
+    patchOperationSchema.getProperties().put(
+            getFieldNameOrThrow(PatchOperation.class, "value"), clazzSchema);
     ArraySchema arraySchema = new ArraySchema();
     arraySchema.setItems(patchOperationSchema);
-
-    var c = new Content();
-    var mt = new MediaType();
-
-    mt.schema(arraySchema);
-    c.addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mt);
-
-    var requestBody = new RequestBody();
-    requestBody.setContent(c);
-    return requestBody;
+    return getRequestBody(arraySchema);
   }
 
   /**
@@ -358,7 +356,7 @@ public class PathItemCreator {
     var deleteMediaType = new MediaType();
     deleteMediaType.schema(new StringSchema());
     deleteContent.addMediaType(
-        org.springframework.http.MediaType.APPLICATION_JSON_VALUE, deleteMediaType);
+        APPLICATION_JSON_VALUE, deleteMediaType);
     deleteResponse.content(deleteContent);
     return deleteResponse;
 

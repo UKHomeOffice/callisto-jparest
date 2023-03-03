@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
+import static uk.gov.homeoffice.digital.sas.jparest.utils.CommonUtils.getFieldNameOrThrow;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_ID_PATH_PARAM;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_RELATED_ID_PATH_PARAM;
 
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
+import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
 import uk.gov.homeoffice.digital.sas.jparest.web.PatchOperation;
 
 /**
@@ -32,9 +34,9 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
   private final ResourceEndpoint endpoint;
   private final PathItemCreator pathItemCreator;
 
-  private static final String API_RESPONSE_SCHEMA_NAME = "ApiResponse";
+  private static final String API_RESPONSE_SCHEMA_NAME = ApiResponse.class.getSimpleName();
 
-  private static final String PATCH_OPERATION_SCHEMA_NAME = "PatchOperation";
+  private static final String PATCH_OPERATION_SCHEMA_NAME = PatchOperation.class.getSimpleName();
 
   @Autowired
   public ResourceOpenApiCustomiser(ResourceEndpoint endpoint, PathItemCreator pathItemCreator) {
@@ -89,11 +91,10 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
     var patchOperationSchema = ensureSchema(components, PATCH_OPERATION_SCHEMA_NAME,
         PatchOperation.class);
 
-    ensureSchema(components, "Metadata",
-        uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
+    ensureSchema(
+            components, ApiResponse.Metadata.class.getSimpleName(), ApiResponse.Metadata.class);
 
-    var pageableSchema = ensureSchema(components,
-        "Pageable", Pageable.class);
+    var pageableSchema = ensureSchema(components, Pageable.class.getSimpleName(), Pageable.class);
     var value = new Pageable(0, DEFAULT_PAGE_SIZE, null);
     pageableSchema.setExample(value);
     return Map.of(API_RESPONSE_SCHEMA_NAME, apiResponseSchema,
@@ -127,7 +128,8 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
           SpringDocAnnotationsUtils.extractSchema(
               components, resource, null, null));
     }
-    patchOperationSchema.getProperties().put("value", composedSchema);
+    patchOperationSchema.getProperties().put(
+            getFieldNameOrThrow(PatchOperation.class, "value"), composedSchema);
   }
 
   private void setParentResourcePaths(OpenAPI openApi,

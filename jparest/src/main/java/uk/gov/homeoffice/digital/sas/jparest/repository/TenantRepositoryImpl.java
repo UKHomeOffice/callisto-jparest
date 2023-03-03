@@ -1,5 +1,7 @@
 package uk.gov.homeoffice.digital.sas.jparest.repository;
 
+import static uk.gov.homeoffice.digital.sas.jparest.utils.CommonUtils.getFieldNameOrThrow;
+
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceUnitUtil;
@@ -11,7 +13,6 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +51,7 @@ public class TenantRepositoryImpl<T>
     super(entityType, entityManager);
     this.entityManager = entityManager;
     this.entityType = entityType;
-    this.tenantIdFieldName = getTenantIdEntityFieldName();
+    this.tenantIdFieldName = getFieldNameOrThrow(BaseEntity.class, "tenantId");
     this.persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
   }
 
@@ -213,14 +214,5 @@ public class TenantRepositoryImpl<T>
     }
 
     return orders;
-  }
-
-  private String getTenantIdEntityFieldName() {
-    return Arrays.stream(BaseEntity.class.getDeclaredFields())
-        .filter(field -> field.getName().equals("tenantId")).findFirst()
-        .orElseThrow(() -> new RuntimeException(
-            String.format("Unable to find the tenant id field within %s class",
-                BaseEntity.class.getSimpleName())))
-        .getName();
   }
 }
