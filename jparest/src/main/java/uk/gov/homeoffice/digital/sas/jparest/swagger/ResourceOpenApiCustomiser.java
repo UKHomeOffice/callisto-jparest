@@ -92,10 +92,12 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
     ensureSchema(components, "Metadata",
         uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
 
-    var pageableSchema = ensureSchema(components, "Pageable", Pageable.class);
+    var pageableSchema = ensureSchema(components,
+        "Pageable", Pageable.class);
     var value = new Pageable(0, DEFAULT_PAGE_SIZE, null);
     pageableSchema.setExample(value);
-    return Map.of(API_RESPONSE_SCHEMA_NAME, apiResponseSchema, PATCH_OPERATION_SCHEMA_NAME, patchOperationSchema);
+    return Map.of(API_RESPONSE_SCHEMA_NAME, apiResponseSchema,
+        PATCH_OPERATION_SCHEMA_NAME, patchOperationSchema);
   }
 
   /**
