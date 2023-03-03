@@ -100,16 +100,13 @@ public class ResourceApiController<T extends BaseEntity> {
     var entities = new ArrayList<T>();
 
     for (PatchOperation<T> patchOperation : ops) {
-      validateAndSetTenantIdPayloadMatch(tenantId, patchOperation.getValue());
+      var entity = patchOperation.getValue();
+      validateAndSetTenantIdPayloadMatch(tenantId, entity);
       //TODO handle null path/null value id
-      var id = UUID.fromString(patchOperation.getPath().replace("/", ""));
-      if (!id.equals(patchOperation.getValue().getId())) {
-        throw new IllegalArgumentException(
-            "The supplied payload value resource id value must match payload id path value");
-      }
+      validateAndSetResourceIdPayloadMatch(UUID.fromString(patchOperation.getPath().replace("/", "")), entity);
 
       if (Objects.equals(patchOperation.getOp(), SupportedPatchOperations.REPLACE.toString())) {
-        entities.add(patchOperation.getValue());
+        entities.add(entity);
       } else {
         throw new OperationNotSupportedException(patchOperation.getOp());
       }
@@ -180,6 +177,17 @@ public class ResourceApiController<T extends BaseEntity> {
 
     } else if (entityTenantId == null) {
       entity.setTenantId(requestTenantId);
+    }
+  }
+
+  private void validateAndSetResourceIdPayloadMatch(UUID requestResourceId, T entity) {
+
+    var entityResourceId = entity.getId();
+    if (entityResourceId != null && !requestResourceId.equals(entityResourceId)) {
+      throw new IllegalArgumentException(
+          "The supplied payload value resource id value must match payload id path value");
+    } else if (entityResourceId == null) {
+      entity.setId(requestResourceId);
     }
   }
 

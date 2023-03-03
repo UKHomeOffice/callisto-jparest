@@ -965,6 +965,51 @@ class ResourceApiControllerTest {
         assertThat(checkResource2).isEqualTo(dummyTwo);
     }
 
+    @Test
+    @Transactional
+    void patch_fieldIsSetToNull_fieldIsSetToNullInResponse()
+        throws JsonProcessingException {
+
+        String createPayload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resource
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponse = controller.create(TENANT_ID, createPayload);
+        assertThat(apiResponse.getItems()).hasSize(1);
+        var createdResource = apiResponse.getItems().get(0);
+
+        //get the newly created resource
+        var getResponse = controller.get(TENANT_ID, createdResource.getId());
+        var getResource = getResponse.getItems().get(0);
+        assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C");
+
+        //create update payload
+        var updatedResource = new DummyEntityC();
+        updatedResource.setDescription(null);
+        updatedResource.setIndex(3L);
+        updatedResource.setId(getResource.getId());
+
+        Object operationOne =
+            new PatchOperation<>("replace", "/" + getResource.getId(), updatedResource);
+
+        var updatedPayload = List.of(operationOne);
+
+        var updateResponse = controller.patch(TENANT_ID, updatedPayload);
+
+        assertThat(updateResponse.getItems()).hasSize(1);
+
+        var dummyOne = updateResponse.getItems().get(0);
+        assertThat(dummyOne).isNotNull();
+        assertThat(dummyOne.getId()).isEqualTo(createdResource.getId());
+        assertThat(dummyOne.getIndex()).isEqualTo(3);
+        assertThat(dummyOne.getDescription()).isNull();
+
+        var checkResponse = controller.get(TENANT_ID, createdResource.getId());
+        var checkResource = checkResponse.getItems().get(0);
+        assertThat(checkResource).isEqualTo(dummyOne);
+    }
+
     // endregion
 
     // region delete
