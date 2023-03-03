@@ -102,7 +102,8 @@ public class ResourceApiController<T extends BaseEntity> {
     for (PatchOperation<T> patchOperation : ops) {
       var entity = patchOperation.getValue();
       validateAndSetTenantIdPayloadMatch(tenantId, entity);
-      validateAndSetResourceIdPayloadMatch(UUID.fromString(patchOperation.getPath().replace("/", "")), entity);
+      validateAndSetResourceIdPayloadMatch(
+          UUID.fromString(patchOperation.getPath().replace("/", "")), entity);
 
       if (Objects.equals(patchOperation.getOp(), SupportedPatchOperations.REPLACE.toString())) {
         entities.add(entity);

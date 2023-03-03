@@ -37,7 +37,8 @@ public class PathItemCreator {
   private static final Parameter PAGEABLE_PARAMETER = getParameter(RequestParameter.PAGEABLE);
   private static final Parameter TENANT_ID_PARAMETER = getParameter(RequestParameter.TENANT_ID);
 
-  private static final Map<String, RequestParameter> PARAM_NAME_TO_ENUM_MAP = RequestParameter.getParamNameToEnumMap();
+  private static final Map<String, RequestParameter> PARAM_NAME_TO_ENUM_MAP =
+      RequestParameter.getParamNameToEnumMap();
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PathItemCreator.class);
 
@@ -319,9 +320,6 @@ public class PathItemCreator {
    */
   private static RequestBody getPatchRequestBody(Class<?> clazz) {
 
-    var c = new Content();
-    var mt = new MediaType();
-
     Schema<?> clazzSchema = SpringDocAnnotationsUtils.extractSchema(
         null, clazz, null, null);
 
@@ -333,6 +331,9 @@ public class PathItemCreator {
     patchOperationSchema.getProperties().put("value", clazzSchema);
     ArraySchema arraySchema = new ArraySchema();
     arraySchema.setItems(patchOperationSchema);
+
+    var c = new Content();
+    var mt = new MediaType();
 
     mt.schema(arraySchema);
     c.addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mt);

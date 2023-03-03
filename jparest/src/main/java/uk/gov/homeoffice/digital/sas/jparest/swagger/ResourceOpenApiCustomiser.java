@@ -52,7 +52,8 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
 
     // Iterate the ResourceEndpoint descriptors to
     // generate documentation for all of the registered endpoints
-    for (Entry<Class<?>, ResourceEndpoint.RootDescriptor> element : endpoint.getDescriptors().entrySet()) {
+    for (Entry<Class<?>, ResourceEndpoint.RootDescriptor> element
+        : endpoint.getDescriptors().entrySet()) {
 
       var clazz = element.getKey();
       var rootDescriptor = element.getValue();
@@ -64,7 +65,8 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
       setParentResourcePaths(openApi, rootDescriptor, clazz, tag);
 
       // Create documentation for relations in the entity
-      for (Entry<Class<? extends BaseEntity>, String> relatedElement : rootDescriptor.getRelations().entrySet()) {
+      for (Entry<Class<? extends BaseEntity>, String> relatedElement :
+          rootDescriptor.getRelations().entrySet()) {
 
         var relatedClazz = relatedElement.getKey();
         var relatedDescriptor = relatedElement.getValue();
@@ -122,8 +124,10 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
     patchOperationSchema.getProperties().put("value", composedSchema);
   }
 
-  private void setParentResourcePaths(OpenAPI openApi, ResourceEndpoint.RootDescriptor rootDescriptor, Class<?> clazz,
-      String tag) {
+  private void setParentResourcePaths(OpenAPI openApi,
+                                      ResourceEndpoint.RootDescriptor rootDescriptor,
+                                      Class<?> clazz,
+                                      String tag) {
     var resourceRootPath = pathItemCreator.createRootPath(tag, clazz);
     openApi.path(rootDescriptor.getPath(), resourceRootPath);
     var resourceItemPath = pathItemCreator.createItemPath(tag, clazz);
@@ -131,8 +135,8 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
   }
 
   private void setRelatedResourcePaths(OpenAPI openApi,
-      String path,
-      Class<?> relatedClazz, String tag) {
+                                       String path,
+                                       Class<?> relatedClazz, String tag) {
 
     var relatedRootPath = pathItemCreator.createRelatedRootPath(tag, relatedClazz);
     openApi.path(path, relatedRootPath);
