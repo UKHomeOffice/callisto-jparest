@@ -102,7 +102,6 @@ public class ResourceApiController<T extends BaseEntity> {
     for (PatchOperation<T> patchOperation : ops) {
       var entity = patchOperation.getValue();
       validateAndSetTenantIdPayloadMatch(tenantId, entity);
-      //TODO handle null path/null value id
       validateAndSetResourceIdPayloadMatch(UUID.fromString(patchOperation.getPath().replace("/", "")), entity);
 
       if (Objects.equals(patchOperation.getOp(), SupportedPatchOperations.REPLACE.toString())) {
@@ -112,7 +111,6 @@ public class ResourceApiController<T extends BaseEntity> {
       }
     }
 
-    //TODO handle null tenant id
     return new ApiResponse<>(service.updateResources(entities, tenantId));
   }
 
