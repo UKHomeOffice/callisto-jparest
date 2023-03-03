@@ -32,6 +32,10 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
   private final ResourceEndpoint endpoint;
   private final PathItemCreator pathItemCreator;
 
+  private static final String API_RESPONSE_SCHEMA_NAME = "ApiResponse";
+
+  private static final String PATCH_OPERATION_SCHEMA_NAME = "PatchOperation";
+
   @Autowired
   public ResourceOpenApiCustomiser(ResourceEndpoint endpoint, PathItemCreator pathItemCreator) {
     this.endpoint = endpoint;
@@ -47,8 +51,8 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
     var components = openApi.getComponents();
     var schemas = registerSchema(components);
 
-    setResponseSchema(schemas.get("ApiResponse"), components);
-    setPatchOperationSchema(schemas.get("PatchOperation"), components);
+    setResponseSchema(schemas.get(API_RESPONSE_SCHEMA_NAME), components);
+    setPatchOperationSchema(schemas.get(PATCH_OPERATION_SCHEMA_NAME), components);
 
     // Iterate the ResourceEndpoint descriptors to
     // generate documentation for all of the registered endpoints
@@ -79,10 +83,10 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
    * Ensures the ApiResponse schema is registered along with the metadata schema.
    */
   private static Map<String, Schema<?>> registerSchema(Components components) {
-    var apiResponseSchema = ensureSchema(components, "ApiResponse",
+    var apiResponseSchema = ensureSchema(components, API_RESPONSE_SCHEMA_NAME,
         uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
 
-    var patchOperationSchema = ensureSchema(components, "PatchOperation",
+    var patchOperationSchema = ensureSchema(components, PATCH_OPERATION_SCHEMA_NAME,
         PatchOperation.class);
 
     ensureSchema(components, "Metadata",
@@ -91,7 +95,7 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
     var pageableSchema = ensureSchema(components, "Pageable", Pageable.class);
     var value = new Pageable(0, DEFAULT_PAGE_SIZE, null);
     pageableSchema.setExample(value);
-    return Map.of("ApiResponse", apiResponseSchema, "PatchOperation", patchOperationSchema);
+    return Map.of(API_RESPONSE_SCHEMA_NAME, apiResponseSchema, PATCH_OPERATION_SCHEMA_NAME, patchOperationSchema);
   }
 
   /**
