@@ -3,7 +3,6 @@ package uk.gov.homeoffice.digital.sas.jparest.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
-import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -659,20 +658,18 @@ class ResourceApiControllerTest {
         assertThat(checkResource2).isEqualTo(dummyTwo);
     }
 
-//    @ParameterizedTest(name="{0}")
-//    @MethodSource("invalidPayloads")
-//    @Transactional
-//    void patch_invalidPayload_jsonExceptionThrown(String payload) {
-//        var controller = getResourceApiController(DummyEntityA.class);
-//        assertThatExceptionOfType(JsonProcessingException.class).isThrownBy(() -> controller.patch(TENANT_ID, payload));
-//    }
-//
-//    @ParameterizedTest(name="{0}")
-//    @MethodSource("invalidBatchProperty")
-//    void patch_unrecognizedPropertyOnPayload_unknownResourcePropertyExceptionThrown(String payload) {
-//        var controller = getResourceApiController(DummyEntityA.class);
-//        assertThatExceptionOfType(UnknownResourcePropertyException.class).isThrownBy(() -> controller.patch(TENANT_ID, payload));
-//    }
+    @Test
+    @Transactional
+    void patch_invalidPayloadOperation_illegalArgumentExceptionThrown() {
+        var controller = getResourceApiController(DummyEntityA.class);
+
+        Object object = new DummyEntityA();
+
+        var payload = Arrays.asList(object);
+        var id = UUID.randomUUID();
+
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> controller.patch(id, payload));
+    }
 
     @Test
     @Transactional

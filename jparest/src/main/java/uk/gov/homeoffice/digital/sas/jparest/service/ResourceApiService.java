@@ -90,7 +90,6 @@ public class ResourceApiService<T extends BaseEntity> {
       var originalEntities = repository.findByTenantIdAndIds(tenantId, ids);
 
       if (originalEntities.size() != entities.size()) {
-        //TODO does this need to include the specific ids?
         throw new ResourceNotFoundException();
       }
 

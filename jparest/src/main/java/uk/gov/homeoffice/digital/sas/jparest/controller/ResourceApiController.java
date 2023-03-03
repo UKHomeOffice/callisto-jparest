@@ -95,7 +95,7 @@ public class ResourceApiController<T extends BaseEntity> {
   public ApiResponse<T> patch(@RequestParam UUID tenantId,
                                @RequestBody List<Object> body) {
 
-    var ops = readEntitiesFromPayload(body);
+    var ops = readPatchOperationsFromPayload(body);
 
     var entities = new ArrayList<T>();
 
@@ -153,7 +153,7 @@ public class ResourceApiController<T extends BaseEntity> {
     }
   }
 
-  private List<PatchOperation<T>> readEntitiesFromPayload(List<Object> body) {
+  private List<PatchOperation<T>> readPatchOperationsFromPayload(List<Object> body) {
     try {
       var opList = new ArrayList<PatchOperation<T>>();
       var patchOperationType = objectMapper.getTypeFactory().constructParametricType(
@@ -163,8 +163,8 @@ public class ResourceApiController<T extends BaseEntity> {
         opList.add(objectMapper.convertValue(ob, patchOperationType));
       }
       return opList;
-    } catch (Exception ex) { //TODO catch correct exception
-      throw new UnknownResourcePropertyException();
+    } catch (IllegalArgumentException ex) {
+      throw new IllegalArgumentException();
     }
   }
 
