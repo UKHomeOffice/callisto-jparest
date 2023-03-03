@@ -159,9 +159,9 @@ public class ResourceApiController<T extends BaseEntity> {
       var patchOperationType = objectMapper.getTypeFactory().constructParametricType(
           PatchOperation.class,
           entityType);
-      for (Object ob : body) {
-        opList.add(objectMapper.convertValue(ob, patchOperationType));
-      }
+
+      body.forEach(ob -> opList.add(objectMapper.convertValue(ob, patchOperationType)));
+
       return opList;
     } catch (IllegalArgumentException ex) {
       throw new IllegalArgumentException();
