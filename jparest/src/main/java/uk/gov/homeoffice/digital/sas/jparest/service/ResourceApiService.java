@@ -87,7 +87,7 @@ public class ResourceApiService<T extends BaseEntity> {
 
       var originalEntities = repository.findByTenantIdAndIds(
           tenantId,
-          new ArrayList<>(mappedEntities.keySet()));
+          mappedEntities.keySet());
 
       if (originalEntities.size() != entities.size()) {
         throw new ResourceNotFoundException();
