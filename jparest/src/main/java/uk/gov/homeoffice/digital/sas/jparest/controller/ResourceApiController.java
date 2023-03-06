@@ -154,18 +154,14 @@ public class ResourceApiController<T extends BaseEntity> {
   }
 
   private List<PatchOperation<T>> readPatchOperationsFromPayload(List<Object> body) {
-    try {
-      var opList = new ArrayList<PatchOperation<T>>();
-      var patchOperationType = objectMapper.getTypeFactory().constructParametricType(
-          PatchOperation.class,
-          entityType);
+    var opList = new ArrayList<PatchOperation<T>>();
+    var patchOperationType = objectMapper.getTypeFactory().constructParametricType(
+        PatchOperation.class,
+        entityType);
 
-      body.forEach(ob -> opList.add(objectMapper.convertValue(ob, patchOperationType)));
+    body.forEach(ob -> opList.add(objectMapper.convertValue(ob, patchOperationType)));
 
-      return opList;
-    } catch (IllegalArgumentException ex) {
-      throw new IllegalArgumentException();
-    }
+    return opList;
   }
 
   private void validateAndSetTenantIdPayloadMatch(UUID requestTenantId, T entity) {

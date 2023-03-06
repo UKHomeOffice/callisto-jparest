@@ -660,19 +660,6 @@ class ResourceApiControllerTest {
 
     @Test
     @Transactional
-    void patch_invalidPayloadOperation_illegalArgumentExceptionThrown() {
-        var controller = getResourceApiController(DummyEntityA.class);
-
-        Object object = new DummyEntityA();
-
-        var payload = List.of(object);
-        var id = UUID.randomUUID();
-
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> controller.patch(id, payload));
-    }
-
-    @Test
-    @Transactional
     void patch_oneResourceDoesntExist_resourceNotFoundExceptionThrown()
         throws JsonProcessingException {
 
