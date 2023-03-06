@@ -1,6 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.service;
 
-import java.util.HashMap;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -192,10 +192,7 @@ class ResourceApiServiceTest<T extends BaseEntity> {
     var newDummyAResource = (DummyEntityA) newResource;
     newDummyAResource.setProfileId(1L);
 
-    var map = new HashMap<UUID, T>();
-    map.put(newResource.getId(), newResource);
-
-    when(repository.findByTenantIdAndIds(newResource.getTenantId(), map.keySet()))
+    when(repository.findByTenantIdAndIds(newResource.getTenantId(), Set.of(newResource.getId())))
         .thenReturn(List.of(existingResource));
 
     resourceApiService.updateResources(List.of(newResource), TENANT_ID);
