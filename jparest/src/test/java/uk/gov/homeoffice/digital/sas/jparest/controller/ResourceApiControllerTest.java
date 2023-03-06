@@ -2,6 +2,7 @@ package uk.gov.homeoffice.digital.sas.jparest.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,6 +31,7 @@ import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntit
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityC;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityD;
 import uk.gov.homeoffice.digital.sas.jparest.entityutils.testentities.DummyEntityF;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.OperationNotSupportedException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceConstraintViolationException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundExceptionMessageUtil;
@@ -52,6 +54,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import uk.gov.homeoffice.digital.sas.jparest.web.PatchOperation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -98,14 +101,14 @@ class ResourceApiControllerTest {
 
     private static final UUID TENANT_ID = UUID.fromString("b7e813a2-bb28-11ec-8422-0242ac120002");
     private static final UUID INVALID_TENANT_ID = UUID.fromString("7a7c7da4-bb29-11ec-1003-0242ac120004");
-    
+
     private static final String ID_FIELD_NAME = "id";
     private static final String TENANT_ID_FIELD_NAME = "tenantId";
     private static final String DESCRIPTION_FIELD_NAME = "description";
     private static final String INDEX_FIELD_NAME = "index";
     private static final String PROFILE_ID_FIELD_NAME = "profileId";
     private static final String DUMMY_B_SET_FIELD_NAME = "dummyEntityBSet";
-    
+
     private static final String RESOURCE_NOT_FOUND_ERROR_FORMAT = "Resource with id: %s was not found";
 
     @Test
@@ -384,7 +387,7 @@ class ResourceApiControllerTest {
         assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.update(TENANT_ID, NON_EXISTENT_ID, "{}"));
     }
 
-    @Test    
+    @Test
     void update_resourceDoesntExist_noActiveTransactionFound() {
         var controller = getResourceApiController(DummyEntityA.class);
 
@@ -392,7 +395,7 @@ class ResourceApiControllerTest {
                         .isThrownBy(() -> controller.update(TENANT_ID, NON_EXISTENT_ID, "{}"));
 
         assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
-    }    
+    }
 
     @Test
     @Transactional
@@ -472,14 +475,14 @@ class ResourceApiControllerTest {
         assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.update(INVALID_TENANT_ID, id, updatedPayload));
     }
 
-    @Test    
-    void update_requestTenantIdDoesNotMatchResourceTenantId_noActiveTransactionFound() {      
+    @Test
+    void update_requestTenantIdDoesNotMatchResourceTenantId_noActiveTransactionFound() {
         var controller = getResourceApiController(DummyEntityA.class);
-        
+
         assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.update(INVALID_TENANT_ID, DUMMY_A_ID_1, "{}"));
 
         assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
-    }    
+    }
 
     @Test
     @Transactional
@@ -562,7 +565,7 @@ class ResourceApiControllerTest {
 
         var resourceApiService = new ResourceApiService<>(
                 entityUtils,
-                new TenantRepositoryImpl<DummyEntityC>(DummyEntityC.class, entityManager),
+            new TenantRepositoryImpl<>(DummyEntityC.class, entityManager),
                 mockedEntityValidator,
                 new TransactionTemplate(transactionManager));
 
@@ -578,6 +581,464 @@ class ResourceApiControllerTest {
         verify(mockedEntityValidator, times(2)).validateAndThrowIfErrorsExist(payloadCaptor.capture());
         assertThat(payloadCaptor.getAllValues()).hasSize(2);
         assertThat(payloadCaptor.getAllValues().get(1).getId()).isEqualTo(resource.getId());
+    }
+
+    // endregion
+
+    // region patch
+    @Test
+    @Transactional
+    void patch_resourcesExist_persistsChanges() throws JsonProcessingException {
+
+        String payloadOne = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C One",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+        String payloadTwo = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C Two",
+            INDEX_FIELD_NAME, 2, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resources
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponseOne = controller.create(TENANT_ID, payloadOne);
+        assertThat(apiResponseOne.getItems()).hasSize(1);
+        var createdResource = apiResponseOne.getItems().get(0);
+
+        var apiResponseTwo = controller.create(TENANT_ID, payloadTwo);
+        assertThat(apiResponseTwo.getItems()).hasSize(1);
+        var createdResource2 = apiResponseTwo.getItems().get(0);
+
+        //get the newly created resources
+        var getResponseOne = controller.get(TENANT_ID, createdResource.getId());
+        var getResourceOne = getResponseOne.getItems().get(0);
+        assertThat(getResourceOne.getDescription()).isEqualTo("Dummy Entity C One");
+
+        var getResponseTwo = controller.get(TENANT_ID, createdResource2.getId());
+        var getResourceTwo = getResponseTwo.getItems().get(0);
+        assertThat(getResourceTwo.getDescription()).isEqualTo("Dummy Entity C Two");
+
+        //create update payload
+        var updatedResourceOne = new DummyEntityC();
+        updatedResourceOne.setDescription("Updated Dummy Entity C One");
+        updatedResourceOne.setIndex(2L);
+        updatedResourceOne.setId(getResourceOne.getId());
+
+        var updatedResourceTwo = new DummyEntityC();
+        updatedResourceTwo.setDescription("Updated Dummy Entity C Two");
+        updatedResourceTwo.setIndex(3L);
+        updatedResourceTwo.setId(getResourceTwo.getId());
+
+        Object operationOne =
+            new PatchOperation<>("replace", "/" + getResourceOne.getId().toString(), updatedResourceOne);
+        Object operationTwo =
+            new PatchOperation<>("replace", "/" + getResourceTwo.getId().toString(), updatedResourceTwo);
+
+        var updatedPayload = Arrays.asList(operationOne, operationTwo);
+
+        var updateResponse = controller.patch(TENANT_ID, updatedPayload);
+
+
+        assertThat(updateResponse.getItems()).hasSize(2);
+
+        var dummyOne = updateResponse.getItems().get(0);
+        assertThat(dummyOne).isNotNull();
+        assertThat(dummyOne.getId()).isEqualTo(createdResource.getId());
+        assertThat(dummyOne.getIndex()).isEqualTo(2);
+        assertThat(dummyOne.getDescription()).isEqualTo("Updated Dummy Entity C One");
+
+        var dummyTwo = updateResponse.getItems().get(1);
+        assertThat(dummyTwo).isNotNull();
+        assertThat(dummyTwo.getId()).isEqualTo(createdResource2.getId());
+        assertThat(dummyTwo.getIndex()).isEqualTo(3);
+        assertThat(dummyTwo.getDescription()).isEqualTo("Updated Dummy Entity C Two");
+
+        var checkResponse = controller.get(TENANT_ID, createdResource.getId());
+        var checkResource = checkResponse.getItems().get(0);
+        assertThat(checkResource).isEqualTo(dummyOne);
+
+        var checkResponse2 = controller.get(TENANT_ID, createdResource2.getId());
+        var checkResource2 = checkResponse2.getItems().get(0);
+        assertThat(checkResource2).isEqualTo(dummyTwo);
+    }
+
+    @Test
+    @Transactional
+    void patch_oneResourceDoesntExist_resourceNotFoundExceptionThrown()
+        throws JsonProcessingException {
+
+        String createPayload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resource
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponse = controller.create(TENANT_ID, createPayload);
+        assertThat(apiResponse.getItems()).hasSize(1);
+        var createdResource = apiResponse.getItems().get(0);
+
+        //get the newly created resource
+        var getResponse = controller.get(TENANT_ID, createdResource.getId());
+        var getResource = getResponse.getItems().get(0);
+        assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C");
+
+        //create update payload
+        var updatedResourceOne = new DummyEntityC();
+        updatedResourceOne.setDescription("Updated Dummy Entity C One");
+        updatedResourceOne.setIndex(2L);
+        updatedResourceOne.setId(createdResource.getId());
+
+        var notCreatedResource = new DummyEntityC();
+        notCreatedResource.setId(NON_EXISTENT_ID);
+        notCreatedResource.setDescription("Updated Dummy Entity C Two");
+        notCreatedResource.setIndex(3L);
+
+        Object operationOne =
+            new PatchOperation<>("replace", "/" + createdResource.getId().toString(), updatedResourceOne);
+        Object operationTwo =
+            new PatchOperation<>("replace", "/" + notCreatedResource.getId().toString(), notCreatedResource);
+
+        var updatedPayload = Arrays.asList(operationOne, operationTwo);
+
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload));
+    }
+
+    @Test
+    @Transactional
+    void patch_unsupportedOperation_operationNotSupportedExceptionThrown()
+        throws JsonProcessingException {
+
+        String createPayload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resource
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponse = controller.create(TENANT_ID, createPayload);
+        assertThat(apiResponse.getItems()).hasSize(1);
+        var createdResource = apiResponse.getItems().get(0);
+
+        //get the newly created resource
+        var getResponse = controller.get(TENANT_ID, createdResource.getId());
+        var getResource = getResponse.getItems().get(0);
+        assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C");
+
+        //create update payload
+        Object operationOne =
+            new PatchOperation<>("foo", "/" + createdResource.getId().toString(), createdResource);
+
+        var updatedPayload = List.of(operationOne);
+
+        assertThatExceptionOfType(OperationNotSupportedException.class).isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload));
+    }
+
+    @Test
+    @Transactional
+    void patch_pathIdDoesNotMatchValueId_illegalArgumentExceptionThrown()
+        throws JsonProcessingException {
+
+        String createPayload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resource
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponse = controller.create(TENANT_ID, createPayload);
+        assertThat(apiResponse.getItems()).hasSize(1);
+        var createdResource = apiResponse.getItems().get(0);
+
+        //get the newly created resource
+        var getResponse = controller.get(TENANT_ID, createdResource.getId());
+        var getResource = getResponse.getItems().get(0);
+        assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C");
+
+        //create update payload
+        Object operationOne =
+            new PatchOperation<>("replace", "/" + NON_EXISTENT_ID, createdResource);
+
+        var updatedPayload = List.of(operationOne);
+
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload));
+    }
+
+    @Test
+    @Transactional
+    void patch_valueIdNotPresent_changePersisted()
+        throws JsonProcessingException {
+
+        String createPayload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resource
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponse = controller.create(TENANT_ID, createPayload);
+        assertThat(apiResponse.getItems()).hasSize(1);
+        var createdResource = apiResponse.getItems().get(0);
+
+        //get the newly created resource
+        var getResponse = controller.get(TENANT_ID, createdResource.getId());
+        var getResource = getResponse.getItems().get(0);
+        assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C");
+
+        //create update payload
+        var updatedResource = new DummyEntityC();
+        updatedResource.setDescription("Updated Dummy Entity C");
+        updatedResource.setIndex(2L);
+        updatedResource.setId(null);
+        updatedResource.setTenantId(TENANT_ID);
+
+        Object operationOne =
+            new PatchOperation<>("replace", "/" + getResource.getId(), updatedResource);
+
+        var updatedPayload = List.of(operationOne);
+
+        var updateResponse = controller.patch(TENANT_ID, updatedPayload);
+
+
+        assertThat(updateResponse.getItems()).hasSize(1);
+
+        var dummyOne = updateResponse.getItems().get(0);
+        assertThat(dummyOne).isNotNull();
+        assertThat(dummyOne.getId()).isEqualTo(createdResource.getId());
+        assertThat(dummyOne.getIndex()).isEqualTo(2);
+        assertThat(dummyOne.getDescription()).isEqualTo("Updated Dummy Entity C");
+
+        var checkResponse = controller.get(TENANT_ID, createdResource.getId());
+        var checkResource = checkResponse.getItems().get(0);
+        assertThat(checkResource).isEqualTo(dummyOne);
+    }
+
+    @Test
+    void patch_resourceDoesntExist_noActiveTransactionFound() {
+        var controller = getResourceApiController(DummyEntityC.class);
+
+        var notCreatedResource = new DummyEntityC();
+        notCreatedResource.setId(NON_EXISTENT_ID);
+        notCreatedResource.setDescription("Updated Dummy Entity C Two");
+        notCreatedResource.setIndex(3L);
+
+        Object operation =
+            new PatchOperation<>("replace", "/" + notCreatedResource.getId().toString(), notCreatedResource);
+
+        var updatedPayload = List.of(operation);
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+            .isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload));
+
+        assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+    }
+
+    @Test
+    @Transactional
+    void patch_requestTenantIdDoesNotMatchOneResourceTenantId_tenantIdMismatchExceptionThrown()
+        throws JsonProcessingException {
+
+        String payloadOne = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C One",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+        String payloadTwo = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C Two",
+            INDEX_FIELD_NAME, 2, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resources
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponseOne = controller.create(TENANT_ID, payloadOne);
+        assertThat(apiResponseOne.getItems()).hasSize(1);
+        var createdResource = apiResponseOne.getItems().get(0);
+
+        var apiResponseTwo = controller.create(TENANT_ID, payloadTwo);
+        assertThat(apiResponseTwo.getItems()).hasSize(1);
+        var createdResource2 = apiResponseTwo.getItems().get(0);
+
+        //get the newly created resources
+        var getResponseOne = controller.get(TENANT_ID, createdResource.getId());
+        var getResourceOne = getResponseOne.getItems().get(0);
+        assertThat(getResourceOne.getDescription()).isEqualTo("Dummy Entity C One");
+
+        var getResponseTwo = controller.get(TENANT_ID, createdResource2.getId());
+        var getResourceTwo = getResponseTwo.getItems().get(0);
+        assertThat(getResourceTwo.getDescription()).isEqualTo("Dummy Entity C Two");
+
+        //create update payload
+        var updatedResourceOne = new DummyEntityC();
+        updatedResourceOne.setDescription("Updated Dummy Entity C One");
+        updatedResourceOne.setIndex(2L);
+        updatedResourceOne.setId(getResourceOne.getId());
+        updatedResourceOne.setTenantId(TENANT_ID);
+
+        var updatedResourceTwo = new DummyEntityC();
+        updatedResourceTwo.setDescription("Updated Dummy Entity C Two");
+        updatedResourceTwo.setIndex(3L);
+        updatedResourceTwo.setId(getResourceTwo.getId());
+        updatedResourceTwo.setTenantId(TENANT_ID);
+
+        Object operationOne =
+            new PatchOperation<>("replace", "/" + getResourceOne.getId().toString(), updatedResourceOne);
+        Object operationTwo =
+            new PatchOperation<>("replace", "/" + getResourceTwo.getId().toString(), updatedResourceTwo);
+
+        var updatedPayload = Arrays.asList(operationOne, operationTwo);
+
+        assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.patch(INVALID_TENANT_ID, updatedPayload));
+    }
+
+    @Test
+    @Transactional
+    void patch_payloadTenantIdDoesNotMatchOneResourceTenantId_tenantIdMismatchExceptionThrown()
+        throws JsonProcessingException {
+
+        String payloadOne = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C One",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+        String payloadTwo = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C Two",
+            INDEX_FIELD_NAME, 2, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resources
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponseOne = controller.create(TENANT_ID, payloadOne);
+        assertThat(apiResponseOne.getItems()).hasSize(1);
+        var createdResource = apiResponseOne.getItems().get(0);
+
+        var apiResponseTwo = controller.create(TENANT_ID, payloadTwo);
+        assertThat(apiResponseTwo.getItems()).hasSize(1);
+        var createdResource2 = apiResponseTwo.getItems().get(0);
+
+        //get the newly created resources
+        var getResponseOne = controller.get(TENANT_ID, createdResource.getId());
+        var getResourceOne = getResponseOne.getItems().get(0);
+        assertThat(getResourceOne.getDescription()).isEqualTo("Dummy Entity C One");
+
+        var getResponseTwo = controller.get(TENANT_ID, createdResource2.getId());
+        var getResourceTwo = getResponseTwo.getItems().get(0);
+        assertThat(getResourceTwo.getDescription()).isEqualTo("Dummy Entity C Two");
+
+        //create update payload
+        var updatedResourceOne = new DummyEntityC();
+        updatedResourceOne.setDescription("Updated Dummy Entity C One");
+        updatedResourceOne.setIndex(2L);
+        updatedResourceOne.setId(getResourceOne.getId());
+        updatedResourceOne.setTenantId(INVALID_TENANT_ID);
+
+        var updatedResourceTwo = new DummyEntityC();
+        updatedResourceTwo.setDescription("Updated Dummy Entity C Two");
+        updatedResourceTwo.setIndex(3L);
+        updatedResourceTwo.setId(getResourceTwo.getId());
+
+        Object operationOne =
+            new PatchOperation<>("replace", "/" + getResourceOne.getId().toString(), updatedResourceOne);
+        Object operationTwo =
+            new PatchOperation<>("replace", "/" + getResourceTwo.getId().toString(), updatedResourceTwo);
+
+        var updatedPayload = Arrays.asList(operationOne, operationTwo);
+
+        assertThatExceptionOfType(TenantIdMismatchException.class).isThrownBy(() -> controller.patch(TENANT_ID, updatedPayload));
+    }
+
+    @Test
+    @Transactional
+    void patch_tenantIdInRequestButNotPayload_persistsChanges()
+        throws JsonProcessingException {
+
+        String payloadOne = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C One",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+        String payloadTwo = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C Two",
+            INDEX_FIELD_NAME, 2, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resources
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponseOne = controller.create(TENANT_ID, payloadOne);
+        assertThat(apiResponseOne.getItems()).hasSize(1);
+        var createdResource = apiResponseOne.getItems().get(0);
+
+        var apiResponseTwo = controller.create(TENANT_ID, payloadTwo);
+        assertThat(apiResponseTwo.getItems()).hasSize(1);
+        var createdResource2 = apiResponseTwo.getItems().get(0);
+
+        //get the newly created resources
+        var getResponseOne = controller.get(TENANT_ID, createdResource.getId());
+        var getResourceOne = getResponseOne.getItems().get(0);
+        assertThat(getResourceOne.getDescription()).isEqualTo("Dummy Entity C One");
+
+        var getResponseTwo = controller.get(TENANT_ID, createdResource2.getId());
+        var getResourceTwo = getResponseTwo.getItems().get(0);
+        assertThat(getResourceTwo.getDescription()).isEqualTo("Dummy Entity C Two");
+
+        //create update payload
+        var updatedResourceOne = new DummyEntityC();
+        updatedResourceOne.setDescription("Updated Dummy Entity C One");
+        updatedResourceOne.setIndex(3L);
+        updatedResourceOne.setId(getResourceOne.getId());
+
+        var updatedResourceTwo = new DummyEntityC();
+        updatedResourceTwo.setDescription("Updated Dummy Entity C Two");
+        updatedResourceTwo.setIndex(2L);
+        updatedResourceTwo.setId(getResourceTwo.getId());
+
+        Object operationOne =
+            new PatchOperation<>("replace", "/" + getResourceOne.getId().toString(), updatedResourceOne);
+        Object operationTwo =
+            new PatchOperation<>("replace", "/" + getResourceTwo.getId().toString(), updatedResourceTwo);
+
+        var updatedPayload = Arrays.asList(operationOne, operationTwo);
+
+        var updateResponse = controller.patch(TENANT_ID, updatedPayload);
+
+        assertThat(updateResponse.getItems()).hasSize(2);
+
+        var dummyOne = updateResponse.getItems().get(0);
+        assertThat(dummyOne).isNotNull();
+        assertThat(dummyOne.getId()).isEqualTo(createdResource.getId());
+        assertThat(dummyOne.getIndex()).isEqualTo(3);
+        assertThat(dummyOne.getDescription()).isEqualTo("Updated Dummy Entity C One");
+
+        var dummyTwo = updateResponse.getItems().get(1);
+        assertThat(dummyTwo).isNotNull();
+        assertThat(dummyTwo.getId()).isEqualTo(createdResource2.getId());
+        assertThat(dummyTwo.getIndex()).isEqualTo(2);
+        assertThat(dummyTwo.getDescription()).isEqualTo("Updated Dummy Entity C Two");
+
+        var checkResponse = controller.get(TENANT_ID, createdResource.getId());
+        var checkResource = checkResponse.getItems().get(0);
+        assertThat(checkResource).isEqualTo(dummyOne);
+
+        var checkResponse2 = controller.get(TENANT_ID, createdResource2.getId());
+        var checkResource2 = checkResponse2.getItems().get(0);
+        assertThat(checkResource2).isEqualTo(dummyTwo);
+    }
+
+    @Test
+    @Transactional
+    void patch_fieldIsSetToNull_fieldIsSetToNullInResponse()
+        throws JsonProcessingException {
+
+        String createPayload = PayloadCreator.createPayload(Map.of(DESCRIPTION_FIELD_NAME, "Dummy Entity C",
+            INDEX_FIELD_NAME, 1, TENANT_ID_FIELD_NAME, TENANT_ID));
+
+        //create new resource
+        var controller = getResourceApiController(DummyEntityC.class);
+        var apiResponse = controller.create(TENANT_ID, createPayload);
+        assertThat(apiResponse.getItems()).hasSize(1);
+        var createdResource = apiResponse.getItems().get(0);
+
+        //get the newly created resource
+        var getResponse = controller.get(TENANT_ID, createdResource.getId());
+        var getResource = getResponse.getItems().get(0);
+        assertThat(getResource.getDescription()).isEqualTo("Dummy Entity C");
+
+        //create update payload
+        var updatedResource = new DummyEntityC();
+        updatedResource.setDescription(null);
+        updatedResource.setIndex(3L);
+        updatedResource.setId(getResource.getId());
+
+        Object operationOne =
+            new PatchOperation<>("replace", "/" + getResource.getId(), updatedResource);
+
+        var updatedPayload = List.of(operationOne);
+
+        var updateResponse = controller.patch(TENANT_ID, updatedPayload);
+
+        assertThat(updateResponse.getItems()).hasSize(1);
+
+        var dummyOne = updateResponse.getItems().get(0);
+        assertThat(dummyOne).isNotNull();
+        assertThat(dummyOne.getId()).isEqualTo(createdResource.getId());
+        assertThat(dummyOne.getIndex()).isEqualTo(3);
+        assertThat(dummyOne.getDescription()).isNull();
+
+        var checkResponse = controller.get(TENANT_ID, createdResource.getId());
+        var checkResource = checkResponse.getItems().get(0);
+        assertThat(checkResource).isEqualTo(dummyOne);
     }
 
     // endregion
@@ -725,7 +1186,7 @@ class ResourceApiControllerTest {
         var relatedIds = List.of(DUMMY_B_ID_3, NON_EXISTENT_ID, NON_EXISTENT_ID_2);
 
         assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() ->
-                controller.addRelated(TENANT_ID, 
+                controller.addRelated(TENANT_ID,
                         DUMMY_A_ID_10,
                         DUMMY_B_SET_FIELD_NAME,
                         relatedIds))
@@ -856,7 +1317,7 @@ class ResourceApiControllerTest {
 
         var relatedIds = List.of(DUMMY_B_ID_3, DUMMY_B_ID_4, DUMMY_B_ID_2);
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> controllerA.deleteRelated(TENANT_ID, 
+                .isThrownBy(() -> controllerA.deleteRelated(TENANT_ID,
                         DUMMY_A_ID_1, DUMMY_B_SET_FIELD_NAME, relatedIds))
                 .withMessageContainingAll(
                         "No related",
@@ -946,6 +1407,15 @@ class ResourceApiControllerTest {
                 Arguments.of(named("string not quoted and property is invalid", "{ \"someProp\": [ unquoted string ] }"))
         );
     }
+
+    private static Stream<Arguments> invalidBatchProperty() {
+        return Stream.of(
+            Arguments.of(named("invalid property",  "[{\"someProp\": \"someValue\"}]")),
+            Arguments.of(named("array not closed and property is invalid", "[{ \"someProp\": [ \"string\" }]")),
+            Arguments.of(named("string not quoted and property is invalid", "[{ \"someProp\": [ unquoted string ] }]"))
+        );
+    }
+
     // endregion
 
     private <T extends BaseEntity, U> ResourceApiController<T> getResourceApiController(Class<T> clazz) {

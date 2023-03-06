@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.jparest.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -14,11 +15,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import uk.gov.homeoffice.digital.sas.jparest.exceptions.OperationNotSupportedException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.TenantIdMismatchException;
 import uk.gov.homeoffice.digital.sas.jparest.exceptions.UnknownResourcePropertyException;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 import uk.gov.homeoffice.digital.sas.jparest.service.ResourceApiService;
 import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
+import uk.gov.homeoffice.digital.sas.jparest.web.PatchOperation;
+import uk.gov.homeoffice.digital.sas.jparest.web.SupportedPatchOperations;
 
 /**
  * Spring MVC controller that exposes JPA entities
@@ -88,6 +92,29 @@ public class ResourceApiController<T extends BaseEntity> {
     return new ApiResponse<>(service.updateResource(entity));
   }
 
+  public ApiResponse<T> patch(@RequestParam UUID tenantId,
+                               @RequestBody List<Object> body) {
+
+    var ops = readPatchOperationsFromPayload(body);
+
+    var entities = new ArrayList<T>();
+
+    for (PatchOperation<T> patchOperation : ops) {
+      var entity = patchOperation.getValue();
+      validateAndSetTenantIdPayloadMatch(tenantId, entity);
+      validateAndSetResourceIdPayloadMatch(
+          UUID.fromString(patchOperation.getPath().replace("/", "")), entity);
+
+      if (Objects.equals(patchOperation.getOp(), SupportedPatchOperations.REPLACE.toString())) {
+        entities.add(entity);
+      } else {
+        throw new OperationNotSupportedException(patchOperation.getOp());
+      }
+    }
+
+    return new ApiResponse<>(service.updateResources(entities, tenantId));
+  }
+
   @SuppressWarnings("squid:S1452") // Generic wildcard types should not be used in return parameters
   public ApiResponse<?> getRelated(
       @RequestParam UUID tenantId,
@@ -126,6 +153,17 @@ public class ResourceApiController<T extends BaseEntity> {
     }
   }
 
+  private List<PatchOperation<T>> readPatchOperationsFromPayload(List<Object> body) {
+    var opList = new ArrayList<PatchOperation<T>>();
+    var patchOperationType = objectMapper.getTypeFactory().constructParametricType(
+        PatchOperation.class,
+        entityType);
+
+    body.forEach(ob -> opList.add(objectMapper.convertValue(ob, patchOperationType)));
+
+    return opList;
+  }
+
   private void validateAndSetTenantIdPayloadMatch(UUID requestTenantId, T entity) {
 
     var entityTenantId = entity.getTenantId();
@@ -134,6 +172,17 @@ public class ResourceApiController<T extends BaseEntity> {
 
     } else if (entityTenantId == null) {
       entity.setTenantId(requestTenantId);
+    }
+  }
+
+  private void validateAndSetResourceIdPayloadMatch(UUID requestResourceId, T entity) {
+
+    var entityResourceId = entity.getId();
+    if (entityResourceId != null && !requestResourceId.equals(entityResourceId)) {
+      throw new IllegalArgumentException(
+          "The supplied payload value resource id value must match payload id path value");
+    } else if (entityResourceId == null) {
+      entity.setId(requestResourceId);
     }
   }
 

@@ -6,6 +6,7 @@ import static uk.gov.homeoffice.digital.sas.jparest.exceptions.ResourceNotFoundE
 import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -70,6 +71,36 @@ public class ResourceApiService<T extends BaseEntity> {
       BeanUtils.copyProperties(entity, originalEntity, EntityUtils.ID_FIELD_NAME);
       repository.saveAndFlush(originalEntity);
       return originalEntity;
+    });
+  }
+
+  public List<T> updateResources(List<T> entities, UUID tenantId) {
+
+    return transactionTemplate.execute(status -> {
+
+      var mappedEntities = new HashMap<UUID, T>();
+      var entityList = new ArrayList<T>();
+      for (T entity : entities) {
+        this.entityValidator.validateAndThrowIfErrorsExist(entity);
+        mappedEntities.put(entity.getId(), entity);
+      }
+
+      var originalEntities = repository.findByTenantIdAndIds(
+          tenantId,
+          mappedEntities.keySet());
+
+      if (originalEntities.size() != entities.size()) {
+        throw new ResourceNotFoundException();
+      }
+
+      for (T originalEntity : originalEntities) {
+        var entity = mappedEntities.get(originalEntity.getId());
+        BeanUtils.copyProperties(entity, originalEntity, EntityUtils.ID_FIELD_NAME);
+        entityList.add(originalEntity);
+      }
+
+      repository.saveAllAndFlush(entityList);
+      return entityList;
     });
   }
 

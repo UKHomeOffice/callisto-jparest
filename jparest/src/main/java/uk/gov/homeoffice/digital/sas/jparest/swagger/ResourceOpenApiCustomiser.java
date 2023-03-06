@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.jparest.swagger;
 
+import static uk.gov.homeoffice.digital.sas.jparest.utils.CommonUtils.getFieldNameOrThrow;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_ID_PATH_PARAM;
 import static uk.gov.homeoffice.digital.sas.jparest.utils.ConstantHelper.URL_RELATED_ID_PATH_PARAM;
 
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import java.util.Map;
 import java.util.Map.Entry;
 import org.springdoc.core.converters.models.Pageable;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -18,7 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.homeoffice.digital.sas.jparest.ResourceEndpoint;
 import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
-
+import uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse;
+import uk.gov.homeoffice.digital.sas.jparest.web.PatchOperation;
 
 /**
  * Extends the OpenApi model to include the endpoints added by the resource
@@ -27,17 +30,19 @@ import uk.gov.homeoffice.digital.sas.jparest.models.BaseEntity;
 @Component
 public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
 
-
   public static final int DEFAULT_PAGE_SIZE = 10;
   private final ResourceEndpoint endpoint;
   private final PathItemCreator pathItemCreator;
+
+  private static final String API_RESPONSE_SCHEMA_NAME = ApiResponse.class.getSimpleName();
+
+  private static final String PATCH_OPERATION_SCHEMA_NAME = PatchOperation.class.getSimpleName();
 
   @Autowired
   public ResourceOpenApiCustomiser(ResourceEndpoint endpoint, PathItemCreator pathItemCreator) {
     this.endpoint = endpoint;
     this.pathItemCreator = pathItemCreator;
   }
-
 
   /**
    * Customises the generated openApi for the endpoints exposed by the
@@ -46,14 +51,15 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
   public void customise(OpenAPI openApi) {
 
     var components = openApi.getComponents();
-    var apiResponseSchema = registerSchema(components);
-    setResponseSchema(apiResponseSchema, components);
+    var schemas = registerSchema(components);
 
+    setResponseSchema(schemas.get(API_RESPONSE_SCHEMA_NAME), components);
+    setPatchOperationSchema(schemas.get(PATCH_OPERATION_SCHEMA_NAME), components);
 
     // Iterate the ResourceEndpoint descriptors to
     // generate documentation for all of the registered endpoints
-    for (Entry<Class<?>, ResourceEndpoint.RootDescriptor> element :
-        endpoint.getDescriptors().entrySet()) {
+    for (Entry<Class<?>, ResourceEndpoint.RootDescriptor> element
+        : endpoint.getDescriptors().entrySet()) {
 
       var clazz = element.getKey();
       var rootDescriptor = element.getValue();
@@ -75,21 +81,24 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
     }
   }
 
-
   /**
    * Ensures the ApiResponse schema is registered along with the metadata schema.
    */
-  private static Schema<?> registerSchema(Components components) {
-    var apiResponseSchema = ensureSchema(components, "ApiResponse",
+  private static Map<String, Schema<?>> registerSchema(Components components) {
+    var apiResponseSchema = ensureSchema(components, API_RESPONSE_SCHEMA_NAME,
         uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.class);
-    ensureSchema(components, "Metadata",
-        uk.gov.homeoffice.digital.sas.jparest.web.ApiResponse.Metadata.class);
 
-    var pageableSchema =
-        ensureSchema(components, "Pageable", Pageable.class);
+    var patchOperationSchema = ensureSchema(components, PATCH_OPERATION_SCHEMA_NAME,
+        PatchOperation.class);
+
+    ensureSchema(
+            components, ApiResponse.Metadata.class.getSimpleName(), ApiResponse.Metadata.class);
+
+    var pageableSchema = ensureSchema(components, Pageable.class.getSimpleName(), Pageable.class);
     var value = new Pageable(0, DEFAULT_PAGE_SIZE, null);
     pageableSchema.setExample(value);
-    return apiResponseSchema;
+    return Map.of(API_RESPONSE_SCHEMA_NAME, apiResponseSchema,
+        PATCH_OPERATION_SCHEMA_NAME, patchOperationSchema);
   }
 
   /**
@@ -108,9 +117,25 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
     arraySchema.setItems(composedSchema);
   }
 
+  /**
+   * Takes the schema for the PatchOperation class and then extends the value
+   * property to be one of the entities exposed by the controller.
+   */
+  private void setPatchOperationSchema(Schema<?> patchOperationSchema, Components components) {
+    var composedSchema = new ComposedSchema();
+    for (Class<?> resource : endpoint.getResourceTypes()) {
+      composedSchema.addOneOfItem(
+          SpringDocAnnotationsUtils.extractSchema(
+              components, resource, null, null));
+    }
+    patchOperationSchema.getProperties().put(
+            getFieldNameOrThrow(PatchOperation.class, "value"), composedSchema);
+  }
 
-  private void setParentResourcePaths(OpenAPI openApi, ResourceEndpoint.RootDescriptor
-      rootDescriptor, Class<?> clazz, String tag) {
+  private void setParentResourcePaths(OpenAPI openApi,
+                                      ResourceEndpoint.RootDescriptor rootDescriptor,
+                                      Class<?> clazz,
+                                      String tag) {
     var resourceRootPath = pathItemCreator.createRootPath(tag, clazz);
     openApi.path(rootDescriptor.getPath(), resourceRootPath);
     var resourceItemPath = pathItemCreator.createItemPath(tag, clazz);
@@ -127,23 +152,21 @@ public class ResourceOpenApiCustomiser implements OpenApiCustomizer {
     openApi.path(path + URL_RELATED_ID_PATH_PARAM, relatedItemPath);
   }
 
-
   /**
    * Util function to get or create schema.
    */
   private static Schema<?> ensureSchema(Components components, String schemaName,
-                                        Class<?> clazz) {
+      Class<?> clazz) {
     var schemas = components.getSchemas();
     var schema = schemas == null ? null : schemas.get(schemaName);
     if (schema == null) {
       schema = ModelConverters.getInstance()
-        .read(new AnnotatedType(clazz)
-          .resolveAsRef(false))
-        .get(schemaName);
+          .read(new AnnotatedType(clazz)
+              .resolveAsRef(false))
+          .get(schemaName);
       components.addSchemas(schemaName, schema);
     }
     return schema;
   }
-
 
 }
