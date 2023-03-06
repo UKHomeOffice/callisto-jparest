@@ -665,7 +665,7 @@ class ResourceApiControllerTest {
 
         Object object = new DummyEntityA();
 
-        var payload = Arrays.asList(object);
+        var payload = List.of(object);
         var id = UUID.randomUUID();
 
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> controller.patch(id, payload));
