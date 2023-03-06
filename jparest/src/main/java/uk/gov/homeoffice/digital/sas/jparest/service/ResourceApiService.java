@@ -77,17 +77,15 @@ public class ResourceApiService<T extends BaseEntity> {
   public List<T> updateResources(List<T> entities, UUID tenantId) {
 
     return transactionTemplate.execute(status -> {
-      var ids = new ArrayList<UUID>();
 
-      var mappedEntities = new HashMap<>();
+      var mappedEntities = new HashMap<UUID, T>();
       var entityList = new ArrayList<T>();
       for (T entity : entities) {
         this.entityValidator.validateAndThrowIfErrorsExist(entity);
         mappedEntities.put(entity.getId(), entity);
-        ids.add(entity.getId());
       }
 
-      var originalEntities = repository.findByTenantIdAndIds(tenantId, ids);
+      var originalEntities = repository.findByTenantIdAndIds(tenantId, mappedEntities.keySet());
 
       if (originalEntities.size() != entities.size()) {
         throw new ResourceNotFoundException();
