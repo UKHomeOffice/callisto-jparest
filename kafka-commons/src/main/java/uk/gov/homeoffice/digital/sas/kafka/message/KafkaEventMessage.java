@@ -1,20 +1,25 @@
 package uk.gov.homeoffice.digital.sas.kafka.message;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 public class KafkaEventMessage<T> {
 
   public static final String SCHEMA_FORMAT = "%s, %s";
 
-  private final String schema;
+  @JsonProperty("schema")
+  private String schema;
 
   @NotNull
-  private final T resource;
+  @JsonProperty("resource")
+  private T resource;
 
   @NotNull
-  private final KafkaAction action;
+  @JsonProperty("action")
+  private KafkaAction action;
 
   public KafkaEventMessage(String projectVersion, T resource,
       KafkaAction action) {
@@ -22,4 +27,6 @@ public class KafkaEventMessage<T> {
     this.resource = resource;
     this.action = action;
   }
+
+  public KafkaEventMessage() {}
 }
