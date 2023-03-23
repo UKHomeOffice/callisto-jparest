@@ -32,7 +32,7 @@ public abstract class KafkaConsumerService<T> {
 
   public void consumer(@Payload String message
   ) throws IOException {
-    if (schemaValidator.validateSchema(message, file)) {
+    if (schemaValidator.isSchemaValid(message)) {
       log.info("consuming message =" + message);
       KafkaEventMessage kafkaEventMessage = mapper.readValue(message, KafkaEventMessage.class);
     }
