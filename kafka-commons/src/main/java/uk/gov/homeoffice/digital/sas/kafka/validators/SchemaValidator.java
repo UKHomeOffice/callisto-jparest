@@ -1,17 +1,15 @@
 package uk.gov.homeoffice.digital.sas.kafka.validators;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.extern.slf4j.Slf4j;
+import uk.gov.homeoffice.digital.sas.kafka.enums.TimeEntrySchema;
+
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.env.Environment;
-import uk.gov.homeoffice.digital.sas.kafka.enums.TimeEntrySchema;
 
 @Slf4j
 public class SchemaValidator {

@@ -16,8 +16,8 @@ class SchemaValidatorTest {
 
   @BeforeEach
   void setup () {
-    validMessage = "{\"schema\":\"uk.gov.homeoffice.digital.sas.timecard.model.TimeEntry, 0.0.1-SNAPSHOT\",\"resource\":{\"id\":\"c0a80018-870e-11b0-8187-0ea38cb30001\",\"tenantId\":\"00000000-0000-0000-0000-000000000000\",\"ownerId\":\"3343a960-de03-42ba-8769-767404fb2fcf\",\"timePeriodTypeId\":\"00000000-0000-0000-0000-000000000001\",\"shiftType\":null,\"actualStartTime\":1679456400000,\"actualEndTime\":1679457000000},\"action\":\"CREATE\"}";
-    invalidMessage = "{\"schema\":\"uk.gov.homeoffice.digital.sas.timecard.model.TimeEntry, 0.0.2-SNAPSHOT\",\"resource\":{\"id\":\"c0a80018-870e-11b0-8187-0ea38cb30001\",\"tenantId\":\"00000000-0000-0000-0000-000000000000\",\"ownerId\":\"3343a960-de03-42ba-8769-767404fb2fcf\",\"timePeriodTypeId\":\"00000000-0000-0000-0000-000000000001\",\"shiftType\":null,\"actualStartTime\":1679456400000,\"actualEndTime\":1679457000000},\"action\":\"CREATE\"}";
+    validMessage = "{\"schema\":\"uk.gov.homeoffice.digital.sas.timecard.model.TimeEntry, 0.0.1\",\"resource\":{\"id\":\"c0a80018-870e-11b0-8187-0ea38cb30001\",\"tenantId\":\"00000000-0000-0000-0000-000000000000\",\"ownerId\":\"3343a960-de03-42ba-8769-767404fb2fcf\",\"timePeriodTypeId\":\"00000000-0000-0000-0000-000000000001\",\"shiftType\":null,\"actualStartTime\":1679456400000,\"actualEndTime\":1679457000000},\"action\":\"CREATE\"}";
+    invalidMessage = "{\"schema\":\"uk.gov.homeoffice.digital.sas.timecard.model.TimeEntry, 0.0.4\",\"resource\":{\"id\":\"c0a80018-870e-11b0-8187-0ea38cb30001\",\"tenantId\":\"00000000-0000-0000-0000-000000000000\",\"ownerId\":\"3343a960-de03-42ba-8769-767404fb2fcf\",\"timePeriodTypeId\":\"00000000-0000-0000-0000-000000000001\",\"shiftType\":null,\"actualStartTime\":1679456400000,\"actualEndTime\":1679457000000},\"action\":\"CREATE\"}";
   }
 
   @Test
@@ -32,17 +32,4 @@ class SchemaValidatorTest {
       () -> assertFalse(actual2)
     );
   }
-
-  @Test
-  void should_returnTrue_when_validMessage() {
-
-  }
-
-  @Test
-  void should_splitMessageSchema_when_correctJsonMessage () {
-
-  }
-
-
-
 }
