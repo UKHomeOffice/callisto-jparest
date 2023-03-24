@@ -3,7 +3,6 @@ package uk.gov.homeoffice.digital.sas.kafka.message;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 public class KafkaEventMessage<T> {
