@@ -1,11 +1,16 @@
 package uk.gov.homeoffice.digital.sas.kafka.validators;
 
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INCORRECT_FORMAT;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_VALIDATED;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -28,28 +33,34 @@ public class SchemaValidator {
   }
 
   private List<String> splitMessageSchema(String schema) {
-    List<String> stringList;
-
-    if (schema.contains(",")) {
-      stringList = Pattern.compile(", ")
-          .splitAsStream(schema).toList();
-    } else {
-      throw new IllegalArgumentException(String.format("Schema: %s is incorrect ", schema));
+    List<String> stringList = new ArrayList<>();
+    try {
+      if (schema.contains(",")) {
+        stringList = Pattern.compile(", ")
+            .splitAsStream(schema).toList();
+      }
+    } catch (IllegalArgumentException e) {
+      log.error(String.format(KAFKA_SCHEMA_INCORRECT_FORMAT,
+          schema), e);
     }
     return stringList;
   }
 
   private boolean isValidMessage(List<String> splitSchema) {
-    if (splitSchema.get(0).equals(resourceName)) {
-      if (isVersionValid(splitSchema.get(1))) {
-        log.info("Schema valid");
-        return true;
-      }
+    if (splitSchema.stream().anyMatch(this::isValidResource)
+        && splitSchema.stream().anyMatch(this::isVersionValid)) {
+      log.info(String.format(KAFKA_SCHEMA_VALIDATED,
+          splitSchema.stream().collect(Collectors.joining(", "))));
       return true;
     } else {
-      log.error("Entity is not time entry");
+      log.error(KAFKA_SCHEMA_INVALID,
+          splitSchema.stream().collect(Collectors.joining(", ")));
       return false;
     }
+  }
+
+  private boolean isValidResource(String value) {
+    return value.equals(resourceName);
   }
 
   private boolean isVersionValid(String value) {

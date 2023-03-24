@@ -1,5 +1,8 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_FAILED_DESERIALIZATION;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -31,17 +34,16 @@ public abstract class KafkaConsumerService<T> {
       topics = "${spring.kafka.template.default-topic}",
       groupId = "${spring.kafka.consumer.group-id}")
 
-  public KafkaEventMessage<T> consumer(@Payload String message
+  public void consumer(@Payload String message
   ) {
     SchemaValidator schemaValidator = new SchemaValidator(resourceName, validVersions);
     if (schemaValidator.isSchemaValid(message)) {
       try {
-        log.info("consuming message =" + message);
-        return mapper.readValue(message, KafkaEventMessage.class);
+        log.info(String.format(KAFKA_CONSUMING_MESSAGE, message));
+        kafkaEventMessage = mapper.readValue(message, KafkaEventMessage.class);
       } catch (JsonProcessingException e) {
-        log.error("Couldn't deserialize");
+        log.error(KAFKA_FAILED_DESERIALIZATION, e);
       }
     }
-    return null;
   }
 }
