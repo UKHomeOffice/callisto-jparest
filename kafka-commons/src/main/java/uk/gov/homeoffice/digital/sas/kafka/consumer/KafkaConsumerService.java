@@ -6,7 +6,11 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_FAIL
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
@@ -15,6 +19,7 @@ import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
 
 @Slf4j
 @Service
+@Getter
 public abstract class KafkaConsumerService<T> {
 
   protected KafkaEventMessage<T> kafkaEventMessage;
@@ -25,7 +30,10 @@ public abstract class KafkaConsumerService<T> {
 
   List<String> validVersions;
 
-  protected KafkaConsumerService(String resourceName, List<String> validVersions) {
+  String payload;
+
+  protected KafkaConsumerService(@Value("${kafka.resource.name}") String resourceName,
+                                 @Value("${kafka.valid.schema.versions}") List<String> validVersions) {
     this.resourceName = resourceName;
     this.validVersions = validVersions;
   }
@@ -36,6 +44,7 @@ public abstract class KafkaConsumerService<T> {
 
   public void consumer(@Payload String message
   ) {
+    this.payload = message;
     SchemaValidator schemaValidator = new SchemaValidator(resourceName, validVersions);
     if (schemaValidator.isSchemaValid(message)) {
       try {
@@ -45,5 +54,9 @@ public abstract class KafkaConsumerService<T> {
         log.error(KAFKA_FAILED_DESERIALIZATION, e);
       }
     }
+  }
+
+  public String getPayload() {
+    return this.payload;
   }
 }
