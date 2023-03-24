@@ -11,6 +11,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import uk.gov.homeoffice.digital.sas.config.TestConfig;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
+import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
 import uk.gov.homeoffice.digital.sas.model.Profile;
 
@@ -64,15 +65,8 @@ class KafkaConsumerServiceTest {
 
     boolean consumed = kafkaConsumerServiceImpl.getLatch().await(3, TimeUnit.SECONDS);
 
-    String payload1 = kafkaConsumerServiceImpl.getPayload();
-    System.out.println("payload is : " + payload1);
   }
 
-//  private String getPayloadFromConsumer() throws InterruptedException {
-//    boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
-//    assertThat(messageConsumed).isTrue();
-//    return kafkaConsumer.getPayload();
-//  }
 
 
 }

@@ -30,7 +30,9 @@ public abstract class KafkaConsumerService<T> {
 
   List<String> validVersions;
 
-  String payload;
+  private CountDownLatch latch = new CountDownLatch(1);
+
+  private String message;
 
   protected KafkaConsumerService(@Value("${kafka.resource.name}") String resourceName,
                                  @Value("${kafka.valid.schema.versions}") List<String> validVersions) {
@@ -42,9 +44,9 @@ public abstract class KafkaConsumerService<T> {
       topics = "${spring.kafka.template.default-topic}",
       groupId = "${spring.kafka.consumer.group-id}")
 
-  public void consumer(@Payload String message
+  public void consumer(@Payload String payload
   ) {
-    this.payload = message;
+    this.message = payload;
     SchemaValidator schemaValidator = new SchemaValidator(resourceName, validVersions);
     if (schemaValidator.isSchemaValid(message)) {
       try {
@@ -54,9 +56,5 @@ public abstract class KafkaConsumerService<T> {
         log.error(KAFKA_FAILED_DESERIALIZATION, e);
       }
     }
-  }
-
-  public String getPayload() {
-    return this.payload;
   }
 }
