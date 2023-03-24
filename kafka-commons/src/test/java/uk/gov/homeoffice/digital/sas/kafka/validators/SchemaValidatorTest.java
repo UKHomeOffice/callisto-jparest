@@ -41,4 +41,10 @@ class SchemaValidatorTest {
       () -> assertFalse(actual2)
     );
   }
+
+  // correct Resource
+  // incorrect Resource
+
+  //correct version
+  //incorrect version
 }

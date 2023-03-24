@@ -1,8 +1,10 @@
 package uk.gov.homeoffice.digital.sas.kafka;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -150,16 +152,29 @@ class EmbeddedKafkaIntegrationTest {
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getSchema().equals(expectedKafkaEventMessage.getSchema()));
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getAction().equals(expectedKafkaEventMessage.getAction()));
 
-    isResourcerDeserialized();
+    isResourceDeserialized();
   }
 
-  private void isResourcerDeserialized() {
-    //Profile actualProfile =
-    //    kafkaConsumerServiceImpl.getKafkaEventMessage().getResource();
 
-    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getResource().getId()).isEqualTo(profile.getId());
-    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getResource().getName().equals(profile.getName()));
-    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getResource().getTenantId().equals(profile.getTenantId()));
 
+  private void isResourceDeserialized() {
+
+    Profile actualProfile = getProfileAsConcreteType();
+    assertAll(
+        () -> assertThat(actualProfile.getId()).isEqualTo(profile.getId()),
+        () -> assertThat(actualProfile.getName().equals(profile.getName())),
+        () -> assertThat(actualProfile.getTenantId().equals(profile.getTenantId()))
+    );
   }
+
+  //This method is needed due to Jackson defaulting to LinkedHasMap on deserialization with
+  // generic types. It converts the LinkedHaspMap to a concrete type.
+  private Profile getProfileAsConcreteType() {
+    ObjectMapper mapper = new ObjectMapper();
+    Profile actualProfile = mapper.convertValue(
+        kafkaConsumerServiceImpl.getKafkaEventMessage().getResource(), new TypeReference<>() {});
+    return actualProfile;
+  }
+
+
 }

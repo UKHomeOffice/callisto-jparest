@@ -4,6 +4,7 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONS
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_FAILED_DESERIALIZATION;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
