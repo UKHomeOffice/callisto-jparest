@@ -25,4 +25,6 @@ public final class Constants {
 
   public static final String KAFKA_SUCCESS_MESSAGE =
       "Message with key [ %s ] sent to topic [ %s ] with action [ %s ]";
+
+  public static final String SCHEMA = "schema";
 }

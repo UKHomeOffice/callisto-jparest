@@ -1,40 +1,47 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import java.io.IOException;
 import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Service;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
 
 @Slf4j
+@Service
 public abstract class KafkaConsumerService<T> {
 
   protected KafkaEventMessage<T> kafkaEventMessage;
 
-  @Value("${time.entry.schema.file.location}")
-  private String file;
-
-  private SchemaValidator schemaValidator = new SchemaValidator();
   ObjectMapper mapper = new ObjectMapper();
 
+  String resourceName;
+
+  List<String> validVersions;
+
+  protected KafkaConsumerService(String resourceName, List<String> validVersions) {
+    this.resourceName = resourceName;
+    this.validVersions = validVersions;
+  }
 
   @KafkaListener(
       topics = "${spring.kafka.template.default-topic}",
       groupId = "${spring.kafka.consumer.group-id}")
 
-  public void consumer(@Payload String message
-  ) throws IOException {
+  public KafkaEventMessage<T> consumer(@Payload String message
+  ) {
+    SchemaValidator schemaValidator = new SchemaValidator(resourceName, validVersions);
     if (schemaValidator.isSchemaValid(message)) {
-      log.info("consuming message =" + message);
-      KafkaEventMessage kafkaEventMessage = mapper.readValue(message, KafkaEventMessage.class);
+      try {
+        log.info("consuming message =" + message);
+        return mapper.readValue(message, KafkaEventMessage.class);
+      } catch (JsonProcessingException e) {
+        log.error("Couldn't deserialize");
+      }
     }
+    return null;
   }
 }

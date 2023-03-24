@@ -1,37 +1,38 @@
 package uk.gov.homeoffice.digital.sas.kafka.validators;
 
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import lombok.extern.slf4j.Slf4j;
-import uk.gov.homeoffice.digital.sas.kafka.enums.TimeEntrySchema;
-
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class SchemaValidator {
+  String resourceName;
 
-  public boolean isSchemaValid(String message) throws IOException {
+  List<String> validVersions;
+
+  public SchemaValidator(String resourceName, List<String> validVersions) {
+    this.resourceName = resourceName;
+    this.validVersions = validVersions;
+  }
+
+  public boolean isSchemaValid(String message) {
     JsonObject jsonMessage = JsonParser.parseString(message).getAsJsonObject();
-
-    String schema = jsonMessage.get("schema").getAsString();
-
+    String schema = jsonMessage.get(SCHEMA).getAsString();
     List<String> splitSchema = splitMessageSchema(schema);
 
     return isValidMessage(splitSchema);
   }
 
-
   private List<String> splitMessageSchema(String schema) {
-    List<String> stringList = new ArrayList<>();
+    List<String> stringList;
 
     if (schema.contains(",")) {
       stringList = Pattern.compile(", ")
-          .splitAsStream(schema)
-          .collect(Collectors.toList());
+          .splitAsStream(schema).toList();
     } else {
       throw new IllegalArgumentException(String.format("Schema: %s is incorrect ", schema));
     }
@@ -39,26 +40,21 @@ public class SchemaValidator {
   }
 
   private boolean isValidMessage(List<String> splitSchema) {
-    if (splitSchema.get(0).contains("uk.gov.homeoffice.digital.sas.timecard.model.TimeEntry")) {
-      if (isInEnum(splitSchema.get(1))) {
-        log.info("schema valid");
+    if (splitSchema.get(0).equals(resourceName)) {
+      if (isVersionValid(splitSchema.get(1))) {
+        log.info("Schema valid");
         return true;
       }
+      return true;
     } else {
       log.error("Entity is not time entry");
       return false;
     }
-    log.error("Schema is invalid");
-    return false;
   }
 
-  private <E extends Enum<E>> boolean isInEnum(String value) {
-    for (TimeEntrySchema s : TimeEntrySchema.values()) {
-      if (s.getVersion().contains(value)) {
-        return true;
-      }
-    }
-    return false;
+  private boolean isVersionValid(String value) {
+    return validVersions.stream().anyMatch(s -> s.contains(value));
   }
+
 
 }

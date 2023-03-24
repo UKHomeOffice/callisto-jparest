@@ -2,14 +2,23 @@ package uk.gov.homeoffice.digital.sas.kafka.validators;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SchemaValidatorTest {
 
-  SchemaValidator schemaValidator = new SchemaValidator();
+  @Value("${kafka.resource.name}")
+  private String resourceName;
+
+  @Value("${kafka.valid.schema.versions}")
+  private List<String> validVersions;
+
+  SchemaValidator schemaValidator = new SchemaValidator(resourceName, validVersions);
 
   private String validMessage;
   private String invalidMessage;
