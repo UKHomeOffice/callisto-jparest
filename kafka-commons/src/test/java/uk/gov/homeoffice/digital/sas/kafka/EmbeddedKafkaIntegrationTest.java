@@ -65,16 +65,11 @@ class EmbeddedKafkaIntegrationTest {
 
     // WHEN
     kafkaConsumerServiceImpl.getLatch().await(3, TimeUnit.SECONDS);
-    String message = kafkaConsumerServiceImpl.receive();
 
-    // THEN
-    String expectedUpdateMessagePayload = generateExpectedPayload(version, profile,
-        KafkaAction.CREATE);
+    //THEN
+    assertThat(kafkaConsumerServiceImpl.receive()).isTrue();
 
-    assertAll(
-      () -> assertThat(message).isEqualTo(expectedUpdateMessagePayload),
-      () -> assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull()
-    );
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
     KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
         profile,
@@ -87,11 +82,21 @@ class EmbeddedKafkaIntegrationTest {
   void shouldSendCreateMessageToTopicWhenProfileIsCreated() throws Exception {
     // GIVEN
     profileRepository.save(profile);
+
     // WHEN
-    boolean messageConsumed = kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+
     // THEN
-    String expectedUpdateMessagePayload = generateExpectedPayload(version, profile, KafkaAction.CREATE);
-    assertThat(kafkaConsumerServiceImpl.receive()).isEqualTo(expectedUpdateMessagePayload);
+    assertThat(kafkaConsumerServiceImpl.receive()).isTrue();
+
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
+
+    KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
+        profile,
+        KafkaAction.CREATE);
+
+    isMessageDeserialized(expectedKafkaEventMessage);
+
   }
 
   @Test
@@ -101,10 +106,17 @@ class EmbeddedKafkaIntegrationTest {
     profile.setName(UPDATED_PROFILE_NAME);
     profile = profileRepository.saveAndFlush(profile);
     // WHEN
-    boolean messageConsumed = kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
-    String expectedUpdateMessagePayload = generateExpectedPayload(version, profile, KafkaAction.UPDATE);
-    assertThat(kafkaConsumerServiceImpl.receive()).isEqualTo(expectedUpdateMessagePayload);
+    assertThat(kafkaConsumerServiceImpl.receive()).isTrue();
+
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
+
+    KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
+        profile,
+        KafkaAction.UPDATE);
+
+    isMessageDeserialized(expectedKafkaEventMessage);
   }
 
   @Test
@@ -113,10 +125,17 @@ class EmbeddedKafkaIntegrationTest {
     profileRepository.save(profile);
     profileRepository.delete(profile);
     // WHEN
-    boolean messageConsumed = kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
-    String expectedDeleteMessagePayload = generateExpectedPayload(version, profile, KafkaAction.DELETE);
-    assertThat(kafkaConsumerServiceImpl.receive()).isEqualTo(expectedDeleteMessagePayload);
+    assertThat(kafkaConsumerServiceImpl.receive()).isTrue();
+
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
+
+    KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
+        profile,
+        KafkaAction.DELETE);
+
+    isMessageDeserialized(expectedKafkaEventMessage);
   }
 
   private String generateExpectedPayload(String version, Profile profile, KafkaAction action) {
