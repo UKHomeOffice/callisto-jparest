@@ -40,7 +40,7 @@ class EmbeddedKafkaIntegrationTest {
   private static final int CONSUMER_TIMEOUT = 5;
   private Profile profile;
 
-  @Value("${projectVersion}")
+  @Value("${schemaVersion}")
   private String version;
 
   @Autowired

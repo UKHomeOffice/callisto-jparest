@@ -20,9 +20,9 @@ public class KafkaEventMessage<T> {
   @JsonProperty("action")
   private KafkaAction action;
 
-  public KafkaEventMessage(String projectVersion, T resource,
+  public KafkaEventMessage(String schemaVersion, T resource,
       KafkaAction action) {
-    this.schema = String.format(SCHEMA_FORMAT, resource.getClass().getName(), projectVersion);
+    this.schema = String.format(SCHEMA_FORMAT, resource.getClass().getName(), schemaVersion);
     this.resource = resource;
     this.action = action;
   }
