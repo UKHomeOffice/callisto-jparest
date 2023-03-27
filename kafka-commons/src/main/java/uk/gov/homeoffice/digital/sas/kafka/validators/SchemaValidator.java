@@ -80,7 +80,7 @@ public class SchemaValidator {
   }
 
   private boolean isVersionValid(String version) {
-     if(!validVersions.stream().anyMatch(s -> s.contains(version))) {
+     if(validVersions.stream().noneMatch(s -> s.contains(version))) {
        log.error(String.format(KAFKA_SCHEMA_INVALID_VERSION, version));
        return false;
      }

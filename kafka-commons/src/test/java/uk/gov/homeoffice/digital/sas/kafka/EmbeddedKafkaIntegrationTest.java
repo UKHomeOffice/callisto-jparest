@@ -141,21 +141,19 @@ class EmbeddedKafkaIntegrationTest {
   }
 
   private void isMessageDeserialized(KafkaEventMessage expectedKafkaEventMessage) {
-    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getSchema().equals(expectedKafkaEventMessage.getSchema()));
-    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getAction().equals(expectedKafkaEventMessage.getAction()));
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getSchema()).isEqualTo(expectedKafkaEventMessage.getSchema());
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getAction()).isEqualTo(expectedKafkaEventMessage.getAction());
 
     isResourceDeserialized();
   }
-
-
 
   private void isResourceDeserialized() {
 
     Profile actualProfile = getProfileAsConcreteType();
     assertAll(
         () -> assertThat(actualProfile.getId()).isEqualTo(profile.getId()),
-        () -> assertThat(actualProfile.getName().equals(profile.getName())),
-        () -> assertThat(actualProfile.getTenantId().equals(profile.getTenantId()))
+        () -> assertThat(actualProfile.getName()).isEqualTo(profile.getName()),
+        () -> assertThat(actualProfile.getTenantId()).isEqualTo(profile.getTenantId())
     );
   }
 
@@ -167,6 +165,4 @@ class EmbeddedKafkaIntegrationTest {
         kafkaConsumerServiceImpl.getKafkaEventMessage().getResource(), new TypeReference<>() {});
     return actualProfile;
   }
-
-
 }
