@@ -67,8 +67,6 @@ class EmbeddedKafkaIntegrationTest {
     kafkaConsumerServiceImpl.getLatch().await(3, TimeUnit.SECONDS);
 
     //THEN
-    assertThat(kafkaConsumerServiceImpl.receive()).isTrue();
-
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
     KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
@@ -87,8 +85,6 @@ class EmbeddedKafkaIntegrationTest {
     kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
 
     // THEN
-    assertThat(kafkaConsumerServiceImpl.receive()).isTrue();
-
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
     KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
@@ -108,8 +104,6 @@ class EmbeddedKafkaIntegrationTest {
     // WHEN
     kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
-    assertThat(kafkaConsumerServiceImpl.receive()).isTrue();
-
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
     KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
@@ -127,8 +121,6 @@ class EmbeddedKafkaIntegrationTest {
     // WHEN
     kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
-    assertThat(kafkaConsumerServiceImpl.receive()).isTrue();
-
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
     KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,

@@ -4,22 +4,14 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONS
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_FAILED_DESERIALIZATION;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
-
-import javax.xml.validation.Schema;
 
 @Slf4j
 @Service
@@ -30,29 +22,30 @@ public abstract class KafkaConsumerService<T> {
 
   ObjectMapper mapper = new ObjectMapper();
 
-  private String message;
-
   @Value("${kafka.resource.name}")
   String resourceName;
 
   @Value("${kafka.valid.schema.versions}")
   List<String> validVersions;
 
-  @KafkaListener(
-      topics = "${spring.kafka.template.default-topic}",
-      groupId = "${spring.kafka.consumer.group-id}")
+  SchemaValidator schemaValidator;
 
-  public void consumer(@Payload String payload
+  protected KafkaConsumerService(SchemaValidator schemaValidator) {
+    this.schemaValidator = schemaValidator;
+  }
+
+  public KafkaEventMessage<T> consumer(String payload
   ) {
-    this.message = payload;
-    SchemaValidator schemaValidator = new SchemaValidator(resourceName, validVersions);
-    if (schemaValidator.isSchemaValid(message)) {
+    schemaValidator.setValidVersions(validVersions);
+    schemaValidator.setResourceName(resourceName);
+    if (schemaValidator.isSchemaValid(payload)) {
       try {
-        log.info(String.format(KAFKA_CONSUMING_MESSAGE, message));
-        kafkaEventMessage = mapper.readValue(message, KafkaEventMessage.class);
+        log.info(String.format(KAFKA_CONSUMING_MESSAGE, payload));
+        return mapper.readValue(payload, KafkaEventMessage.class);
       } catch (JsonProcessingException e) {
         log.error(KAFKA_FAILED_DESERIALIZATION, e);
       }
     }
+    return null;
   }
 }
