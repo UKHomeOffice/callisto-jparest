@@ -20,15 +20,15 @@ public abstract class KafkaConsumerService<T> {
 
   protected KafkaEventMessage<T> kafkaEventMessage;
 
-  ObjectMapper mapper = new ObjectMapper();
+  private ObjectMapper mapper = new ObjectMapper();
 
   @Value("${kafka.resource.name}")
-  String resourceName;
+  private String resourceName;
 
   @Value("${kafka.valid.schema.versions}")
-  List<String> validVersions;
+  private List<String> validVersions;
 
-  SchemaValidator schemaValidator;
+  private final SchemaValidator schemaValidator;
 
   protected KafkaConsumerService(SchemaValidator schemaValidator) {
     this.schemaValidator = schemaValidator;
