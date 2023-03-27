@@ -30,12 +30,13 @@ public abstract class KafkaConsumerService<T> {
 
   ObjectMapper mapper = new ObjectMapper();
 
-  private CountDownLatch latch = new CountDownLatch(1);
-
   private String message;
 
-  @Autowired
-  private SchemaValidator schemaValidator;
+  @Value("${kafka.resource.name}")
+  String resourceName;
+
+  @Value("${kafka.valid.schema.versions}")
+  List<String> validVersions;
 
   @KafkaListener(
       topics = "${spring.kafka.template.default-topic}",
@@ -44,6 +45,7 @@ public abstract class KafkaConsumerService<T> {
   public void consumer(@Payload String payload
   ) {
     this.message = payload;
+    SchemaValidator schemaValidator = new SchemaValidator(resourceName, validVersions);
     if (schemaValidator.isSchemaValid(message)) {
       try {
         log.info(String.format(KAFKA_CONSUMING_MESSAGE, message));

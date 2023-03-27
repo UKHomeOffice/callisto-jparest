@@ -24,14 +24,12 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.*;
 @NoArgsConstructor
 public class SchemaValidator {
 
-  @Value("${kafka.resource.name}")
   String resourceName;
 
-  @Value("${kafka.valid.schema.versions}")
   List<String> validVersions;
 
-  public SchemaValidator(@Value("${kafka.resource.name}") String resourceName,
-                         @Value("${kafka.valid.schema.versions}") List<String> validVersions) {
+  public SchemaValidator(String resourceName,
+                         List<String> validVersions) {
     this.resourceName = resourceName;
     this.validVersions = validVersions;
   }
