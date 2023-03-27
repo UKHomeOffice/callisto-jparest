@@ -39,6 +39,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_FAILED_DESERIALIZATION;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 
 @SpringBootTest(classes = TestConfig.class)
 @ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
@@ -90,7 +92,10 @@ class KafkaConsumerServiceTest {
     kafkaConsumerServiceImpl.consumer(invalidMessage);
     verify(schemaValidator).isSchemaValid(invalidMessage);
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNull();
-    assertThat(capturedOutput.getOut()).contains(KAFKA_FAILED_DESERIALIZATION);
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_VERSION, "0.0" +
+        ".4"));
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID, " uk.gov" +
+        ".homeoffice.digital.sas.model.Profile"));
   }
 
   private KafkaEventMessage generateExpectedKafkaEventMessage(String version, Profile resource,
