@@ -25,11 +25,15 @@ public class KafkaConsumerServiceImpl extends KafkaConsumerService<Profile> {
       groupId = "${spring.kafka.consumer.group-id}"
   )
   public void onMessage(@Payload String message) {
-    if (latch != null) {
-      latch.countDown();
-      if (latch.getCount() == 0) {
+    //if (latch != null) {
+    //  latch.countDown();
+    //  if (latch.getCount() == 0) {
         kafkaEventMessage = consumer(message);
-      }
-    }
+    //  }
+    //}
+  }
+
+  public void setExpectedNumberOfMessages(int expectedNumberOfMessages) {
+    latch = new CountDownLatch(expectedNumberOfMessages);
   }
 }

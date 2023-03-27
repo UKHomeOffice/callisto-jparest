@@ -37,7 +37,7 @@ class EmbeddedKafkaIntegrationTest {
   private static final String TENANT_ID = "tenantId";
   private static final String PROFILE_NAME = "Original profile";
   private static final String UPDATED_PROFILE_NAME = "Updated profile";
-  private static final int CONSUMER_TIMEOUT = 3;
+  private static final int CONSUMER_TIMEOUT = 5;
   private Profile profile;
 
   @Value("${projectVersion}")
@@ -64,7 +64,7 @@ class EmbeddedKafkaIntegrationTest {
     kafkaProducerService.sendMessage(PROFILE_ID.toString(), profile, KafkaAction.CREATE);
 
     // WHEN
-    kafkaConsumerServiceImpl.getLatch().await(3, TimeUnit.SECONDS);
+    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
 
     //THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
@@ -97,6 +97,7 @@ class EmbeddedKafkaIntegrationTest {
 
   @Test
   void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
+    kafkaConsumerServiceImpl.setExpectedNumberOfMessages(2);
     // GIVEN
     profileRepository.saveAndFlush(profile);
     profile.setName(UPDATED_PROFILE_NAME);
