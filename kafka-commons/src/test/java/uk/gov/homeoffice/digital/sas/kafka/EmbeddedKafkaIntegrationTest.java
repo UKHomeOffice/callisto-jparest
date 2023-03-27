@@ -37,7 +37,7 @@ class EmbeddedKafkaIntegrationTest {
   private static final String TENANT_ID = "tenantId";
   private static final String PROFILE_NAME = "Original profile";
   private static final String UPDATED_PROFILE_NAME = "Updated profile";
-  private static final int CONSUMER_TIMEOUT = 10;
+  private static final int CONSUMER_TIMEOUT = 3;
   private Profile profile;
 
   @Value("${projectVersion}")
@@ -70,8 +70,11 @@ class EmbeddedKafkaIntegrationTest {
     // THEN
     String expectedUpdateMessagePayload = generateExpectedPayload(version, profile,
         KafkaAction.CREATE);
-    assertThat(message).isEqualTo(expectedUpdateMessagePayload);
-    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
+
+    assertAll(
+      () -> assertThat(message).isEqualTo(expectedUpdateMessagePayload),
+      () -> assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull()
+    );
 
     KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
         profile,
@@ -80,52 +83,41 @@ class EmbeddedKafkaIntegrationTest {
     isMessageDeserialized(expectedKafkaEventMessage);
   }
 
-  //@Test
-  //void shouldSendCreateMessageToTopicWhenProfileIsCreated() throws Exception {
-  //  // GIVEN
-  //  profileRepository.save(profile);
-  //
-  //  // WHEN
-  //  boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
-  //
-  //  // THEN
-  //  assertThat(messageConsumed).isTrue();
-  //  String expectedUpdateMessagePayload = generateExpectedPayload(version, profile, KafkaAction.CREATE);
-  //  assertThat(kafkaConsumer.getPayload()).isEqualTo(expectedUpdateMessagePayload);
-  //}
-  //
-  //@Test
-  //void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
-  //  kafkaConsumer.setExpectedNumberOfMessages(2);
-  //  // GIVEN
-  //  profileRepository.saveAndFlush(profile);
-  //  profile.setName(UPDATED_PROFILE_NAME);
-  //  profile = profileRepository.saveAndFlush(profile);
-  //
-  //  // WHEN
-  //  boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
-  //
-  //  // THEN
-  //  assertThat(messageConsumed).isTrue();
-  //  String expectedUpdateMessagePayload = generateExpectedPayload(version, profile, KafkaAction.UPDATE);
-  //  assertThat(kafkaConsumer.getPayload()).isEqualTo(expectedUpdateMessagePayload);
-  //}
-  //
-  //@Test
-  //void shouldSendDeleteMessageToTopicWhenProfileIsDeleted() throws Exception {
-  //  kafkaConsumer.setExpectedNumberOfMessages(2);
-  //  // GIVEN
-  //  profileRepository.save(profile);
-  //  profileRepository.delete(profile);
-  //
-  //  // WHEN
-  //  boolean messageConsumed = kafkaConsumer.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
-  //
-  //  // THEN
-  //  assertThat(messageConsumed).isTrue();
-  //  String expectedDeleteMessagePayload = generateExpectedPayload(version, profile, KafkaAction.DELETE);
-  //  assertThat(kafkaConsumer.getPayload()).isEqualTo(expectedDeleteMessagePayload);
-  //}
+  @Test
+  void shouldSendCreateMessageToTopicWhenProfileIsCreated() throws Exception {
+    // GIVEN
+    profileRepository.save(profile);
+    // WHEN
+    boolean messageConsumed = kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    // THEN
+    String expectedUpdateMessagePayload = generateExpectedPayload(version, profile, KafkaAction.CREATE);
+    assertThat(kafkaConsumerServiceImpl.receive()).isEqualTo(expectedUpdateMessagePayload);
+  }
+
+  @Test
+  void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
+    // GIVEN
+    profileRepository.saveAndFlush(profile);
+    profile.setName(UPDATED_PROFILE_NAME);
+    profile = profileRepository.saveAndFlush(profile);
+    // WHEN
+    boolean messageConsumed = kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    // THEN
+    String expectedUpdateMessagePayload = generateExpectedPayload(version, profile, KafkaAction.UPDATE);
+    assertThat(kafkaConsumerServiceImpl.receive()).isEqualTo(expectedUpdateMessagePayload);
+  }
+
+  @Test
+  void shouldSendDeleteMessageToTopicWhenProfileIsDeleted() throws Exception {
+    // GIVEN
+    profileRepository.save(profile);
+    profileRepository.delete(profile);
+    // WHEN
+    boolean messageConsumed = kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    // THEN
+    String expectedDeleteMessagePayload = generateExpectedPayload(version, profile, KafkaAction.DELETE);
+    assertThat(kafkaConsumerServiceImpl.receive()).isEqualTo(expectedDeleteMessagePayload);
+  }
 
   private String generateExpectedPayload(String version, Profile profile, KafkaAction action) {
     return "{\"schema\":\""

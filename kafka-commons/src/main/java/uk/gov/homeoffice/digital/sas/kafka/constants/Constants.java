@@ -37,6 +37,10 @@ public final class Constants {
 
   public static final String KAFKA_SCHEMA_INVALID = "Schema: [ %s ] is invalid";
 
+  public static final String KAFKA_SCHEMA_INVALID_RESOURCE = "Invalid schema resource [ %s ]";
+
+  public static final String KAFKA_SCHEMA_INVALID_VERSION = "Invalid schema version [ %s ]";
+
 
 
 

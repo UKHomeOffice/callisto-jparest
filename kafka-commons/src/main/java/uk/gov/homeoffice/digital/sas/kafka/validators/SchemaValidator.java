@@ -1,25 +1,37 @@
 package uk.gov.homeoffice.digital.sas.kafka.validators;
 
-import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INCORRECT_FORMAT;
-import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID;
-import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_VALIDATED;
-import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA;
-
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.*;
 
 @Slf4j
+@Component
+@Getter
+@Setter
+@NoArgsConstructor
 public class SchemaValidator {
+
+  @Value("${kafka.resource.name}")
   String resourceName;
 
+  @Value("${kafka.valid.schema.versions}")
   List<String> validVersions;
 
-  public SchemaValidator(String resourceName, List<String> validVersions) {
+  public SchemaValidator(@Value("${kafka.resource.name}") String resourceName,
+                         @Value("${kafka.valid.schema.versions}") List<String> validVersions) {
     this.resourceName = resourceName;
     this.validVersions = validVersions;
   }
@@ -28,7 +40,6 @@ public class SchemaValidator {
     JsonObject jsonMessage = JsonParser.parseString(message).getAsJsonObject();
     String schema = jsonMessage.get(SCHEMA).getAsString();
     List<String> splitSchema = splitMessageSchema(schema);
-
     return isValidMessage(splitSchema);
   }
 
@@ -47,25 +58,33 @@ public class SchemaValidator {
   }
 
   private boolean isValidMessage(List<String> splitSchema) {
-    if (splitSchema.stream().anyMatch(this::isValidResource)
-        && splitSchema.stream().anyMatch(this::isVersionValid)) {
+    if(splitSchema.size() != 2) return  false;
+    if (isValidResource(splitSchema.get(0))
+        && isVersionValid(splitSchema.get(1)) ) {
       log.info(String.format(KAFKA_SCHEMA_VALIDATED,
           splitSchema.stream().collect(Collectors.joining(", "))));
       return true;
     } else {
-      log.error(KAFKA_SCHEMA_INVALID,
-          splitSchema.stream().collect(Collectors.joining(", ")));
+      log.error(String.format(KAFKA_SCHEMA_INVALID,
+        splitSchema.stream().collect(Collectors.joining(", "))));
       return false;
     }
   }
 
-  private boolean isValidResource(String value) {
-    return value.equals(resourceName);
+  private boolean isValidResource(String resource) {
+    if(!resource.equals(resourceName)) {
+      log.error(String.format(KAFKA_SCHEMA_INVALID_RESOURCE,resource));
+      return false;
+    }
+    return true;
   }
 
-  private boolean isVersionValid(String value) {
-    return validVersions.stream().anyMatch(s -> s.contains(value));
+  private boolean isVersionValid(String version) {
+     if(!validVersions.stream().anyMatch(s -> s.contains(version))) {
+       log.error(String.format(KAFKA_SCHEMA_INVALID_VERSION, version));
+       return false;
+     }
+     return true;
   }
-
 
 }

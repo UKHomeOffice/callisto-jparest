@@ -11,12 +11,15 @@ import java.util.concurrent.CountDownLatch;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
+
+import javax.xml.validation.Schema;
 
 @Slf4j
 @Service
@@ -27,19 +30,12 @@ public abstract class KafkaConsumerService<T> {
 
   ObjectMapper mapper = new ObjectMapper();
 
-  String resourceName;
-
-  List<String> validVersions;
-
   private CountDownLatch latch = new CountDownLatch(1);
 
   private String message;
 
-  protected KafkaConsumerService(@Value("${kafka.resource.name}") String resourceName,
-                                 @Value("${kafka.valid.schema.versions}") List<String> validVersions) {
-    this.resourceName = resourceName;
-    this.validVersions = validVersions;
-  }
+  @Autowired
+  private SchemaValidator schemaValidator;
 
   @KafkaListener(
       topics = "${spring.kafka.template.default-topic}",
@@ -48,7 +44,6 @@ public abstract class KafkaConsumerService<T> {
   public void consumer(@Payload String payload
   ) {
     this.message = payload;
-    SchemaValidator schemaValidator = new SchemaValidator(resourceName, validVersions);
     if (schemaValidator.isSchemaValid(message)) {
       try {
         log.info(String.format(KAFKA_CONSUMING_MESSAGE, message));
