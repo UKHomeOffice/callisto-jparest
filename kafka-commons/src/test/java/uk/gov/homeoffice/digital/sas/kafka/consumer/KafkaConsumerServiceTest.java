@@ -58,6 +58,9 @@ class KafkaConsumerServiceTest {
   @Value("${projectVersion}")
   private String version;
 
+  @Value("${kafka.resource.name}")
+  private String resourceName;
+
   @SpyBean
   private SchemaValidator schemaValidator;
 
@@ -94,8 +97,8 @@ class KafkaConsumerServiceTest {
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNull();
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_VERSION, "0.0" +
         ".4"));
-    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID, " uk.gov" +
-        ".homeoffice.digital.sas.model.Profile"));
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID,
+        resourceName +  ", 0.0.4"));
   }
 
   private KafkaEventMessage generateExpectedKafkaEventMessage(String version, Profile resource,
