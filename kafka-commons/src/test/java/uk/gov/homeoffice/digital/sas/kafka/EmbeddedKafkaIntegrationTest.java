@@ -64,6 +64,7 @@ class EmbeddedKafkaIntegrationTest {
   }
 
   @Test
+  @Order(1)
   void shouldSendCreateMessageToTopicFromProducer() throws Exception {
     // GIVEN
     kafkaProducerService.sendMessage(PROFILE_ID.toString(), profile, KafkaAction.CREATE);
@@ -82,6 +83,7 @@ class EmbeddedKafkaIntegrationTest {
   }
 
   @Test
+  @Order(2)
   void shouldSendCreateMessageToTopicWhenProfileIsCreated() throws Exception {
     // GIVEN
     profileRepository.save(profile);
@@ -102,6 +104,7 @@ class EmbeddedKafkaIntegrationTest {
   }
 
   @Test
+  @Order(3)
   void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
     // GIVEN
     profileRepository.saveAndFlush(profile);
@@ -122,6 +125,7 @@ class EmbeddedKafkaIntegrationTest {
   }
 
   @Test
+  @Order(4)
   void shouldSendDeleteMessageToTopicWhenProfileIsDeleted() throws Exception {
     // GIVEN
     profileRepository.save(profile);
