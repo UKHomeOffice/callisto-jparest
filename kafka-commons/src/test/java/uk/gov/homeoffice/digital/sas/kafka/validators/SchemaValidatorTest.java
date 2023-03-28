@@ -17,8 +17,6 @@ import java.util.List;
 @ExtendWith({OutputCaptureExtension.class})
 class SchemaValidatorTest {
 
-  @Autowired
-  SchemaValidator schemaValidator;
 
   @Value("${kafka.valid.schema.versions}")
   private List<String> validVersions;
@@ -29,10 +27,11 @@ class SchemaValidatorTest {
   private String validMessage;
   private String invalidMessage;
 
+  SchemaValidator schemaValidator;
+
   @BeforeEach
   void setup () {
-    schemaValidator.setValidVersions(validVersions);
-    schemaValidator.setResourceName(resourceName);
+    schemaValidator = new SchemaValidator(resourceName, validVersions);
     validMessage = "{\"schema\":\"uk.gov.homeoffice.digital.sas.model.Profile, 0.1.0\",\"resource\":{\"id\":\"c0a80018-870e-11b0-8187-0ea38cb30001\",\"tenantId\":\"00000000-0000-0000-0000-000000000000\",\"ownerId\":\"3343a960-de03-42ba-8769-767404fb2fcf\",\"timePeriodTypeId\":\"00000000-0000-0000-0000-000000000001\",\"shiftType\":null,\"actualStartTime\":1679456400000,\"actualEndTime\":1679457000000},\"action\":\"CREATE\"}";
     invalidMessage = "{\"schema\":\"uk.gov.homeoffice.digital.sas.model.Profile, 0.0.4\",\"resource\":{\"id\":\"c0a80018-870e-11b0-8187-0ea38cb30001\",\"tenantId\":\"00000000-0000-0000-0000-000000000000\",\"ownerId\":\"3343a960-de03-42ba-8769-767404fb2fcf\",\"timePeriodTypeId\":\"00000000-0000-0000-0000-000000000001\",\"shiftType\":null,\"actualStartTime\":1679456400000,\"actualEndTime\":1679457000000},\"action\":\"CREATE\"}";
   }

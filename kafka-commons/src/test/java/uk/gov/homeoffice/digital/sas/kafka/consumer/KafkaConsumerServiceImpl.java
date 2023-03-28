@@ -1,6 +1,9 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
@@ -16,7 +19,7 @@ public class KafkaConsumerServiceImpl extends KafkaConsumerService<Profile> {
 
   private CountDownLatch latch = new CountDownLatch(1);
 
-  public KafkaConsumerServiceImpl(SchemaValidator schemaValidator) {
+  protected KafkaConsumerServiceImpl(SchemaValidator schemaValidator) {
     super(schemaValidator);
   }
 
@@ -25,15 +28,6 @@ public class KafkaConsumerServiceImpl extends KafkaConsumerService<Profile> {
       groupId = "${spring.kafka.consumer.group-id}"
   )
   public void onMessage(@Payload String message) {
-    //if (latch != null) {
-    //  latch.countDown();
-    //  if (latch.getCount() == 0) {
-        kafkaEventMessage = consumer(message);
-    //  }
-    //}
-  }
-
-  public void setExpectedNumberOfMessages(int expectedNumberOfMessages) {
-    latch = new CountDownLatch(expectedNumberOfMessages);
+    kafkaEventMessage = consumer(message);
   }
 }

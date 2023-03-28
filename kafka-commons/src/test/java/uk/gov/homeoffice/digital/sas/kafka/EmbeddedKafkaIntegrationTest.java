@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.homeoffice.digital.sas.config.TestConfig;
 import uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerServiceImpl;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
@@ -37,7 +40,7 @@ class EmbeddedKafkaIntegrationTest {
   private static final String TENANT_ID = "tenantId";
   private static final String PROFILE_NAME = "Original profile";
   private static final String UPDATED_PROFILE_NAME = "Updated profile";
-  private static final int CONSUMER_TIMEOUT = 5;
+  private static final int CONSUMER_TIMEOUT = 3;
   private Profile profile;
 
   @Value("${schemaVersion}")
@@ -47,26 +50,25 @@ class EmbeddedKafkaIntegrationTest {
   private KafkaProducerService<Profile> kafkaProducerService;
 
   @Autowired
-  private KafkaConsumerServiceImpl kafkaConsumerServiceImpl;
+  KafkaConsumerServiceImpl kafkaConsumerServiceImpl;
 
   @Autowired
   private ProfileRepository profileRepository;
 
   @BeforeEach
   void setup() {
-    profile = new Profile(null, TENANT_ID, PROFILE_NAME);
+    profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME);
   }
 
   @Test
   void shouldSendCreateMessageToTopicFromProducer() throws Exception {
-    profile.setId(PROFILE_ID);
     // GIVEN
     kafkaProducerService.sendMessage(PROFILE_ID.toString(), profile, KafkaAction.CREATE);
 
     // WHEN
-    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
-
-    //THEN
+    CountDownLatch latch = new CountDownLatch(1); // block current thread execution for specific time
+    latch.await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
     KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
@@ -82,7 +84,8 @@ class EmbeddedKafkaIntegrationTest {
     profileRepository.save(profile);
 
     // WHEN
-    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    CountDownLatch latch = new CountDownLatch(1); // block current thread execution for specific time
+    latch.await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
 
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
@@ -97,13 +100,15 @@ class EmbeddedKafkaIntegrationTest {
 
   @Test
   void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
-    kafkaConsumerServiceImpl.setExpectedNumberOfMessages(2);
     // GIVEN
     profileRepository.saveAndFlush(profile);
     profile.setName(UPDATED_PROFILE_NAME);
     profile = profileRepository.saveAndFlush(profile);
     // WHEN
-    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    CountDownLatch latch = new CountDownLatch(1); // block current thread execution for specific time
+    latch.await(3, TimeUnit.SECONDS);
+
+
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
@@ -120,7 +125,9 @@ class EmbeddedKafkaIntegrationTest {
     profileRepository.save(profile);
     profileRepository.delete(profile);
     // WHEN
-    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    CountDownLatch latch = new CountDownLatch(1); // block current thread execution for specific time
+    latch.await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
@@ -131,28 +138,13 @@ class EmbeddedKafkaIntegrationTest {
     isMessageDeserialized(expectedKafkaEventMessage);
   }
 
-  private String generateExpectedPayload(String version, Profile profile, KafkaAction action) {
-    return "{\"schema\":\""
-        .concat(profile.getClass().getName())
-        .concat(", ")
-        .concat(version)
-        .concat("\",\"resource\":{\"id\":")
-        .concat(profile.getId().toString())
-        .concat(",\"tenantId\":\"")
-        .concat(profile.getTenantId())
-        .concat("\",\"name\":\"")
-        .concat(profile.getName())
-        .concat("\"},\"action\":\"")
-        .concat(action.name())
-        .concat("\"}");
-  }
-
   private KafkaEventMessage generateExpectedKafkaEventMessage(String version, Profile resource,
                                                               KafkaAction action) {
     return new KafkaEventMessage<>(version, resource, action);
   }
 
   private void isMessageDeserialized(KafkaEventMessage expectedKafkaEventMessage) {
+
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getSchema()).isEqualTo(expectedKafkaEventMessage.getSchema());
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getAction()).isEqualTo(expectedKafkaEventMessage.getAction());
 
