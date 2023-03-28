@@ -29,12 +29,6 @@ public abstract class SchemaValidator {
 
   List<String> validVersions;
 
-  protected SchemaValidator(String resourceName,
-                         List<String> validVersions) {
-    this.resourceName = resourceName;
-    this.validVersions = validVersions;
-  }
-
   public boolean isSchemaValid(String message) {
     JsonObject jsonMessage = JsonParser.parseString(message).getAsJsonObject();
     String schema = jsonMessage.get(SCHEMA).getAsString();
@@ -44,15 +38,12 @@ public abstract class SchemaValidator {
 
   private List<String> splitMessageSchema(String schema) {
     List<String> stringList = new ArrayList<>();
-    try {
       if (schema.contains(",")) {
         stringList = Pattern.compile(", ")
             .splitAsStream(schema).toList();
+      } else {
+        log.error(String.format(KAFKA_SCHEMA_INCORRECT_FORMAT, schema));
       }
-    } catch (IllegalArgumentException e) {
-      log.error(String.format(KAFKA_SCHEMA_INCORRECT_FORMAT,
-          schema), e);
-    }
     return stringList;
   }
 

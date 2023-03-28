@@ -35,17 +35,15 @@ public abstract class KafkaConsumerService<T> {
   }
 
   public KafkaEventMessage<T> consumer(String payload
-  ) {
+  ) throws JsonProcessingException {
     schemaValidator.setValidVersions(validVersions);
     schemaValidator.setResourceName(resourceName);
+
     if (schemaValidator.isSchemaValid(payload)) {
-      try {
         log.info(String.format(KAFKA_CONSUMING_MESSAGE, payload));
         return mapper.readValue(payload, KafkaEventMessage.class);
-      } catch (JsonProcessingException e) {
-        log.error(KAFKA_FAILED_DESERIALIZATION, e);
-      }
     }
+
     return null;
   }
 }

@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
@@ -28,7 +29,7 @@ public class KafkaConsumerServiceImpl extends KafkaConsumerService<Profile> {
       topics = {"${spring.kafka.template.default-topic}"},
       groupId = "${spring.kafka.consumer.group-id}"
   )
-  public void onMessage(@Payload String message) {
+  public void onMessage(@Payload String message) throws JsonProcessingException {
     if (latch != null) {
       latch.countDown();
       if (latch.getCount() == 0) {
