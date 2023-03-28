@@ -59,20 +59,17 @@ public class SchemaValidator {
   }
 
   private boolean isValidMessage(List<String> splitSchema) {
-    if (splitSchema.size() == 2) {
-      if (isValidResource(splitSchema.get(0)) && isVersionValid(splitSchema.get(1))) {
-        log.info(String.format(KAFKA_SCHEMA_VALIDATED,
-            splitSchema.stream().collect(Collectors.joining(", "))));
-        return true;
-      } else {
-        log.error(String.format(KAFKA_SCHEMA_INVALID,
-            splitSchema.stream().collect(Collectors.joining(", "))));
-        return false;
-      }
+    if (splitSchema.size() == 2
+        && isValidResource(splitSchema.get(0))
+        && isVersionValid(splitSchema.get(1))) {
+      log.info(String.format(KAFKA_SCHEMA_VALIDATED,
+          splitSchema.stream().collect(Collectors.joining(", "))));
+      return true;
+    } else {
+      log.error(String.format(KAFKA_SCHEMA_INVALID,
+          splitSchema.stream().collect(Collectors.joining(", "))));
+      return false;
     }
-    log.error(String.format(KAFKA_SCHEMA_INVALID,
-        splitSchema.stream().collect(Collectors.joining(", "))));
-    return false;
   }
 
   private boolean isValidResource(String resource) {
