@@ -34,9 +34,6 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
         "port=3333"
     }
 )
-@TestPropertySource(properties = {
-    "spring.kafka.producer.bootstrap-servers=${spring.embedded.kafka.brokers}",
-    "spring.kafka.consumer.bootstrap-servers=${spring.embedded.kafka.brokers}"})
 class EmbeddedKafkaIntegrationTest {
 
   private static final Long PROFILE_ID = 1L;
