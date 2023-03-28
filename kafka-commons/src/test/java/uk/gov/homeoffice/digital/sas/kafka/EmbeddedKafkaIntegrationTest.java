@@ -34,6 +34,9 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
         "port=3333"
     }
 )
+@TestPropertySource(properties = {
+    "spring.kafka.producer.bootstrap-servers=${spring.embedded.kafka.brokers}",
+    "spring.kafka.consumer.bootstrap-servers=${spring.embedded.kafka.brokers}"})
 class EmbeddedKafkaIntegrationTest {
 
   private static final Long PROFILE_ID = 1L;
@@ -106,8 +109,7 @@ class EmbeddedKafkaIntegrationTest {
     profile = profileRepository.saveAndFlush(profile);
     // WHEN
     CountDownLatch latch = new CountDownLatch(1); // block current thread execution for specific time
-    latch.await(3, TimeUnit.SECONDS);
-
+    latch.await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
 
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
