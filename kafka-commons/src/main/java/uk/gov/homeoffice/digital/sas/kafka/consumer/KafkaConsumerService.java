@@ -33,7 +33,7 @@ public abstract class KafkaConsumerService<T> {
     this.schemaValidator = schemaValidator;
   }
 
-  public KafkaEventMessage<T> consumer(String payload
+  public KafkaEventMessage<T> consume(String payload
   ) throws JsonProcessingException {
     schemaValidator.setValidVersions(validVersions);
     schemaValidator.setResourceName(resourceName);

@@ -66,7 +66,7 @@ class KafkaConsumerServiceTest {
   //Does deserialize, logs success
   @Test
   void should_returnKafkaEventMessage_AndLogSuccess_when_correctMessage(CapturedOutput capturedOutput) throws JsonProcessingException {
-    kafkaConsumerServiceImpl.consumer(validMessage);
+    kafkaConsumerServiceImpl.consume(validMessage);
     //verify(schemaValidator).isSchemaValid(validMessage);
     //assertEquals(expectedKafkaEventMessage, kafkaConsumerServiceImpl.getKafkaEventMessage());
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_CONSUMING_MESSAGE,
@@ -76,7 +76,7 @@ class KafkaConsumerServiceTest {
   //doesn't deserialize, logs error
   @Test
   void should_returnNull_AndLogFailure_when_incorrectMessage(CapturedOutput capturedOutput) throws JsonProcessingException {
-    kafkaConsumerServiceImpl.consumer(invalidMessage);
+    kafkaConsumerServiceImpl.consume(invalidMessage);
     //verify(schemaValidator).isSchemaValid(invalidMessage);
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNull();
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_VERSION, "0.0" +

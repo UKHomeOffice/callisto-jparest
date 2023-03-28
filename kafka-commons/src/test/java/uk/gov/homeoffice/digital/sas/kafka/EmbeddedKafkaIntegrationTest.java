@@ -28,11 +28,7 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 @SpringBootTest(classes = TestConfig.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(
-    partitions = 3,
-    brokerProperties = {
-        "listeners=PLAINTEXT://localhost:2111",
-        "port=2111"
-    }
+    partitions = 3
 )
 @TestPropertySource(properties = {
     "spring.kafka.producer.bootstrap-servers=${spring.embedded.kafka.brokers}",
