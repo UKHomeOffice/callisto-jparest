@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -60,18 +59,20 @@ public class SchemaValidator {
   }
 
   private boolean isValidMessage(List<String> splitSchema) {
-    if (splitSchema.size() != 2) {
-      return false;
+    if (splitSchema.size() == 2) {
+      if (isValidResource(splitSchema.get(0)) && isVersionValid(splitSchema.get(1))) {
+        log.info(String.format(KAFKA_SCHEMA_VALIDATED,
+            splitSchema.stream().collect(Collectors.joining(", "))));
+        return true;
+      } else {
+        log.error(String.format(KAFKA_SCHEMA_INVALID,
+            splitSchema.stream().collect(Collectors.joining(", "))));
+        return false;
+      }
     }
-    if (isValidResource(splitSchema.get(0)) && isVersionValid(splitSchema.get(1))) {
-      log.info(String.format(KAFKA_SCHEMA_VALIDATED,
-          splitSchema.stream().collect(Collectors.joining(", "))));
-      return true;
-    } else {
-      log.error(String.format(KAFKA_SCHEMA_INVALID,
-          splitSchema.stream().collect(Collectors.joining(", "))));
-      return false;
-    }
+    log.error(String.format(KAFKA_SCHEMA_INVALID,
+        splitSchema.stream().collect(Collectors.joining(", "))));
+    return false;
   }
 
   private boolean isValidResource(String resource) {
