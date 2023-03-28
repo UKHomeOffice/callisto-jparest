@@ -1,6 +1,8 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_JSON_MESSAGE;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_JSON_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
@@ -49,7 +51,6 @@ class KafkaConsumerServiceTest {
 
   KafkaEventMessage expectedKafkaEventMessage;
 
-  //
   @BeforeEach
   void setup() {
     schemaValidator.setValidVersions(validVersions);
@@ -58,8 +59,8 @@ class KafkaConsumerServiceTest {
     expectedKafkaEventMessage = generateExpectedKafkaEventMessage("0.1.0",
         profile,
         KafkaAction.CREATE);
-    validMessage = "{\"schema\":\"uk.gov.homeoffice.digital.sas.model.Profile, 0.1.0\",\"resource\":{\"id\":\"c0a80018-870e-11b0-8187-0ea38cb30001\",\"tenantId\":\"00000000-0000-0000-0000-000000000000\",\"ownerId\":\"3343a960-de03-42ba-8769-767404fb2fcf\",\"timePeriodTypeId\":\"00000000-0000-0000-0000-000000000001\",\"shiftType\":null,\"actualStartTime\":1679456400000,\"actualEndTime\":1679457000000},\"action\":\"CREATE\"}";
-    invalidMessage = "{\"schema\":\"uk.gov.homeoffice.digital.sas.model.Profile, 0.0.4\",\"resource\":{\"id\":\"c0a80018-870e-11b0-8187-0ea38cb30001\",\"tenantId\":\"00000000-0000-0000-0000-000000000000\",\"ownerId\":\"3343a960-de03-42ba-8769-767404fb2fcf\",\"timePeriodTypeId\":\"00000000-0000-0000-0000-000000000001\",\"shiftType\":null,\"actualStartTime\":1679456400000,\"actualEndTime\":1679457000000},\"action\":\"CREATE\"}";
+    validMessage = KAFKA_VALID_JSON_MESSAGE;
+    invalidMessage = KAFKA_INVALID_JSON_MESSAGE;
   }
 
   //Does deserialize, logs success
