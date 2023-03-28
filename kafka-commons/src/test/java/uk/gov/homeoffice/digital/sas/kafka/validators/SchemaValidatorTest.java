@@ -9,11 +9,17 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import uk.gov.homeoffice.digital.sas.config.TestConfig;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.*;
-import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.*;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_JSON_MESSAGE;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_SCHEMA_FORMAT_JSON_MESSAGE;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_SCHEMA_RESOURCE_MESSAGE;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_JSON_MESSAGE;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_SCHEMA;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INCORRECT_FORMAT;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_RESOURCE;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_VALIDATED;
+import java.util.List;
 
 @SpringBootTest(classes = TestConfig.class)
 @ExtendWith({OutputCaptureExtension.class})
@@ -58,13 +64,15 @@ class SchemaValidatorTest {
     // given
     // when
     schemaValidator.isSchemaValid(validMessage);
+
     // then
     assertTrue(capturedOutput.getOut().contains(String.format(KAFKA_SCHEMA_VALIDATED, KAFKA_VALID_SCHEMA)));
   }
 
   @Test
-  void should_returnCorrectLogMessage_invalidResource (CapturedOutput capturedOutput) {
+  void should_returnCorrectLogMessage_when_invalidResource (CapturedOutput capturedOutput) {
     // given
+    String messageValidResource = "{\"schema\":\"uk.gov.homeoffice.digital.sas.timecard.model.TimeEntry, 0.1.0\",\"resource\":{\"id\":\"c0a80018-870e-11b0-8187-0ea38cb30001\",\"tenantId\":\"00000000-0000-0000-0000-000000000000\",\"ownerId\":\"3343a960-de03-42ba-8769-767404fb2fcf\",\"timePeriodTypeId\":\"00000000-0000-0000-0000-000000000001\",\"shiftType\":null,\"actualStartTime\":1679456400000,\"actualEndTime\":1679457000000},\"action\":\"CREATE\"}";
     // when
     boolean actual = schemaValidator.isSchemaValid(KAFKA_INVALID_SCHEMA_RESOURCE_MESSAGE);
     // then
@@ -81,7 +89,7 @@ class SchemaValidatorTest {
   }
 
   @Test
-  void should_returnCorrectLogMessage_invalidVersion (CapturedOutput capturedOutput) {
+  void should_returnCorrectLogMessage_when_invalidVersion (CapturedOutput capturedOutput) {
     // given
     // when
     boolean actual = schemaValidator.isSchemaValid(invalidMessage);
@@ -90,7 +98,7 @@ class SchemaValidatorTest {
   }
 
   @Test
-  void should_throwIllegalArgumentExceptionLogError_incorrectSchemaFormat(
+  void should_returnLogError_when_incorrectSchemaFormat(
       CapturedOutput capturedOutput) {
     // given
     // when
@@ -98,5 +106,7 @@ class SchemaValidatorTest {
     // then
     assertTrue(capturedOutput.getOut().contains(String.format(KAFKA_SCHEMA_INCORRECT_FORMAT, "uk.gov"
         + ".homeoffice.digital.sas.model.Profile 0.0.4")));
+
+
   }
 }
