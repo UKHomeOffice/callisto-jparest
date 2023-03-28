@@ -17,21 +17,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 
 @Slf4j
-@Component
 @Getter
 @Setter
 @NoArgsConstructor
-public class SchemaValidator {
+public abstract class SchemaValidator {
 
   String resourceName;
 
   List<String> validVersions;
 
-  public SchemaValidator(String resourceName,
+  protected SchemaValidator(String resourceName,
                          List<String> validVersions) {
     this.resourceName = resourceName;
     this.validVersions = validVersions;

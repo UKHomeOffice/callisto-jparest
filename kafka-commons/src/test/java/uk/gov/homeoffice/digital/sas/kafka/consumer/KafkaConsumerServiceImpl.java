@@ -8,6 +8,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
+import uk.gov.homeoffice.digital.sas.kafka.validators.KafkaSchemaValidatorImpl;
 import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
 import uk.gov.homeoffice.digital.sas.model.Profile;
 
@@ -19,7 +20,7 @@ public class KafkaConsumerServiceImpl extends KafkaConsumerService<Profile> {
 
   private CountDownLatch latch = new CountDownLatch(1);
 
-  protected KafkaConsumerServiceImpl(SchemaValidator schemaValidator) {
+  protected KafkaConsumerServiceImpl(KafkaSchemaValidatorImpl schemaValidator) {
     super(schemaValidator);
   }
 
@@ -31,7 +32,7 @@ public class KafkaConsumerServiceImpl extends KafkaConsumerService<Profile> {
     if (latch != null) {
       latch.countDown();
       if (latch.getCount() == 0) {
-    kafkaEventMessage = consumer(message);
+        kafkaEventMessage = consumer(message);
       }
     }
   }
