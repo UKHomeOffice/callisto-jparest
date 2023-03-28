@@ -24,11 +24,6 @@ public class KafkaConsumerServiceImpl extends KafkaConsumerService<Profile> {
       groupId = "${spring.kafka.consumer.group-id}"
   )
   public void onMessage(@Payload String message) throws JsonProcessingException {
-    if (latch != null) {
-      latch.countDown();
-      if (latch.getCount() == 0) {
         kafkaEventMessage = consume(message);
-      }
-    }
   }
 }
