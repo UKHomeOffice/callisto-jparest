@@ -40,8 +40,8 @@ public abstract class KafkaConsumerService<T> {
     schemaValidator.setResourceName(resourceName);
 
     if (schemaValidator.isSchemaValid(payload)) {
-        log.info(String.format(KAFKA_CONSUMING_MESSAGE, payload));
-        return mapper.readValue(payload, KafkaEventMessage.class);
+      log.info(String.format(KAFKA_CONSUMING_MESSAGE, payload));
+      return mapper.readValue(payload, KafkaEventMessage.class);
     }
 
     return null;

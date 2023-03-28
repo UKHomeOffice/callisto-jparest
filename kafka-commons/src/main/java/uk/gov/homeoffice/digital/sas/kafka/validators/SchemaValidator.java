@@ -38,12 +38,12 @@ public abstract class SchemaValidator {
 
   private List<String> splitMessageSchema(String schema) {
     List<String> stringList = new ArrayList<>();
-      if (schema.contains(",")) {
-        stringList = Pattern.compile(", ")
-            .splitAsStream(schema).toList();
-      } else {
-        log.error(String.format(KAFKA_SCHEMA_INCORRECT_FORMAT, schema));
-      }
+    if (schema.contains(",")) {
+      stringList = Pattern.compile(", ")
+          .splitAsStream(schema).toList();
+    } else {
+      log.error(String.format(KAFKA_SCHEMA_INCORRECT_FORMAT, schema));
+    }
     return stringList;
   }
 

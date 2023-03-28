@@ -11,8 +11,6 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import uk.gov.homeoffice.digital.sas.config.TestConfig;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_JSON_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_SCHEMA_FORMAT_JSON_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_JSON_MESSAGE;
