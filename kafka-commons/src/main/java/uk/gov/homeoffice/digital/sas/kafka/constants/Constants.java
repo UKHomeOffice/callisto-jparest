@@ -45,5 +45,9 @@ public final class Constants {
 
 
   //Strings
-  public static final String SCHEMA = "schema";
+  public static final String SCHEMA_JSON_ATTRIBUTE = "schema";
+
+  public static final String SCHEMA_COMMA_DELIMETER = ", ";
+
+  public static final String SCHEMA_FORMAT = "%s" + SCHEMA_COMMA_DELIMETER + "%s";
 }

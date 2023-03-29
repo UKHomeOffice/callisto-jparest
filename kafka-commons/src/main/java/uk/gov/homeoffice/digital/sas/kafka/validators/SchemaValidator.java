@@ -3,7 +3,8 @@ package uk.gov.homeoffice.digital.sas.kafka.validators;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_VALIDATED;
-import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA_COMMA_DELIMETER;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA_JSON_ATTRIBUTE;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -20,21 +21,21 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 @Getter
 @Setter
 @NoArgsConstructor
-public abstract class SchemaValidator {
+public class SchemaValidator {
 
-  DefaultArtifactVersion supportedVersion;
+  private DefaultArtifactVersion supportedVersion;
 
   public boolean isSchemaValid(String message) {
     JsonObject jsonMessage = JsonParser.parseString(message).getAsJsonObject();
-    String schema = jsonMessage.get(SCHEMA).getAsString();
+    String schema = jsonMessage.get(SCHEMA_JSON_ATTRIBUTE).getAsString();
     List<String> splitSchema = splitMessageSchema(schema);
     return isValidMessage(splitSchema, schema);
   }
 
   private List<String> splitMessageSchema(String schema) {
     List<String> stringList = new ArrayList<>();
-    if (schema.contains(",")) {
-      stringList = Pattern.compile(", ")
+    if (schema.contains(SCHEMA_COMMA_DELIMETER)) {
+      stringList = Pattern.compile(SCHEMA_COMMA_DELIMETER)
           .splitAsStream(schema).toList();
     }
     return stringList;

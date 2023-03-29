@@ -3,6 +3,7 @@ package uk.gov.homeoffice.digital.sas.kafka.consumer;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,7 @@ import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
 @Slf4j
 @Service
 @Getter
-public abstract class KafkaConsumerService<T> {
+public class KafkaConsumerService<T> {
 
   protected KafkaEventMessage<T> kafkaEventMessage;
 
@@ -39,7 +40,7 @@ public abstract class KafkaConsumerService<T> {
 
     if (schemaValidator.isSchemaValid(payload)) {
       log.info(String.format(KAFKA_CONSUMING_MESSAGE, payload));
-      return mapper.readValue(payload, KafkaEventMessage.class);
+      return mapper.readValue(payload, new TypeReference<>() {});
     }
 
     return null;

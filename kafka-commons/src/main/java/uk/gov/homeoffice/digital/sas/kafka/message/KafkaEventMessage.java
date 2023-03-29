@@ -1,13 +1,12 @@
 package uk.gov.homeoffice.digital.sas.kafka.message;
 
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA_FORMAT;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
 public class KafkaEventMessage<T> {
-
-  public static final String SCHEMA_FORMAT = "%s, %s";
 
   @JsonProperty("schema")
   private String schema;
