@@ -1,7 +1,6 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_RESOURCE;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_JSON_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_RESOURCE;
@@ -10,7 +9,7 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONS
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 
-import org.apache.maven.artifact.versioning.ComparableVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +41,7 @@ class KafkaConsumerServiceTest {
   private String resourceName;
 
   @Value("0.1.0")
-  private ComparableVersion validVersion;
+  private DefaultArtifactVersion supportedVersion;
 
   @Autowired
   private SchemaValidator schemaValidator;
@@ -54,7 +53,7 @@ class KafkaConsumerServiceTest {
 
   @BeforeEach
   void setup() {
-    schemaValidator.setValidVersion(validVersion);
+    schemaValidator.setSupportedVersion(supportedVersion);
     schemaValidator.setResourceName(resourceName);
     profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME);
     expectedKafkaEventMessage = generateExpectedKafkaEventMessage("0.1.0",

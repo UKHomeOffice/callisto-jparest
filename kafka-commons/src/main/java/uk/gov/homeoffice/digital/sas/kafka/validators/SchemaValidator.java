@@ -1,6 +1,5 @@
 package uk.gov.homeoffice.digital.sas.kafka.validators;
 
-import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INCORRECT_FORMAT;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_RESOURCE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
@@ -12,13 +11,11 @@ import com.google.gson.JsonParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.maven.artifact.versioning.ComparableVersion;
-
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 @Slf4j
 @Getter
@@ -28,7 +25,7 @@ public abstract class SchemaValidator {
 
   String resourceName;
 
-  ComparableVersion validVersion;
+  DefaultArtifactVersion supportedVersion;
 
   public boolean isSchemaValid(String message) {
     JsonObject jsonMessage = JsonParser.parseString(message).getAsJsonObject();
@@ -67,11 +64,29 @@ public abstract class SchemaValidator {
   }
 
   private boolean isVersionValid(String version) {
-    ComparableVersion messageVersion = new ComparableVersion(version);
-   if (validVersion.compareTo(messageVersion) < 0) {
-     log.error(String.format(KAFKA_SCHEMA_INVALID_VERSION, version));
-     return false;
+    DefaultArtifactVersion messageVersion = new DefaultArtifactVersion(version);
+
+    switch (isMajorVersionValid(messageVersion.getMajorVersion())) {
+      case 1:
+        log.error(String.format(KAFKA_SCHEMA_INVALID_VERSION, version));
+        return false;
+      case -1:
+        log.info(String.format(KAFKA_SCHEMA_VALIDATED, version));
+        return true;
+      case 0:
+        if (messageVersion.getMinorVersion() > supportedVersion.getMinorVersion()) {
+          log.error(String.format(KAFKA_SCHEMA_INVALID_VERSION, version));
+          return false;
+        } else {
+          log.info(String.format(KAFKA_SCHEMA_VALIDATED, version));
+          return true;
+        }
+      default:
+        return false;
     }
-    return true;
+  }
+
+  private int isMajorVersionValid(int majorVersion) {
+    return Integer.compare(majorVersion, supportedVersion.getMajorVersion());
   }
 }

@@ -4,10 +4,9 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONS
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.maven.artifact.versioning.ComparableVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
@@ -25,8 +24,8 @@ public abstract class KafkaConsumerService<T> {
   @Value("${kafka.resource.name}")
   private String resourceName;
 
-  @Value("${kafka.valid.schema.version}")
-  private ComparableVersion validVersion;
+  @Value("${kafka.supported.schema.version}")
+  private DefaultArtifactVersion supportedVersion;
 
   private final SchemaValidator schemaValidator;
 
@@ -36,7 +35,7 @@ public abstract class KafkaConsumerService<T> {
 
   public KafkaEventMessage<T> consume(String payload
   ) throws JsonProcessingException {
-    schemaValidator.setValidVersion(validVersion);
+    schemaValidator.setSupportedVersion(supportedVersion);
     schemaValidator.setResourceName(resourceName);
 
     if (schemaValidator.isSchemaValid(payload)) {
