@@ -36,7 +36,6 @@ public abstract class KafkaConsumerService<T> {
   public KafkaEventMessage<T> consume(String payload
   ) throws JsonProcessingException {
     schemaValidator.setSupportedVersion(supportedVersion);
-    schemaValidator.setResourceName(resourceName);
 
     if (schemaValidator.isSchemaValid(payload)) {
       log.info(String.format(KAFKA_CONSUMING_MESSAGE, payload));

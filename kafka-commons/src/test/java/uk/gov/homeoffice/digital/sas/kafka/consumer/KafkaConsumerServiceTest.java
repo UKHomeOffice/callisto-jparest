@@ -54,7 +54,6 @@ class KafkaConsumerServiceTest {
   @BeforeEach
   void setup() {
     schemaValidator.setSupportedVersion(supportedVersion);
-    schemaValidator.setResourceName(resourceName);
     profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME);
     expectedKafkaEventMessage = generateExpectedKafkaEventMessage("0.1.0",
         profile,
@@ -64,7 +63,7 @@ class KafkaConsumerServiceTest {
   //Does deserialize, logs success
   @Test
   void should_returnKafkaEventMessage_AndLogSuccess_when_correctMessage(CapturedOutput capturedOutput) throws JsonProcessingException {
-    String message = String.format(KAFKA_JSON_MESSAGE, KAFKA_VALID_RESOURCE, KAFKA_VALID_VERSION);
+    String message = String.format(KAFKA_JSON_MESSAGE, KAFKA_VALID_VERSION);
 
     kafkaConsumerServiceImpl.onMessage(message);
 
@@ -76,8 +75,7 @@ class KafkaConsumerServiceTest {
   //doesn't deserialize, logs error
   @Test
   void should_returnNull_AndLogFailure_when_incorrectMessage(CapturedOutput capturedOutput) throws JsonProcessingException {
-    String message = String.format(KAFKA_JSON_MESSAGE, KAFKA_VALID_RESOURCE,
-        KAFKA_INVALID_VERSION);
+    String message = String.format(KAFKA_JSON_MESSAGE, KAFKA_INVALID_VERSION);
 
     kafkaConsumerServiceImpl.onMessage(message);
 

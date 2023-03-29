@@ -1,7 +1,6 @@
 package uk.gov.homeoffice.digital.sas.kafka.validators;
 
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID;
-import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_RESOURCE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_VALIDATED;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA;
@@ -23,8 +22,6 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 @NoArgsConstructor
 public abstract class SchemaValidator {
 
-  String resourceName;
-
   DefaultArtifactVersion supportedVersion;
 
   public boolean isSchemaValid(String message) {
@@ -44,23 +41,13 @@ public abstract class SchemaValidator {
   }
 
   private boolean isValidMessage(List<String> splitSchema, String schema) {
-    if (splitSchema.size() == 2
-        && isValidResource(splitSchema.get(0))
-        && isVersionValid(splitSchema.get(1))) {
+    if (splitSchema.size() == 2 && isVersionValid(splitSchema.get(1))) {
       log.info(String.format(KAFKA_SCHEMA_VALIDATED, schema));
       return true;
     } else {
       log.error(String.format(KAFKA_SCHEMA_INVALID, schema));
       return false;
     }
-  }
-
-  private boolean isValidResource(String resource) {
-    if (!resource.equals(resourceName)) {
-      log.error(String.format(KAFKA_SCHEMA_INVALID_RESOURCE, resource));
-      return false;
-    }
-    return true;
   }
 
   private boolean isVersionValid(String version) {
