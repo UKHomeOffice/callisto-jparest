@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_FAILED_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SUCCESS_MESSAGE;
-import static uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage.SCHEMA_FORMAT;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA_FORMAT;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;

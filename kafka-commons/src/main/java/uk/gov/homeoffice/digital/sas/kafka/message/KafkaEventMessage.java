@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.kafka.message;
 
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA_FORMAT;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
