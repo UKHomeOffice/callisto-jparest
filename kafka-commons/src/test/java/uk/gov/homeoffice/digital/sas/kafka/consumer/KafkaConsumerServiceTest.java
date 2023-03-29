@@ -25,7 +25,7 @@ import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
 import uk.gov.homeoffice.digital.sas.model.Profile;
-import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 @SpringBootTest(classes = TestConfig.class)
@@ -37,9 +37,6 @@ class KafkaConsumerServiceTest {
   private static final String PROFILE_NAME = "Original profile";
 
   private Profile profile;
-
-  private String validMessage;
-  private String invalidMessage;
 
   @Value("${kafka.resource.name}")
   private String resourceName;
@@ -63,34 +60,37 @@ class KafkaConsumerServiceTest {
     expectedKafkaEventMessage = generateExpectedKafkaEventMessage("0.1.0",
         profile,
         KafkaAction.CREATE);
-    validMessage = String.format(KAFKA_JSON_MESSAGE, KAFKA_VALID_RESOURCE, KAFKA_VALID_VERSION);
-    invalidMessage = String.format(KAFKA_JSON_MESSAGE, KAFKA_INVALID_RESOURCE,
-        KAFKA_INVALID_VERSION);
   }
 
   //Does deserialize, logs success
   @Test
   void should_returnKafkaEventMessage_AndLogSuccess_when_correctMessage(CapturedOutput capturedOutput) throws JsonProcessingException {
-    kafkaConsumerServiceImpl.consume(validMessage);
-    assertThat(expectedKafkaEventMessage).isEqualTo(kafkaConsumerServiceImpl.getKafkaEventMessage());
-    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_CONSUMING_MESSAGE,
-        validMessage));
+    String message = String.format(KAFKA_JSON_MESSAGE, KAFKA_VALID_RESOURCE, KAFKA_VALID_VERSION);
+
+    kafkaConsumerServiceImpl.onMessage(message);
+
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getSchema()).isEqualTo(expectedKafkaEventMessage.getSchema());
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getAction()).isEqualTo(expectedKafkaEventMessage.getAction());
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_CONSUMING_MESSAGE, message));
   }
 
   //doesn't deserialize, logs error
   @Test
   void should_returnNull_AndLogFailure_when_incorrectMessage(CapturedOutput capturedOutput) throws JsonProcessingException {
-    kafkaConsumerServiceImpl.consume(invalidMessage);
+    String message = String.format(KAFKA_JSON_MESSAGE, KAFKA_VALID_RESOURCE,
+        KAFKA_INVALID_VERSION);
+
+    kafkaConsumerServiceImpl.onMessage(message);
+
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNull();
-    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_VERSION, "0.0" +
-        ".4"));
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_VERSION,
+        KAFKA_INVALID_VERSION));
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID,
-        resourceName + ", 0.0.4"));
+        KAFKA_VALID_RESOURCE + ", " + KAFKA_INVALID_VERSION));
   }
 
   private KafkaEventMessage generateExpectedKafkaEventMessage(String version, Profile resource,
                                                               KafkaAction action) {
     return new KafkaEventMessage<>(version, resource, action);
   }
-
 }
