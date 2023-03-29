@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 
 @Slf4j
@@ -27,13 +28,13 @@ public abstract class SchemaValidator {
 
   String resourceName;
 
-  List<String> validVersions;
+  ComparableVersion validVersion;
 
   public boolean isSchemaValid(String message) {
     JsonObject jsonMessage = JsonParser.parseString(message).getAsJsonObject();
     String schema = jsonMessage.get(SCHEMA).getAsString();
     List<String> splitSchema = splitMessageSchema(schema);
-    return isValidMessage(splitSchema);
+    return isValidMessage(splitSchema, schema);
   }
 
   private List<String> splitMessageSchema(String schema) {
@@ -41,22 +42,18 @@ public abstract class SchemaValidator {
     if (schema.contains(",")) {
       stringList = Pattern.compile(", ")
           .splitAsStream(schema).toList();
-    } else {
-      log.error(String.format(KAFKA_SCHEMA_INCORRECT_FORMAT, schema));
     }
     return stringList;
   }
 
-  private boolean isValidMessage(List<String> splitSchema) {
+  private boolean isValidMessage(List<String> splitSchema, String schema) {
     if (splitSchema.size() == 2
         && isValidResource(splitSchema.get(0))
         && isVersionValid(splitSchema.get(1))) {
-      log.info(String.format(KAFKA_SCHEMA_VALIDATED,
-          splitSchema.stream().collect(Collectors.joining(", "))));
+      log.info(String.format(KAFKA_SCHEMA_VALIDATED, schema));
       return true;
     } else {
-      log.error(String.format(KAFKA_SCHEMA_INVALID,
-          splitSchema.stream().collect(Collectors.joining(", "))));
+      log.error(String.format(KAFKA_SCHEMA_INVALID, schema));
       return false;
     }
   }
@@ -70,11 +67,11 @@ public abstract class SchemaValidator {
   }
 
   private boolean isVersionValid(String version) {
-    if (validVersions.stream().noneMatch(s -> s.contains(version))) {
-      log.error(String.format(KAFKA_SCHEMA_INVALID_VERSION, version));
-      return false;
+    ComparableVersion messageVersion = new ComparableVersion(version);
+   if (validVersion.compareTo(messageVersion) < 0) {
+     log.error(String.format(KAFKA_SCHEMA_INVALID_VERSION, version));
+     return false;
     }
     return true;
   }
-
 }

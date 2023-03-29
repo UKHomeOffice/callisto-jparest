@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.kafka.validators;
 
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,104 +10,141 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import uk.gov.homeoffice.digital.sas.config.TestConfig;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_JSON_MESSAGE;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_RESOURCE;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_SCHEMA_FORMAT_JSON_MESSAGE;
-import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_SCHEMA_RESOURCE_MESSAGE;
-import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_JSON_MESSAGE;
-import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_SCHEMA;
-import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INCORRECT_FORMAT;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_VERSION;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_JSON_MESSAGE;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_RESOURCE;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_VERSION;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_RESOURCE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_VALIDATED;
-import java.util.List;
 
 @SpringBootTest(classes = TestConfig.class)
 @ExtendWith({OutputCaptureExtension.class})
 class SchemaValidatorTest {
 
 
-  @Value("${kafka.valid.schema.versions}")
-  private List<String> validVersions;
+  private ComparableVersion validVersion;
 
   @Value("${kafka.resource.name}")
   private String resourceName;
-
-  private String validMessage;
-  private String invalidMessage;
 
   SchemaValidator schemaValidator;
 
   @BeforeEach
   void setup () {
     schemaValidator = new KafkaSchemaValidatorImpl();
-    schemaValidator.setValidVersions(validVersions);
     schemaValidator.setResourceName(resourceName);
-    validMessage = KAFKA_VALID_JSON_MESSAGE;
-    invalidMessage = KAFKA_INVALID_JSON_MESSAGE;
   }
 
   @Test
-  void should_returnTrue_when_schemaValid () {
+  void should_returnTrue_when_schemaValid() {
     // given
+    validVersion = new ComparableVersion("0.1.0");
+    schemaValidator.setValidVersion(validVersion);
+
+    String validMessage = String.format(KAFKA_JSON_MESSAGE, KAFKA_VALID_RESOURCE,
+        KAFKA_VALID_VERSION);
     // when
-    boolean actual1 = schemaValidator.isSchemaValid(this.validMessage);
-    boolean actual2 = schemaValidator.isSchemaValid(this.invalidMessage);
+    boolean actual = schemaValidator.isSchemaValid(validMessage);
+
     // then
-    assertAll(
-      () -> assertTrue(actual1),
-      () -> assertFalse(actual2)
-    );
+    assertThat(actual).isTrue();
   }
 
   @Test
-  void should_returnCorrectLogMessage_when_validResource (CapturedOutput capturedOutput) {
+  void should_returnFalse_when_schemaInvalid() {
+    //given
+    validVersion = new ComparableVersion("0.1.0");
+    schemaValidator.setValidVersion(validVersion);
+
+    String invalidMessage = String.format(KAFKA_JSON_MESSAGE, KAFKA_INVALID_RESOURCE,
+        KAFKA_INVALID_VERSION);
+
+    //when
+    boolean actual = schemaValidator.isSchemaValid(invalidMessage);
+
+    //then
+    assertThat(actual).isFalse();
+  }
+
+  @Test
+  void should_returnCorrectLogMessage_when_validResource(CapturedOutput capturedOutput) {
     // given
+    validVersion = new ComparableVersion("0.1.0");
+    schemaValidator.setValidVersion(validVersion);
+
+    String validMessage = String.format(KAFKA_JSON_MESSAGE, KAFKA_VALID_RESOURCE,
+        KAFKA_VALID_VERSION);
     // when
     schemaValidator.isSchemaValid(validMessage);
 
     // then
-    assertTrue(capturedOutput.getOut().contains(String.format(KAFKA_SCHEMA_VALIDATED, KAFKA_VALID_SCHEMA)));
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_VALIDATED,
+        KAFKA_VALID_RESOURCE + ", " + KAFKA_VALID_VERSION));
   }
 
   @Test
-  void should_returnCorrectLogMessage_when_invalidResource (CapturedOutput capturedOutput) {
+  void should_returnCorrectLogMessage_when_invalidResource(CapturedOutput capturedOutput) {
     // given
-    String messageValidResource = "{\"schema\":\"uk.gov.homeoffice.digital.sas.timecard.model.TimeEntry, 0.1.0\",\"resource\":{\"id\":\"c0a80018-870e-11b0-8187-0ea38cb30001\",\"tenantId\":\"00000000-0000-0000-0000-000000000000\",\"ownerId\":\"3343a960-de03-42ba-8769-767404fb2fcf\",\"timePeriodTypeId\":\"00000000-0000-0000-0000-000000000001\",\"shiftType\":null,\"actualStartTime\":1679456400000,\"actualEndTime\":1679457000000},\"action\":\"CREATE\"}";
+    validVersion = new ComparableVersion("0.1.0");
+    schemaValidator.setValidVersion(validVersion);
+
+    String invalidMessage = String.format(KAFKA_JSON_MESSAGE, KAFKA_INVALID_RESOURCE,
+        KAFKA_VALID_VERSION);
     // when
-    boolean actual = schemaValidator.isSchemaValid(KAFKA_INVALID_SCHEMA_RESOURCE_MESSAGE);
+    schemaValidator.isSchemaValid(invalidMessage);
     // then
-    assertTrue(capturedOutput.getOut().contains(String.format(KAFKA_SCHEMA_INVALID_RESOURCE, "uk.gov.homeoffice.digital.sas.timecard.model.TimeEntry")));
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_RESOURCE, "uk" +
+        ".gov.homeoffice.digital.sas.timecard.model.TimeEntry"));
   }
 
   @Test
-  void should_returnCorrectLogMessage_when_validVersion (CapturedOutput capturedOutput) {
+  void should_returnCorrectLogMessage_when_validVersion(CapturedOutput capturedOutput) {
     // given
+    validVersion = new ComparableVersion("0.1.0");
+    schemaValidator.setValidVersion(validVersion);
+
+    String validMessage = String.format(KAFKA_JSON_MESSAGE, KAFKA_VALID_RESOURCE,
+        KAFKA_VALID_VERSION);
     // when
-    boolean actual = schemaValidator.isSchemaValid(validMessage);
+    schemaValidator.isSchemaValid(validMessage);
     // then
-    assertTrue(capturedOutput.getOut().contains(String.format(KAFKA_SCHEMA_VALIDATED, "uk.gov.homeoffice.digital.sas.model.Profile, 0.1.0")));
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_VALIDATED, "uk.gov" +
+        ".homeoffice.digital.sas.model.Profile, 0.1.0"));
   }
 
   @Test
-  void should_returnCorrectLogMessage_when_invalidVersion (CapturedOutput capturedOutput) {
+  void should_returnCorrectLogMessage_when_invalidVersion(CapturedOutput capturedOutput) {
     // given
+    validVersion = new ComparableVersion("0.1.0");
+    schemaValidator.setValidVersion(validVersion);
+
+    String invalidMessage = String.format(KAFKA_JSON_MESSAGE, KAFKA_VALID_RESOURCE,
+        KAFKA_INVALID_VERSION);
     // when
-    boolean actual = schemaValidator.isSchemaValid(invalidMessage);
+    schemaValidator.isSchemaValid(invalidMessage);
     // then
-    assertTrue(capturedOutput.getOut().contains(String.format(KAFKA_SCHEMA_INVALID_VERSION, "0.0.4")));
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_VERSION,
+        "0.2.0"));
   }
 
   @Test
   void should_returnLogError_when_incorrectSchemaFormat(
       CapturedOutput capturedOutput) {
     // given
+    validVersion = new ComparableVersion("0.1.0");
+    schemaValidator.setValidVersion(validVersion);
+
+    String invalidMessage = String.format(KAFKA_INVALID_SCHEMA_FORMAT_JSON_MESSAGE, KAFKA_VALID_RESOURCE,
+        KAFKA_VALID_VERSION);
     // when
-    boolean actual = schemaValidator.isSchemaValid(KAFKA_INVALID_SCHEMA_FORMAT_JSON_MESSAGE);
+    schemaValidator.isSchemaValid(String.format(invalidMessage));
     // then
-    assertTrue(capturedOutput.getOut().contains(String.format(KAFKA_SCHEMA_INCORRECT_FORMAT, "uk.gov"
-        + ".homeoffice.digital.sas.model.Profile 0.0.4")));
-
-
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID,
+      KAFKA_VALID_RESOURCE + " " + KAFKA_VALID_VERSION));
   }
 }

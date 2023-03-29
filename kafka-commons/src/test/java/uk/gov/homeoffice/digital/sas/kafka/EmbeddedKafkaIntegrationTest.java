@@ -2,11 +2,13 @@ package uk.gov.homeoffice.digital.sas.kafka;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -81,6 +83,7 @@ class EmbeddedKafkaIntegrationTest {
   void shouldSendCreateMessageToTopicWhenProfileIsCreated() throws Exception {
     // GIVEN
     profileRepository.save(profile);
+
     // WHEN
     kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN

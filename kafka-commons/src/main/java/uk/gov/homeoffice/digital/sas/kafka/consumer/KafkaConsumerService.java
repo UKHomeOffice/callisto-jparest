@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
@@ -24,8 +25,8 @@ public abstract class KafkaConsumerService<T> {
   @Value("${kafka.resource.name}")
   private String resourceName;
 
-  @Value("${kafka.valid.schema.versions}")
-  private List<String> validVersions;
+  @Value("${kafka.valid.schema.version}")
+  private ComparableVersion validVersion;
 
   private final SchemaValidator schemaValidator;
 
@@ -35,7 +36,7 @@ public abstract class KafkaConsumerService<T> {
 
   public KafkaEventMessage<T> consume(String payload
   ) throws JsonProcessingException {
-    schemaValidator.setValidVersions(validVersions);
+    schemaValidator.setValidVersion(validVersion);
     schemaValidator.setResourceName(resourceName);
 
     if (schemaValidator.isSchemaValid(payload)) {
