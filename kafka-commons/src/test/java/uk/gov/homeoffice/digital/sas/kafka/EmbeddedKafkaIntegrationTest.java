@@ -64,10 +64,8 @@ class EmbeddedKafkaIntegrationTest {
   void shouldSendCreateMessageToTopicFromProducer() throws Exception {
     // GIVEN
     kafkaProducerService.sendMessage(PROFILE_ID.toString(), profile, KafkaAction.CREATE);
-
     // WHEN
-    CountDownLatch latch = new CountDownLatch(1); // block current thread execution for specific time
-    latch.await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
@@ -83,11 +81,8 @@ class EmbeddedKafkaIntegrationTest {
   void shouldSendCreateMessageToTopicWhenProfileIsCreated() throws Exception {
     // GIVEN
     profileRepository.save(profile);
-
     // WHEN
-    CountDownLatch latch = new CountDownLatch(1); // block current thread execution for specific time
-    latch.await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
-
+    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
@@ -107,9 +102,8 @@ class EmbeddedKafkaIntegrationTest {
     profile.setName(UPDATED_PROFILE_NAME);
     profile = profileRepository.saveAndFlush(profile);
     // WHEN
-    CountDownLatch latch = new CountDownLatch(1); // block current thread execution for specific time
-    latch.await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
-
+    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(2));
+    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
@@ -127,9 +121,8 @@ class EmbeddedKafkaIntegrationTest {
     profileRepository.save(profile);
     profileRepository.delete(profile);
     // WHEN
-    CountDownLatch latch = new CountDownLatch(1); // block current thread execution for specific time
-    latch.await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
-
+    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(2));
+    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
