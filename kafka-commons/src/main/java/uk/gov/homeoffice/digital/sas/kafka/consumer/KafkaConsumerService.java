@@ -7,8 +7,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
@@ -18,9 +16,7 @@ import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
 @Getter
 public class KafkaConsumerService<T> {
 
-  protected KafkaEventMessage<T> kafkaEventMessage;
-
-  private ObjectMapper mapper = new ObjectMapper();
+  private final ObjectMapper mapper = new ObjectMapper();
 
   private final SchemaValidator schemaValidator;
 

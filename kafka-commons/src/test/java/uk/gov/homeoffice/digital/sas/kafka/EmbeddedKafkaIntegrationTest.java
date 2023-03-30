@@ -2,13 +2,11 @@ package uk.gov.homeoffice.digital.sas.kafka;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -26,6 +24,7 @@ import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
 import uk.gov.homeoffice.digital.sas.model.Profile;
 import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
+import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
 @SpringBootTest(classes = TestConfig.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
@@ -71,11 +70,11 @@ class EmbeddedKafkaIntegrationTest {
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
-    KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
+    KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
         profile,
         KafkaAction.CREATE);
 
-    isMessageDeserialized(expectedKafkaEventMessage);
+    assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
   }
 
   @Test
@@ -89,11 +88,11 @@ class EmbeddedKafkaIntegrationTest {
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
-    KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
+    KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
         profile,
         KafkaAction.CREATE);
 
-    isMessageDeserialized(expectedKafkaEventMessage);
+    assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
 
   }
 
@@ -110,11 +109,11 @@ class EmbeddedKafkaIntegrationTest {
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
-    KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
+    KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
         profile,
         KafkaAction.UPDATE);
 
-    isMessageDeserialized(expectedKafkaEventMessage);
+    assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
   }
 
   @Test
@@ -129,27 +128,23 @@ class EmbeddedKafkaIntegrationTest {
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
-    KafkaEventMessage expectedKafkaEventMessage = generateExpectedKafkaEventMessage(version,
+    KafkaEventMessage expectedKafkaEventMessage =
+        TestUtils.generateExpectedKafkaEventMessage(version,
         profile,
         KafkaAction.DELETE);
 
-    isMessageDeserialized(expectedKafkaEventMessage);
+    assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
   }
 
-  private KafkaEventMessage generateExpectedKafkaEventMessage(String version, Profile resource,
-                                                              KafkaAction action) {
-    return new KafkaEventMessage<>(version, resource, action);
-  }
-
-  private void isMessageDeserialized(KafkaEventMessage expectedKafkaEventMessage) {
+  private void assertMessageIsDeserializedAsExpected(KafkaEventMessage expectedKafkaEventMessage) {
 
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getSchema()).isEqualTo(expectedKafkaEventMessage.getSchema());
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getAction()).isEqualTo(expectedKafkaEventMessage.getAction());
 
-    isResourceDeserialized();
+    assertResourceIsDeserialized();
   }
 
-  private void isResourceDeserialized() {
+  private void assertResourceIsDeserialized() {
 
     Profile actualProfile = getProfileAsConcreteType();
     assertAll(

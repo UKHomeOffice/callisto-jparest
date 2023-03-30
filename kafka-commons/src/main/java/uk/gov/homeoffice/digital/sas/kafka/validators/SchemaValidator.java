@@ -19,12 +19,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@Getter
 @Component
 public class SchemaValidator {
 
-  @Value("${kafka.supported.schema.version}")
   private String supportedVersion;
+
+  public SchemaValidator(@Value("${kafka.supported.schema.version}") String supportedVersion) {
+    this.supportedVersion = supportedVersion;
+  }
 
   public boolean isSchemaValid(String message) {
     JsonObject jsonMessage = JsonParser.parseString(message).getAsJsonObject();
@@ -56,7 +58,7 @@ public class SchemaValidator {
   }
 
   private boolean isVersionValid(String version) {
-    Semver semver = new Semver(version, Semver.SemverType.NPM);
+    var semver = new Semver(version, Semver.SemverType.NPM);
     if (semver.withClearedSuffix().satisfies(supportedVersion)) {
       return true;
     } else {

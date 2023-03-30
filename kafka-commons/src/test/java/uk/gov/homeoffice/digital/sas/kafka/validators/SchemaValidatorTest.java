@@ -1,46 +1,37 @@
 package uk.gov.homeoffice.digital.sas.kafka.validators;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-import uk.gov.homeoffice.digital.sas.config.TestConfig;
+import uk.gov.homeoffice.digital.sas.config.TestConfigWithoutJpa;
+import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_SCHEMA_FORMAT_JSON_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_VERSION;
-import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_JSON_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_RESOURCE;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_VERSION;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.SCHEMA_FIELD_INVALID_VALUE;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.SCHEMA_FIELD_VALUE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INCORRECT_FORMAT;
-import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_VALIDATED;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA_COMMA_DELIMETER;
-import com.vdurmont.semver4j.Semver;
 
-@SpringBootTest(classes = TestConfig.class)
 @ExtendWith({OutputCaptureExtension.class})
 class SchemaValidatorTest {
 
-  SchemaValidator schemaValidator;
+  private static final String SEMVER_VERSION_IDENTIFIER = "^0.x.x";
 
-  @BeforeEach
-  void setup () {
-    schemaValidator = new KafkaSchemaValidatorImpl();
-  }
 
   @Test
   void should_returnTrue_when_schemaValid() {
     // given
-    ReflectionTestUtils.setField(schemaValidator, "supportedVersion", "^0.x.x");
-    String message = String.format(KAFKA_JSON_MESSAGE, KAFKA_VALID_VERSION);
+    SchemaValidator schemaValidator = new SchemaValidator(SEMVER_VERSION_IDENTIFIER);
+    String message = TestUtils.createKafkaMessage(KAFKA_VALID_VERSION);
     // when
     boolean actual = schemaValidator.isSchemaValid(message);
 
@@ -51,8 +42,8 @@ class SchemaValidatorTest {
   @Test
   void should_returnFalse_when_schemaInvalid() {
     //given
-    ReflectionTestUtils.setField(schemaValidator, "supportedVersion", "^0.x.x");
-    String message = String.format(KAFKA_JSON_MESSAGE, KAFKA_INVALID_VERSION);
+    SchemaValidator schemaValidator = new SchemaValidator(SEMVER_VERSION_IDENTIFIER);
+    String message = TestUtils.createKafkaMessage(KAFKA_INVALID_VERSION);
 
     //when
     boolean actual = schemaValidator.isSchemaValid(message);
@@ -64,20 +55,20 @@ class SchemaValidatorTest {
   @Test
   void should_returnCorrectLogMessage_when_validVersion(CapturedOutput capturedOutput) {
     // given
-    ReflectionTestUtils.setField(schemaValidator, "supportedVersion", "^0.x.x");
-    String message = String.format(KAFKA_JSON_MESSAGE, KAFKA_VALID_VERSION);
+    SchemaValidator schemaValidator = new SchemaValidator(SEMVER_VERSION_IDENTIFIER);
+    String message = TestUtils.createKafkaMessage(KAFKA_VALID_VERSION);
     // when
     schemaValidator.isSchemaValid(message);
     // then
-    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_VALIDATED, "uk.gov" +
-        ".homeoffice.digital.sas.model.Profile, 0.1.0"));
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_VALIDATED,
+        String.format(SCHEMA_FIELD_VALUE, KAFKA_VALID_VERSION)));
   }
 
   @Test
   void should_returnCorrectLogMessage_when_invalidVersion(CapturedOutput capturedOutput) {
     // given
-    ReflectionTestUtils.setField(schemaValidator, "supportedVersion", "^0.x.x");
-    String message = String.format(KAFKA_JSON_MESSAGE, KAFKA_INVALID_VERSION);
+    SchemaValidator schemaValidator = new SchemaValidator(SEMVER_VERSION_IDENTIFIER);
+    String message = TestUtils.createKafkaMessage(KAFKA_INVALID_VERSION);
     // when
     schemaValidator.isSchemaValid(message);
     // then
@@ -89,10 +80,10 @@ class SchemaValidatorTest {
   void should_returnLogError_when_incorrectSchemaFormat(
       CapturedOutput capturedOutput) {
     // given
-    ReflectionTestUtils.setField(schemaValidator, "supportedVersion", "^0.x.x");
-    String message = String.format(KAFKA_INVALID_SCHEMA_FORMAT_JSON_MESSAGE, KAFKA_VALID_VERSION);
+    SchemaValidator schemaValidator = new SchemaValidator(SEMVER_VERSION_IDENTIFIER);
+    String message = TestUtils.createKafkaMessage(SCHEMA_FIELD_INVALID_VALUE, KAFKA_VALID_VERSION);
     // when
-    schemaValidator.isSchemaValid(String.format(message));
+    schemaValidator.isSchemaValid(message);
     // then
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INCORRECT_FORMAT,
       KAFKA_VALID_RESOURCE + " " + KAFKA_VALID_VERSION));
@@ -104,11 +95,11 @@ class SchemaValidatorTest {
                                                                 String messageVersion,
                                                                 CapturedOutput capturedOutput) {
     //given
-    ReflectionTestUtils.setField(schemaValidator, "supportedVersion", testSupportedVersion);
+    SchemaValidator schemaValidator = new SchemaValidator(testSupportedVersion);
 
-    String message = String.format(KAFKA_JSON_MESSAGE, messageVersion);
+    String message = TestUtils.createKafkaMessage(messageVersion);
     //when
-    schemaValidator.isSchemaValid(String.format(message));
+    schemaValidator.isSchemaValid(message);
     //then
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_VERSION,
         messageVersion));
@@ -121,9 +112,9 @@ class SchemaValidatorTest {
                                                                   String messageVersion,
                                                                   CapturedOutput capturedOutput) {
     //given
-    ReflectionTestUtils.setField(schemaValidator, "supportedVersion", testSupportedVersion);
+    SchemaValidator schemaValidator = new SchemaValidator(testSupportedVersion);
 
-    String message = String.format(KAFKA_JSON_MESSAGE, messageVersion);
+    String message = TestUtils.createKafkaMessage(messageVersion);
     //when
     schemaValidator.isSchemaValid(String.format(message));
 
@@ -133,11 +124,4 @@ class SchemaValidatorTest {
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_VALIDATED,
         schema));
   }
-
-  //anything up to v2
-
-  //anything up to v3
-
-  //
-
 }
