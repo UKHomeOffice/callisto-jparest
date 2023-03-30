@@ -5,8 +5,12 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONS
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
@@ -15,8 +19,6 @@ import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
 @Service
 @Getter
 public class KafkaConsumerService<T> {
-
-  private final ObjectMapper mapper = new ObjectMapper();
 
   private final SchemaValidator schemaValidator;
 
@@ -33,7 +35,8 @@ public class KafkaConsumerService<T> {
 
     if (schemaValidator.isSchemaValid(payload)) {
       log.info(String.format(KAFKA_CONSUMING_MESSAGE, payload));
-      return mapper.readValue(payload, new TypeReference<>() {});
+
+      return new Gson().fromJson(payload, new TypeToken<KafkaEventMessage<T>>() { }.getType());
     }
 
     return null;

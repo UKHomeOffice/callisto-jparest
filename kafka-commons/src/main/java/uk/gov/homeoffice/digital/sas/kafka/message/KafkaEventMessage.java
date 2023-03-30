@@ -26,6 +26,4 @@ public class KafkaEventMessage<T> {
     this.resource = resource;
     this.action = action;
   }
-
-  public KafkaEventMessage() {}
 }
