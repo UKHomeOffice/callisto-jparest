@@ -3,10 +3,8 @@ package uk.gov.homeoffice.digital.sas.kafka.consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_JSON_MESSAGE;
-import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_RESOURCE;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
-import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -50,7 +48,6 @@ class KafkaConsumerServiceTest {
 
   @BeforeEach
   void setup() {
-    schemaValidator.setSupportedVersion(supportedVersion);
     profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME);
     expectedKafkaEventMessage = generateExpectedKafkaEventMessage("0.1.0",
         profile,
@@ -79,8 +76,6 @@ class KafkaConsumerServiceTest {
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNull();
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_VERSION,
         KAFKA_INVALID_VERSION));
-    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID,
-        KAFKA_VALID_RESOURCE + ", " + KAFKA_INVALID_VERSION));
   }
 
   private KafkaEventMessage generateExpectedKafkaEventMessage(String version, Profile resource,

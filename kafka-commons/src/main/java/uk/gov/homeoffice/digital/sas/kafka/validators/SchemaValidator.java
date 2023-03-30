@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.kafka.validators;
 
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INCORRECT_FORMAT;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_VALIDATED;
@@ -8,26 +9,22 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA_JSO
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.vdurmont.semver4j.Semver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Getter
-@Setter
-@NoArgsConstructor
 @Component
 public class SchemaValidator {
 
   @Value("${kafka.supported.schema.version}")
-  private DefaultArtifactVersion supportedVersion;
+  private String supportedVersion;
 
   public boolean isSchemaValid(String message) {
     JsonObject jsonMessage = JsonParser.parseString(message).getAsJsonObject();
@@ -46,39 +43,25 @@ public class SchemaValidator {
   }
 
   private boolean isValidMessage(List<String> splitSchema, String schema) {
-    if (splitSchema.size() == 2 && isVersionValid(splitSchema.get(1))) {
-      log.info(String.format(KAFKA_SCHEMA_VALIDATED, schema));
-      return true;
+    if (splitSchema.size() == 2) {
+      if (isVersionValid(splitSchema.get(1))) {
+        log.info(String.format(KAFKA_SCHEMA_VALIDATED, schema));
+        return true;
+      }
     } else {
-      log.error(String.format(KAFKA_SCHEMA_INVALID, schema));
+      log.error(String.format(KAFKA_SCHEMA_INCORRECT_FORMAT, schema));
       return false;
     }
+    return false;
   }
 
   private boolean isVersionValid(String version) {
-    DefaultArtifactVersion messageVersion = new DefaultArtifactVersion(version);
-
-    switch (isMajorVersionValid(messageVersion.getMajorVersion())) {
-      case 1:
-        log.error(String.format(KAFKA_SCHEMA_INVALID_VERSION, version));
-        return false;
-      case -1:
-        log.info(String.format(KAFKA_SCHEMA_VALIDATED, version));
-        return true;
-      case 0:
-        if (messageVersion.getMinorVersion() > supportedVersion.getMinorVersion()) {
-          log.error(String.format(KAFKA_SCHEMA_INVALID_VERSION, version));
-          return false;
-        } else {
-          log.info(String.format(KAFKA_SCHEMA_VALIDATED, version));
-          return true;
-        }
-      default:
-        return false;
+    Semver semver = new Semver(version, Semver.SemverType.NPM);
+    if (semver.withClearedSuffix().satisfies(supportedVersion)) {
+      return true;
+    } else {
+      log.error((String.format(KAFKA_SCHEMA_INVALID_VERSION, version)));
+      return false;
     }
-  }
-
-  private int isMajorVersionValid(int majorVersion) {
-    return Integer.compare(majorVersion, supportedVersion.getMajorVersion());
   }
 }

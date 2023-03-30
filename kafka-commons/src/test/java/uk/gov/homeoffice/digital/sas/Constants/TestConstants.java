@@ -4,7 +4,7 @@ public class TestConstants {
 
   public static final String KAFKA_VALID_VERSION = "0.1.0";
 
-  public static final String KAFKA_INVALID_VERSION = "0.2.0";
+  public static final String KAFKA_INVALID_VERSION = "1.0.0";
 
   public static final String KAFKA_VALID_RESOURCE = "uk.gov.homeoffice.digital.sas.model.Profile";
 
