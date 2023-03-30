@@ -29,6 +29,12 @@ public class SchemaValidator {
   @Value("${kafka.supported.schema.version}")
   private DefaultArtifactVersion supportedVersion;
 
+  private String extractedResource;
+  private String extractedSchemaVersion;
+
+  @Value("${kafka.supported.schema.version}")
+  private String expectedResource;
+
   public boolean isSchemaValid(String message) {
     JsonObject jsonMessage = JsonParser.parseString(message).getAsJsonObject();
     String schema = jsonMessage.get(SCHEMA_JSON_ATTRIBUTE).getAsString();
@@ -41,6 +47,8 @@ public class SchemaValidator {
     if (schema.contains(SCHEMA_COMMA_DELIMETER)) {
       stringList = Pattern.compile(SCHEMA_COMMA_DELIMETER)
           .splitAsStream(schema).toList();
+      extractedResource = stringList.get(0);
+      extractedSchemaVersion = stringList.get(1);
     }
     return stringList;
   }
@@ -81,4 +89,15 @@ public class SchemaValidator {
   private int isMajorVersionValid(int majorVersion) {
     return Integer.compare(majorVersion, supportedVersion.getMajorVersion());
   }
+
+  public boolean compareResources() {
+
+    if (expectedResource.equals(extractedResource)) {
+      log.info("Expected resource == Extracted resource");
+      return true;
+    }
+    log.info("Expected resource != Extracted resource. Reacting to difference");
+    return false;
+  }
+
 }
