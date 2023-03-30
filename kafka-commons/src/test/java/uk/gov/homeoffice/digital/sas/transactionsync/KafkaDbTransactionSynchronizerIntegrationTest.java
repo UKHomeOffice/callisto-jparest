@@ -18,13 +18,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import uk.gov.homeoffice.digital.sas.config.TestConfig;
+import uk.gov.homeoffice.digital.sas.config.TestConfigWithJpa;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.transactionsync.KafkaDbTransactionSynchronizer;
 import uk.gov.homeoffice.digital.sas.model.Profile;
 import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 
-@SpringBootTest(classes = TestConfig.class)
+@SpringBootTest(classes = TestConfigWithJpa.class)
 @DirtiesContext
 @EmbeddedKafka(
     partitions = 1,

@@ -4,10 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
-import uk.gov.homeoffice.digital.sas.config.TestConfigWithoutJpa;
 import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -25,7 +23,6 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA_COM
 class SchemaValidatorTest {
 
   private static final String SEMVER_VERSION_IDENTIFIER = "^0.x.x";
-
 
   @Test
   void should_returnTrue_when_schemaValid() {
@@ -91,7 +88,7 @@ class SchemaValidatorTest {
 
   @ParameterizedTest
   @CsvSource({"^1.x.x,2.0.0", "1.x.x,0.8.0", "1.x.x,2.0.0-SNAPSHOT", "^1.5.x,1.4.x"})
-  void should_logError_when_VersionIsAboveSupportedVersion(String testSupportedVersion,
+  void isSchemaValid_versionIsNotSupported_logsError(String testSupportedVersion,
                                                                 String messageVersion,
                                                                 CapturedOutput capturedOutput) {
     //given
@@ -108,7 +105,7 @@ class SchemaValidatorTest {
   @ParameterizedTest
   @CsvSource({"^0.x.x,0.1.0", "^1.x.x,1.4.5", "^1.x.x,1.1.0", "^1.5.x,1.5.7",
       "^1.4.5,1.4.7-SNAPSHOT"})
-  void should_logSuccess_when_versionIsBelowSupportedVersion(String testSupportedVersion,
+  void isSchemaValid_versionIsSupported_logsSuccess(String testSupportedVersion,
                                                                   String messageVersion,
                                                                   CapturedOutput capturedOutput) {
     //given
@@ -116,7 +113,7 @@ class SchemaValidatorTest {
 
     String message = TestUtils.createKafkaMessage(messageVersion);
     //when
-    schemaValidator.isSchemaValid(String.format(message));
+    schemaValidator.isSchemaValid(message);
 
     //then
     String schema = KAFKA_VALID_RESOURCE + SCHEMA_COMMA_DELIMETER +  messageVersion;

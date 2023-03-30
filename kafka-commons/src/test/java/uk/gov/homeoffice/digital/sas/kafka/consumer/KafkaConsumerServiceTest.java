@@ -3,7 +3,6 @@ package uk.gov.homeoffice.digital.sas.kafka.consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_VERSION;
-import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.SCHEMA_FIELD_INVALID_VALUE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 
@@ -15,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
-import uk.gov.homeoffice.digital.sas.config.TestConfigWithoutJpa;
+import uk.gov.homeoffice.digital.sas.config.TestConfig;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.model.Profile;
@@ -23,7 +22,7 @@ import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-@SpringBootTest(classes = TestConfigWithoutJpa.class)
+@SpringBootTest(classes = TestConfig.class)
 @ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
 class KafkaConsumerServiceTest {
 

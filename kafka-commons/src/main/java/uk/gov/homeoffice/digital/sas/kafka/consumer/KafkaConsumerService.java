@@ -24,6 +24,10 @@ public class KafkaConsumerService<T> {
     this.schemaValidator = schemaValidator;
   }
 
+  /**
+   * If payload is invalid consume returns null.
+   * The null value is up to the service to handle
+   */
   public KafkaEventMessage<T> consume(String payload
   ) throws JsonProcessingException {
 

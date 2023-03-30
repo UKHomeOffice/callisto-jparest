@@ -15,7 +15,6 @@ public class TestUtils {
     return new KafkaEventMessage<>(version, resource, action);
   }
 
-
   public static <S extends Serializable> String createKafkaMessage(String version){
     String resource = createResourceJson();
 

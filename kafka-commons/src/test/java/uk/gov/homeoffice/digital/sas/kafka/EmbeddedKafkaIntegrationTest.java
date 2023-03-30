@@ -17,7 +17,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
-import uk.gov.homeoffice.digital.sas.config.TestConfig;
+import uk.gov.homeoffice.digital.sas.config.TestConfigWithJpa;
 import uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerServiceImpl;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
@@ -26,7 +26,7 @@ import uk.gov.homeoffice.digital.sas.model.Profile;
 import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
-@SpringBootTest(classes = TestConfig.class)
+@SpringBootTest(classes = TestConfigWithJpa.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(
     partitions = 3
@@ -141,10 +141,10 @@ class EmbeddedKafkaIntegrationTest {
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getSchema()).isEqualTo(expectedKafkaEventMessage.getSchema());
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getAction()).isEqualTo(expectedKafkaEventMessage.getAction());
 
-    assertResourceIsDeserialized();
+    assertResourceIsDeserializedAsExpected();
   }
 
-  private void assertResourceIsDeserialized() {
+  private void assertResourceIsDeserializedAsExpected() {
 
     Profile actualProfile = getProfileAsConcreteType();
     assertAll(
