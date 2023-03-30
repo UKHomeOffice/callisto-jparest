@@ -37,9 +37,6 @@ class KafkaConsumerServiceTest {
 
   private Profile profile;
 
-  @Value("${kafka.resource.name}")
-  private String resourceName;
-
   @Value("0.1.0")
   private DefaultArtifactVersion supportedVersion;
 

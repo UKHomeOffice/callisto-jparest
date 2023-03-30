@@ -16,13 +16,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Getter
 @Setter
 @NoArgsConstructor
+@Component
 public class SchemaValidator {
 
+  @Value("${kafka.supported.schema.version}")
   private DefaultArtifactVersion supportedVersion;
 
   public boolean isSchemaValid(String message) {

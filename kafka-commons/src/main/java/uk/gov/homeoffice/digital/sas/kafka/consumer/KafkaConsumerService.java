@@ -22,12 +22,6 @@ public class KafkaConsumerService<T> {
 
   private ObjectMapper mapper = new ObjectMapper();
 
-  @Value("${kafka.resource.name}")
-  private String resourceName;
-
-  @Value("${kafka.supported.schema.version}")
-  private DefaultArtifactVersion supportedVersion;
-
   private final SchemaValidator schemaValidator;
 
   protected KafkaConsumerService(SchemaValidator schemaValidator) {
@@ -36,7 +30,6 @@ public class KafkaConsumerService<T> {
 
   public KafkaEventMessage<T> consume(String payload
   ) throws JsonProcessingException {
-    schemaValidator.setSupportedVersion(supportedVersion);
 
     if (schemaValidator.isSchemaValid(payload)) {
       log.info(String.format(KAFKA_CONSUMING_MESSAGE, payload));
