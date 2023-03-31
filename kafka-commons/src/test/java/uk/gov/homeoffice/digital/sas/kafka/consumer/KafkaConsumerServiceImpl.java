@@ -22,12 +22,13 @@ public class KafkaConsumerServiceImpl  implements ConsumerSeekAware {
   KafkaConsumerService<Profile> kafkaConsumerService;
 
   ConsumerSeekCallback callback;
+  CountDownLatch latch;
+
 
   public KafkaConsumerServiceImpl(KafkaConsumerService<Profile> kafkaConsumerService) {
     this.kafkaConsumerService = kafkaConsumerService;
   }
 
-  private CountDownLatch latch = new CountDownLatch(1);
   @Value("${spring.kafka.template.default-topic}")
   private String topic;
 
@@ -48,6 +49,7 @@ public class KafkaConsumerServiceImpl  implements ConsumerSeekAware {
   }
   
   public void Reset() {
+    latch = null;
     kafkaEventMessage = null;
     callback.seekToEnd(topic, 0);
   }

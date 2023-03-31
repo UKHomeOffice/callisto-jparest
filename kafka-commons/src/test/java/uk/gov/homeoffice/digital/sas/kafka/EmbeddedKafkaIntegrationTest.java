@@ -73,7 +73,7 @@ class EmbeddedKafkaIntegrationTest {
     // GIVEN
     kafkaProducerService.sendMessage(PROFILE_ID.toString(), profile, KafkaAction.CREATE);
     // WHEN
-    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    assertThat(kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
 
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
@@ -92,7 +92,7 @@ class EmbeddedKafkaIntegrationTest {
     profileRepository.save(profile);
 
     // WHEN
-    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    assertThat(kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
@@ -111,7 +111,7 @@ class EmbeddedKafkaIntegrationTest {
     profile.setName(UPDATED_PROFILE_NAME);
     profile = profileRepository.saveAndFlush(profile);
     // WHEN
-    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    assertThat(kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
     KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
@@ -127,7 +127,7 @@ class EmbeddedKafkaIntegrationTest {
     profileRepository.save(profile);
     profileRepository.delete(profile);
     // WHEN
-    kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
+    assertThat(kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
