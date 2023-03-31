@@ -26,10 +26,11 @@ import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
 import uk.gov.homeoffice.digital.sas.model.Profile;
 import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 import uk.gov.homeoffice.digital.sas.utils.TestUtils;
+
 @SpringBootTest(classes = TestConfigWithJpa.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(
-    partitions = 3
+    partitions = 1
 )
 @TestPropertySource(properties = {
     "spring.kafka.producer.bootstrap-servers=${spring.embedded.kafka.brokers}",
@@ -67,7 +68,7 @@ class EmbeddedKafkaIntegrationTest {
 
   @Test
   void shouldSendCreateMessageToTopicFromProducer() throws Exception {
-
+    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(1));
 
     // GIVEN
     kafkaProducerService.sendMessage(PROFILE_ID.toString(), profile, KafkaAction.CREATE);
@@ -75,34 +76,31 @@ class EmbeddedKafkaIntegrationTest {
     kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
 
     // THEN
-    if (kafkaConsumerServiceImpl.getLatch().getCount() == 0) {
-      assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
-      KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
-          profile,
-          KafkaAction.CREATE);
+    KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
+        profile,
+        KafkaAction.CREATE);
 
-      assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
-    }
+    assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
   }
 
   @Test
   void shouldSendCreateMessageToTopicWhenProfileIsCreated() throws Exception {
+    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(1));
     // GIVEN
     profileRepository.save(profile);
 
     // WHEN
     kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
-    if (kafkaConsumerServiceImpl.getLatch().getCount() == 0) {
-      assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
-      KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
-          profile,
-          KafkaAction.CREATE);
+    KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
+        profile,
+        KafkaAction.CREATE);
 
-      assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
-    }
+    assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
   }
 
   @Test
@@ -115,15 +113,11 @@ class EmbeddedKafkaIntegrationTest {
     // WHEN
     kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
-    if (kafkaConsumerServiceImpl.getLatch().getCount() == 0) {
-      assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
-
-      KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
-          profile,
-          KafkaAction.UPDATE);
-
-      assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
-    }
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
+    KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
+        profile,
+        KafkaAction.UPDATE);
+    assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
   }
 
   @Test
@@ -135,16 +129,14 @@ class EmbeddedKafkaIntegrationTest {
     // WHEN
     kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
-    if (kafkaConsumerServiceImpl.getLatch().getCount() == 0) {
-      assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
-      KafkaEventMessage expectedKafkaEventMessage =
-          TestUtils.generateExpectedKafkaEventMessage(version,
-              profile,
-              KafkaAction.DELETE);
+    KafkaEventMessage expectedKafkaEventMessage =
+        TestUtils.generateExpectedKafkaEventMessage(version,
+            profile,
+            KafkaAction.DELETE);
 
-      assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
-    }
+    assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
   }
 
   private void assertMessageIsDeserializedAsExpected(KafkaEventMessage expectedKafkaEventMessage) {
@@ -170,7 +162,8 @@ class EmbeddedKafkaIntegrationTest {
   private Profile getProfileAsConcreteType() {
     ObjectMapper mapper = new ObjectMapper();
     Profile actualProfile = mapper.convertValue(
-        kafkaConsumerServiceImpl.getKafkaEventMessage().getResource(), new TypeReference<>() {});
+        kafkaConsumerServiceImpl.getKafkaEventMessage().getResource(), new TypeReference<>() {
+        });
     return actualProfile;
   }
 }

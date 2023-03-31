@@ -50,7 +50,5 @@ public class KafkaConsumerServiceImpl  implements ConsumerSeekAware {
   public void Reset() {
     kafkaEventMessage = null;
     callback.seekToEnd(topic, 0);
-    callback.seekToEnd(topic, 1);
-    callback.seekToEnd(topic, 2);
   }
 }
