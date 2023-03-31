@@ -20,8 +20,6 @@ import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.model.Profile;
 import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 @SpringBootTest(classes = TestConfig.class)
 @ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
 class KafkaConsumerServiceTest {
@@ -46,7 +44,7 @@ class KafkaConsumerServiceTest {
 
   //Does deserialize, logs success
   @Test
-  void should_returnKafkaEventMessage_AndLogSuccess_when_correctMessage(CapturedOutput capturedOutput) throws JsonProcessingException {
+  void should_returnKafkaEventMessage_AndLogSuccess_when_correctMessage(CapturedOutput capturedOutput) {
     String message = TestUtils.createKafkaMessage(KAFKA_VALID_VERSION);
 
     kafkaConsumerServiceImpl.onMessage(message);
@@ -58,7 +56,7 @@ class KafkaConsumerServiceTest {
 
   //doesn't deserialize, logs error
   @Test
-  void should_returnNull_AndLogFailure_when_incorrectMessage(CapturedOutput capturedOutput) throws JsonProcessingException {
+  void should_returnNull_AndLogFailure_when_incorrectMessage(CapturedOutput capturedOutput) {
     String message = TestUtils.createKafkaMessage(KAFKA_INVALID_VERSION);
 
     kafkaConsumerServiceImpl.onMessage(message);

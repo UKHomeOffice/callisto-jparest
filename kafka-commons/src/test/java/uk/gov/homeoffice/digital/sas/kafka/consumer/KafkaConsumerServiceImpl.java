@@ -1,6 +1,5 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.concurrent.CountDownLatch;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +7,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
-import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
 import uk.gov.homeoffice.digital.sas.model.Profile;
 
 @Service
@@ -30,7 +28,7 @@ public class KafkaConsumerServiceImpl {
       topics = {"${spring.kafka.template.default-topic}"},
       groupId = "${spring.kafka.consumer.group-id}"
   )
-  public void onMessage(@Payload String message) throws JsonProcessingException {
+  public void onMessage(@Payload String message) {
     kafkaEventMessage = kafkaConsumerService.consume(message);
     latch.countDown();
   }
