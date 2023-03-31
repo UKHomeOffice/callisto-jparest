@@ -7,6 +7,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,6 @@ import uk.gov.homeoffice.digital.sas.kafka.producer.KafkaProducerService;
 import uk.gov.homeoffice.digital.sas.model.Profile;
 import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 import uk.gov.homeoffice.digital.sas.utils.TestUtils;
-
 @SpringBootTest(classes = TestConfigWithJpa.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(
@@ -57,6 +58,11 @@ class EmbeddedKafkaIntegrationTest {
   @BeforeEach
   void setup() {
     profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME);
+  }
+
+  @AfterEach
+  void cleanup() {
+    kafkaConsumerServiceImpl.Reset();
   }
 
   @Test
@@ -101,12 +107,12 @@ class EmbeddedKafkaIntegrationTest {
 
   @Test
   void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
+    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(2));
     // GIVEN
     profileRepository.saveAndFlush(profile);
     profile.setName(UPDATED_PROFILE_NAME);
     profile = profileRepository.saveAndFlush(profile);
     // WHEN
-    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(2));
     kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
     if (kafkaConsumerServiceImpl.getLatch().getCount() == 0) {
@@ -122,11 +128,11 @@ class EmbeddedKafkaIntegrationTest {
 
   @Test
   void shouldSendDeleteMessageToTopicWhenProfileIsDeleted() throws Exception {
+    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(2));
     // GIVEN
     profileRepository.save(profile);
     profileRepository.delete(profile);
     // WHEN
-    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(2));
     kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS);
     // THEN
     if (kafkaConsumerServiceImpl.getLatch().getCount() == 0) {
