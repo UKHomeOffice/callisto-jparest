@@ -6,6 +6,7 @@ import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 
+import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,10 +46,12 @@ class KafkaConsumerServiceTest {
   //Does deserialize, logs success
   @Test
   void should_returnKafkaEventMessage_AndLogSuccess_when_correctMessage(CapturedOutput capturedOutput) {
+    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(1));
     String message = TestUtils.createKafkaMessage(KAFKA_VALID_VERSION);
 
     kafkaConsumerServiceImpl.onMessage(message);
 
+    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getSchema()).isEqualTo(expectedKafkaEventMessage.getSchema());
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getAction()).isEqualTo(expectedKafkaEventMessage.getAction());
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_CONSUMING_MESSAGE, message));
@@ -57,6 +60,7 @@ class KafkaConsumerServiceTest {
   //doesn't deserialize, logs error
   @Test
   void should_returnNull_AndLogFailure_when_incorrectMessage(CapturedOutput capturedOutput) {
+    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(1));
     String message = TestUtils.createKafkaMessage(KAFKA_INVALID_VERSION);
 
     kafkaConsumerServiceImpl.onMessage(message);
