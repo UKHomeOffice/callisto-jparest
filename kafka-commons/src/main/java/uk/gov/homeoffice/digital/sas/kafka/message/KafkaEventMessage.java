@@ -10,15 +10,15 @@ import lombok.Getter;
 public class KafkaEventMessage<T> {
 
   @JsonProperty("schema")
-  private String schema;
+  private final String schema;
 
   @NotNull
   @JsonProperty("resource")
-  private T resource;
+  private final T resource;
 
   @NotNull
   @JsonProperty("action")
-  private KafkaAction action;
+  private final KafkaAction action;
 
   public KafkaEventMessage(String schemaVersion, T resource,
       KafkaAction action) {
