@@ -68,12 +68,12 @@ class EmbeddedKafkaIntegrationTest {
 
   @Test
   void shouldSendCreateMessageToTopicFromProducer() throws Exception {
-    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(1));
+    kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
 
     // GIVEN
     kafkaProducerService.sendMessage(PROFILE_ID.toString(), profile, KafkaAction.CREATE);
     // WHEN
-    assertThat(kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
+    assertThat(kafkaConsumerServiceImpl.awaitMessages(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
 
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
@@ -87,12 +87,12 @@ class EmbeddedKafkaIntegrationTest {
 
   @Test
   void shouldSendCreateMessageToTopicWhenProfileIsCreated() throws Exception {
-    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(1));
+    kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
     // GIVEN
     profileRepository.save(profile);
 
     // WHEN
-    assertThat(kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
+    assertThat(kafkaConsumerServiceImpl.awaitMessages(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
@@ -105,13 +105,13 @@ class EmbeddedKafkaIntegrationTest {
 
   @Test
   void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
-    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(2));
+    kafkaConsumerServiceImpl.setExpectedNumberOfMessages(2);
     // GIVEN
     profileRepository.saveAndFlush(profile);
     profile.setName(UPDATED_PROFILE_NAME);
     profile = profileRepository.saveAndFlush(profile);
     // WHEN
-    assertThat(kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
+    assertThat(kafkaConsumerServiceImpl.awaitMessages(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
     KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
@@ -122,12 +122,12 @@ class EmbeddedKafkaIntegrationTest {
 
   @Test
   void shouldSendDeleteMessageToTopicWhenProfileIsDeleted() throws Exception {
-    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(2));
+    kafkaConsumerServiceImpl.setExpectedNumberOfMessages(2);
     // GIVEN
     profileRepository.save(profile);
     profileRepository.delete(profile);
     // WHEN
-    assertThat(kafkaConsumerServiceImpl.getLatch().await(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
+    assertThat(kafkaConsumerServiceImpl.awaitMessages(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 

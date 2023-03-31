@@ -46,7 +46,7 @@ class KafkaConsumerServiceTest {
   //Does deserialize, logs success
   @Test
   void should_returnKafkaEventMessage_AndLogSuccess_when_correctMessage(CapturedOutput capturedOutput) {
-    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(1));
+    kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
     String message = TestUtils.createKafkaMessage(KAFKA_VALID_VERSION);
 
     kafkaConsumerServiceImpl.onMessage(message);
@@ -60,7 +60,7 @@ class KafkaConsumerServiceTest {
   //doesn't deserialize, logs error
   @Test
   void should_returnNull_AndLogFailure_when_incorrectMessage(CapturedOutput capturedOutput) {
-    kafkaConsumerServiceImpl.setLatch(new CountDownLatch(1));
+    kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
     String message = TestUtils.createKafkaMessage(KAFKA_INVALID_VERSION);
 
     kafkaConsumerServiceImpl.onMessage(message);
