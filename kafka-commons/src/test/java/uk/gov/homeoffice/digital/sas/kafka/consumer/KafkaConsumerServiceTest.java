@@ -6,7 +6,8 @@ import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +29,7 @@ class KafkaConsumerServiceTest {
   private static final Long PROFILE_ID = 1L;
   private static final String TENANT_ID = "tenantId";
   private static final String PROFILE_NAME = "Original profile";
+  private static final int CONSUMER_TIMEOUT = 1;
 
   @Autowired
   private KafkaConsumerServiceImpl kafkaConsumerServiceImpl;
@@ -51,6 +53,7 @@ class KafkaConsumerServiceTest {
 
     kafkaConsumerServiceImpl.onMessage(message);
 
+    assertThat(kafkaConsumerServiceImpl.awaitMessages(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getSchema()).isEqualTo(expectedKafkaEventMessage.getSchema());
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage().getAction()).isEqualTo(expectedKafkaEventMessage.getAction());
@@ -65,6 +68,7 @@ class KafkaConsumerServiceTest {
 
     kafkaConsumerServiceImpl.onMessage(message);
 
+    assertThat(kafkaConsumerServiceImpl.awaitMessages(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNull();
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_VERSION,
         KAFKA_INVALID_VERSION));
