@@ -66,7 +66,7 @@ class EmbeddedKafkaIntegrationTest {
   }
 
   @Test
-  void shouldSendCreateMessageToTopicFromProducer() throws Exception {
+  void shouldSendCreateMessageToTopicFromProducer() {
     kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
 
     // GIVEN
@@ -85,7 +85,7 @@ class EmbeddedKafkaIntegrationTest {
   }
 
   @Test
-  void shouldSendCreateMessageToTopicWhenProfileIsCreated() throws Exception {
+  void shouldSendCreateMessageToTopicWhenProfileIsCreated() {
     kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
     // GIVEN
     profileRepository.save(profile);
@@ -103,7 +103,7 @@ class EmbeddedKafkaIntegrationTest {
   }
 
   @Test
-  void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() throws Exception {
+  void shouldSendUpdateMessageToTopicWhenProfileIsUpdated() {
     kafkaConsumerServiceImpl.setExpectedNumberOfMessages(2);
     // GIVEN
     profileRepository.saveAndFlush(profile);
@@ -120,7 +120,7 @@ class EmbeddedKafkaIntegrationTest {
   }
 
   @Test
-  void shouldSendDeleteMessageToTopicWhenProfileIsDeleted() throws Exception {
+  void shouldSendDeleteMessageToTopicWhenProfileIsDeleted() {
     kafkaConsumerServiceImpl.setExpectedNumberOfMessages(2);
     // GIVEN
     profileRepository.save(profile);
