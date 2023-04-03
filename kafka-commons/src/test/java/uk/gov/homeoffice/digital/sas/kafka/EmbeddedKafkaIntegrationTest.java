@@ -62,7 +62,7 @@ class EmbeddedKafkaIntegrationTest {
 
   @AfterEach
   void cleanup() {
-    kafkaConsumerServiceImpl.TearDown();
+    kafkaConsumerServiceImpl.tearDown();
   }
 
   @Test
