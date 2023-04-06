@@ -23,10 +23,6 @@ public class KafkaConsumerService<T> {
     this.schemaValidator = schemaValidator;
   }
 
-  /**
-   * If payload is invalid consume returns null.
-   * The null value is up to the service to handle
-   */
   public KafkaEventMessage<T> convertToKafkaEventMessage(String payload
   ) {
     if (schemaValidator.isSchemaValid(payload)) {
