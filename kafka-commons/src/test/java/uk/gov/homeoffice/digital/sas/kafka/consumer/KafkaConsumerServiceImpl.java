@@ -41,7 +41,7 @@ public class KafkaConsumerServiceImpl implements ConsumerSeekAware {
           + " Ensure setExpectedNumberOfMessages has been called.");
     }
     if (latch.getCount() == 1) {
-      kafkaEventMessage = kafkaConsumerService.consume(message);
+      kafkaEventMessage = kafkaConsumerService.convertToKafkaEventMessage(message);
     }
     latch.countDown();
   }

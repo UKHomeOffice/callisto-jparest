@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
@@ -8,6 +9,7 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHE
 
 import java.util.concurrent.TimeUnit;
 
+import org.apache.kafka.common.security.oauthbearer.secured.ValidateException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,10 +68,9 @@ class KafkaConsumerServiceTest {
     kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
     String message = TestUtils.createKafkaMessage(KAFKA_INVALID_VERSION);
 
-    kafkaConsumerServiceImpl.onMessage(message);
+    assertThrows(ValidateException.class, () ->
+        kafkaConsumerServiceImpl.onMessage(message));
 
-    assertThat(kafkaConsumerServiceImpl.awaitMessages(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
-    assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNull();
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_VERSION,
         KAFKA_INVALID_VERSION));
   }
