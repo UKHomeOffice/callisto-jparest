@@ -18,7 +18,7 @@ import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
 @Getter
 public class KafkaConsumerService<T> {
 
-  public static final ObjectMapper objectmapper = new ObjectMapper();
+  public static final ObjectMapper objectMapper = new ObjectMapper();
 
   private final SchemaValidator schemaValidator;
 
@@ -30,7 +30,7 @@ public class KafkaConsumerService<T> {
   ) throws JsonProcessingException {
     if (schemaValidator.isSchemaValid(payload)) {
       log.info(String.format(KAFKA_CONSUMING_MESSAGE, payload));
-      return objectmapper.readValue(payload, new TypeReference<>() {});
+      return objectMapper.readValue(payload, new TypeReference<>() {});
     } else {
       throw new ValidateException(String.format(KAFKA_SCHEMA_INVALID_VERSION, payload));
     }

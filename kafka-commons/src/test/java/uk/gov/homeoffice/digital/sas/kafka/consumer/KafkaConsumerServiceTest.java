@@ -35,7 +35,6 @@ class KafkaConsumerServiceTest {
   private static final Long PROFILE_ID = 1L;
   private static final String TENANT_ID = "tenantId";
   private static final String PROFILE_NAME = "Original profile";
-
   private final static Date START_TIME = TestUtils.getAsDate(LocalDateTime.now());
   private static final int CONSUMER_TIMEOUT = 1;
 

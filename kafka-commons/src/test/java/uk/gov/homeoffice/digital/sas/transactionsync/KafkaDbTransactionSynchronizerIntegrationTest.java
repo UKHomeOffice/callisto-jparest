@@ -5,6 +5,7 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.DATABASE_T
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_TRANSACTION_INITIALIZED;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.TRANSACTION_SUCCESSFUL;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -25,6 +26,7 @@ import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.transactionsync.KafkaDbTransactionSynchronizer;
 import uk.gov.homeoffice.digital.sas.model.Profile;
 import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
+import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
 @SpringBootTest(classes = TestConfigWithJpa.class)
 @DirtiesContext
@@ -38,7 +40,7 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 class KafkaDbTransactionSynchronizerIntegrationTest {
   private static final String PROFILE_NAME = "Original profile";
 
-  private final static Date START_TIME = Date.from(Instant.parse("2022-01-01T15:00:00"));
+  private final static Date START_TIME = TestUtils.getAsDate(LocalDateTime.now());
   private Profile profile;
 
   private String messageKey;
