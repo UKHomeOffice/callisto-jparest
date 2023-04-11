@@ -8,8 +8,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.security.oauthbearer.secured.ValidateException;
 import org.springframework.stereotype.Service;
+import uk.gov.homeoffice.digital.sas.kafka.exceptions.KafkaConsumerException;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
 
@@ -32,7 +32,7 @@ public class KafkaConsumerService<T> {
       log.info(String.format(KAFKA_CONSUMING_MESSAGE, payload));
       return objectMapper.readValue(payload, new TypeReference<>() {});
     } else {
-      throw new ValidateException(String.format(KAFKA_SCHEMA_INVALID_VERSION, payload));
+      throw new KafkaConsumerException(String.format(KAFKA_SCHEMA_INVALID_VERSION, payload));
     }
   }
 }

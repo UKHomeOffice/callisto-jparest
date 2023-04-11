@@ -6,14 +6,10 @@ import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALI
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.kafka.common.security.oauthbearer.secured.ValidateException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import uk.gov.homeoffice.digital.sas.config.TestConfig;
+import uk.gov.homeoffice.digital.sas.kafka.exceptions.KafkaConsumerException;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.model.Profile;
@@ -73,7 +70,7 @@ class KafkaConsumerServiceTest {
     kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
     String message = TestUtils.createKafkaMessage(KAFKA_INVALID_VERSION);
 
-    assertThrows(ValidateException.class, () ->
+    assertThrows(KafkaConsumerException.class, () ->
         kafkaConsumerServiceImpl.onMessage(message));
 
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_VERSION,
