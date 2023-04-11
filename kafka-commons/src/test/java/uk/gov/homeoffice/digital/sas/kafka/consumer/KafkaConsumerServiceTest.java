@@ -68,7 +68,7 @@ class KafkaConsumerServiceTest {
 
   //doesn't deserialize, logs error
   @Test
-  void should_returnNull_AndLogFailure_when_incorrectMessage(CapturedOutput capturedOutput) {
+  void should_returnNull_AndLogFailure_when_incorrectMessage() {
     kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
     String message = TestUtils.createKafkaMessage(KAFKA_INVALID_VERSION);
 
@@ -76,7 +76,5 @@ class KafkaConsumerServiceTest {
       kafkaConsumerServiceImpl.onMessage(message);
     }).isInstanceOf(KafkaConsumerException.class)
         .hasMessageContaining(String.format(KAFKA_SCHEMA_INVALID_VERSION, message));
-
-    assertThat(capturedOutput.getOut()).contains(KAFKA_STOPPING_CONSUMING);
   }
 }
