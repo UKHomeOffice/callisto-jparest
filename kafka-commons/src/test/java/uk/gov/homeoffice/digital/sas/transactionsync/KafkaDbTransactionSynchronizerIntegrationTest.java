@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.DATABASE_TRANSACTION_SUCCESSFUL;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_TRANSACTION_INITIALIZED;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.TRANSACTION_SUCCESSFUL;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import org.junit.jupiter.api.AfterEach;
@@ -35,6 +37,8 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 )
 class KafkaDbTransactionSynchronizerIntegrationTest {
   private static final String PROFILE_NAME = "Original profile";
+
+  private final static Date START_TIME = Date.from(Instant.parse("2022-01-01T15:00:00"));
   private Profile profile;
 
   private String messageKey;
@@ -46,7 +50,7 @@ class KafkaDbTransactionSynchronizerIntegrationTest {
   void setup() {
     TransactionSynchronizationManager.initSynchronization();
     Long tenantId = new Random().nextLong();
-    profile = new Profile(null, String.valueOf(tenantId), PROFILE_NAME);
+    profile = new Profile(null, String.valueOf(tenantId), PROFILE_NAME, START_TIME);
   }
 
   @Test

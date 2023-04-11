@@ -16,6 +16,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.kafka.version>3.0.2</spring.kafka.version>
     <spring.boot.version>3.0.2</spring.boot.version>
+    <jackson.version>2.14.2</jackson.version>
   </properties>
 
   <dependencies>
@@ -48,13 +49,13 @@
     <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>2.14.2</version>
+        <version>${jackson.version}</version>
         <scope>compile</scope>
     </dependency>
     <dependency>
         <groupId>com.fasterxml.jackson.datatype</groupId>
         <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>2.14.2</version>
+        <version>${jackson.version}</version>
         <scope>compile</scope>
     </dependency>
     <dependency>
@@ -144,18 +145,6 @@
       <version>2.1.214</version>
       <scope>test</scope>
     </dependency>
-      <dependency>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
-          <version>2.14.2</version>
-          <scope>compile</scope>
-      </dependency>
-      <dependency>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
-          <version>2.14.2</version>
-          <scope>compile</scope>
-      </dependency>
 
   </dependencies>
 

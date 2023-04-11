@@ -3,6 +3,12 @@ package uk.gov.homeoffice.digital.sas.utils;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.*;
 import com.google.gson.Gson;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
@@ -44,5 +50,9 @@ public class TestUtils {
         ACTUAL_START_TIME_FIELD_NAME, ACTUAL_START_TIME_FIELD_VALUE,
         ACTUAL_END_TIME_FIELD_NAME, ACTUAL_END_TIME_FIELD_VALUE
     ));
+  }
+
+  public static Date getAsDate(LocalDateTime dateTime) {
+    return Date.from(dateTime.toInstant(ZoneOffset.UTC));
   }
 }

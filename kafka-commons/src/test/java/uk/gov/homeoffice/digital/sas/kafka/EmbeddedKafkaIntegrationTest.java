@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
@@ -40,6 +43,8 @@ class EmbeddedKafkaIntegrationTest {
   private static final String TENANT_ID = "tenantId";
   private static final String PROFILE_NAME = "Original profile";
   private static final String UPDATED_PROFILE_NAME = "Updated profile";
+
+  private final static Date START_TIME = TestUtils.getAsDate(LocalDateTime.now());
   private static final int CONSUMER_TIMEOUT = 3;
   private Profile profile;
 
@@ -57,7 +62,7 @@ class EmbeddedKafkaIntegrationTest {
 
   @BeforeEach
   void setup() {
-    profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME);
+    profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME, START_TIME);
   }
 
   @AfterEach

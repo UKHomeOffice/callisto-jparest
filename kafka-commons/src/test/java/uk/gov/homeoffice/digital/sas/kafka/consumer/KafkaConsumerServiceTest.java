@@ -8,6 +8,9 @@ import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONS
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.common.security.oauthbearer.secured.ValidateException;
@@ -32,6 +35,8 @@ class KafkaConsumerServiceTest {
   private static final Long PROFILE_ID = 1L;
   private static final String TENANT_ID = "tenantId";
   private static final String PROFILE_NAME = "Original profile";
+
+  private final static Date START_TIME = TestUtils.getAsDate(LocalDateTime.now());
   private static final int CONSUMER_TIMEOUT = 1;
 
   @Autowired
@@ -41,7 +46,7 @@ class KafkaConsumerServiceTest {
 
   @BeforeEach
   void setup() {
-    Profile profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME);
+    Profile profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME, START_TIME);
     expectedKafkaEventMessage =
         TestUtils.generateExpectedKafkaEventMessage(KAFKA_VALID_VERSION,
         profile,
