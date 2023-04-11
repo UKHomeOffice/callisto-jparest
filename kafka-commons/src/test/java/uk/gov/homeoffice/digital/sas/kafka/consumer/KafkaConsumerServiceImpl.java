@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +35,7 @@ public class KafkaConsumerServiceImpl implements ConsumerSeekAware {
   @KafkaListener(
       topics = { "${spring.kafka.template.default-topic}" },
       groupId = "${spring.kafka.consumer.group-id}")
-  public void onMessage(@Payload String message) {
+  public void onMessage(@Payload String message) throws JsonProcessingException {
     if (latch == null) {
       throw new NullPointerException(
           "Message recieved before the expected number of messages had been set."

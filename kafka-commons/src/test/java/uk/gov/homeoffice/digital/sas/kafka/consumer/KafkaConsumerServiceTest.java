@@ -7,6 +7,7 @@ import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.common.security.oauthbearer.secured.ValidateException;
@@ -49,7 +50,7 @@ class KafkaConsumerServiceTest {
 
   //Does deserialize, logs success
   @Test
-  void should_returnKafkaEventMessage_AndLogSuccess_when_correctMessage(CapturedOutput capturedOutput) {
+  void should_returnKafkaEventMessage_AndLogSuccess_when_correctMessage(CapturedOutput capturedOutput) throws JsonProcessingException {
     kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
     String message = TestUtils.createKafkaMessage(KAFKA_VALID_VERSION);
 
