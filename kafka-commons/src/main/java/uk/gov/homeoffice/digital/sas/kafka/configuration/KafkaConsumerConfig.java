@@ -1,5 +1,7 @@
 package uk.gov.homeoffice.digital.sas.kafka.configuration;
 
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_STOPPING_CONSUMING;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
@@ -24,7 +26,7 @@ public class KafkaConsumerConfig {
 
       // Need to throw only on chosen exception.
       if (exception.getCause() instanceof KafkaConsumerException) {
-        log.warn("Stopping consumer due to critical error", exception.getCause());
+        log.warn(KAFKA_STOPPING_CONSUMING, exception.getCause());
         kafkaListenerEndpointRegistry.stop();
       }
       throw exception;

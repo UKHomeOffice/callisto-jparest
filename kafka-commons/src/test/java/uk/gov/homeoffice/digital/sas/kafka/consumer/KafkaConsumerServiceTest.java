@@ -1,11 +1,13 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_STOPPING_CONSUMING;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -70,10 +72,11 @@ class KafkaConsumerServiceTest {
     kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
     String message = TestUtils.createKafkaMessage(KAFKA_INVALID_VERSION);
 
-    assertThrows(KafkaConsumerException.class, () ->
-        kafkaConsumerServiceImpl.onMessage(message));
+    assertThatThrownBy(() -> {
+      kafkaConsumerServiceImpl.onMessage(message);
+    }).isInstanceOf(KafkaConsumerException.class)
+        .hasMessageContaining(String.format(KAFKA_SCHEMA_INVALID_VERSION, message));
 
-    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INVALID_VERSION,
-        KAFKA_INVALID_VERSION));
+    assertThat(capturedOutput.getOut()).contains(KAFKA_STOPPING_CONSUMING);
   }
 }

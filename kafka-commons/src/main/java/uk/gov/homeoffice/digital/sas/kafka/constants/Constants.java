@@ -30,14 +30,11 @@ public final class Constants {
 
   public static final String KAFKA_SCHEMA_VALIDATED = "Schema: [ %s ] has been validated";
 
-  public static final String KAFKA_SCHEMA_INVALID = "Schema: [ %s ] is invalid";
-
   public static final String KAFKA_SCHEMA_INCORRECT_FORMAT = "Schema has incorrect format: [ %s ]";
 
   public static final String KAFKA_SCHEMA_INVALID_VERSION = "Invalid schema version [ %s ]";
 
-
-
+  public static final String KAFKA_STOPPING_CONSUMING = "Stopping consumer due to critical error";
 
   //Strings
   public static final String SCHEMA_JSON_ATTRIBUTE = "schema";
