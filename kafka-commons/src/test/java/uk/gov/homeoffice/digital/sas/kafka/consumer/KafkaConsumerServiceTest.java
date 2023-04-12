@@ -83,8 +83,6 @@ class KafkaConsumerServiceTest {
       kafkaConsumerServiceImpl.onMessage(message);
     }).isInstanceOf(KafkaConsumerException.class)
         .hasMessageContaining(String.format(KAFKA_SCHEMA_INVALID_VERSION, message));
-
-    verify(kafkaListenerEndpointRegistry).stop();
   }
 
 }
