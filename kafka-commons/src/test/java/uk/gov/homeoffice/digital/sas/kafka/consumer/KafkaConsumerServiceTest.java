@@ -76,9 +76,6 @@ class KafkaConsumerServiceTest {
     kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
     String message = TestUtils.createKafkaMessage(KAFKA_INVALID_VERSION);
 
-    KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry =
-        mock(KafkaListenerEndpointRegistry.class);
-
     assertThatThrownBy(() -> {
       kafkaConsumerServiceImpl.onMessage(message);
     }).isInstanceOf(KafkaConsumerException.class)
