@@ -34,11 +34,12 @@ public class KafkaConsumerServiceImpl implements ConsumerSeekAware {
 
   @KafkaListener(
       topics = { "${spring.kafka.template.default-topic}" },
-      groupId = "${spring.kafka.consumer.group-id}")
+      groupId = "${spring.kafka.consumer.group-id}",
+      errorHandler = "KafkaConsumerErrorHandler")
   public void onMessage(@Payload String message) throws JsonProcessingException {
     if (latch == null) {
       throw new NullPointerException(
-          "Message recieved before the expected number of messages had been set."
+          "Message received before the expected number of messages had been set."
           + " Ensure setExpectedNumberOfMessages has been called.");
     }
     if (latch.getCount() == 1) {

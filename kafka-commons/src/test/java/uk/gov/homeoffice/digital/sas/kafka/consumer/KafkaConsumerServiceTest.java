@@ -3,6 +3,8 @@ package uk.gov.homeoffice.digital.sas.kafka.consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
@@ -15,11 +17,13 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import uk.gov.homeoffice.digital.sas.config.TestConfig;
 import uk.gov.homeoffice.digital.sas.kafka.exceptions.KafkaConsumerException;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
@@ -72,9 +76,15 @@ class KafkaConsumerServiceTest {
     kafkaConsumerServiceImpl.setExpectedNumberOfMessages(1);
     String message = TestUtils.createKafkaMessage(KAFKA_INVALID_VERSION);
 
+    KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry =
+        mock(KafkaListenerEndpointRegistry.class);
+
     assertThatThrownBy(() -> {
       kafkaConsumerServiceImpl.onMessage(message);
     }).isInstanceOf(KafkaConsumerException.class)
         .hasMessageContaining(String.format(KAFKA_SCHEMA_INVALID_VERSION, message));
+
+    verify(kafkaListenerEndpointRegistry).stop();
   }
+
 }
