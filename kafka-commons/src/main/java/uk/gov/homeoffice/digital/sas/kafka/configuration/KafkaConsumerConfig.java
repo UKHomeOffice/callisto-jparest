@@ -20,7 +20,7 @@ public class KafkaConsumerConfig {
     this.kafkaListenerEndpointRegistry = kafkaListenerEndpointRegistry;
   }
 
-  @Bean(value = "KafkaConsumerErrorHandler")
+  @Bean(value = "kafkaConsumerErrorHandler")
   public KafkaListenerErrorHandler errorHandler() {
     return (message, exception) -> {
 
