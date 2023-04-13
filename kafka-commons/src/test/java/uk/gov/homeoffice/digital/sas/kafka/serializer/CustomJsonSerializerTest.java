@@ -28,10 +28,11 @@ class CustomJsonSerializerTest {
 
   private Profile profile;
 
+  ObjectMapper objectMapper = createMapper();
+
   @Test
   void whenObjectMapperCreated_canDeserializeDateFields() {
 
-    ObjectMapper objectMapper = createMapper();
 
     assertThat(objectMapper.canSerialize(Profile.class));
   }
@@ -39,7 +40,6 @@ class CustomJsonSerializerTest {
   @Test
   void whenSerializing_dateIsInIso8601Format() throws JsonProcessingException {
     profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME, START_TIME);
-    ObjectMapper objectMapper = createMapper();
 
     String jsonString = objectMapper.writeValueAsString(profile);
 
