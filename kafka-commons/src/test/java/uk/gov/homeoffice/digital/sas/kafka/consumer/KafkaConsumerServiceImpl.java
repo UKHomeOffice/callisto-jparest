@@ -35,7 +35,7 @@ public class KafkaConsumerServiceImpl implements ConsumerSeekAware {
   @KafkaListener(
       topics = { "${spring.kafka.template.default-topic}" },
       groupId = "${spring.kafka.consumer.group-id}",
-      errorHandler = "KafkaConsumerErrorHandler")
+      errorHandler = "kafkaConsumerErrorHandler")
   public void onMessage(@Payload String message) throws JsonProcessingException {
     if (latch == null) {
       throw new NullPointerException(
