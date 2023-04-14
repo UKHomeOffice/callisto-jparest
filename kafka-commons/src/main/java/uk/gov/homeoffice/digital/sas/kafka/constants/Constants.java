@@ -34,10 +34,23 @@ public final class Constants {
 
   public static final String KAFKA_SCHEMA_INVALID_VERSION = "Invalid schema version [ %s ]";
 
+  public static final String KAFKA_RESOURCE_NOT_UNDERSTOOD =
+      "The resource within the schema is not understood [ %s ]";
+
+  public static final String KAFKA_COULD_NOT_DESERIALIZE_RESOURCE =
+      "The resource recieved could not be deserialized [ %s ]";
+
+  public static final String KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED =
+      "Failed deserialization on message [ %s ]";
+
   public static final String KAFKA_STOPPING_CONSUMING = "Stopping consumer due to critical error";
+
+  public static final String KAFKA_SUCCESSFUL_DESERIALIZATION =
+      "Successful deserialization of message entity [ %s ] created";
 
   //Strings
   public static final String SCHEMA_JSON_ATTRIBUTE = "schema";
+  public static final String RESOURCE_JSON_ATTRIBUTE = "resource";
 
   public static final String SCHEMA_COMMA_DELIMETER = ", ";
 

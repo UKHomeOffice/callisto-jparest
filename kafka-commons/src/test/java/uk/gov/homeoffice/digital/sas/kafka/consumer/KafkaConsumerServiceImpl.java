@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.micrometer.core.instrument.Counter;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 

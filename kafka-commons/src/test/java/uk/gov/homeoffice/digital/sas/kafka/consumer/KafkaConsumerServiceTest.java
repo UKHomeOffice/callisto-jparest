@@ -10,6 +10,7 @@ import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_STOPPING_CONSUMING;
+import static uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerUtils.getSchemaFromMessageAsString;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -79,7 +80,8 @@ class KafkaConsumerServiceTest {
     assertThatThrownBy(() -> {
       kafkaConsumerServiceImpl.onMessage(message);
     }).isInstanceOf(KafkaConsumerException.class)
-        .hasMessageContaining(String.format(KAFKA_SCHEMA_INVALID_VERSION, message));
+        .hasMessageContaining(String.format(KAFKA_SCHEMA_INVALID_VERSION,
+            getSchemaFromMessageAsString(message)));
   }
 
 }

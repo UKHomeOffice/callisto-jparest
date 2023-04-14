@@ -2,13 +2,17 @@ package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SUCCESSFUL_DESERIALIZATION;
+import static uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerUtils.getSchemaFromMessageAsString;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Counter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import uk.gov.homeoffice.digital.sas.kafka.exceptions.KafkaConsumerException;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
@@ -32,7 +36,9 @@ public class KafkaConsumerService<T> {
       log.info(String.format(KAFKA_CONSUMING_MESSAGE, payload));
       return objectMapper.readValue(payload, new TypeReference<>() {});
     } else {
-      throw new KafkaConsumerException(String.format(KAFKA_SCHEMA_INVALID_VERSION, payload));
+      throw new KafkaConsumerException(String.format(KAFKA_SCHEMA_INVALID_VERSION,
+          getSchemaFromMessageAsString(payload)));
     }
   }
+
 }
