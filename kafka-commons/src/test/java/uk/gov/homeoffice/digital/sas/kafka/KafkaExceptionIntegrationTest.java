@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas;
+package uk.gov.homeoffice.digital.sas.kafka;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_STOPPING_CONSUMING;
