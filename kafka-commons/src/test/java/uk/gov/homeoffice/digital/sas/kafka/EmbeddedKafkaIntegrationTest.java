@@ -5,21 +5,20 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.homeoffice.digital.sas.config.TestConfigWithJpa;
 import uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerServiceImpl;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
@@ -29,6 +28,7 @@ import uk.gov.homeoffice.digital.sas.model.Profile;
 import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TestConfigWithJpa.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(
@@ -48,8 +48,7 @@ class EmbeddedKafkaIntegrationTest {
   private static final int CONSUMER_TIMEOUT = 3;
   private Profile profile;
 
-  @Value("0.1.0")
-  private String version;
+  private String expectedSchemaVersion = "0.1.0";
 
   @Autowired
   private KafkaProducerService<Profile> kafkaProducerService;
@@ -82,7 +81,7 @@ class EmbeddedKafkaIntegrationTest {
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
-    KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
+    KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(expectedSchemaVersion,
         profile,
         KafkaAction.CREATE);
 
@@ -100,7 +99,7 @@ class EmbeddedKafkaIntegrationTest {
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
-    KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
+    KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(expectedSchemaVersion,
         profile,
         KafkaAction.CREATE);
 
@@ -118,7 +117,7 @@ class EmbeddedKafkaIntegrationTest {
     assertThat(kafkaConsumerServiceImpl.awaitMessages(CONSUMER_TIMEOUT, TimeUnit.SECONDS)).isTrue();
     // THEN
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
-    KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(version,
+    KafkaEventMessage expectedKafkaEventMessage = TestUtils.generateExpectedKafkaEventMessage(expectedSchemaVersion,
         profile,
         KafkaAction.UPDATE);
     assertMessageIsDeserializedAsExpected(expectedKafkaEventMessage);
@@ -136,7 +135,7 @@ class EmbeddedKafkaIntegrationTest {
     assertThat(kafkaConsumerServiceImpl.getKafkaEventMessage()).isNotNull();
 
     KafkaEventMessage expectedKafkaEventMessage =
-        TestUtils.generateExpectedKafkaEventMessage(version,
+        TestUtils.generateExpectedKafkaEventMessage(expectedSchemaVersion,
             profile,
             KafkaAction.DELETE);
 
