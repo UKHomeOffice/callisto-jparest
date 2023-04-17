@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.kafka.validators;
+package uk.gov.homeoffice.digital.sas.kafka.consumer.validators;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -8,8 +8,10 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_STOPPING_CONSUMING;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SUCCESSFUL_DESERIALIZATION;
 import static uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerUtils.getSchemaFromMessageAsString;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDateTime;
@@ -24,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
-import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+
 import uk.gov.homeoffice.digital.sas.config.TestConfig;
 import uk.gov.homeoffice.digital.sas.kafka.exceptions.KafkaConsumerException;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
@@ -44,6 +46,9 @@ class KafkaConsumerServiceTest {
 
   @Autowired
   private KafkaConsumerServiceImpl kafkaConsumerServiceImpl;
+
+  @Autowired
+  private KafkaConsumerService kafkaConsumerService;
 
   KafkaEventMessage expectedKafkaEventMessage;
 
@@ -82,6 +87,24 @@ class KafkaConsumerServiceTest {
     }).isInstanceOf(KafkaConsumerException.class)
         .hasMessageContaining(String.format(KAFKA_SCHEMA_INVALID_VERSION,
             getSchemaFromMessageAsString(message)));
+  }
+
+  @Test
+  void checkDeserializedResource_logsSuccessWhenValidPayload(CapturedOutput capturedOutput) {
+    Profile profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME, START_TIME);
+    kafkaConsumerService.checkDeserializedResource("resource", profile);
+
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SUCCESSFUL_DESERIALIZATION,
+        "resource"));
+  }
+
+  @Test
+  void checkDeserializedResource_logsFailureWhenInvalidPayload(CapturedOutput capturedOutput) {
+    Profile profile = null;
+    kafkaConsumerService.checkDeserializedResource("resource", profile);
+
+    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED,
+        "resource"));
   }
 
 }

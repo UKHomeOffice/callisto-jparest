@@ -30,31 +30,10 @@ import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 @ExtendWith(OutputCaptureExtension.class)
 class KafkaConsumerUtilsTest {
 
-  @Autowired
-  KafkaConsumerUtils<Profile> consumerUtils;
-
   private static final Long PROFILE_ID = 1L;
   private static final String TENANT_ID = "tenantId";
   private static final String PROFILE_NAME = "Original profile";
   private final static Date START_TIME = TestUtils.getAsDate(LocalDateTime.now());
-
-  @Test
-  void checkDeserializedResource_logsSuccessWhenValidPayload(CapturedOutput capturedOutput) {
-    Profile profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME, START_TIME);
-    consumerUtils.checkDeserializedResource("resource", profile);
-
-    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SUCCESSFUL_DESERIALIZATION,
-        "resource"));
-  }
-
-  @Test
-  void checkDeserializedResource_logsFailureWhenInvalidPayload(CapturedOutput capturedOutput) {
-    Profile profile = null;
-    consumerUtils.checkDeserializedResource("resource", profile);
-
-    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED,
-        "resource"));
-  }
 
   @Test
   void getSchemaFromMessageAsString_returnsSchemaAsResource() {

@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.kafka.validators;
+package uk.gov.homeoffice.digital.sas.kafka.consumer.validators;
 
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INCORRECT_FORMAT;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;

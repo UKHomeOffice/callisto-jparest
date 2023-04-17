@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SUCCESSFUL_DESERIALIZATION;
 import static uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerUtils.getSchemaFromMessageAsString;
@@ -8,14 +9,13 @@ import static uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerUtils.ge
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micrometer.core.instrument.Counter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import uk.gov.homeoffice.digital.sas.kafka.consumer.validators.SchemaValidator;
 import uk.gov.homeoffice.digital.sas.kafka.exceptions.KafkaConsumerException;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
-import uk.gov.homeoffice.digital.sas.kafka.validators.SchemaValidator;
 
 @Slf4j
 @Service
@@ -38,6 +38,14 @@ public class KafkaConsumerService<T> {
     } else {
       throw new KafkaConsumerException(String.format(KAFKA_SCHEMA_INVALID_VERSION,
           getSchemaFromMessageAsString(payload)));
+    }
+  }
+
+  public void checkDeserializedResource(String payload, T resource) {
+    if (ObjectUtils.isEmpty(resource)) {
+      log.error(String.format(KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED, payload));
+    } else {
+      log.info(String.format(KAFKA_SUCCESSFUL_DESERIALIZATION, payload));
     }
   }
 
