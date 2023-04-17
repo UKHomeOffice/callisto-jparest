@@ -10,11 +10,8 @@ import static uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerUtils.ge
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import uk.gov.homeoffice.digital.sas.config.TestConfig;
 import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
-@SpringBootTest(classes = TestConfig.class)
 class KafkaConsumerUtilsTest {
 
   @Test
