@@ -26,7 +26,7 @@ public class KafkaConsumerService<T> {
 
   private final SchemaValidator schemaValidator;
 
-  protected KafkaConsumerService(SchemaValidator schemaValidator) {
+  public KafkaConsumerService(SchemaValidator schemaValidator) {
     this.schemaValidator = schemaValidator;
   }
 
