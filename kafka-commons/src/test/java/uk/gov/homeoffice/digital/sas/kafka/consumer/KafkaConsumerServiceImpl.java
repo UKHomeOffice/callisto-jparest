@@ -1,12 +1,9 @@
 package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.micrometer.core.instrument.Counter;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import lombok.Getter;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.ConsumerSeekAware;

@@ -11,14 +11,12 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.homeoffice.digital.sas.config.TestConfigWithJpa;
 import uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerServiceImpl;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
@@ -28,7 +26,6 @@ import uk.gov.homeoffice.digital.sas.model.Profile;
 import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TestConfigWithJpa.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(

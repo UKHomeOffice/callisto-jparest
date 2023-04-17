@@ -19,7 +19,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.homeoffice.digital.sas.config.TestConfigWithJpa;
-import uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerService;
 import uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerServiceImpl;
 import uk.gov.homeoffice.digital.sas.model.Profile;
 import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
@@ -50,10 +49,6 @@ class KafkaExceptionIntegrationTest {
   private final static Date START_TIME = TestUtils.getAsDate(LocalDateTime.now());
   private static final int CONSUMER_TIMEOUT = 3;
   private Profile profile;
-
-
-  @Autowired
-  KafkaConsumerService kafkaConsumerService;
 
   @Autowired
   KafkaConsumerServiceImpl kafkaConsumerServiceImpl;
