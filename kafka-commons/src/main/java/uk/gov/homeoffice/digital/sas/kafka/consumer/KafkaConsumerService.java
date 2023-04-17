@@ -9,6 +9,7 @@ import static uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerUtils.ge
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,13 @@ public class KafkaConsumerService<T> {
     } else {
       log.info(String.format(KAFKA_SUCCESSFUL_DESERIALIZATION, payload));
     }
+  }
+
+  public boolean isResourceOfType(String payload, Class<T> type) {
+    JsonParser.parseString(payload).getAsJsonObject();
+    String schema = getSchemaFromMessageAsString(payload);
+
+    return schema.contains(type.getSimpleName());
   }
 
 }

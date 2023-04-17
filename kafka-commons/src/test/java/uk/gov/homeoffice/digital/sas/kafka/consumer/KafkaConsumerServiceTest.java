@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_SCHEMA_RESOURCE;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
@@ -107,4 +108,15 @@ class KafkaConsumerServiceTest {
         "resource"));
   }
 
+  @Test
+  void isResourceOfType_returnsTrueWhenValidSchema() {
+    String payload = TestUtils.createKafkaMessage(KAFKA_VALID_VERSION);
+    assertThat(kafkaConsumerService.isResourceOfType(payload, Profile.class)).isTrue();
+  }
+
+  @Test
+  void isResourceOfType_returnFalseWhenInvalidSchema() {
+    String payload = TestUtils.createKafkaMessage(KAFKA_INVALID_SCHEMA_RESOURCE, KAFKA_VALID_VERSION);
+    assertThat(kafkaConsumerService.isResourceOfType(payload, Profile.class)).isFalse();
+  }
 }

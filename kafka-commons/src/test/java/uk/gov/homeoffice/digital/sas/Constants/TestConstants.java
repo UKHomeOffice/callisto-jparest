@@ -6,7 +6,10 @@ public class TestConstants {
 
   public static final String KAFKA_INVALID_VERSION = "1.0.0";
 
-  public static final String KAFKA_VALID_RESOURCE = "uk.gov.homeoffice.digital.sas.model.Profile";
+  public static final String KAFKA_VALID_SCHEMA_RESOURCE = "uk.gov.homeoffice.digital.sas.model.Profile";
+
+  public static final String KAFKA_INVALID_SCHEMA_RESOURCE = "uk.gov.homeoffice.digital.sas.model" +
+      ".Unknown";
 
   public static final String SCHEMA_FIELD_NAME = "schema";
 
