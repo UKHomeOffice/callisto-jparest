@@ -11,12 +11,12 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan("uk.gov.homeoffice.digital.sas.kafka.consumer")
 public class KafkaConsumerConfig {
 
-  @Value("${actuator.kafka.failure.url}") String actuatorKafkaFailureUrl;
-  @Value("${actuator.error.type}") String actuatorErrorType;
-  @Value("${actuator.failure.description}") String actuatorKafkaFailureDescription;
-
   @Bean
-  public Counter consumerErrorCounter(MeterRegistry meterRegistry) {
+  public Counter consumerErrorCounter(MeterRegistry meterRegistry,
+                                      @Value("${actuator.kafka.failure.url}") String actuatorKafkaFailureUrl,
+                                      @Value("${actuator.error.type}") String actuatorErrorType,
+                                      @Value("${actuator.failure.description}") String actuatorKafkaFailureDescription
+                                      ) {
     return Counter.builder(actuatorKafkaFailureUrl)
         .tag("type", actuatorErrorType)
         .description(actuatorKafkaFailureDescription)
