@@ -25,6 +25,8 @@ public final class Constants {
   public static final String KAFKA_SUCCESS_MESSAGE =
       "Message with key [ %s ] sent to topic [ %s ] with action [ %s ]";
 
+  //Consumer logs
+
   public static final String KAFKA_CONSUMING_MESSAGE =
       "Consuming message: [%s]";
 
@@ -36,6 +38,10 @@ public final class Constants {
 
   public static final String KAFKA_RESOURCE_NOT_UNDERSTOOD =
       "The resource within the schema is not understood [ %s ]";
+
+  public static final String KAFKA_PAYLOAD_IS_NULL = "Received payload is null";
+
+  public static final String RESOURCE_TYPE_IS_NULL = "Resource type is null";
 
   public static final String KAFKA_COULD_NOT_DESERIALIZE_RESOURCE =
       "The resource recieved could not be deserialized [ %s ]";

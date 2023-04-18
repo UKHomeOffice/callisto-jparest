@@ -7,8 +7,10 @@ import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALI
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_PAYLOAD_IS_NULL;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SUCCESSFUL_DESERIALIZATION;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.RESOURCE_TYPE_IS_NULL;
 import static uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerUtils.getSchemaFromMessageAsString;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -113,5 +115,23 @@ class KafkaConsumerServiceTest {
   void isResourceOfType_returnFalseWhenInvalidSchema() {
     String payload = TestUtils.createKafkaMessage(KAFKA_INVALID_SCHEMA_RESOURCE, KAFKA_VALID_VERSION);
     assertThat(kafkaConsumerService.isResourceOfType(payload, Profile.class)).isFalse();
+  }
+
+  @Test
+  void isResourceOfType_returnFalseWhenPayloadNull() {
+    assertThatThrownBy(() -> {
+      kafkaConsumerService.isResourceOfType(null, Profile.class);
+    }).isInstanceOf(KafkaConsumerException.class)
+        .hasMessageContaining(KAFKA_PAYLOAD_IS_NULL);
+  }
+
+  @Test
+  void isResourceOfType_returnFalseWhenTypeNull() {
+    String payload = TestUtils.createKafkaMessage(KAFKA_INVALID_SCHEMA_RESOURCE, KAFKA_VALID_VERSION);
+
+    assertThatThrownBy(() -> {
+      kafkaConsumerService.isResourceOfType(payload, Profile.class);
+    }).isInstanceOf(KafkaConsumerException.class)
+        .hasMessageContaining(RESOURCE_TYPE_IS_NULL);
   }
 }

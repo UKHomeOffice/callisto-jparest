@@ -2,14 +2,17 @@ package uk.gov.homeoffice.digital.sas.kafka.consumer;
 
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_CONSUMING_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_PAYLOAD_IS_NULL;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SCHEMA_INVALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SUCCESSFUL_DESERIALIZATION;
+import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.RESOURCE_TYPE_IS_NULL;
 import static uk.gov.homeoffice.digital.sas.kafka.consumer.KafkaConsumerUtils.getSchemaFromMessageAsString;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonParser;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,11 +53,16 @@ public class KafkaConsumerService<T> {
     }
   }
 
-  public boolean isResourceOfType(String payload, Class<T> type) {
+  public boolean isResourceOfType(@NotNull String payload, @NotNull Class<T> type) {
+    if (payload == null) {
+      throw new KafkaConsumerException(KAFKA_PAYLOAD_IS_NULL);
+    }
+    if (type == null) {
+      throw new KafkaConsumerException(RESOURCE_TYPE_IS_NULL);
+    }
+
     JsonParser.parseString(payload).getAsJsonObject();
     String schema = getSchemaFromMessageAsString(payload);
-
     return schema.contains(type.getSimpleName());
   }
-
 }
