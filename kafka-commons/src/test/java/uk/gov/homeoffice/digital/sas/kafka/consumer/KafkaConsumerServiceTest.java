@@ -88,26 +88,6 @@ class KafkaConsumerServiceTest {
   }
 
   @Test
-  void checkDeserializedResource_logsSuccessWhenValidPayload(CapturedOutput capturedOutput) {
-    Profile profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME, START_TIME);
-    kafkaConsumerService.checkDeserializedResource("resource", profile);
-
-    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SUCCESSFUL_DESERIALIZATION,
-        "resource"));
-  }
-
-  @Test
-  void checkDeserializedResource_logsFailureWhenInvalidPayload(CapturedOutput capturedOutput) {
-    Profile profile = null;
-
-    assertThatThrownBy(() -> {
-      kafkaConsumerService.checkDeserializedResource("resource", profile);
-    }).isInstanceOf(KafkaConsumerException.class)
-        .hasMessageContaining(String.format(KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED,
-            "resource"));
-  }
-
-  @Test
   void isResourceOfType_returnsTrueWhenValidSchema() {
     String payload = TestUtils.createKafkaMessage(KAFKA_VALID_VERSION);
     assertThat(kafkaConsumerService.isResourceOfType(payload, Profile.class)).isTrue();
