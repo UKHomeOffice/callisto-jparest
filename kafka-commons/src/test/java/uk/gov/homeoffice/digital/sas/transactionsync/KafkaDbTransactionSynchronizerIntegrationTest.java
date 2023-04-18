@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.DATABASE_TRANSACTION_SUCCESSFUL;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_TRANSACTION_INITIALIZED;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.TRANSACTION_SUCCESSFUL;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import org.junit.jupiter.api.AfterEach;
@@ -23,6 +26,7 @@ import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.transactionsync.KafkaDbTransactionSynchronizer;
 import uk.gov.homeoffice.digital.sas.model.Profile;
 import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
+import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
 @SpringBootTest(classes = TestConfigWithJpa.class)
 @DirtiesContext
@@ -35,6 +39,8 @@ import uk.gov.homeoffice.digital.sas.repository.ProfileRepository;
 )
 class KafkaDbTransactionSynchronizerIntegrationTest {
   private static final String PROFILE_NAME = "Original profile";
+
+  private final static Date START_TIME = TestUtils.getAsDate(LocalDateTime.now());
   private Profile profile;
 
   private String messageKey;
@@ -46,7 +52,7 @@ class KafkaDbTransactionSynchronizerIntegrationTest {
   void setup() {
     TransactionSynchronizationManager.initSynchronization();
     Long tenantId = new Random().nextLong();
-    profile = new Profile(null, String.valueOf(tenantId), PROFILE_NAME);
+    profile = new Profile(null, String.valueOf(tenantId), PROFILE_NAME, START_TIME);
   }
 
   @Test

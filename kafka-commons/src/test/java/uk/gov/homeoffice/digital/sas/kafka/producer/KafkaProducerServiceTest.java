@@ -19,6 +19,7 @@ import ch.qos.logback.core.read.ListAppender;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaAction;
 import uk.gov.homeoffice.digital.sas.kafka.message.KafkaEventMessage;
 import uk.gov.homeoffice.digital.sas.model.Profile;
+import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -27,6 +28,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_FAILED_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.KAFKA_SUCCESS_MESSAGE;
 import static uk.gov.homeoffice.digital.sas.kafka.constants.Constants.SCHEMA_FORMAT;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -40,6 +44,9 @@ class KafkaProducerServiceTest {
   private final static String TENANT_ID = "tenantId";
   private final static String PROFILE_NAME = "profileX";
   private final static String SCHEMA_VERSION = "1.0.0";
+
+  private final static Date START_TIME = TestUtils.getAsDate(LocalDateTime.now());
+
   private Profile profile;
 
   @Captor
@@ -63,7 +70,7 @@ class KafkaProducerServiceTest {
 
   @BeforeEach
   void setup() {
-    profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME);
+    profile = new Profile(PROFILE_ID, TENANT_ID, PROFILE_NAME, START_TIME);
     kafkaProducerService = new KafkaProducerService<>(kafkaTemplate, TOPIC_NAME, SCHEMA_VERSION);
   }
 

@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.digital.sas.kafka.validators;
+package uk.gov.homeoffice.digital.sas.kafka.consumer.validators;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +10,7 @@ import uk.gov.homeoffice.digital.sas.utils.TestUtils;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_INVALID_VERSION;
-import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_RESOURCE;
+import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_SCHEMA_RESOURCE;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.KAFKA_VALID_VERSION;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.SCHEMA_FIELD_INVALID_VALUE;
 import static uk.gov.homeoffice.digital.sas.Constants.TestConstants.SCHEMA_FIELD_VALUE;
@@ -83,7 +83,7 @@ class SchemaValidatorTest {
     schemaValidator.isSchemaValid(message);
     // then
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_INCORRECT_FORMAT,
-      KAFKA_VALID_RESOURCE + " " + KAFKA_VALID_VERSION));
+      KAFKA_VALID_SCHEMA_RESOURCE + " " + KAFKA_VALID_VERSION));
   }
 
   @ParameterizedTest
@@ -116,7 +116,7 @@ class SchemaValidatorTest {
     schemaValidator.isSchemaValid(message);
 
     //then
-    String schema = KAFKA_VALID_RESOURCE + SCHEMA_COMMA_DELIMETER +  messageVersion;
+    String schema = KAFKA_VALID_SCHEMA_RESOURCE + SCHEMA_COMMA_DELIMETER +  messageVersion;
 
     assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_SCHEMA_VALIDATED,
         schema));
