@@ -99,10 +99,12 @@ class KafkaConsumerServiceTest {
   @Test
   void checkDeserializedResource_logsFailureWhenInvalidPayload(CapturedOutput capturedOutput) {
     Profile profile = null;
-    kafkaConsumerService.checkDeserializedResource("resource", profile);
 
-    assertThat(capturedOutput.getOut()).contains(String.format(KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED,
-        "resource"));
+    assertThatThrownBy(() -> {
+      kafkaConsumerService.checkDeserializedResource("resource", profile);
+    }).isInstanceOf(KafkaConsumerException.class)
+        .hasMessageContaining(String.format(KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED,
+            "resource"));
   }
 
   @Test
@@ -130,7 +132,7 @@ class KafkaConsumerServiceTest {
     String payload = TestUtils.createKafkaMessage(KAFKA_INVALID_SCHEMA_RESOURCE, KAFKA_VALID_VERSION);
 
     assertThatThrownBy(() -> {
-      kafkaConsumerService.isResourceOfType(payload, Profile.class);
+      kafkaConsumerService.isResourceOfType(payload, null);
     }).isInstanceOf(KafkaConsumerException.class)
         .hasMessageContaining(RESOURCE_TYPE_IS_NULL);
   }

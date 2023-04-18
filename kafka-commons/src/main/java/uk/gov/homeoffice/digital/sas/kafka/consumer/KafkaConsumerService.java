@@ -48,7 +48,8 @@ public class KafkaConsumerService<T> {
 
   public void checkDeserializedResource(String payload, T resource) {
     if (ObjectUtils.isEmpty(resource)) {
-      throw new KafkaConsumerException(String.format(KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED, payload));
+      throw new KafkaConsumerException(
+          String.format(KAFKA_DESERIALIZATION_TO_CONCRETE_TYPE_FAILED, payload));
     } else {
       // Should turn into debug once consumer logic has stabilized
       log.info(String.format(KAFKA_SUCCESSFUL_DESERIALIZATION, payload));
