@@ -28,7 +28,6 @@ class KafkaConsumerUtilsTest {
     String payload = TestUtils.createKafkaMessage(KAFKA_VALID_VERSION);
 
     JsonObject jsonMessage = JsonParser.parseString(payload).getAsJsonObject();
-    jsonMessage.get(RESOURCE_JSON_ATTRIBUTE).toString();
 
     assertThat(getResourceFromMessageAsString(payload))
         .isEqualTo(jsonMessage.get(RESOURCE_JSON_ATTRIBUTE).toString());
