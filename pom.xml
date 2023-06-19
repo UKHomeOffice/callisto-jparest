@@ -30,11 +30,11 @@
     <distributionManagement>
         <repository>
             <id>callisto-jparest</id>
-            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
+            <url>https://maven.pkg.github.com/UKHomeOffice/callisto-jparest</url>
         </repository>
         <snapshotRepository>
             <id>callisto-jparest</id>
-            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
+            <url>https://maven.pkg.github.com/UKHomeOffice/callisto-jparest</url>
         </snapshotRepository>
     </distributionManagement>
 
