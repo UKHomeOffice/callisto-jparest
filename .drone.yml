@@ -1,168 +1,168 @@
----
-kind: pipeline
-type: kubernetes
-name: jparest
+#---
+#kind: pipeline
+#type: kubernetes
+#name: jparest
+#
+#platform:
+#  os: linux
+#  arch: amd64
+#
+#trigger:
+#  event:
+#    include:
+#    - push
+#    - pull_request
+#
+#steps:
+#- name: fetch
+#  image: alpine/git
+#  commands:
+#    - "git fetch origin +refs/heads/main:"
 
-platform:
-  os: linux
-  arch: amd64
+#- name: test
+#  image: maven:3.8-openjdk-17
+#  depends_on:
+#    - fetch
+#  commands:
+#  - mvn clean install
 
-trigger:
-  event:
-    include:
-    - push
-    - pull_request
+#- name: sonar
+#  image: maven:3.8-openjdk-17
+#  depends_on:
+#  - test
+#  environment:
+#    SONAR_HOST:
+#      from_secret: sonar_cloud_host
+#    SONAR_TOKEN:
+#      from_secret: sonar_cloud_token
+#  commands:
+#  - mvn -X sonar:sonar
+#    -Dsonar.host.url=$${SONAR_HOST}
+#    -Dsonar.login=$${SONAR_TOKEN}
+#    -Dsonar.branch.name=$DRONE_BRANCH
+#    -Dsonar.projectKey=callisto-jparest
+#    -Dsonar.qualitygate.wait=true
+#  when:
+#    event:
+#      exclude:
+#      - pull_request
 
-steps:
-- name: fetch
-  image: alpine/git
-  commands:
-    - "git fetch origin +refs/heads/main:"
+#- name: publish
+#  image: maven:3.8-openjdk-17
+#  depends_on:
+#    - sonar
+#  environment:
+#    ARTIFACTORY_TOKEN:
+#        from_secret: github_token
+#  commands:
+#  - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
+#  - versionExtract=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+#  - sed -i "/^version=/{s|.$|"=$versionExtract"|}" git_tag.sh
+#  when:
+#    branch: main
+#    event:
+#      exclude:
+#      - pull_request
 
-- name: test
-  image: maven:3.8-openjdk-17
-  depends_on:
-    - fetch
-  commands:
-  - mvn clean install
+#- name: git tag
+#  image: alpine/git
+#  depends_on:
+#    - publish
+#  environment:
+#    SSH_KEY:
+#      from_secret: github_token
+#  commands:
+#    - chmod 777 git_tag.sh
+#    - ./git_tag.sh
+#  when:
+#    branch: main
+#    event:
+#      exclude:
+#      - pull_request
 
-- name: sonar
-  image: maven:3.8-openjdk-17
-  depends_on:
-  - test
-  environment:
-    SONAR_HOST:
-      from_secret: sonar_cloud_host
-    SONAR_TOKEN:
-      from_secret: sonar_cloud_token
-  commands:
-  - mvn -X sonar:sonar
-    -Dsonar.host.url=$${SONAR_HOST}
-    -Dsonar.login=$${SONAR_TOKEN}
-    -Dsonar.branch.name=$DRONE_BRANCH
-    -Dsonar.projectKey=callisto-jparest
-    -Dsonar.qualitygate.wait=true
-  when:
-    event:
-      exclude:
-      - pull_request
-
-- name: publish
-  image: maven:3.8-openjdk-17
-  depends_on:
-    - sonar
-  environment:
-    ARTIFACTORY_TOKEN:
-        from_secret: github_token
-  commands:
-  - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DskipTests
-  - versionExtract=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-  - sed -i "/^version=/{s|.$|"=$versionExtract"|}" git_tag.sh
-  when:
-    branch: main
-    event:
-      exclude:
-      - pull_request
-
-- name: git tag
-  image: alpine/git
-  depends_on:
-    - publish
-  environment:
-    SSH_KEY:
-      from_secret: github_token
-  commands:
-    - chmod 777 git_tag.sh
-    - ./git_tag.sh
-  when:
-    branch: main
-    event:
-      exclude:
-      - pull_request
-
-- name: snapshot
-  image: maven:3.8-openjdk-17
-  depends_on:
-    - sonar
-  environment:
-    ARTIFACTORY_TOKEN:
-      from_secret: github_token
-  commands:
-    - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && snapshotSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
-    - version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-    - mvn versions:set -DnewVersion=$version$${snapshotSuffix}-SNAPSHOT -f pom.xml
-    - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DsnapshotSuffix=$${snapshotSuffix}-SNAPSHOT -DskipTests
-  when:
-    branch:
-      exclude:
-      - main
-
----
-kind: pipeline
-type: kubernetes
-name: build notifications
-
-trigger:
-  status:
-    - success
-    - failure
-  event:
-    - push
-
-depends_on:
-  - jparest
-
-steps:
-  - name: slack
-    image: plugins/slack
-    settings:
-      webhook:
-        from_secret: SLACK_WEBHOOK_URL
-      channel: callisto-tech-notifications
-      username: Drone
-      template: |
-        {{#success build.status}}
-          <${DRONE_BUILD_LINK}|Build #{{ build.number }}> succeeded! :tada:
-        {{else}}
-          <${DRONE_BUILD_LINK}|Build #{{ build.number }}> failed :broken_heart:
-        {{/success}}
-        Commit: <${DRONE_REPO_LINK}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}> - {{{ trim build.message }}}
-        Repo: {{ repo.name }}
-        Branch: <${DRONE_REPO_LINK}/commits/{{ build.branch }}|{{ build.branch }}>
-        Author: {{ build.author }}
-        <https://sonarcloud.io/dashboard?id=callisto-jparest&branch={{ build.branch }}&resolved=false|SonarCloud Analysis Report>
+#- name: snapshot
+#  image: maven:3.8-openjdk-17
+#  depends_on:
+#    - sonar
+#  environment:
+#    ARTIFACTORY_TOKEN:
+#      from_secret: github_token
+#  commands:
+#    - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && snapshotSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
+#    - version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+#    - mvn versions:set -DnewVersion=$version$${snapshotSuffix}-SNAPSHOT -f pom.xml
+#    - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DsnapshotSuffix=$${snapshotSuffix}-SNAPSHOT -DskipTests
+#  when:
+#    branch:
+#      exclude:
+#      - main
 
 ---
-kind: pipeline
-type: kubernetes
-name: urgent notifications
+#kind: pipeline
+#type: kubernetes
+#name: build notifications
+#
+#trigger:
+#  status:
+#    - success
+#    - failure
+#  event:
+#    - push
+#
+#depends_on:
+#  - jparest
 
-trigger:
-  status:
-    - failure
-  event:
-    - push
+#steps:
+#  - name: slack
+#    image: plugins/slack
+#    settings:
+#      webhook:
+#        from_secret: SLACK_WEBHOOK_URL
+#      channel: callisto-tech-notifications
+#      username: Drone
+#      template: |
+#        {{#success build.status}}
+#          <${DRONE_BUILD_LINK}|Build #{{ build.number }}> succeeded! :tada:
+#        {{else}}
+#          <${DRONE_BUILD_LINK}|Build #{{ build.number }}> failed :broken_heart:
+#        {{/success}}
+#        Commit: <${DRONE_REPO_LINK}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}> - {{{ trim build.message }}}
+#        Repo: {{ repo.name }}
+#        Branch: <${DRONE_REPO_LINK}/commits/{{ build.branch }}|{{ build.branch }}>
+#        Author: {{ build.author }}
+#        <https://sonarcloud.io/dashboard?id=callisto-jparest&branch={{ build.branch }}&resolved=false|SonarCloud Analysis Report>
+#
+#---
+#kind: pipeline
+#type: kubernetes
+#name: urgent notifications
+#
+#trigger:
+#  status:
+#    - failure
+#  event:
+#    - push
+#
+#depends_on:
+#  - jparest
 
-depends_on:
-  - jparest
+#slack: &slack
+#  image: plugins/slack
+#  settings:
+#    webhook:
+#      from_secret: slack_urgent_webhook_url
+#    channel: callisto-urgent-tech-notifications
+#    username: Drone
 
-slack: &slack
-  image: plugins/slack
-  settings:
-    webhook:
-      from_secret: slack_urgent_webhook_url
-    channel: callisto-urgent-tech-notifications
-    username: Drone
-
-steps:
-  - name: slack_build_urgent
-    <<: *slack
-    settings:
-      template: |
-        <${DRONE_BUILD_LINK}|Build #{{build.number}}> failed :this-is-fine-fire:
-        Commit: <${DRONE_REPO_LINK}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}> - {{{ trim build.message }}}
-        Repo: {{ repo.name }}
-        Author: {{ build.author }}
-    when:
-      branch:
-        - main
+#steps:
+#  - name: slack_build_urgent
+#    <<: *slack
+#    settings:
+#      template: |
+#        <${DRONE_BUILD_LINK}|Build #{{build.number}}> failed :this-is-fine-fire:
+#        Commit: <${DRONE_REPO_LINK}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}> - {{{ trim build.message }}}
+#        Repo: {{ repo.name }}
+#        Author: {{ build.author }}
+#    when:
+#      branch:
+#        - main
