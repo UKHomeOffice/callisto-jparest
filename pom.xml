@@ -52,7 +52,6 @@
         <module>jparest</module>
         <module>demo</module>
         <module>cucumber-jparest</module>
-        <module>kafka-commons</module>
     </modules>
 
     <build>
