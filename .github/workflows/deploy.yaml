@@ -1,9 +1,10 @@
 name: Publish package
 on:
-  workflow_run:
-    workflows: [Build and analyze]
-    types: [completed]
-    branches: [main]
+  push:
+#  workflow_run:
+#    workflows: [Build and analyze]
+#    types: [completed]
+#    branches: [main]
 
 jobs:
   publish:
