@@ -4,6 +4,7 @@
     <servers>
         <server>
             <id>github</id>
+            <!-- Any username would work as long as it's not empty -->
             <username>DummyUser</username>
             <password>${GITHUB_TOKEN}</password>
         </server>
