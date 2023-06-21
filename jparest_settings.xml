@@ -4,14 +4,28 @@
     <servers>
         <server>
             <id>callisto-jparest</id>
-            <configuration>
-                <httpHeaders>
-                    <property>
-                        <name>Authorization</name>
-                        <value>Bearer ${ARTIFACTORY_TOKEN}</value>
-                    </property>
-                </httpHeaders>
-            </configuration>
+            <username>Authorization</username>
+            <value>${env.GITHUB_TOKEN}</value>
         </server>
     </servers>
+
+    <profiles>
+        <profile>
+            <id>github</id>
+            <repositories>
+                <repository>
+                    <id>Callisto-jparest</id>
+                    <name>Callisto jparest Repo</name>
+                    <url>https://maven.pkg.github.com/UKHomeOffice/callisto-kafka-commons</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>github</activeProfile>
+    </activeProfiles>
 </settings>
