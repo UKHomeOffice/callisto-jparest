@@ -3,29 +3,9 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <servers>
         <server>
-            <id>callisto-jparest</id>
-            <username>Authorization</username>
-            <value>${env.GITHUB_TOKEN}</value>
+            <id>github</id>
+            <username>DummyUser</username>
+            <password>${GITHUB_TOKEN}</password>
         </server>
     </servers>
-
-    <profiles>
-        <profile>
-            <id>github</id>
-            <repositories>
-                <repository>
-                    <id>Callisto-jparest</id>
-                    <name>Callisto jparest Repo</name>
-                    <url>https://maven.pkg.github.com/UKHomeOffice/callisto-kafka-commons</url>
-                    <snapshots>
-                        <enabled>true</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
-        </profile>
-    </profiles>
-
-    <activeProfiles>
-        <activeProfile>github</activeProfile>
-    </activeProfiles>
 </settings>

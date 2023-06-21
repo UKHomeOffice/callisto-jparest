@@ -91,7 +91,7 @@ steps:
     - "BRANCH=$(echo $DRONE_BRANCH | tr '[:lower:]' '[:upper:]') && [[ $BRANCH =~ (EAHW-[0-9]*) ]] && snapshotSuffix=$${match/#E/-E}$${BASH_REMATCH/#E/-E}"
     - version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
     - mvn versions:set -DnewVersion=$version$${snapshotSuffix}-SNAPSHOT -f pom.xml
-    - mvn -s ./jparest_settings.xml -f pom.xml install -B org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy -DsnapshotSuffix=$${snapshotSuffix}-SNAPSHOT -DskipTests
+    - mvn -s ./jparest_settings.xml -f pom.xml install -B deploy -DsnapshotSuffix=$${snapshotSuffix}-SNAPSHOT -DskipTests
   when:
     branch:
       exclude:
