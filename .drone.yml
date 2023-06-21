@@ -98,71 +98,71 @@ steps:
       - main
 
 ---
-#kind: pipeline
-#type: kubernetes
-#name: build notifications
-#
-#trigger:
-#  status:
-#    - success
-#    - failure
-#  event:
-#    - push
-#
-#depends_on:
-#  - jparest
+kind: pipeline
+type: kubernetes
+name: build notifications
 
-#steps:
-#  - name: slack
-#    image: plugins/slack
-#    settings:
-#      webhook:
-#        from_secret: SLACK_WEBHOOK_URL
-#      channel: callisto-tech-notifications
-#      username: Drone
-#      template: |
-#        {{#success build.status}}
-#          <${DRONE_BUILD_LINK}|Build #{{ build.number }}> succeeded! :tada:
-#        {{else}}
-#          <${DRONE_BUILD_LINK}|Build #{{ build.number }}> failed :broken_heart:
-#        {{/success}}
-#        Commit: <${DRONE_REPO_LINK}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}> - {{{ trim build.message }}}
-#        Repo: {{ repo.name }}
-#        Branch: <${DRONE_REPO_LINK}/commits/{{ build.branch }}|{{ build.branch }}>
-#        Author: {{ build.author }}
-#        <https://sonarcloud.io/dashboard?id=callisto-jparest&branch={{ build.branch }}&resolved=false|SonarCloud Analysis Report>
-#
-#---
-#kind: pipeline
-#type: kubernetes
-#name: urgent notifications
-#
-#trigger:
-#  status:
-#    - failure
-#  event:
-#    - push
-#
-#depends_on:
-#  - jparest
-#
-#slack: &slack
-#  image: plugins/slack
-#  settings:
-#    webhook:
-#      from_secret: slack_urgent_webhook_url
-#    channel: callisto-urgent-tech-notifications
-#    username: Drone
-#
-#steps:
-#  - name: slack_build_urgent
-#    <<: *slack
-#    settings:
-#      template: |
-#        <${DRONE_BUILD_LINK}|Build #{{build.number}}> failed :this-is-fine-fire:
-#        Commit: <${DRONE_REPO_LINK}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}> - {{{ trim build.message }}}
-#        Repo: {{ repo.name }}
-#        Author: {{ build.author }}
-#    when:
-#      branch:
-#        - main
+trigger:
+  status:
+    - success
+    - failure
+  event:
+    - push
+
+depends_on:
+  - jparest
+
+steps:
+  - name: slack
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK_URL
+      channel: callisto-tech-notifications
+      username: Drone
+      template: |
+        {{#success build.status}}
+          <${DRONE_BUILD_LINK}|Build #{{ build.number }}> succeeded! :tada:
+        {{else}}
+          <${DRONE_BUILD_LINK}|Build #{{ build.number }}> failed :broken_heart:
+        {{/success}}
+        Commit: <${DRONE_REPO_LINK}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}> - {{{ trim build.message }}}
+        Repo: {{ repo.name }}
+        Branch: <${DRONE_REPO_LINK}/commits/{{ build.branch }}|{{ build.branch }}>
+        Author: {{ build.author }}
+        <https://sonarcloud.io/dashboard?id=callisto-jparest&branch={{ build.branch }}&resolved=false|SonarCloud Analysis Report>
+
+---
+kind: pipeline
+type: kubernetes
+name: urgent notifications
+
+trigger:
+  status:
+    - failure
+  event:
+    - push
+
+depends_on:
+  - jparest
+
+slack: &slack
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: slack_urgent_webhook_url
+    channel: callisto-urgent-tech-notifications
+    username: Drone
+
+steps:
+  - name: slack_build_urgent
+    <<: *slack
+    settings:
+      template: |
+        <${DRONE_BUILD_LINK}|Build #{{build.number}}> failed :this-is-fine-fire:
+        Commit: <${DRONE_REPO_LINK}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}> - {{{ trim build.message }}}
+        Repo: {{ repo.name }}
+        Author: {{ build.author }}
+    when:
+      branch:
+        - main
