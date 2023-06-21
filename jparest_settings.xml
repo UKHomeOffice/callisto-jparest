@@ -3,15 +3,10 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <servers>
         <server>
-            <id>callisto-jparest</id>
-            <configuration>
-                <httpHeaders>
-                    <property>
-                        <name>Authorization</name>
-                        <value>Bearer ${ARTIFACTORY_TOKEN}</value>
-                    </property>
-                </httpHeaders>
-            </configuration>
+            <id>github</id>
+            <!-- Any username would work as long as it's not empty -->
+            <username>DummyUser</username>
+            <password>${GITHUB_TOKEN}</password>
         </server>
     </servers>
 </settings>

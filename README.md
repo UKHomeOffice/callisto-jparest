@@ -65,7 +65,7 @@ To update the parent pom version globally throughout the project run the followi
 ```bash
   $ mvn versions:set -DnewVersion={version} -f pom.xml
 ```
-When pushing a branch jparest will automatically deploy a snapshot image to artifactory. The naming convention for this
+When pushing a branch jparest will automatically deploy a snapshot image to github packages. The naming convention for this
 is as follows 
 
 ```bash
@@ -73,7 +73,7 @@ is as follows
 ```
 ## Merging into Main
 Once a PR is merged into the main branch the snapshot suffix will be deleted from the version.
-The assigned version number will be used to create a version release in artifactory and a Github tag for backup.
+The assigned version number will be used to create a version release in Github packages and a Github tag for backup.
 
 
 ## Using Filters

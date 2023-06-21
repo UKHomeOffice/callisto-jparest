@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.1.12</revision>
+        <revision>0.1.13</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.version>${revision}${snapshotSuffix}</project.version>
         <snapshotSuffix/>
@@ -29,12 +29,12 @@
 
     <distributionManagement>
         <repository>
-            <id>callisto-jparest</id>
-            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/UKHomeOffice/callisto-jparest</url>
         </repository>
         <snapshotRepository>
-            <id>callisto-jparest</id>
-            <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/callisto-jparest</url>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/UKHomeOffice/callisto-jparest</url>
         </snapshotRepository>
     </distributionManagement>
 
